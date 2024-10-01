@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+import defaultTheme from 'tailwindcss/defaultTheme';
+
 const config: Config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -17,6 +19,10 @@ const config: Config = {
         foreground2: "#6D655D",
         primary: "#A1FD59",
       },
+    },
+    fontFamily: {
+      'sans': ['GT-America', ...defaultTheme.fontFamily.sans],
+      'mono': ['GT-America-Mono', ...defaultTheme.fontFamily.mono],
     },
   },
   plugins: [],

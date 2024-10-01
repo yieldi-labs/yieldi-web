@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import WalletButton from "@/app/walletButton";
 import "./globals.css";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Yieldi",
@@ -17,8 +18,14 @@ export default function RootLayout({
       </head>
       <body>
         <nav className="flex items-stretch border-b">
-          <div className="py-3 px-4 border-r">
-            <img src="/logo.svg" style={{ height: 28 }} />
+          <div className="flex items-center py-3 border-r">
+            <Image
+              alt="Yieldi Logo"
+              src="/logo.svg"
+              width={0}
+              height={0}
+              className="w-24 h-auto md:block mx-4"
+            />
           </div>
           <div className="flex-1 flex">
             <a
