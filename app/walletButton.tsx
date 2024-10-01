@@ -32,7 +32,7 @@ export default function WalletButton() {
   return (
     <>
       <a
-        className="uppercase tracking-widest p-4 border-r text-sm leading-6 bg-primary cursor-pointer"
+        className="font-mono uppercase tracking-widest p-4 border-r text-sm leading-6 bg-primary cursor-pointer"
         onClick={onClick}
       >
         {bitcoinWallet
