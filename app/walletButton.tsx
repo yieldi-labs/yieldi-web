@@ -13,23 +13,22 @@ import Card from "@/app/card";
 import Modal from "@/app/modal";
 import Button from "@/app/button";
 import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { useAccount, useBalance } from 'wagmi';
+import { disconnect } from "wagmi/actions";
+import wagmiConfig from "./wagmiConfig";
 
 export default function WalletButton() {
   const [modal, setModal] = useState<undefined | { type: string }>();
   const [bitcoinWallet, setBitcoinWallet] = useAtom(atomBitcoinWallet);
   const { openConnectModal } = useConnectModal();
+  const { address: ethAddress, isConnected: isEthConnected } = useAccount();
 
   function onClick() {
-    if (bitcoinWallet) {
-      setModal({ type: "bitcoinWallet" });
-    } else {
-      setModal({ type: "selectWallet" });
-    }
+    setModal({ type: "walletInfo" });
   }
 
   async function onConnectBitcoin() {
     try {
-      setModal(undefined);
       const wallet = await bitcoinConnectInjected();
       setBitcoinWallet(wallet);
     } catch (error) {
@@ -41,8 +40,19 @@ export default function WalletButton() {
     if (openConnectModal) {
       openConnectModal();
     }
-    setModal(undefined);
   }
+
+  function onDisconnectEthereum() {
+    disconnect(wagmiConfig);
+  }
+
+  const displayAddress = bitcoinWallet && isEthConnected
+    ? "Wallet"
+    : bitcoinWallet
+    ? formatAddress(bitcoinWallet.address)
+    : isEthConnected
+    ? formatAddress(ethAddress)
+    : "Connect Wallet";
 
   return (
     <>
@@ -50,89 +60,93 @@ export default function WalletButton() {
         className="font-mono uppercase tracking-widest p-4 border-r text-sm leading-6 bg-primary cursor-pointer"
         onClick={onClick}
       >
-        {bitcoinWallet
-          ? formatAddress(bitcoinWallet.address)
-          : "Connect Wallet"}
+        {displayAddress}
       </a>
-      {modal && modal.type === "bitcoinWallet" && (
-        <ModalBitcoinWallet
-          address={bitcoinWallet.address}
+      {modal && modal.type === "walletInfo" && (
+        <ModalWalletInfo
+          bitcoinWallet={bitcoinWallet}
+          ethAddress={ethAddress}
           onClose={() => setModal(undefined)}
           setBitcoinWallet={setBitcoinWallet}
-        />
-      )}
-      {modal && modal.type === "selectWallet" && (
-        <ModalSelectWallet
-          onClose={() => setModal(undefined)}
           onConnectBitcoin={onConnectBitcoin}
           onConnectEthereum={onConnectEthereum}
+          onDisconnectEthereum={onDisconnectEthereum}
         />
       )}
     </>
   );
 }
 
-function ModalBitcoinWallet({
-  address,
+function ModalWalletInfo({
+  bitcoinWallet,
+  ethAddress,
   onClose,
   setBitcoinWallet,
+  onConnectBitcoin,
+  onConnectEthereum,
+  onDisconnectEthereum,
 }: {
-  address: string;
+  bitcoinWallet: { address: string } | null;
+  ethAddress: string | undefined;
   onClose: () => void;
   setBitcoinWallet: (_: undefined | object) => void;
+  onConnectBitcoin: () => void;
+  onConnectEthereum: () => void;
+  onDisconnectEthereum: () => void;
 }) {
-  const [balance, setBalance] = useState(0);
+  const [btcBalance, setBtcBalance] = useState(0);
+  const { data: ethBalance } = useBalance({
+    address: ethAddress,
+  });
 
   useEffect(() => {
-    (async () => {
-      setBalance(await bitcoinBalance(address));
-    })();
-  }, [address]);
+    if (bitcoinWallet) {
+      (async () => {
+        setBtcBalance(await bitcoinBalance(bitcoinWallet.address));
+      })();
+    }
+  }, [bitcoinWallet]);
 
-  function onDisconnect() {
-    onClose();
+  function onDisconnectBitcoin() {
     setBitcoinWallet(undefined);
   }
 
   return (
     <Modal
       onClose={onClose}
-      title="Bitcoin Wallet"
+      title="Wallet"
       style={{ maxWidth: "360px" }}
     >
-      <Card className="mb-4">
-        <h2 className="text-center font-semibold mb-4">
-          {formatAddress(address)}
-        </h2>
-        <div className="text-center">{formatNumber(balance, 0, 5)} BTC</div>
-      </Card>
-      <Button className="w-full" onClick={onDisconnect}>
-        Disconnect
-      </Button>
-    </Modal>
-  );
-}
-
-function ModalSelectWallet({
-  onClose,
-  onConnectBitcoin,
-  onConnectEthereum,
-}: {
-  onClose: () => void;
-  onConnectBitcoin: () => void;
-  onConnectEthereum: () => void;
-}) {
-  return (
-    <Modal
-      onClose={onClose}
-      title="Select Wallet"
-      style={{ maxWidth: "360px" }}
-    >
-      <Button className="w-full mb-4" onClick={onConnectBitcoin}>
-        Connect Bitcoin Wallet
-      </Button>
-      <Button className="w-full" onClick={onConnectEthereum}>
-        Connect Ethereum Wallet
+      {bitcoinWallet ? (
+        <Card className="mb-4">
+          <h2 className="text-center font-semibold mb-2">Bitcoin Wallet</h2>
+          <div className="text-center mb-2">{formatAddress(bitcoinWallet.address)}</div>
+          <div className="text-center">{formatNumber(btcBalance, 0, 5)} BTC</div>
+          <Button className="w-full mt-4" onClick={onDisconnectBitcoin}>
+            Disconnect Bitcoin Wallet
+          </Button>
+        </Card>
+      ) : (
+        <Button className="w-full mb-4" onClick={onConnectBitcoin}>
+          Connect Bitcoin Wallet
+        </Button>
+      )}
+      {ethAddress ? (
+        <Card className="mb-4">
+          <h2 className="text-center font-semibold mb-2">Ethereum Wallet</h2>
+          <div className="text-center mb-2">{formatAddress(ethAddress)}</div>
+          <div className="text-center">{ethBalance ? formatNumber(parseFloat(ethBalance.formatted), 18, 4) : '0'} ETH</div>
+          <Button className="w-full mt-4" onClick={onDisconnectEthereum}>
+            Disconnect Ethereum Wallet
+          </Button>
+        </Card>
+      ) : (
+        <Button className="w-full mb-4" onClick={onConnectEthereum}>
+          Connect Ethereum Wallet
+        </Button>
+      )}
+      <Button className="w-full" onClick={onClose}>
+        Close
       </Button>
     </Modal>
   );
