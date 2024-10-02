@@ -20,6 +20,7 @@ import Modal from "@/app/modal";
 import Error from "@/app/error";
 import Input from "@/app/input";
 import Button from "@/app/button";
+import Image from "next/image";
 
 export default function Home() {
   const [bitcoinWallet] = useAtom<null | { address: string }>(
@@ -122,7 +123,7 @@ export default function Home() {
         rows={[
           [
             <div className="flex items-center" key="1">
-              <img src="/logo-btc.svg" alt="Logo" className="h-8 mr-2" />
+              <Image src="/logo-btc.svg" alt="Logo" className="h-8 mr-2" with={32} height={32} />
               <div className="leading-none">
                 Bitcoin
                 <div className="text-xs opacity-50">Thorchain Savers</div>

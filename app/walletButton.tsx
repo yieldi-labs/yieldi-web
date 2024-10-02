@@ -16,17 +16,28 @@ import Button from "@/app/button";
 export default function WalletButton() {
   const [modal, setModal] = useState<undefined | { type: string }>();
   const [bitcoinWallet, setBitcoinWallet] = useAtom(atomBitcoinWallet);
+
   function onClick() {
     if (bitcoinWallet) {
       setModal({ type: "bitcoinWallet" });
-      return;
+    } else {
+      setModal({ type: "selectWallet" });
     }
-    onConnectBitcoin();
   }
 
   async function onConnectBitcoin() {
-    const wallet = await bitcoinConnectInjected();
-    setBitcoinWallet(wallet);
+    try {
+      setModal(undefined);
+      const wallet = await bitcoinConnectInjected();
+      setBitcoinWallet(wallet);
+    } catch (error) {
+      console.error("Failed to connect Bitcoin wallet:", error);
+    }
+  }
+
+  function onConnectEthereum() {
+    alert('Metamask');
+    setModal(undefined);
   }
 
   return (
@@ -39,13 +50,20 @@ export default function WalletButton() {
           ? formatAddress(bitcoinWallet.address)
           : "Connect Wallet"}
       </a>
-      {modal && modal.type == "bitcoinWallet" ? (
+      {modal && modal.type === "bitcoinWallet" && (
         <ModalBitcoinWallet
           address={bitcoinWallet.address}
           onClose={() => setModal(undefined)}
           setBitcoinWallet={setBitcoinWallet}
         />
-      ) : null}
+      )}
+      {modal && modal.type === "selectWallet" && (
+        <ModalSelectWallet
+          onClose={() => setModal(undefined)}
+          onConnectBitcoin={onConnectBitcoin}
+          onConnectEthereum={onConnectEthereum}
+        />
+      )}
     </>
   );
 }
@@ -86,6 +104,31 @@ function ModalBitcoinWallet({
       </Card>
       <Button className="w-full" onClick={onDisconnect}>
         Disconnect
+      </Button>
+    </Modal>
+  );
+}
+
+function ModalSelectWallet({
+  onClose,
+  onConnectBitcoin,
+  onConnectEthereum,
+}: {
+  onClose: () => void;
+  onConnectBitcoin: () => void;
+  onConnectEthereum: () => void;
+}) {
+  return (
+    <Modal
+      onClose={onClose}
+      title="Select Wallet"
+      style={{ maxWidth: "360px" }}
+    >
+      <Button className="w-full mb-4" onClick={onConnectBitcoin}>
+        Connect Bitcoin Wallet
+      </Button>
+      <Button className="w-full" onClick={onConnectEthereum}>
+        Connect Ethereum Wallet
       </Button>
     </Modal>
   );
