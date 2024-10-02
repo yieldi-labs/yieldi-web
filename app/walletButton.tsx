@@ -12,10 +12,12 @@ import {
 import Card from "@/app/card";
 import Modal from "@/app/modal";
 import Button from "@/app/button";
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 export default function WalletButton() {
   const [modal, setModal] = useState<undefined | { type: string }>();
   const [bitcoinWallet, setBitcoinWallet] = useAtom(atomBitcoinWallet);
+  const { openConnectModal } = useConnectModal();
 
   function onClick() {
     if (bitcoinWallet) {
@@ -36,7 +38,9 @@ export default function WalletButton() {
   }
 
   function onConnectEthereum() {
-    alert('Metamask');
+    if (openConnectModal) {
+      openConnectModal();
+    }
     setModal(undefined);
   }
 
