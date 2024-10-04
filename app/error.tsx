@@ -1,15 +1,23 @@
 "use client";
 
+import { useEffect } from "react";
+import Button from "./button";
+
 export default function Error({
-  children,
-  className,
+  error,
+  reset,
 }: {
-  children: React.ReactNode;
-  className: string;
+  error: Error & { digest?: string };
+  reset: () => void;
 }) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
-    <div className={`bg-red-500 text-white p-4 ${className || ""}`}>
-      {children}
+    <div className="text-center py-16">
+      <h2 className="text-xl font-bold red-500 mb-4">Something went wrong!</h2>
+      <Button onClick={() => reset()}>Try again</Button>
     </div>
   );
 }

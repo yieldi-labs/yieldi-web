@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
+  Wallet,
   useAtom,
-  atomBitcoinWallet,
-  bitcoinBalance,
+  atomWallet,
   formatAddress,
   formatNumber,
   bitcoinConnectInjected,
+  ethereumConnectInjected,
 } from "@/app/utils";
 import Card from "@/app/card";
 import Modal from "@/app/modal";
@@ -15,18 +17,26 @@ import Button from "@/app/button";
 
 export default function WalletButton() {
   const [modal, setModal] = useState<undefined | { type: string }>();
-  const [bitcoinWallet, setBitcoinWallet] = useAtom(atomBitcoinWallet);
+  const [wallet, setWallet] = useAtom(atomWallet);
+
   function onClick() {
-    if (bitcoinWallet) {
-      setModal({ type: "bitcoinWallet" });
+    if (wallet) {
+      setModal({ type: "wallet" });
       return;
     }
-    onConnectBitcoin();
+    setModal({ type: "pickChain" });
   }
 
   async function onConnectBitcoin() {
+    setModal(undefined);
     const wallet = await bitcoinConnectInjected();
-    setBitcoinWallet(wallet);
+    setWallet(wallet);
+  }
+
+  async function onConnectEthereum() {
+    setModal(undefined);
+    const wallet = await ethereumConnectInjected();
+    setWallet(wallet);
   }
 
   return (
@@ -35,41 +45,73 @@ export default function WalletButton() {
         className="font-mono uppercase tracking-widest p-4 border-r text-sm leading-6 bg-primary cursor-pointer"
         onClick={onClick}
       >
-        {bitcoinWallet
-          ? formatAddress(bitcoinWallet.address)
-          : "Connect Wallet"}
+        {wallet ? formatAddress(wallet.address) : "CONNECT WALLET"}
       </a>
-      {modal && modal.type == "bitcoinWallet" ? (
-        <ModalBitcoinWallet
-          address={bitcoinWallet.address}
+      {modal && modal.type == "pickChain" ? (
+        <Modal
+          title="Connect Wallet"
           onClose={() => setModal(undefined)}
-          setBitcoinWallet={setBitcoinWallet}
+          style={{ maxWidth: 360 }}
+        >
+          <Button
+            className="w-full flex items-center text-left mt-2"
+            onClick={onConnectBitcoin}
+          >
+            <Image
+              src="/logo-btc.svg"
+              className="icon mr-2"
+              alt="Bitcoin Logo"
+              height={24}
+              width={24}
+            />{" "}
+            Bitcoin
+          </Button>
+          <Button
+            className="w-full flex items-center text-left mt-2"
+            onClick={onConnectEthereum}
+          >
+            <Image
+              src="/logo-eth.svg"
+              className="icon mr-2"
+              alt="Bitcoin Logo"
+              height={24}
+              width={24}
+            />{" "}
+            Ethereum
+          </Button>
+        </Modal>
+      ) : null}
+      {modal && modal.type == "wallet" ? (
+        <ModalWallet
+          wallet={wallet!}
+          onClose={() => setModal(undefined)}
+          setWallet={setWallet}
         />
       ) : null}
     </>
   );
 }
 
-function ModalBitcoinWallet({
-  address,
+function ModalWallet({
+  wallet,
   onClose,
-  setBitcoinWallet,
+  setWallet,
 }: {
-  address: string;
+  wallet: Wallet;
   onClose: () => void;
-  setBitcoinWallet: (_: undefined | object) => void;
+  setWallet: (_: undefined | object) => void;
 }) {
   const [balance, setBalance] = useState(0);
 
   useEffect(() => {
     (async () => {
-      setBalance(await bitcoinBalance(address));
+      setBalance(await wallet.getBalance());
     })();
-  }, [address]);
+  }, [wallet]);
 
   function onDisconnect() {
     onClose();
-    setBitcoinWallet(undefined);
+    setWallet(undefined);
   }
 
   return (
@@ -80,9 +122,11 @@ function ModalBitcoinWallet({
     >
       <Card className="mb-4">
         <h2 className="text-center font-semibold mb-4">
-          {formatAddress(address)}
+          {formatAddress(wallet?.address)}
         </h2>
-        <div className="text-center">{formatNumber(balance, 0, 5)} BTC</div>
+        <div className="text-center">
+          {formatNumber(balance, 0, 5)} {wallet.symbol}
+        </div>
       </Card>
       <Button className="w-full" onClick={onDisconnect}>
         Disconnect

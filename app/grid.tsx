@@ -20,7 +20,7 @@ export default function Grid({
       {rows.map((r, i) => (
         <div
           key={i}
-          className="grid bg-white border items-center"
+          className="grid bg-white border items-center mb-2"
           style={{ gridTemplateColumns: `repeat(${headers.length},1fr)` }}
         >
           {r.map((c, i) => (
