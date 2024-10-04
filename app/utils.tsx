@@ -2,11 +2,33 @@ import { useState, useEffect } from "react";
 import { hex, base64 } from "@scure/base";
 import * as btc from "@scure/btc-signer";
 import SatsConnect from "sats-connect";
+import * as viem from "viem";
+import { mainnet } from "viem/chains";
 
-export const atomBitcoinWallet = newAtom(null);
+export const parseUnits = viem.parseUnits;
+export const formatUnits = viem.formatUnits;
 
+export const ONE = BigInt("1000000000000000000");
+export const ONE6 = BigInt("1000000");
+export const ONE12 = BigInt("1000000000000");
+export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
+export const UINT_MAX = BigInt(
+  "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+);
+export const UINT128_MAX = BigInt("340282366920938463463374607431768211455");
+
+export interface Wallet {
+  chain: string;
+  symbol: string;
+  publicKey?: string;
+  address: string;
+  signPsbt: (tx: btc.Transaction) => void;
+  getBalance: () => Promise<number>;
+}
+
+export const atomWallet = newAtom<undefined | Wallet>(undefined);
 if (typeof window !== "undefined") {
-  window.bitcoinWallet = atomBitcoinWallet;
+  window.atomWallet = atomWallet;
 }
 
 export const BITCOIN_NETWORK = {
@@ -54,10 +76,15 @@ export async function fetchJson(url: string, options?: object) {
   return await res.json();
 }
 
-function newAtom<V>(v: V) {
+interface Atom<V> {
+  v: V;
+  l: Array<() => void>;
+}
+
+function newAtom<V>(v: V): Atom<V> {
   return { v, l: [] };
 }
-function getAtom<V>(a: { v: V }) {
+function getAtom<V>(a: Atom<V>) {
   return a.v;
 }
 export function setAtom(a, b, c) {
@@ -70,31 +97,161 @@ export function setAtom(a, b, c) {
   } else {
     a.v = b;
   }
-  a.l.forEach((l) => l());
+  a.l.forEach((l: () => void) => l());
 }
-export function useAtom<V>(a: { v: V }) {
+export function useAtom<V>(a: Atom<V>): [V, (b: any, c?: any) => void] {
   const [v, setV] = useState(getAtom<V>(a));
   useEffect(() => {
     const l = () => setV(getAtom<V>(a));
     a.l.push(l);
-    return () => a.l.splice(a.l.indexOf(l), 1);
+    return () => {
+      a.l.splice(a.l.indexOf(l), 1);
+    };
   }, [a]);
   return [v, (b, c) => setAtom(a, b, c)];
 }
-export function onAtom(a, fn) {
+export function onAtom<V>(a: Atom<V>, fn: (v: V) => void) {
   const h = () => fn(a.v);
   a.l.push(h);
   return () => a.l.splice(a.l.indexOf(h), 1);
 }
 
-export async function bitcoinConnectInjected() {
-  let result = await SatsConnect.request(
-    "wallet_requestPermissions",
-    undefined,
+export const publicClient = viem.createPublicClient({
+  chain: mainnet,
+  transport: viem.http(),
+  batch: { multicall: true },
+});
+
+declare global {
+  interface Window {
+    ethereum: undefined | { request: (a: any) => Promise<any> };
+  }
+}
+
+export const walletClient = viem.createWalletClient({
+  chain: mainnet,
+  transport: viem.custom(
+    typeof window === "undefined" || !window.ethereum
+      ? { request: async () => undefined }
+      : window.ethereum,
+  ),
+});
+
+interface ABI {
+  name: string;
+  stateMutability: string;
+}
+
+export async function call(
+  address: string,
+  fn: string | ABI,
+  ...args: Array<string | number | bigint>
+): Promise<any> {
+  let abi;
+  let fnName;
+  let isView;
+  let isPayable;
+  if (typeof fn === "object") {
+    abi = [fn];
+    fnName = fn.name;
+    isView = fn.stateMutability === "view";
+  } else {
+    const [name, params, returns] = fn.split("-");
+    let rname = name[0] === "+" ? name.slice(1) : name;
+    if (rname[0] === "$") rname = rname.slice(1);
+    let efn = `function ${rname}(${params}) external`;
+    if (name[0] !== "+") efn += " view";
+    if (returns) efn += ` returns (${returns})`;
+    abi = viem.parseAbi([efn]);
+    fnName = rname;
+    isView = name[0] !== "+";
+    isPayable = name[1] === "$";
+  }
+  if (isView) {
+    return publicClient.readContract({
+      address: address as viem.Address,
+      abi,
+      args,
+      functionName: fnName,
+    });
+  } else {
+    const account = getAtom(atomWallet)?.address;
+    if (!account) throw new Error("Wallet not connected");
+    const { request } = await publicClient.simulateContract({
+      address: address as viem.Address,
+      abi,
+      value: BigInt(isPayable ? args[0] : 0),
+      args: isPayable ? args.slice(1) : args,
+      functionName: fnName,
+      account: account as viem.Address,
+    });
+    const hash = await walletClient.writeContract(request);
+    await publicClient.waitForTransactionReceipt({ hash });
+    console.log("tx hash", hash);
+    return hash;
+  }
+}
+
+export async function checkAllowance(
+  owner: string,
+  asset: string,
+  target: string,
+  amount: bigint,
+) {
+  const allowance: bigint = await call(
+    asset,
+    "allowance-address,address-uint256",
+    owner,
+    target,
   );
-  //if (result.status == "error") throw new Error(result.error.message);
-  result = await SatsConnect.request("getAddresses", {
-    purposes: ["payment"],
+  if ((amount = UINT_MAX)) {
+    amount = UINT128_MAX;
+  }
+  if (allowance < amount) {
+    await call(
+      owner,
+      "+approve-address,address,uint256",
+      asset,
+      target,
+      amount,
+    );
+  }
+}
+
+export async function ethereumConnectInjected() {
+  try {
+    if (!window.ethereum) throw new Error("No web wallet installed");
+    const accounts = await window.ethereum!.request({
+      method: "eth_requestAccounts",
+    });
+    const address = accounts[0];
+    const chainId = await window.ethereum!.request({ method: "eth_chainId" });
+    if (chainId != "0x1") {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0x1" }],
+      });
+    }
+    return {
+      chain: "ethereum",
+      symbol: "ETH",
+      address: address,
+      getBalance: async () => {
+        const b = await publicClient.getBalance({ address });
+        return parseFloat(formatUnits(b, 18));
+      },
+    };
+  } catch (e: Error | any) {
+    console.error(e);
+    alert("Error connecting wallet: " + e?.message);
+  }
+}
+
+export async function bitcoinConnectInjected() {
+  await SatsConnect.request("wallet_requestPermissions", undefined);
+  //if (result0.status == "error") throw new Error(result.error.message);
+  let result = await SatsConnect.request("getAddresses", {
+    purposes: ["payment"], // eslint-disable-line
   });
   if (
     result.status == "error" &&
@@ -105,21 +262,25 @@ export async function bitcoinConnectInjected() {
     });
   }
   if (result.status == "error") {
-    SatsConnect.request("wallet_renouncePermissions");
+    SatsConnect.request("wallet_renouncePermissions", undefined);
     localStorage["sats-connect_defaultProvider"] = "";
     throw new Error(result.error.message);
   }
   const addresses = result.result.addresses;
   const address = addresses[0].address;
   return {
+    chain: "bitcoin",
+    symbol: "BTC",
     address: address,
     publicKey: addresses[0].publicKey,
+    getBalance: async () => {
+      return await bitcoinBalance(address);
+    },
     signPsbt: async (tx: btc.Transaction) => {
-      const signInputs = { [address]: [] };
-      for (const i in tx.inputs) {
-        signInputs[address].push(parseInt(i));
+      const signInputs: { [key: string]: Array<number> } = { [address]: [] };
+      for (let i = 0; i < tx.inputsLength; i++) {
+        signInputs[address].push(i);
       }
-      console.log(signInputs);
 
       const response = await SatsConnect.request("signPsbt", {
         psbt: base64.encode(tx.toPSBT()),
@@ -149,9 +310,18 @@ export async function bitcoinBalance(address: string) {
   );
 }
 
+interface Utxo {
+  txid: string;
+  vout: number;
+  value: number;
+  status: { confirmed: boolean };
+}
+
 export async function bitcoinUtxos(address: string) {
   if (!address) throw new Error("Wallet not connected");
-  const utxos = await fetchJson(`${mempoolUrl}/address/${address}/utxo`);
+  const utxos: [Utxo] = await fetchJson(
+    `${mempoolUrl}/address/${address}/utxo`,
+  );
   const confirmedUTXOs = utxos
     .filter((utxo) => utxo.status.confirmed)
     .sort((a, b) => b.value - a.value);
@@ -160,8 +330,8 @@ export async function bitcoinUtxos(address: string) {
   const result = [];
   for (let i = 0; i < confirmedUTXOs.length; ++i) {
     if (!spend) {
-      if (!getAtom(atomBitcoinWallet)) throw new Error("Wallet not connected");
-      const pubKey = hex.decode(getAtom(atomBitcoinWallet).publicKey);
+      if (!getAtom(atomWallet)) throw new Error("Wallet not connected");
+      const pubKey = hex.decode(getAtom(atomWallet)?.publicKey || "");
       spend = address.match(/^(2|3)/)
         ? btc.p2sh(btc.p2wpkh(pubKey, BITCOIN_NETWORK), BITCOIN_NETWORK)
         : address.match(/^(tb1p|bc1p)/)
@@ -183,9 +353,9 @@ export async function bitcoinUtxos(address: string) {
 }
 
 export async function bitcoinSendTx(tx: btc.Transaction) {
-  return await getAtom(atomBitcoinWallet).signPsbt(tx);
+  return await getAtom(atomWallet)?.signPsbt(tx);
   /*
-  const signedPsbt = await getAtom(atomBitcoinWallet).signPsbt(tx);
+  const signedPsbt = await getAtom(atomWallet).signPsbt(tx);
   const signedTx = btc.Transaction.fromPSBT(hex.decode(signedPsbt));
   console.log(signedTx.hex);
   return await bitcoinPushTx(signedTx.hex);
@@ -206,7 +376,7 @@ export async function bitcoinPushTx(txHex: string) {
       } else {
         throw new Error("Error broadcasting transaction. Please try again");
       }
-    } catch (e) {
+    } catch (e: Error | any) {
       throw new Error(e?.message || e);
     }
   } else {
