@@ -4,6 +4,8 @@ import * as btc from "@scure/btc-signer";
 import SatsConnect from "sats-connect";
 import * as viem from "viem";
 import { mainnet } from "viem/chains";
+import { getAccount } from '@wagmi/core'
+import wagmiConfig from "./wagmiConfig";
 
 export const parseUnits = viem.parseUnits;
 export const formatUnits = viem.formatUnits;
@@ -26,9 +28,29 @@ export interface Wallet {
   getBalance: () => Promise<number>;
 }
 
-export const atomWallet = newAtom<undefined | Wallet>(undefined);
+export const atomWallet = newAtom<{
+  ethereum?: Wallet;
+  bitcoin?: Wallet;
+}>({});
+
 if (typeof window !== "undefined") {
   window.atomWallet = atomWallet;
+}
+
+export async function ethereumGetWalletClient() {
+  const account = getAccount(wagmiConfig);
+  if (!account.address) return null;
+  
+  return {
+    chain: "ethereum",
+    symbol: "ETH",
+    address: account.address,
+    getBalance: async () => {
+      if (!account.address) throw new Error("Account address is undefined");
+      const b = await publicClient.getBalance({ address: account.address });
+      return parseFloat(formatUnits(b, 18));
+    },
+  };
 }
 
 export const BITCOIN_NETWORK = {
