@@ -58,10 +58,9 @@ function ModalWallet({
 
   useEffect(() => {
     async function fetchBitcoinBalance() {
-      if (wallets.bitcoin) {
-        const balance = await wallets.bitcoin.getBalance();
-        setBtcBalance(balance);
-      }
+      if (!wallets.bitcoin) return;
+      const balance = await wallets.bitcoin.getBalance();
+      setBtcBalance(balance);
     }
     fetchBitcoinBalance();
   }, [wallets.bitcoin]);
@@ -77,13 +76,13 @@ function ModalWallet({
           getBalance: async () => Number(ethBalance?.formatted || 0),
         },
       }));
-    } else {
-      setWallets(prev => {
-        const newWallets = { ...prev };
-        delete newWallets.ethereum;
-        return newWallets;
-      });
-    }
+      return;
+    } 
+    setWallets(prev => {
+      const newWallets = { ...prev };
+      delete newWallets.ethereum;
+      return newWallets;
+    });
   }, [isEthConnected, ethAddress, ethBalance, setWallets]);
 
   useEffect(() => {
