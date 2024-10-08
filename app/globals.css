@@ -51,7 +51,7 @@
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: url("../public/noise.png") lightgray 0% 0% / 148.5629677772522px 148.5629677772522px repeat;;
   font-family: "GT-America", sans-serif;
 }
 
