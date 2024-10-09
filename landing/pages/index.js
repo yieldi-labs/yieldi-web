@@ -11,7 +11,7 @@ import distribution from "@public/icons/distribution.svg";
 const Hero = () => (
   <section className="text-gray-600 flex flex-col lg:h-screen w-full lg:sticky lg:top-0">
     <div className="text-center pt-32 flex-col flex lg:flex-1 w-full h-full">
-      <h1 className="text-primary text-center font-bold text-hero-mobile lg:text-hero leading-none max-w-hero mx-auto font-gt-america-ext">
+      <h1 className="text-primary-dark text-center font-bold text-hero-mobile lg:text-hero leading-none max-w-hero mx-auto font-gt-america-ext">
         The yield layer for shared{" "}
         <span className="relative z-[-1] bg-highlight lg:before:absolute lg:before:content-[''] lg:before:w-full lg:before:h-[68%] lg:before:inset-y-4 lg:before:z-[-2] lg:before:bg-highlight lg:bg-transparent">
           security.
@@ -27,7 +27,7 @@ const Hero = () => (
         />
         <div className="mt-8 lg:ml-7 lg:mt-0 flex flex-col lg:mt-10 sm:px-2 flex-1 px-4 lg:px-0 justify-between h-auto">
           <span />
-          <div className="text-2xl lg:text-3xl text-primary text-left font-medium font-gt-america-ext max-w-content lg:pl-12 leading-[44px]">
+          <div className="text-2xl lg:text-3xl text-primary-dark text-left font-medium font-gt-america-ext max-w-content lg:pl-12 leading-[44px]">
             Launch liquidity for shared security protocols. <br /> Native
             yield-streaming for the lowest cost of security.
           </div>
@@ -124,7 +124,7 @@ const ToolKit = () => {
                 Yieldi addresses critical issues in the AVS ecosystem, enhancing
                 price discovery and liquidity for AVS tokens.
               </p>
-              <p className="text-primary-light text-2xl font-normal">
+              <p className="text-primary-dark-light text-2xl font-normal">
                 By providing real yield in native assets (ETH/BTC), Yieldi
                 incentivizes users to delegate their LSTs to AVS operators.
                 <br />
@@ -164,14 +164,14 @@ const ToolKit = () => {
               ))}
             </ul>
           </div>
-          <div className="lg:w-[1280px] mx-auto text-center text-primary text-lg lg:text-[40px] font-bold lg:pt-20 lg:px-24 pt-10 px-5 font-gt-america-ext lg:leading-[48px]">
+          <div className="lg:w-[1280px] mx-auto text-center text-primary-dark text-lg lg:text-[40px] font-bold lg:pt-20 lg:px-24 pt-10 px-5 font-gt-america-ext lg:leading-[48px]">
             Join the future of yield streaming with Yieldi and experience
             efficient, secure, and innovative financial growth.
           </div>
         </div>
         <div className="flex max-w-screen-2xl mx-auto pb-20 px-4">
           <div className="flex flex-col items-center flex-1 p-[60px] gap-[45px] rounded-3xl lg:rounded-[40px] border border-border">
-            <h1 className="text-2xl text-primary text-center font-bold lg:text-subtitle lg:leading-[48px] self-stretch font-gt-america-ext">
+            <h1 className="text-2xl text-primary-dark text-center font-bold lg:text-subtitle lg:leading-[48px] self-stretch font-gt-america-ext">
               The Yield Venue for Shared{" "}
               <span className="relative z-[0] bg-highlight">Security</span>
             </h1>
@@ -213,7 +213,7 @@ const FeatureCard = ({ icon, title, desc }) => (
       <Image src={icon} alt={title} />
     </div>
     <div className="flex flex-col sm:items-center lg:items-start">
-      <h4 className="text-[36px] font-bold text-primary h-[90px] lg:w-[70px] leading-[40px] lg:text-start text-center font-gt-america-ext">
+      <h4 className="text-[36px] font-bold text-primary-dark h-[90px] lg:w-[70px] leading-[40px] lg:text-start text-center font-gt-america-ext">
         {title}
       </h4>
       <p className="mt-5 text-xl font-medium text-border">{desc}</p>

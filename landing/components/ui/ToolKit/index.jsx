@@ -44,7 +44,7 @@ const ToolKit = () => {
                 Yieldi addresses critical issues in the AVS ecosystem, enhancing
                 price discovery and liquidity for AVS tokens.
               </p>
-              <p className="text-primary-light text-2xl font-normal">
+              <p className="text-primary-dark-light text-2xl font-normal">
                 By providing real yield in native assets (ETH/BTC), Yieldi
                 incentivizes users to delegate their LSTs to AVS operators.
                 <br />
@@ -76,7 +76,7 @@ const FeatureCard = ({ icon, title, desc }) => (
       <Image src={icon} alt={title} />
     </div>
     <div className="flex flex-col sm:items-center lg:items-start">
-      <h4 className="text-[36px] font-bold text-primary h-[90px] lg:w-[70px] leading-[40px] lg:text-start text-center font-gt-america-ext">
+      <h4 className="text-[36px] font-bold text-primary-dark h-[90px] lg:w-[70px] leading-[40px] lg:text-start text-center font-gt-america-ext">
         {title}
       </h4>
       <p className="mt-5 text-xl font-medium text-border">{desc}</p>
