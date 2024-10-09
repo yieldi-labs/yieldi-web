@@ -42,10 +42,11 @@ export default function WalletButton() {
   return (
     <>
       <a
-        className="font-mono uppercase tracking-widest p-4 border-r text-sm leading-6 bg-primary cursor-pointer"
+        className="flex w-[182px] px-7 py-[13px] justify-center items-center gap-2.5 flex-shrink-0 rounded-[50px] bg-[#007D98]
+        text-white text-center font-sans text-sm font-bold leading-5"
         onClick={onClick}
       >
-        {wallet ? formatAddress(wallet.address) : "CONNECT WALLET"}
+        {wallet ? formatAddress(wallet.address) : "Connect Wallet"}
       </a>
       {modal && modal.type == "pickChain" ? (
         <Modal
