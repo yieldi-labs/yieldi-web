@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import {
   Wallet,
@@ -9,35 +9,22 @@ import {
   formatAddress,
   formatNumber,
   bitcoinConnectInjected,
-  ethereumConnectInjected,
 } from "@/app/utils";
 import Card from "@/app/card";
 import Modal from "@/app/modal";
 import Button from "@/app/button";
+import { useAccount, useDisconnect, useBalance } from 'wagmi';
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 export default function WalletButton() {
   const [modal, setModal] = useState<undefined | { type: string }>();
-  const [wallet, setWallet] = useAtom(atomWallet);
+  const [wallets] = useAtom(atomWallet);
 
   function onClick() {
-    if (wallet) {
-      setModal({ type: "wallet" });
-      return;
-    }
-    setModal({ type: "pickChain" });
+    setModal({ type: "wallet" });
   }
 
-  async function onConnectBitcoin() {
-    setModal(undefined);
-    const wallet = await bitcoinConnectInjected();
-    setWallet(wallet);
-  }
-
-  async function onConnectEthereum() {
-    setModal(undefined);
-    const wallet = await ethereumConnectInjected();
-    setWallet(wallet);
-  }
+  const connectedWallets = Object.values(wallets).filter(Boolean).length;
 
   return (
     <>
@@ -45,47 +32,11 @@ export default function WalletButton() {
         className="font-mono uppercase tracking-widest p-4 border-r text-sm leading-6 bg-primary cursor-pointer"
         onClick={onClick}
       >
-        {wallet ? formatAddress(wallet.address) : "CONNECT WALLET"}
+        {connectedWallets > 0 ? "WALLETS" : "CONNECT WALLET"}
       </a>
-      {modal && modal.type == "pickChain" ? (
-        <Modal
-          title="Connect Wallet"
-          onClose={() => setModal(undefined)}
-          style={{ maxWidth: 360 }}
-        >
-          <Button
-            className="w-full flex items-center text-left mt-2"
-            onClick={onConnectBitcoin}
-          >
-            <Image
-              src="/logo-btc.svg"
-              className="icon mr-2"
-              alt="Bitcoin Logo"
-              height={24}
-              width={24}
-            />{" "}
-            Bitcoin
-          </Button>
-          <Button
-            className="w-full flex items-center text-left mt-2"
-            onClick={onConnectEthereum}
-          >
-            <Image
-              src="/logo-eth.svg"
-              className="icon mr-2"
-              alt="Bitcoin Logo"
-              height={24}
-              width={24}
-            />{" "}
-            Ethereum
-          </Button>
-        </Modal>
-      ) : null}
       {modal && modal.type == "wallet" ? (
         <ModalWallet
-          wallet={wallet!}
           onClose={() => setModal(undefined)}
-          setWallet={setWallet}
         />
       ) : null}
     </>
@@ -93,44 +44,141 @@ export default function WalletButton() {
 }
 
 function ModalWallet({
-  wallet,
   onClose,
-  setWallet,
 }: {
-  wallet: Wallet;
   onClose: () => void;
-  setWallet: (_: undefined | object) => void;
 }) {
-  const [balance, setBalance] = useState(0);
+  const [wallets, setWallets] = useAtom(atomWallet);
+  const { address: ethAddress, isConnected: isEthConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { data: ethBalance } = useBalance({ address: ethAddress });
+  const { openConnectModal } = useConnectModal();
+
+  const [btcBalance, setBtcBalance] = useState(0);
 
   useEffect(() => {
-    (async () => {
-      setBalance(await wallet.getBalance());
-    })();
-  }, [wallet]);
+    async function fetchBitcoinBalance() {
+      if (!wallets.bitcoin) return;
+      const balance = await wallets.bitcoin.getBalance();
+      setBtcBalance(balance);
+    }
+    fetchBitcoinBalance();
+  }, [wallets.bitcoin]);
 
-  function onDisconnect() {
-    onClose();
-    setWallet(undefined);
+  const updateEthereumWallet = useCallback(() => {
+    if (isEthConnected && ethAddress) {
+      setWallets(prev => ({
+        ...prev,
+        ethereum: {
+          chain: "ethereum",
+          symbol: "ETH",
+          address: ethAddress,
+          getBalance: async () => Number(ethBalance?.formatted || 0),
+        },
+      }));
+      return;
+    } 
+    setWallets(prev => {
+      const newWallets = { ...prev };
+      delete newWallets.ethereum;
+      return newWallets;
+    });
+  }, [isEthConnected, ethAddress, ethBalance, setWallets]);
+
+  useEffect(() => {
+    updateEthereumWallet();
+  }, [updateEthereumWallet]);
+
+  async function onConnectBitcoin() {
+    try {
+      const bitcoinWallet = await bitcoinConnectInjected();
+      setWallets(prev => ({ ...prev, bitcoin: bitcoinWallet }));
+    } catch (error) {
+      console.error("Failed to connect Bitcoin wallet:", error);
+    }
+  }
+
+  function onConnectEthereum() {
+    if (!openConnectModal) return;
+    openConnectModal();
+  }
+
+  function onDisconnectBitcoin() {
+    setWallets(prev => {
+      const newWallets = { ...prev };
+      delete newWallets.bitcoin;
+      return newWallets;
+    });
   }
 
   return (
     <Modal
       onClose={onClose}
-      title="Bitcoin Wallet"
-      style={{ maxWidth: "360px" }}
+      title="Wallets"
+      style={{ maxWidth: "400px" }}
     >
-      <Card className="mb-4">
-        <h2 className="text-center font-semibold mb-4">
-          {formatAddress(wallet?.address)}
-        </h2>
-        <div className="text-center">
-          {formatNumber(balance, 0, 5)} {wallet.symbol}
-        </div>
-      </Card>
-      <Button className="w-full" onClick={onDisconnect}>
-        Disconnect
-      </Button>
+      <WalletCard
+        chain="Bitcoin"
+        logo="/logo-btc.svg"
+        wallet={wallets.bitcoin}
+        balance={btcBalance}
+        onConnect={onConnectBitcoin}
+        onDisconnect={onDisconnectBitcoin}
+      />
+      <WalletCard
+        chain="Ethereum"
+        logo="/logo-eth.svg"
+        wallet={wallets.ethereum}
+        balance={Number(ethBalance?.formatted || 0)}
+        onConnect={onConnectEthereum}
+        onDisconnect={disconnect}
+      />
     </Modal>
+  );
+}
+
+function WalletCard({
+  chain,
+  logo,
+  wallet,
+  balance,
+  onConnect,
+  onDisconnect,
+}: {
+  chain: string;
+  logo: string;
+  wallet?: Wallet;
+  balance: number;
+  onConnect: () => void;
+  onDisconnect: () => void;
+}) {
+  return (
+    <Card className="mb-4">
+      <h2 className="text-center font-semibold mb-4">{chain}</h2>
+      {wallet ? (
+        <>
+          <div className="text-center mb-2">
+            {formatAddress(wallet.address)}
+          </div>
+          <div className="text-center mb-4">
+            {formatNumber(balance, 0, 5)} {wallet.symbol}
+          </div>
+          <Button className="w-full" onClick={onDisconnect}>
+            Disconnect
+          </Button>
+        </>
+      ) : (
+        <Button className="w-full flex items-center justify-center" onClick={onConnect}>
+          <Image
+            src={logo}
+            alt={`${chain} logo`}
+            width={24}
+            height={24}
+            className="mr-2"
+          />
+          Connect {chain}
+        </Button>
+      )}
+    </Card>
   );
 }
