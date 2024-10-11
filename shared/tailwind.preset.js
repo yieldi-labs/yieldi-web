@@ -1,8 +1,11 @@
-const defaultTheme = require('tailwindcss/defaultTheme');
+const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
   theme: {
     extend: {
+      backgroundImage: {
+        "nav-radial": "radial-gradient(circle, #FFFFFF 20%, #FFFFFF 80%)",
+      },
       borderColor: {
         DEFAULT: "var(--border)",
       },
@@ -49,8 +52,8 @@ module.exports = {
         bold: "700",
       },
       fontFamily: {
-        'sans': ['GT-America', ...defaultTheme.fontFamily.sans],
-        'mono': ['GT-America-Mono', ...defaultTheme.fontFamily.mono],
+        sans: ["GT-America", ...defaultTheme.fontFamily.sans],
+        mono: ["GT-America-Mono", ...defaultTheme.fontFamily.mono],
         "gt-america": ["GT-America"],
         "gt-america-ext": ["GT-America-Extended"],
       },

@@ -51,6 +51,10 @@
   font-weight: bold;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: "GT-America", sans-serif;
 }

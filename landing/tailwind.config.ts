@@ -1,9 +1,13 @@
+import sharedPreset from "../shared/tailwind.preset.js";
+import formsPlugin from "@tailwindcss/forms";
+
 module.exports = {
-  presets: [require("../shared/tailwind.preset.js")],
+  presets: [sharedPreset],
   mode: "jit",
   content: [
     "./pages/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
+    "../shared/components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -11,7 +15,7 @@ module.exports = {
     },
   },
   plugins: [
-    require("@tailwindcss/forms")({
+    formsPlugin({
       strategy: "class", // only generate classes
     }),
   ],
