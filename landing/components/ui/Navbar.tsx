@@ -1,24 +1,15 @@
-import React from 'react';
-import Link from 'next/link';
+import { Yieldi } from "../svg";
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   return (
-    <nav className="bg-gray-800 p-4">
-      <div className="container mx-auto flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold text-white">
-          MyWebsite
-        </Link>
-        <div className="space-x-4">
-          <Link href="/" className="text-gray-300 hover:text-white">
-            Home
-          </Link>
-          <Link href="/about" className="text-gray-300 hover:text-white">
-            About
-          </Link>
-          <Link href="/contact" className="text-gray-300 hover:text-white">
-            Contact
-          </Link>
-        </div>
+    <nav className="w-100 h-28">
+      <div className="bg-gradient-radial w-100 flex items-center border-2 border-white from-white/20 to-white/80">
+        <Yieldi className="scale-[0.69] transform" />
+        <ul className="flex items-center gap-2">
+          <li>About</li>
+          <li>Solutin</li>
+          <li>Components</li>
+        </ul>
       </div>
     </nav>
   );

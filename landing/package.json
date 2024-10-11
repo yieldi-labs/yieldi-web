@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "npm run lint:prettier && npm run lint:next && npm run lint:tsc",
+    "lint:prettier": "npx prettier --check .",
+    "lint:next": "next lint",
+    "lint:tsc": "tsc --noEmit",
+    "lint:fix": "npm run lint:prettier:fix && npm run lint:next:fix",
+    "lint:prettier:fix": "npm run lint:prettier -- --write",
+    "lint:next:fix": "npm run lint:next -- --fix",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -16,6 +22,7 @@
     "react-dom": "^18"
   },
   "devDependencies": {
+    "@tailwindcss/forms": "^0.5.9",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
