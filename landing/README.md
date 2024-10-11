@@ -23,6 +23,7 @@ Yieldi is a gas-efficient yield-streaming platform that leverages native ETH/BTC
 ### Installation and Development
 
 1. Clone the repository and install dependencies:
+
    ```
    git clone [repository-url]
    cd landing-page
