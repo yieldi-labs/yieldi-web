@@ -105,7 +105,7 @@ const Navbar = () => {
                     <Link
                       href={item.path}
                       className="duration-150 hover:text-secondary hover:bg-primary/80 h-10 px-5 py-2.5 lg:rounded-nav lg:border lg:border-primary-light 
-                                            justify-center items-center gap-2.5 inline-flex text-center font-medium text-nav leading-normal uppercase text-primary-dark"
+                                            justify-center items-center gap-2.5 inline-flex text-center font-medium text-base leading-normal uppercase text-primary-dark"
                     >
                       {item.title}
                     </Link>
