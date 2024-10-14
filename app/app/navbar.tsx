@@ -5,9 +5,9 @@ import WalletButton from "@/app/walletButton";
 
 export default function Navbar() {
   return (
-    <nav className="flex w-auto h-20 px-5 pl-10 py-5 
-      justify-between items-center flex-shrink-0 rounded-3xl border-4 border-[#FFF] 
-      bg-[radial-gradient(152.17%_50%_at_50%_50%,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.80)_100%)] mx-32 mb-9">
+    <nav className="flex w-auto h-20 px-5 pl-10 py-5 mx-32 mb-9 rounded-3xl
+      justify-between items-center flex-shrink-0 border-4 border-[#FFF] 
+      bg-[radial-gradient(152.17%_50%_at_50%_50%,rgba(255,255,255,0.20)_0%,rgba(255,255,255,0.80)_100%)]">
       <div className="flex items-center py-3">
         <Image
           alt="Yieldi Logo"
