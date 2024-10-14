@@ -27,6 +27,7 @@ module.exports = {
         mono: ["GT-America-Mono", ...defaultTheme.fontFamily.mono],
         "gt-america": ["GT-America"],
         "gt-america-ext": ["GT-America-Extended"],
+        "gt-america-exp": ["GT-America-Expanded"],
       },
       spacing: { 18: "4.5rem", 28: "7rem" },
       maxWidth: { hero: "990px", content: "520px" },
