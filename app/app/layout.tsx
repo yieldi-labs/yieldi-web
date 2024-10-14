@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import WalletButton from "@/app/walletButton";
-import { Providers } from "./providers";
 import "./globals.css";
+import Navbar from "./navbar";
+import BlurredCircle from "./blurredCircle";
+import { Providers } from "./providers";
 import '@rainbow-me/rainbowkit/styles.css';
 
 export const metadata: Metadata = {
@@ -19,29 +19,23 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.png" />
       </head>
       <body>
+        <div className={`fixed bottom-0 right-0 translate-x-[20%] translate-y-[20%]`}>
+          <BlurredCircle size={594} color="yellow" />
+        </div>
+        <div className={`fixed top-[10px] left-0 translate-x-[-20%] translate-y-[-20%]`}>
+          <BlurredCircle size={594} color="#A799FE" />
+        </div>
+        <div className={`fixed bottom-[-297px] left-0 translate-x-[-20%] translate-y-[-20%]`}>
+          <BlurredCircle size={594} color="#FF6656" />
+        </div>
+        <div className={`fixed top-[-20px] right-[50px] translate-x-[-20%] translate-y-[-20%]`}>
+          <BlurredCircle size={594} color="#007D98" />
+        </div>
+        <div className={`fixed top-[-20px] right-0 translate-x-[40%] translate-y-[-20%]`}>
+          <BlurredCircle size={594} color="#A1FD59" />
+        </div>
         <Providers>
-          <nav className="flex items-stretch border-b">
-            <div className="flex items-center py-3 border-r">
-              <Image
-                alt="Yieldi Logo"
-                src="/logo.svg"
-                width={0}
-                height={0}
-                className="w-24 h-auto md:block mx-4"
-              />
-            </div>
-            <div className="flex-1 flex">
-              <a
-                className="uppercase tracking-widest p-4 border-r text-sm leading-6 border-b border-b-2 border-b-foreground font-medium"
-                href="/"
-              >
-                Dashboard
-              </a>
-            </div>
-            <div className="border-l flex">
-              <WalletButton />
-            </div>
-          </nav>
+          <Navbar />
           <div className="max-w-5xl mx-auto p-4">{children}</div>
         </Providers>
       </body>
