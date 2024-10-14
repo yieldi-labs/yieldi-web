@@ -34,15 +34,15 @@ const Explore = () => {
             <TranslucentCard key={coin} className="p-5 rounded-2xl flex flex-col items-start">
               <div className="flex items-center mb-4">
                 <Image src={`/logo-${coin.toLowerCase()}.svg`} alt={`${coin} logo`} width={32} height={32} />
-                <span className="ml-2 text-2xl font-bold">{coin}</span>
+                <span className="ml-2 text-2xl font-medium font-gt-america-ext">{coin}</span>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-3xl font-bold">{coin === 'USDT' ? '$6.5M' : coin === 'ETH' ? '$8.54M' : '$10M'}</p>
+                <div className="bg-white rounded-xl p-3 flex justify-center flex-col items-center">
+                  <p className="text-3xl font-medium">{coin === 'USDT' ? '$6.5M' : coin === 'ETH' ? '$8.54M' : '$10M'}</p>
                   <p className="text-sm text-gray-500">TVL</p>
                 </div>
-                <div>
-                  <p className="text-3xl font-bold">{coin === 'USDT' ? '7.43%' : coin === 'ETH' ? '6.4%' : '12%'}</p>
+                <div className="bg-white rounded-xl p-3 flex justify-center flex-col items-center">
+                  <p className="text-3xl font-medium">{coin === 'USDT' ? '7.43%' : coin === 'ETH' ? '6.4%' : '12%'}</p>
                   <p className="text-sm text-gray-500">APR</p>
                 </div>
               </div>
