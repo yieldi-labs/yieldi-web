@@ -35,8 +35,10 @@ export default function RootLayout({
           <BlurredCircle size={594} color="#A1FD59" />
         </div>
         <Providers>
-          <Navbar />
-          <div className="max-w-5xl mx-auto py-4">{children}</div>
+          <div className="px-32 ">
+            <Navbar />
+            <div className="mx-auto py-4">{children}</div>
+          </div>
         </Providers>
       </body>
     </html>
