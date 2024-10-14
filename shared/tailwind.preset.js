@@ -27,17 +27,6 @@ module.exports = {
           light: "#6D655D",
         },
       },
-      fontSize: {
-        nav: "16px",
-        hero: ["96px", "96px"],
-        "hero-mobile": "36px",
-        title: ["64px", "60px"],
-        "title-desktop": ["64px", "64px"],
-        "title-mobile": ["42px", "42px"],
-        subtitle: ["48px", "48px"],
-        body: ["20px", "24px"],
-        "body-large": ["24px", "32px"],
-      },
       borderRadius: {
         nav: "40px",
         large: "20px",

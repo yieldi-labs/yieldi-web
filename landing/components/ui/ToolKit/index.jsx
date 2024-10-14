@@ -35,7 +35,7 @@ const ToolKit = () => {
               <FeatureCard key={idx} {...item} />
             ))}
           </ul>
-          <h3 className="text-3xl lg:text-title-desktop font-bold lg:mt-32 mt-8 pt-2 text-start font-gt-america-ext">
+          <h3 className="text-3xl lg:text-6xl font-bold lg:mt-32 mt-8 pt-2 text-start font-gt-america-ext">
             What Problem Does Yieldi Solve?
           </h3>
           <div className="flex lg:flex-row flex-col justify-between items-center lg:mt-28 mt-9 pb-12">

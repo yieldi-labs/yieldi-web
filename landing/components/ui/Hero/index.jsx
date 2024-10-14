@@ -7,7 +7,7 @@ import discordIcon from "@public/logos/discord.svg";
 const Hero = () => (
   <section className="text-gray-600 mt-28 flex flex-col lg:h-screen w-full">
     <div className="text-center flex-col flex lg:flex-1 lg:fixed w-full">
-      <h1 className="text-primary-dark text-center font-bold text-hero-mobile lg:text-hero leading-none max-w-hero mx-auto font-gt-america-ext">
+      <h1 className="text-primary-dark text-center font-bold text-4xl lg:text-8xl leading-none max-w-hero mx-auto font-gt-america-ext">
         The yield layer for shared{" "}
         <span className="relative z-[-1] bg-highlight lg:before:absolute lg:before:content-[''] lg:before:w-full lg:before:h-[68%] lg:before:inset-y-4 lg:before:z-[-2] lg:before:bg-highlight lg:bg-transparent">
           security.

@@ -11,7 +11,7 @@ import distribution from "@public/icons/distribution.svg";
 const Hero = () => (
   <section className="text-gray-600 flex flex-col lg:h-screen w-full lg:sticky lg:top-0">
     <div className="text-center pt-32 flex-col flex lg:flex-1 w-full h-full">
-      <h1 className="text-primary-dark text-center font-bold text-hero-mobile lg:text-hero leading-none max-w-hero mx-auto font-gt-america-ext">
+      <h1 className="text-primary-dark text-center font-bold text-4xl lg:text-8xl leading-none max-w-hero mx-auto font-gt-america-ext">
         The yield layer for shared{" "}
         <span className="relative z-[-1] bg-highlight lg:before:absolute lg:before:content-[''] lg:before:w-full lg:before:h-[68%] lg:before:inset-y-4 lg:before:z-[-2] lg:before:bg-highlight lg:bg-transparent">
           security.
@@ -115,7 +115,7 @@ const ToolKit = () => {
               <FeatureCard key={idx} {...item} />
             ))}
           </ul>
-          <h3 className="text-3xl lg:text-title-desktop font-bold lg:mt-32 mt-8 pt-2 text-start font-gt-america-ext">
+          <h3 className="text-3xl lg:text-6xl font-bold lg:mt-32 mt-8 pt-2 text-start font-gt-america-ext">
             What Problem Does Yieldi Solve?
           </h3>
           <div className="flex lg:flex-row flex-col justify-between items-center lg:mt-28 mt-9 pb-12">
@@ -150,7 +150,7 @@ const ToolKit = () => {
       <section className="lg:sticky lg:top-0" id="components">
         <div className="flex flex-col justify-center mb-20">
           <div className="w-full bg-accent rounded-3xl lg:rounded-[60px] lg:py-16 py-8 lg:px-24 px-8 flex-1 mx-auto">
-            <h2 className="text-dark lg:text-title text-title-mobile lg:text-start text-center font-bold uppercase flex-1 mb-16">
+            <h2 className="text-dark lg:text-6xl text-4xl lg:text-start text-center font-bold uppercase flex-1 mb-16">
               key components
             </h2>
             <ul>
@@ -171,7 +171,7 @@ const ToolKit = () => {
         </div>
         <div className="flex max-w-screen-2xl mx-auto pb-20 px-4">
           <div className="flex flex-col items-center flex-1 p-[60px] gap-[45px] rounded-3xl lg:rounded-[40px] border border-border">
-            <h1 className="text-2xl text-primary-dark text-center font-bold lg:text-subtitle lg:leading-[48px] self-stretch font-gt-america-ext">
+            <h1 className="text-2xl text-primary-dark text-center font-bold lg:text-5xl lg:leading-[48px] self-stretch font-gt-america-ext">
               The Yield Venue for Shared{" "}
               <span className="relative z-[0] bg-highlight">Security</span>
             </h1>

@@ -29,10 +29,11 @@ export default function WalletButton() {
   return (
     <>
       <a
-        className="font-mono uppercase tracking-widest p-4 border-r text-sm leading-6 bg-primary cursor-pointer"
+    className="flex w-48 px-7 py-3 justify-center items-center gap-2.5 flex-shrink-0 rounded-full bg-[#007D98]
+        text-white text-center font-sans text-sm font-bold leading-5"
         onClick={onClick}
       >
-        {connectedWallets > 0 ? "WALLETS" : "CONNECT WALLET"}
+        {connectedWallets > 0 ? "Wallets" : "Connect Wallet"}
       </a>
       {modal && modal.type == "wallet" ? (
         <ModalWallet

@@ -34,7 +34,7 @@ const Testimonials = () => {
     <SectionWrapper className="z-10 pb-8 px-0" id="components">
       <div className="flex flex-col justify-center">
         <div className="w-full bg-accent rounded-large lg:py-16 py-8 lg:px-24 px-8 flex-1 mx-auto">
-          <h2 className="text-dark lg:text-title text-title-mobile lg:text-start text-center font-bold uppercase flex-1">
+          <h2 className="text-dark lg:text-6xl text-4xl lg:text-start text-center font-bold uppercase flex-1">
             key components
           </h2>
           <ul>
@@ -55,7 +55,7 @@ const Testimonials = () => {
       </div>
       <div className="flex max-w-screen-2xl mx-auto lg:px-[55px] px-8 mb-24">
         <div className="flex flex-col items-center flex-1 p-[60px] gap-[45px] rounded-large border border-border">
-          <h1 className="text-2xl text-primary-dark text-center font-bold lg:text-subtitle lg:leading-[48px] self-stretch font-gt-america-ext">
+          <h1 className="text-2xl text-primary-dark text-center font-bold lg:text-5xl lg:leading-[48px] self-stretch font-gt-america-ext">
             The Yield Venue for Shared{" "}
             <span className="relative z-[0] bg-highlight">Security</span>
           </h1>
