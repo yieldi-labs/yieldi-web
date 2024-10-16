@@ -18,7 +18,7 @@ const LinkWithHoverEffect = ({
 
   useEffect(() => {
     setPathname(window.location.pathname);
-  }, [window.location.pathname]);
+  }, []);
 
   return (
     <ul
