@@ -7,10 +7,10 @@ import { Close } from "../../svg";
 interface SlidingMenuProps {
   links: { label: string; href: string }[];
   buttons?: {
-    label: string;
+    label?: string;
     component?: JSX.Element;
     className?: string;
-    onClick: () => void;
+    onClick?: () => void;
   }[];
   menuOpen: boolean;
   toggleMenu: () => void;

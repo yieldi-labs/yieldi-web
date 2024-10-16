@@ -10,10 +10,10 @@ import Link from "next/link";
 interface NavbarProps {
   links: { label: string; href: string }[];
   buttons?: {
-    label: string;
+    label?: string;
     component?: JSX.Element;
     className?: string;
-    onClick: () => void;
+    onClick?: () => void;
   }[];
 }
 
