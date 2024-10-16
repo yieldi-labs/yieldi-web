@@ -1,5 +1,5 @@
 {
-  "name": "blinder",
+  "name": "landing",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -12,30 +12,26 @@
     "lint:tsc": "tsc --noEmit",
     "lint:fix": "npm run lint:prettier:fix && npm run lint:next:fix",
     "lint:prettier:fix": "npm run lint:prettier -- --write",
-    "lint:next:fix": "npm run lint:next -- --fix"
+    "lint:next:fix": "npm run lint:next -- --fix",
+    "format": "prettier --write ."
   },
   "dependencies": {
-    "@next/font": "13.0.7",
-    "eslint": "8.30.0",
-    "eslint-config-next": "13.1.1",
-    "next": "14.2.5",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "tailwind-merge": "^2.5.2"
+    "next": "14.2.15",
+    "next-seo": "^6.6.0",
+    "react": "^18",
+    "react-dom": "^18"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.3",
-    "autoprefixer": "^10.4.13",
-    "@types/node": "^20.16.1",
-    "@types/react": "^18.3.4",
-    "@types/react-dom": "^18.3.0",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.5",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "postcss": "^8.4.41",
-    "prettier": "^3.3.3",
-    "tailwindcss": "^3.4.10",
-    "typescript": "^5.5.4"
+    "@tailwindcss/forms": "^0.5.9",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.20",
+    "babel-loader": "^9.2.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.15",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
 }

@@ -1,6 +1,6 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @font-face {
   font-family: "GT-America";
@@ -51,41 +51,11 @@
   font-weight: bold;
 }
 
-.custom-screen {
-  @apply max-w-screen-xl mx-auto px-4 lg:px-8;
+html {
+  scroll-behavior: smooth;
 }
 
-.gradient-border {
-  border: 1px solid transparent;
-  background: linear-gradient(white, white),
-    linear-gradient(
-      25deg,
-      rgba(209, 213, 219, 1),
-      rgba(209, 213, 219, 1),
-      rgba(0, 0, 0, 0.63),
-      rgba(209, 213, 219, 1),
-      rgba(209, 213, 219, 1)
-    );
-  background-clip: padding-box, border-box;
-  background-origin: padding-box, border-box;
-}
-
-.body {
-  background: #f5f1eb url("/background.png");
-  background-repeat: repeat-x;
-  background-attachment: fixed;
-
-  /* Stack the color and image */
-  background-blend-mode: multiply;
-  color: #332b29;
-}
-
-@media (max-width: 1260px) {
-  .body {
-    background-repeat: repeat;
-  }
-}
-
-.text__color--main {
-  color: #332b29;
+body {
+  font-family: "GT-America", sans-serif;
+  overflow-x: hidden;
 }
