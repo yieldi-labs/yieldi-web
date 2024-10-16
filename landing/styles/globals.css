@@ -57,4 +57,5 @@ html {
 
 body {
   font-family: "GT-America", sans-serif;
+  overflow-x: hidden;
 }

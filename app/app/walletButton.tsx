@@ -13,7 +13,7 @@ import {
 import Card from "@/app/card";
 import Modal from "@/app/modal";
 import Button from "@/app/button";
-import { useAccount, useDisconnect, useBalance } from 'wagmi';
+import { useAccount, useDisconnect, useBalance } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 export default function WalletButton() {
@@ -29,26 +29,20 @@ export default function WalletButton() {
   return (
     <>
       <a
-    className="flex w-48 px-7 py-3 justify-center items-center gap-2.5 flex-shrink-0 rounded-full bg-[#007D98]
+        className="flex w-48 px-7 py-3 justify-center items-center gap-2.5 flex-shrink-0 rounded-full bg-[#007D98]
         text-white text-center font-sans text-sm font-bold leading-5"
         onClick={onClick}
       >
         {connectedWallets > 0 ? "Wallets" : "Connect Wallet"}
       </a>
       {modal && modal.type == "wallet" ? (
-        <ModalWallet
-          onClose={() => setModal(undefined)}
-        />
+        <ModalWallet onClose={() => setModal(undefined)} />
       ) : null}
     </>
   );
 }
 
-function ModalWallet({
-  onClose,
-}: {
-  onClose: () => void;
-}) {
+function ModalWallet({ onClose }: { onClose: () => void }) {
   const [wallets, setWallets] = useAtom(atomWallet);
   const { address: ethAddress, isConnected: isEthConnected } = useAccount();
   const { disconnect } = useDisconnect();
@@ -68,7 +62,7 @@ function ModalWallet({
 
   const updateEthereumWallet = useCallback(() => {
     if (isEthConnected && ethAddress) {
-      setWallets(prev => ({
+      setWallets((prev) => ({
         ...prev,
         ethereum: {
           chain: "ethereum",
@@ -78,13 +72,13 @@ function ModalWallet({
         },
       }));
       return;
-    } 
-    setWallets(prev => {
+    }
+    setWallets((prev) => {
       const newWallets = { ...prev };
       delete newWallets.ethereum;
       return newWallets;
     });
-  }, [isEthConnected, ethAddress, ethBalance, setWallets]);
+  }, [isEthConnected, ethAddress, ethBalance]);
 
   useEffect(() => {
     updateEthereumWallet();
@@ -93,7 +87,7 @@ function ModalWallet({
   async function onConnectBitcoin() {
     try {
       const bitcoinWallet = await bitcoinConnectInjected();
-      setWallets(prev => ({ ...prev, bitcoin: bitcoinWallet }));
+      setWallets((prev) => ({ ...prev, bitcoin: bitcoinWallet }));
     } catch (error) {
       console.error("Failed to connect Bitcoin wallet:", error);
     }
@@ -105,7 +99,7 @@ function ModalWallet({
   }
 
   function onDisconnectBitcoin() {
-    setWallets(prev => {
+    setWallets((prev) => {
       const newWallets = { ...prev };
       delete newWallets.bitcoin;
       return newWallets;
@@ -113,11 +107,7 @@ function ModalWallet({
   }
 
   return (
-    <Modal
-      onClose={onClose}
-      title="Wallets"
-      style={{ maxWidth: "400px" }}
-    >
+    <Modal onClose={onClose} title="Wallets" style={{ maxWidth: "400px" }}>
       <WalletCard
         chain="Bitcoin"
         logo="/logo-btc.svg"
@@ -169,7 +159,10 @@ function WalletCard({
           </Button>
         </>
       ) : (
-        <Button className="w-full flex items-center justify-center" onClick={onConnect}>
+        <Button
+          className="w-full flex items-center justify-center"
+          onClick={onConnect}
+        >
           <Image
             src={logo}
             alt={`${chain} logo`}

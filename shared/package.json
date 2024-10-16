@@ -6,8 +6,8 @@
     "tailwindcss": "^3.4.13"
   },
   "peerDependencies": {
-    "react": "^18.x",
-    "react-dom": "^18.x",
-    "next": "^14.x"
+    "react": "^18",
+    "react-dom": "^18",
+    "next": "^14"
   }
 }

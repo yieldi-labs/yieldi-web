@@ -11,7 +11,10 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // add any landing-specific extensions here
+      backgroundImage: {
+        "noise-pattern": "url('/images/noise.png')",
+        "hero-pattern": "url('/images/hero-background.png')",
+      },
     },
   },
   plugins: [

@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { SVGProps } from "react";
 
@@ -7,9 +8,14 @@ const aspectRatio = defaultWidth / defaultHeight;
 
 interface YieldiLogoProps extends SVGProps<SVGSVGElement> {
   width?: number;
+  className?: string;
 }
 
-const YieldiLogo = ({ width = defaultWidth, ...props }: YieldiLogoProps) => {
+const YieldiLogo = ({
+  width = defaultWidth,
+  className = "",
+  ...props
+}: YieldiLogoProps) => {
   const height = width / aspectRatio;
 
   return (
@@ -19,6 +25,7 @@ const YieldiLogo = ({ width = defaultWidth, ...props }: YieldiLogoProps) => {
       height={height}
       viewBox={`0 0 ${defaultWidth} ${defaultHeight}`}
       fill="none"
+      className={className}
       {...props}
     >
       {/* SVG path and circle elements */}

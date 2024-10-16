@@ -4,7 +4,7 @@ import * as btc from "@scure/btc-signer";
 import SatsConnect from "sats-connect";
 import * as viem from "viem";
 import { mainnet } from "viem/chains";
-import { getAccount } from '@wagmi/core'
+import { getAccount } from "@wagmi/core";
 import wagmiConfig from "./wagmiConfig";
 
 export const parseUnits = viem.parseUnits;
@@ -40,7 +40,7 @@ if (typeof window !== "undefined") {
 export async function ethereumGetWalletClient() {
   const account = getAccount(wagmiConfig);
   if (!account.address) return null;
-  
+
   return {
     chain: "ethereum",
     symbol: "ETH",

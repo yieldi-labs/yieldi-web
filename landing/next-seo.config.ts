@@ -1,4 +1,5 @@
-export default {
+const config = {
+  title: "Yieldi",
   description: "Yieldi",
   viewport: "width=device-width, initial-scale=1",
   openGraph: {
@@ -40,3 +41,5 @@ export default {
     },
   ],
 };
+
+export default config;
