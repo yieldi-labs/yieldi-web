@@ -5,6 +5,7 @@ import SlidingMenu from "./SlidingMenu";
 import { Yieldi, Burger } from "../../svg";
 import LinkWithHoverEffect from "../LinkWithHoverEffect";
 import { createScrollHandler } from "../../../utils/scrollHandler";
+import Link from "next/link";
 
 interface NavbarProps {
   links: { label: string; href: string }[];
@@ -46,7 +47,9 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
           transform: isSticky ? "translateY(0)" : "translateY(-10px)",
         }}
       >
-        <Yieldi className="tablet:w-[108px] w-[96px]" />
+        <Link href="/">
+          <Yieldi className="tablet:w-[108px] w-[96px]" />
+        </Link>
 
         <div className="tablet:hidden block flex items-center">
           <button onClick={toggleMenu} aria-label="Toggle Menu">

@@ -4,7 +4,7 @@ module.exports = {
     extend: {
       backgroundImage: {
         "nav-radial":
-          "radial-gradient(circle at 80% 30%, transparent 20%, #FFFFFF 110%)",
+          "radial-gradient(circle at 80% 30%, transparent 20%, #FFFFFF 90%)",
       },
       backdropBlur: { m: "5px", l: "10px", xl: "20px" },
       borderColor: { DEFAULT: "var(--border)" },
@@ -31,6 +31,10 @@ module.exports = {
       spacing: { 18: "4.5rem", 28: "7rem" },
       maxWidth: { hero: "990px", content: "520px" },
       screens: { "mobile-lg": "480px", tablet: "768px", desktop: "1200px" },
+      height: {
+        m: "512px",
+        l: "1024px",
+      },
     },
   },
 };

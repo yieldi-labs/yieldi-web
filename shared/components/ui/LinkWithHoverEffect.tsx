@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { scrollToElement } from "../../utils/scrollToElement";
+import { useEffect, useState } from "react";
 
 interface LinkWithHoverEffectProps {
   links: { label: string; href: string }[];
@@ -14,15 +14,19 @@ const LinkWithHoverEffect = ({
   column,
   toggleMenu,
 }: LinkWithHoverEffectProps) => {
-  // const router = useRouter();
+  const [pathname, setPathname] = useState("");
+
+  useEffect(() => {
+    setPathname(window.location.pathname);
+  }, [window.location.pathname]);
 
   return (
     <ul
       className={`desktop:gap-20 flex items-center gap-14 font-medium uppercase ${column && "flex-col"}`}
     >
       {links.map(({ label, href }, index) => {
-        const isActive = false;
-        console.log(href);
+        const isActive = pathname === href;
+
         return (
           <li key={index} className="group relative cursor-pointer">
             {href.startsWith("#") ? (
