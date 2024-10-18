@@ -53,8 +53,8 @@ export default function Home() {
       setBalance(await wallet.getBalance());
       setSaver(
         await fetchJson(
-          `https://thornode.ninerealms.com/thorchain/pool/${wallet.chain == "bitcoin" ? "BTC.BTC" : "ETH.ETH"}/liquidity_provider/${wallet.address}`
-        )
+          `https://thornode.ninerealms.com/thorchain/pool/${wallet.chain == "bitcoin" ? "BTC.BTC" : "ETH.ETH"}/liquidity_provider/${wallet.address}`,
+        ),
       );
     })();
   }, [wallet, wallet?.address]);
@@ -66,10 +66,10 @@ export default function Home() {
   }, []);
 
   const bitcoinPool = pools.find(
-    (p: { asset: string }) => p.asset === "BTC.BTC"
+    (p: { asset: string }) => p.asset === "BTC.BTC",
   );
   const ethereumPool = pools.find(
-    (p: { asset: string }) => p.asset === "ETH.ETH"
+    (p: { asset: string }) => p.asset === "ETH.ETH",
   );
 
   const farms = [];
@@ -212,8 +212,8 @@ function ModalDeposit({
     (async () => {
       setPool(
         await fetchJson(
-          `https://thornode.ninerealms.com/thorchain/pool/${modal.farm.pool.asset}`
-        )
+          `https://thornode.ninerealms.com/thorchain/pool/${modal.farm.pool.asset}`,
+        ),
       );
     })();
   }, [modal.farm.pool.asset]);
@@ -234,7 +234,7 @@ function ModalDeposit({
 
       const inbound = (
         await fetchJson(
-          "https://thornode.ninerealms.com/thorchain/inbound_addresses"
+          "https://thornode.ninerealms.com/thorchain/inbound_addresses",
         )
       ).find((i: { chain: string }) => i.chain === wallet.symbol);
 
@@ -282,7 +282,7 @@ function ModalDeposit({
           ADDRESS_ZERO,
           parsedAmount,
           "+:e",
-          ((Date.now() / 1000) | 0) + 300
+          ((Date.now() / 1000) | 0) + 300,
         );
         console.log(hash);
       }
@@ -336,7 +336,7 @@ function ModalDeposit({
                   parseFloat(modal.farm.pool.saversDepth)) /
                   1e8,
                 8,
-                0
+                0,
               )}
             </div>
           </div>

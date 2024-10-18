@@ -6,6 +6,16 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+        port: "",
+        pathname: "**",
+      },
+    ],
+  },
   reactStrictMode: true,
   webpack: (config) => {
     // Ensure shared folder is transpiled

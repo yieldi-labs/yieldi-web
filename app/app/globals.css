@@ -43,6 +43,27 @@
   font-weight: normal;
 }
 
+@font-face {
+  font-family: "GT-America-Extended";
+  src: url("/fonts/GT-America-Extended-Medium-Trial.woff") format("woff");
+  font-style: normal;
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: "GT-America-Expanded";
+  src: url("/fonts/GT-America-Expanded-Bold-Trial.woff") format("woff");
+  font-style: normal;
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "GT-America-Expanded";
+  src: url("/fonts/GT-America-Expanded-Medium-Trial.woff") format("woff");
+  font-style: normal;
+  font-weight: 500;
+}
+
 :root {
   --background: #f5f1eb;
   --foreground: #332b29;
