@@ -1,10 +1,10 @@
 import Image from "next/image";
-import TranslucentCard from "../translucentCard";
+import TranslucentCard from "../TranslucentCard";
 import { formatNumber } from "@/app/utils";
 
 interface TopCardItem {
   asset: string;
-  tvl: number;
+  formattedTVL: string;
   apr: number;
 }
 
@@ -40,9 +40,7 @@ const TopCards: React.FC<TopCardsProps> = ({
           </div>
           <div className="grid-cols-2 gap-4 w-full flex">
             <div className="bg-white rounded-xl p-3 flex justify-center flex-col items-center flex-1 w-1/2">
-              <p className="text-3xl font-medium">
-                ${formatNumber(item.tvl, 2, 2)}M
-              </p>
+              <p className="text-3xl font-medium">{item.formattedTVL}</p>
               <p className="text-gray-700 text-base mt-2 font-medium">TVL</p>
             </div>
             <div className="bg-white rounded-xl p-3 flex justify-center flex-col items-center flex-1 w-1/2">

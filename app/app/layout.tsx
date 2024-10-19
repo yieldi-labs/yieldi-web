@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import WalletButton from "./walletButton";
+import WalletButton from "./WalletButton";
 import { Providers } from "./providers";
 import { Navbar, BlurredCircle } from "@shared/components";
 import "./globals.css";

@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { hex, base64 } from "@scure/base";
 import * as btc from "@scure/btc-signer";
-import SatsConnect from "sats-connect";
+import SatsConnect, { AddressPurpose } from "sats-connect";
 import * as viem from "viem";
 import { mainnet } from "viem/chains";
 import { getAccount } from "@wagmi/core";
 import wagmiConfig from "./wagmiConfig";
+import { Saver } from "./explore/Explore";
+import { PoolDetail } from "@/midgard";
 
 export const parseUnits = viem.parseUnits;
 export const formatUnits = viem.formatUnits;
@@ -35,7 +37,7 @@ export type AtomWallet = {
 export const atomWallet = newAtom<AtomWallet>({});
 
 if (typeof window !== "undefined") {
-  window.atomWallet = atomWallet;
+  (window as any).atomWallet = atomWallet;
 }
 
 export async function ethereumGetWalletClient() {
@@ -110,15 +112,19 @@ function newAtom<V>(v: V): Atom<V> {
 function getAtom<V>(a: Atom<V>) {
   return a.v;
 }
-export function setAtom(a, b, c) {
+export function setAtom<V>(
+  a: Atom<V>,
+  b: ((prev: V) => V) | Partial<V> | string,
+  c?: any,
+): void {
   if (typeof b === "function") {
-    a.v = b(a.v);
+    a.v = (b as (prev: V) => V)(a.v);
   } else if (typeof b === "object") {
     a.v = { ...a.v, ...b };
   } else if (typeof b === "string" && typeof a.v === "object") {
     a.v = { ...a.v, [b]: c };
   } else {
-    a.v = b;
+    a.v = b as V;
   }
   a.l.forEach((l: () => void) => l());
 }
@@ -147,7 +153,7 @@ export const publicClient = viem.createPublicClient({
 
 declare global {
   interface Window {
-    ethereum: undefined | { request: (a: any) => Promise<any> };
+    atomWallet?: Atom<AtomWallet>;
   }
 }
 
@@ -198,7 +204,7 @@ export async function call(
       functionName: fnName,
     });
   } else {
-    const account = getAtom(atomWallet)?.address;
+    const account = getAtom(atomWallet)?.ethereum?.address;
     if (!account) throw new Error("Wallet not connected");
     const { request } = await publicClient.simulateContract({
       address: address as viem.Address,
@@ -272,24 +278,38 @@ export async function ethereumConnectInjected() {
 
 export async function bitcoinConnectInjected() {
   await SatsConnect.request("wallet_requestPermissions", undefined);
-  //if (result0.status == "error") throw new Error(result.error.message);
-  let result = await SatsConnect.request("getAddresses", {
-    purposes: ["payment"], // eslint-disable-line
-  });
-  if (
-    result.status == "error" &&
-    result.error.message.includes("Method not supported")
-  ) {
-    result = await SatsConnect.request("getAccounts", {
-      purposes: ["payment"],
+
+  let addresses;
+  try {
+    const result = await SatsConnect.request("getAddresses", {
+      purposes: [AddressPurpose.Payment],
     });
+    if (result.status === "success") {
+      addresses = result.result.addresses;
+    } else {
+      throw new Error(result.error.message);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("Method not supported")) {
+      const result = await SatsConnect.request("getAccounts", {
+        purposes: [AddressPurpose.Payment],
+      });
+      if (result.status === "success") {
+        addresses = result.result;
+      } else {
+        throw new Error(result.error.message);
+      }
+    } else {
+      throw error;
+    }
   }
-  if (result.status == "error") {
+
+  if (!addresses || addresses.length === 0) {
     SatsConnect.request("wallet_renouncePermissions", undefined);
     localStorage["sats-connect_defaultProvider"] = "";
-    throw new Error(result.error.message);
+    throw new Error("No addresses returned");
   }
-  const addresses = result.result.addresses;
+
   const address = addresses[0].address;
   return {
     chain: "bitcoin",
@@ -315,7 +335,6 @@ export async function bitcoinConnectInjected() {
       }
       console.log(response);
       return response.result.txid;
-      //return hex.encode(base64.decode(response.result.psbt));
     },
   };
 }
@@ -354,7 +373,7 @@ export async function bitcoinUtxos(address: string) {
   for (let i = 0; i < confirmedUTXOs.length; ++i) {
     if (!spend) {
       if (!getAtom(atomWallet)) throw new Error("Wallet not connected");
-      const pubKey = hex.decode(getAtom(atomWallet)?.publicKey || "");
+      const pubKey = hex.decode(getAtom(atomWallet)?.bitcoin?.publicKey || "");
       spend = address.match(/^(2|3)/)
         ? btc.p2sh(btc.p2wpkh(pubKey, BITCOIN_NETWORK), BITCOIN_NETWORK)
         : address.match(/^(tb1p|bc1p)/)
@@ -376,7 +395,7 @@ export async function bitcoinUtxos(address: string) {
 }
 
 export async function bitcoinSendTx(tx: btc.Transaction) {
-  return await getAtom(atomWallet)?.signPsbt(tx);
+  return getAtom(atomWallet)?.bitcoin?.signPsbt(tx);
   /*
   const signedPsbt = await getAtom(atomWallet).signPsbt(tx);
   const signedTx = btc.Transaction.fromPSBT(hex.decode(signedPsbt));
@@ -406,3 +425,34 @@ export async function bitcoinPushTx(txHex: string) {
     return await response.text();
   }
 }
+
+export const addDollarSignAndSuffix = (value: number) => {
+  if (value >= 1e6) {
+    return `$${formatNumber(value / 1e6, 2, 2)}M`;
+  } else if (value >= 1e3) {
+    return `$${formatNumber(value / 1e3, 2, 2)}K`;
+  } else {
+    return `$${formatNumber(value, 2, 2)}`;
+  }
+};
+
+export const calculateSaverTVL = (saver: Saver) => {
+  return (
+    (parseFloat(saver.saversDepth) * parseFloat(saver.assetPriceUSD)) / 1e8
+  );
+};
+
+export const getFormattedSaverTVL = (saver: Saver) => {
+  return addDollarSignAndSuffix(calculateSaverTVL(saver));
+};
+
+export const calculatePoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
+  const assetValueInUSD =
+    (parseFloat(pool.assetDepth) * parseFloat(pool.assetPriceUSD)) / 1e8;
+  const runeValueInUSD = (parseFloat(pool.runeDepth) * runePriceUSD) / 1e8;
+  return assetValueInUSD + runeValueInUSD;
+};
+
+export const getFormattedPoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
+  return addDollarSignAndSuffix(calculatePoolTVL(pool, runePriceUSD));
+};
