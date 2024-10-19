@@ -3,20 +3,10 @@ import Image from "next/image";
 import TranslucentCard from "../translucentCard";
 import TopCards from "./TopCards";
 import { formatNumber } from "@/app/utils";
-
-interface Pool {
-  asset: string;
-  assetPriceUSD: string;
-  volume24h: string;
-  depth: string;
-  poolAPY: string;
-  assetDepth: string;
-  runeDepth: string;
-  nativeDecimal: string;
-}
+import { PoolDetail, PoolDetails } from "@/midgard";
 
 interface LiquidityPoolsProps {
-  pools: Pool[];
+  pools: PoolDetails;
   runePriceUSD: number;
 }
 
@@ -29,7 +19,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     direction: "desc",
   });
 
-  const calculateTVL = (pool: Pool) => {
+  const calculateTVL = (pool: PoolDetail) => {
     const assetValueInUSD =
       (parseFloat(pool.assetDepth) * parseFloat(pool.assetPriceUSD)) / 1e8;
     const runeValueInUSD = (parseFloat(pool.runeDepth) * runePriceUSD) / 1e8;
@@ -62,12 +52,12 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
   };
 
-  const calculateVolumeUSD = (pool: Pool) => {
+  const calculateVolumeUSD = (pool: PoolDetail) => {
     const volumeInRune = parseFloat(pool.volume24h) / 1e8;
     return volumeInRune * runePriceUSD;
   };
 
-  const calculateVolumeDepthRatio = (pool: Pool) => {
+  const calculateVolumeDepthRatio = (pool: PoolDetail) => {
     const volumeUSD = calculateVolumeUSD(pool);
     const tvlUSD = calculateTVL(pool) * 1e6;
     return volumeUSD / tvlUSD;

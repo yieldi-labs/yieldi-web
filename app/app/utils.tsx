@@ -28,10 +28,11 @@ export interface Wallet {
   getBalance: () => Promise<number>;
 }
 
-export const atomWallet = newAtom<{
+export type AtomWallet = {
   ethereum?: Wallet;
   bitcoin?: Wallet;
-}>({});
+};
+export const atomWallet = newAtom<AtomWallet>({});
 
 if (typeof window !== "undefined") {
   window.atomWallet = atomWallet;
