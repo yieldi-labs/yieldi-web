@@ -5,7 +5,7 @@ import SatsConnect, { AddressPurpose } from "sats-connect";
 import * as viem from "viem";
 import { mainnet } from "viem/chains";
 import { getAccount } from "@wagmi/core";
-import wagmiConfig from "./wagmiConfig";
+import { wagmiConfig } from "./wagmiConfig";
 import { Saver } from "./explore/Explore";
 import { PoolDetail } from "@/midgard";
 
@@ -290,7 +290,10 @@ export async function bitcoinConnectInjected() {
       throw new Error(result.error.message);
     }
   } catch (error) {
-    if (error instanceof Error && error.message.includes("Method not supported")) {
+    if (
+      error instanceof Error &&
+      error.message.includes("Method not supported")
+    ) {
       const result = await SatsConnect.request("getAccounts", {
         purposes: [AddressPurpose.Payment],
       });
