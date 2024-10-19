@@ -1,96 +1,37 @@
-"use client";
+import { getPools, getStats } from "@/midgard";
+import Explore, { Saver } from "./Explore";
+import { fetchJson } from "@/utils/json";
 
-import { useState, useEffect } from "react";
-import LiquidityPools from "./LiquidityPools";
-import SaverVaults from "./SaverVaults";
-import { fetchJson } from "@/app/utils";
-
-interface Pool {
-  asset: string;
-  assetPriceUSD: string;
-  volume24h: string;
-  depth: string;
-  poolAPY: string;
-  assetDepth: string;
-  runeDepth: string;
-  nativeDecimal: string;
+interface SaverDetails {
+  savers: Saver;
 }
 
-interface Saver {
-  asset: string;
-  saversCount: number;
-  saversReturn: string;
-  earned: string;
-  filled: number;
-  assetPriceUSD: string;
-  saversDepth: string;
-  assetDepth: string;
-  synthSupply: string;
+interface Savers {
+  [key: string]: SaverDetails;
 }
 
-const Explore = () => {
-  const [activeTab, setActiveTab] = useState("liquidity");
-  const [pools, setPools] = useState<Pool[]>([]);
-  const [savers, setSavers] = useState<Saver[]>([]);
-  const [runePriceUSD, setRunePriceUSD] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
+const ExplorePage = async () => {
+  try {
+    const [poolsData, statsData, saversData] = await Promise.all([
+      getPools(),
+      getStats(),
+      fetchJson("https://vanaheimex.com/api/saversInfo"),
+    ]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [poolsData, statsData, saversData] = await Promise.all([
-          fetchJson("https://midgard.ninerealms.com/v2/pools"),
-          fetchJson("https://midgard.ninerealms.com/v2/stats"),
-          fetchJson("https://vanaheimex.com/api/saversInfo"),
-        ]);
-        setPools(poolsData);
-        setSavers(Object.values(saversData).map((s) => s.savers));
-        setRunePriceUSD(parseFloat(statsData.runePriceUSD));
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // TODO(matt): handle no data
+    if (!poolsData.data) return;
+    if (!statsData.data) return;
+    if (!saversData) return;
 
-    fetchData();
-  }, []);
-
-  return (
-    <main className="mx-auto">
-      <nav className="mb-4">
-        <ul className="flex space-x-8 font-semibold font-gt-america-exp text-2xl">
-          <li>
-            <a
-              href="#"
-              onClick={() => setActiveTab("liquidity")}
-              className={`pb-2 no-underline ${activeTab === "liquidity" ? "text-gray-900 font-bold" : "text-gray-400 hover:text-gray-700 font-medium"}`}
-            >
-              LIQUIDITY POOLS
-            </a>
-          </li>
-          <li>
-            <a
-              href="#"
-              onClick={() => setActiveTab("savers")}
-              className={`pb-2 no-underline ${activeTab === "savers" ? "text-gray-900 font-bold" : "text-gray-400 hover:text-gray-700 font-medium"}`}
-            >
-              SAVER VAULTS
-            </a>
-          </li>
-        </ul>
-      </nav>
-
-      {loading ? (
-        <p>Loading data...</p>
-      ) : activeTab === "liquidity" ? (
-        <LiquidityPools pools={pools} runePriceUSD={runePriceUSD} />
-      ) : (
-        <SaverVaults savers={savers} />
-      )}
-    </main>
-  );
+    const savers = Object.values(saversData as Savers).map(
+      (s) => s.savers as Saver,
+    );
+    return (
+      <Explore pools={poolsData.data} stats={statsData.data} savers={savers} />
+    );
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 };
 
-export default Explore;
+export default ExplorePage;

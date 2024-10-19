@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
-  Wallet,
   BITCOIN_NETWORK,
   ADDRESS_ZERO,
   call,
@@ -15,6 +14,7 @@ import {
   bitcoinUtxos,
   bitcoinSendTx,
   atomWallet,
+  AtomWallet,
 } from "@/app/utils";
 import * as btc from "@scure/btc-signer";
 import Grid from "@/app/grid";
@@ -34,30 +34,34 @@ interface TcPool {
   saversAPR: string;
 }
 
+interface ModalParams {
+  type: string;
+  farm?: any;
+}
+
 export default function Home() {
   const [wallet] = useAtom(atomWallet);
-  const [modal, setModal] = useState<
-    undefined | { type: string; farm?: any }
-  >();
-  const [balance, setBalance] = useState(0);
-  const [saver, setSaver] = useState({
+  const [modal, setModal] = useState<undefined | ModalParams>();
+  const [balance] = useState(0);
+  const [saver] = useState({
     asset_redeem_value: "0",
     growth_pct: "0",
   });
   const [pools, setPools] = useState<TcPool[]>([]);
 
-  useEffect(() => {
-    (async () => {
-      if (!wallet) return;
-      if (!wallet.address) return setBalance(0);
-      setBalance(await wallet.getBalance());
-      setSaver(
-        await fetchJson(
-          `https://thornode.ninerealms.com/thorchain/pool/${wallet.chain == "bitcoin" ? "BTC.BTC" : "ETH.ETH"}/liquidity_provider/${wallet.address}`,
-        ),
-      );
-    })();
-  }, [wallet, wallet?.address]);
+  // TODO - this is broken
+  //useEffect(() => {
+  //  (async () => {
+  //    if (!wallet) return;
+  //    if (!wallet.address) return setBalance(0);
+  //    setBalance(await wallet.getBalance());
+  //    setSaver(
+  //      await fetchJson(
+  //        `https://thornode.ninerealms.com/thorchain/pool/${wallet.chain == "bitcoin" ? "BTC.BTC" : "ETH.ETH"}/liquidity_provider/${wallet.address}`,
+  //      ),
+  //    );
+  //  })();
+  //}, [wallet, wallet?.address]);
 
   useEffect(() => {
     (async () => {
@@ -83,11 +87,10 @@ export default function Home() {
       apy: bitcoinPool.saversAPR,
       assetPrice: parseFloat(bitcoinPool.assetPriceUSD),
       tvl: parseFloat(bitcoinPool.saversDepth),
-      balanceWallet: wallet?.chain == "bitcoin" ? balance : 0,
-      balanceStaked:
-        wallet?.chain == "bitcoin"
-          ? parseFloat(saver.asset_redeem_value) * 2
-          : 0,
+      balanceWallet: wallet?.bitcoin?.address ? balance : 0,
+      balanceStaked: wallet?.bitcoin?.address
+        ? parseFloat(saver.asset_redeem_value) * 2
+        : 0,
     });
   }
   if (ethereumPool) {
@@ -100,11 +103,10 @@ export default function Home() {
       apy: ethereumPool.saversAPR,
       assetPrice: parseFloat(ethereumPool.assetPriceUSD),
       tvl: parseFloat(ethereumPool.saversDepth),
-      balanceWallet: wallet?.chain == "ethereum" ? balance : 0,
-      balanceStaked:
-        wallet?.chain == "ethereum"
-          ? (parseFloat(saver.asset_redeem_value) / 1e8) * 2
-          : 0,
+      balanceWallet: wallet?.ethereum?.address ? balance : 0,
+      balanceStaked: wallet?.ethereum?.address
+        ? (parseFloat(saver.asset_redeem_value) / 1e8) * 2
+        : 0,
     });
   }
 
@@ -193,7 +195,7 @@ function ModalDeposit({
   modal,
   setModal,
 }: {
-  wallet: Wallet;
+  wallet: AtomWallet;
   modal: any;
   setModal: (v: undefined | any) => void;
 }) {
@@ -225,10 +227,10 @@ function ModalDeposit({
       if (!wallet) {
         throw new Error("Connect a wallet first");
       }
-      if (modal.farm.symbol == "BTC" && wallet.chain != "bitcoin") {
+      if (modal.farm.symbol == "BTC" && wallet?.bitcoin?.address) {
         throw new Error("Connect a Bitcoin wallet first");
       }
-      if (modal.farm.symbol == "ETH" && wallet.chain != "ethereum") {
+      if (modal.farm.symbol == "ETH" && wallet?.ethereum?.address) {
         throw new Error("Connect an Ethereum wallet first");
       }
 
@@ -236,13 +238,13 @@ function ModalDeposit({
         await fetchJson(
           "https://thornode.ninerealms.com/thorchain/inbound_addresses",
         )
-      ).find((i: { chain: string }) => i.chain === wallet.symbol);
+      ).find((i: { chain: string }) => i.chain === modal.farm.symbol);
 
       if (inbound.halted) {
         throw new Error("Thorchain temporarily offline");
       }
 
-      if (wallet.chain == "bitcoin") {
+      if (wallet?.bitcoin?.address) {
         const fees = await bitcoinFees();
         const parsedAmount = (parseFloat(amount) * 1e8) | 0;
         if (Number.isNaN(amount)) {
@@ -251,15 +253,17 @@ function ModalDeposit({
         const outputs = [
           { address: inbound.address, amount: BigInt(parsedAmount) },
         ];
-        const utxos = await bitcoinUtxos(wallet?.address);
-        const { tx } = btc.selectUTXO(utxos, outputs, "default", {
-          changeAddress: wallet.address,
+        const utxos = await bitcoinUtxos(wallet?.bitcoin?.address);
+        const selected = btc.selectUTXO(utxos, outputs, "default", {
+          changeAddress: wallet?.bitcoin?.address,
           feePerByte: BigInt(fees.fastestFee + 1),
           network: BITCOIN_NETWORK,
           bip69: false,
           allowUnknownOutputs: true,
           createTx: true,
         });
+        if (!selected) throw new Error("Not enough funds");
+        const { tx } = selected;
         if (!tx) throw new Error("Missing UTXOs to pay for transaction");
         tx.addOutput({
           amount: BigInt(0),
@@ -272,7 +276,7 @@ function ModalDeposit({
         const hash = await bitcoinSendTx(tx);
         console.log(hash);
         // TODO toast with success & mempool link
-      } else if (wallet.chain == "ethereum") {
+      } else if (wallet?.ethereum?.address) {
         const parsedAmount = parseUnits(amount, 18);
         const hash = await call(
           inbound.router,
@@ -343,13 +347,13 @@ function ModalDeposit({
           <div className="flex">
             <div className="flex-1">Capacity Used</div>
             <div className="font-semibold">
-              {formatNumber(pool?.savers_fill_bps, 2, 2)}%
+              {formatNumber(pool?.savers_fill_bps || 0, 2, 2)}%
             </div>
           </div>
           <div className="flex">
             <div className="flex-1">Capacity Left</div>
             <div className="font-semibold">
-              {formatNumber(pool?.savers_capacity_remaining, 8, 1)}{" "}
+              {formatNumber(pool?.savers_capacity_remaining || 0, 8, 1)}{" "}
               {modal.farm.symbol}
             </div>
           </div>
