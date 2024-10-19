@@ -4,7 +4,7 @@ import * as btc from "@scure/btc-signer";
 import SatsConnect, { AddressPurpose } from "sats-connect";
 import * as viem from "viem";
 import { mainnet } from "viem/chains";
-import { getAccount } from "@wagmi/core";
+import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "./wagmiConfig";
 import { Saver } from "./explore/Explore";
 import { PoolDetail } from "@/midgard";
