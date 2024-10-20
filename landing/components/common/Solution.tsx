@@ -17,33 +17,31 @@ const text = [
   },
 ];
 
-const Solution = () => {
-  return (
-    <div className="relative flex flex-col gap-[36px] tablet:gap-[110px] font-gt-america-ext text-neutral-900 w-full mb-[53px] tablet:mb-[150px] px-8 tablet:px-18">
-      <h2 className="text-[32px] tablet:text-[64px] text-left desktop-sm:text-center font-bold leading-[40px] tablet:leading-[68px] max-w-[300px] tablet:max-w-full">
-        What Problem Does Yieldi Solve<span className="font-sans">?</span>
-      </h2>
-      <div className="flex flex-col-reverse desktop-sm:flex-row gap-[40px] tablet:gap-[90px] justify-center items-center">
-        <div className="flex flex-col gap-[12px] tablet:gap-[30px] w-full desktop-sm:w-[70%]">
-          {text.map((item, index) => (
-            <p
-              key={index}
-              className={`text-[16px] tablet:text-[24px] ${
-                item.type === "subheading"
-                  ? "font-bold text-neutral-900"
-                  : "text-neutral-800 font-medium font-gt-america"
-              }`}
-            >
-              {item.text}
-            </p>
-          ))}
-        </div>
-        <SVGComponents.SolutionSVG className="w-[300px] tablet:w-[532px] h-[300px] tablet:h-[532px]" />
+const Solution = () => (
+  <div className="relative flex flex-col gap-[36px] tablet:gap-[110px] font-gt-america-ext text-neutral-900 w-full mb-[53px] tablet:mb-[150px] px-8 tablet:px-18">
+    <h2 className="text-[32px] tablet:text-[64px] text-left desktop-sm:text-center font-bold leading-[40px] tablet:leading-[68px] max-w-[300px] tablet:max-w-full">
+      What Problem Does Yieldi Solve<span className="font-sans">?</span>
+    </h2>
+    <div className="flex flex-col-reverse desktop-sm:flex-row gap-[40px] tablet:gap-[90px] justify-center items-center">
+      <div className="flex flex-col gap-[12px] tablet:gap-[30px] w-full desktop-sm:w-[70%]">
+        {text.map((item, index) => (
+          <p
+            key={index}
+            className={`text-[16px] tablet:text-[24px] ${
+              item.type === "subheading"
+                ? "font-bold text-neutral-900"
+                : "text-neutral-800 font-medium font-gt-america"
+            }`}
+          >
+            {item.text}
+          </p>
+        ))}
       </div>
-      <div id="solution" className="absolute top-[-200px]"></div>
-      <GradientCircles circles={gradientCirclesConfig.solution} />
+      <SVGComponents.SolutionSVG className="w-[300px] tablet:w-[532px] h-[300px] tablet:h-[532px]" />
     </div>
-  );
-};
+    <div id="solution" className="absolute top-[-200px]"></div>
+    <GradientCircles circles={gradientCirclesConfig.solution} />
+  </div>
+);
 
 export default Solution;

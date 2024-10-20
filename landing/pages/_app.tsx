@@ -4,13 +4,11 @@ import { DefaultSeo } from "next-seo";
 import SEO from "@/next-seo.config";
 import { Layout } from "@/components/ui";
 
-function MyApp({ Component, pageProps }: AppProps) {
-  return (
-    <Layout>
-      <DefaultSeo {...SEO} />
-      <Component {...pageProps} />
-    </Layout>
-  );
-}
+const MyApp = ({ Component, pageProps }: AppProps) => (
+  <Layout>
+    <DefaultSeo {...SEO} />
+    <Component {...pageProps} />
+  </Layout>
+);
 
 export default MyApp;
