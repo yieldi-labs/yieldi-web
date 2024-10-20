@@ -1,6 +1,5 @@
-import { GradientCircles } from "../ui";
-import { gradientCirclesConfig } from "@/utils";
-import { SVGComponents } from "@shared/components";
+import { landingGradientCircles } from "@shared/utils";
+import { SVGComponents, CommonComponents } from "@shared/components";
 
 const text = [
   {
@@ -40,7 +39,9 @@ const Solution = () => (
       <SVGComponents.SolutionSVG className="w-[300px] tablet:w-[532px] h-[300px] tablet:h-[532px]" />
     </div>
     <div id="solution" className="absolute top-[-200px]"></div>
-    <GradientCircles circles={gradientCirclesConfig.solution} />
+    <CommonComponents.GradientCircles
+      circles={landingGradientCircles.solution}
+    />
   </div>
 );
 

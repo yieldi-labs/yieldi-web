@@ -1,0 +1,1 @@
+export { landingGradientCircles } from "./gradientCirclesConfig";

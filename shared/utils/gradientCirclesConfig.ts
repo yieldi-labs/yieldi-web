@@ -1,4 +1,4 @@
-export const gradientCirclesConfig = {
+export const landingGradientCircles = {
   solution: [
     {
       size: 810,

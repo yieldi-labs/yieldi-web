@@ -1,5 +1,5 @@
-import { GradientCircles } from "../ui";
-import { gradientCirclesConfig } from "@/utils";
+import { CommonComponents } from "@shared/components";
+import { landingGradientCircles } from "@shared/utils";
 
 const components = [
   {
@@ -59,7 +59,9 @@ const KeyComponents = () => (
         </div>
       ))}
     </div>
-    <GradientCircles circles={gradientCirclesConfig.keyComponents} />
+    <CommonComponents.GradientCircles
+      circles={landingGradientCircles.keyComponents}
+    />
     <div id="components" className="absolute top-[-150px]"></div>
   </div>
 );

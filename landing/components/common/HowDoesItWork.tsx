@@ -1,7 +1,6 @@
 import { cloneElement } from "react";
-import { GradientCircles } from "../ui";
-import { gradientCirclesConfig } from "@/utils";
-import { SVGComponents } from "@shared/components";
+import { landingGradientCircles } from "@shared/utils";
+import { SVGComponents, CommonComponents } from "@shared/components";
 
 const boxes = [
   {
@@ -54,7 +53,9 @@ const HowDoesItWork = () => (
         </div>
       ))}
     </div>
-    <GradientCircles circles={gradientCirclesConfig.howDoesItWork} />
+    <CommonComponents.GradientCircles
+      circles={landingGradientCircles.howDoesItWork}
+    />
   </div>
 );
 

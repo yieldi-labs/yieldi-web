@@ -1,7 +1,6 @@
-import { gradientCirclesConfig } from "@/utils";
-import { Button } from "@shared/components/ui";
-import { GradientCircles } from "../ui";
 import { Discord, Telegram, XLogo } from "../svg";
+import { landingGradientCircles } from "@shared/utils";
+import { CommonComponents, UIComponents } from "@shared/components";
 
 const socials = [
   {
@@ -28,7 +27,7 @@ const CTA = () => (
       <h3 className="text-[20px] tablet:text-[42px]">
         The Yield Venue for Shared Security
       </h3>
-      <Button
+      <UIComponents.Button
         label="Restake Now"
         link="https://app.yieldi.xyz"
         className="w-full uppercase font-medium tablet:py-[42px] py-[14px] tablet:text-[20px] text-[16px] font-gt-america-ext"
@@ -46,7 +45,7 @@ const CTA = () => (
         ))}
       </div>
     </footer>
-    <GradientCircles circles={gradientCirclesConfig.footer} />
+    <CommonComponents.GradientCircles circles={landingGradientCircles.footer} />
   </div>
 );
 
