@@ -25,13 +25,13 @@ const SlidingMenu = ({
   <>
     {menuOpen && (
       <div
-        className="fixed inset-0 z-30 bg-white bg-opacity-50 backdrop-blur-md transition-opacity duration-300 ease-in-out"
+        className="fixed inset-0 z-[250] bg-white bg-opacity-50 backdrop-blur-md transition-opacity duration-300 ease-in-out"
         onClick={toggleMenu}
       />
     )}
 
     <div
-      className={`fixed right-0 top-0 z-40 flex h-screen w-[70vw] flex-col gap-14 ${
+      className={`fixed right-0 top-0 z-[300] flex h-screen w-[70vw] flex-col gap-14 ${
         menuOpen ? "translate-x-0" : "translate-x-full"
       } tablet:hidden bg-white/50 backdrop-blur-md transition-transform duration-300 ease-in-out`}
     >

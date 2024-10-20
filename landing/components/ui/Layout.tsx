@@ -1,6 +1,4 @@
-import React from "react";
-import Footer from "./Footer";
-import { Navbar } from "@shared/components";
+import { UIComponents } from "@shared/components";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -8,7 +6,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => (
   <div className="flex min-h-screen flex-col bg-noise-pattern bg-contain">
-    <Navbar
+    <UIComponents.Navbar
       links={[
         { label: "About", href: "#about" },
         { label: "Solution", href: "#solution" },
@@ -16,7 +14,6 @@ const Layout = ({ children }: LayoutProps) => (
       ]}
     />
     <main className="flex-grow">{children}</main>
-    <Footer />
   </div>
 );
 

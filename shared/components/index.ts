@@ -1,11 +1,8 @@
 // UI Components
-export { default as Navbar } from "./ui/Navbar";
-export { default as Button } from "./ui/Button";
+export * as UIComponents from "./ui";
 
 // SVG Components
-export { default as Close } from "./svg/Close";
-export { default as Yieldi } from "./svg/Yieldi";
-export { default as Burger } from "./svg/Burger";
+export * as SVGComponents from "./svg";
 
 // Common Components
-export { default as BlurredCircle } from "./common/GradientBlurredCircle";
+export * as CommonComponents from "./common";

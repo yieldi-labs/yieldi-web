@@ -3,13 +3,13 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        "nav-radial":
-          "radial-gradient(circle at 80% 30%, transparent 20%, #FFFFFF 90%)",
+        "transparent-radial":
+          "radial-gradient(circle at 50% 30%, transparent 20%, #FFFFFF 100%)",
       },
       backdropBlur: { m: "5px", l: "10px", xl: "20px" },
       borderColor: { DEFAULT: "var(--border)" },
       colors: {
-        neutral: { DEFAULT: "#3A3D3F", black: "#242628" },
+        neutral: { DEFAULT: "#242628", 900: "#3A3D3F", 800: "#424648" },
         background: "var(--background)",
         foreground: "var(--foreground)",
         foreground2: "#6D655D",
@@ -27,10 +27,16 @@ module.exports = {
         mono: ["GT-America-Mono", ...defaultTheme.fontFamily.mono],
         "gt-america": ["GT-America"],
         "gt-america-ext": ["GT-America-Extended"],
+        "gt-america-exp": ["GT-America-Expanded"],
       },
       spacing: { 18: "4.5rem", 28: "7rem" },
       maxWidth: { hero: "990px", content: "520px" },
-      screens: { "mobile-lg": "480px", tablet: "768px", desktop: "1200px" },
+      screens: {
+        "mobile-lg": "480px",
+        tablet: "768px",
+        "desktop-sm": "1024px",
+        desktop: "1200px",
+      },
       height: {
         m: "512px",
         l: "1024px",

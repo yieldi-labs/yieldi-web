@@ -51,11 +51,17 @@
   font-weight: bold;
 }
 
+@font-face {
+  font-family: "GT-America-Expanded";
+  src: url("/fonts/GT-America-Expanded-Bold-Trial.otf") format("opentype");
+  font-style: normal;
+  font-weight: bold;
+}
+
 html {
   scroll-behavior: smooth;
 }
 
 body {
   font-family: "GT-America", sans-serif;
-  overflow-x: hidden;
 }
