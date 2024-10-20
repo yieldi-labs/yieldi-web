@@ -13,6 +13,7 @@ Yieldi is a decentralized application (dApp) that allows users to earn yield on 
 
 - Next.js
 - React
+- pnpm
 - TypeScript
 - Tailwind CSS
 - Viem
@@ -24,11 +25,11 @@ Yieldi is a decentralized application (dApp) that allows users to earn yield on 
 1. Clone the repository
 2. Install dependencies:
    ```
-   npm install
+   pnpm install
    ```
 3. Run the development server:
    ```
-   npm run dev
+   pnpm run dev
    ```
 4. Open [http://localhost:3000](http://localhost:3000) in your browser
 

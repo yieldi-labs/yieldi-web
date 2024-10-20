@@ -18,7 +18,25 @@ module.exports = {
         accent: { DEFAULT: "#72BACA", dark: "#71bac9" },
         dark: "#003944",
         highlight: "#A1FD59",
-        border: { DEFAULT: "#524B48", light: "#6D655D" },
+        border: {
+          DEFAULT: "#524B48",
+          light: "#6D655D",
+        },
+        gray: {
+          400: "#818A8F",
+          700: "#424648",
+          900: "#3A3D3F",
+        },
+      },
+      borderRadius: {
+        nav: "40px",
+        large: "20px",
+      },
+      fontWeight: {
+        light: "300",
+        normal: "400",
+        medium: "500",
+        bold: "700",
       },
       borderRadius: { nav: "40px", large: "20px" },
       fontWeight: { light: "300", normal: "400", medium: "500", bold: "700" },

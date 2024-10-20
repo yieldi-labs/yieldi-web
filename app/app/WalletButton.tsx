@@ -9,6 +9,7 @@ import {
   formatAddress,
   formatNumber,
   bitcoinConnectInjected,
+  AtomWallet,
 } from "@/app/utils";
 import Card from "@/app/card";
 import Modal from "@/app/modal";
@@ -18,7 +19,7 @@ import { useConnectModal } from "@rainbow-me/rainbowkit";
 
 export default function WalletButton() {
   const [modal, setModal] = useState<undefined | { type: string }>();
-  const [wallets] = useAtom(atomWallet);
+  const [wallets] = useAtom<AtomWallet>(atomWallet);
 
   function onClick() {
     setModal({ type: "wallet" });
@@ -29,8 +30,8 @@ export default function WalletButton() {
   return (
     <>
       <a
-        className="flex w-48 px-7 py-3 justify-center items-center gap-2.5 flex-shrink-0 rounded-full bg-[#007D98]
-        text-white text-center font-sans text-sm font-bold leading-5"
+        className="flex w-48 px-7 py-3 justify-center items-center gap-2.5 flex-shrink-0 rounded-full bg-highlight
+        text-gray-900 text-center font-sans text-sm font-bold leading-5"
         onClick={onClick}
       >
         {connectedWallets > 0 ? "Wallets" : "Connect Wallet"}
@@ -62,7 +63,7 @@ function ModalWallet({ onClose }: { onClose: () => void }) {
 
   const updateEthereumWallet = useCallback(() => {
     if (isEthConnected && ethAddress) {
-      setWallets((prev) => ({
+      setWallets((prev: AtomWallet) => ({
         ...prev,
         ethereum: {
           chain: "ethereum",
@@ -73,11 +74,12 @@ function ModalWallet({ onClose }: { onClose: () => void }) {
       }));
       return;
     }
-    setWallets((prev) => {
+    setWallets((prev: AtomWallet) => {
       const newWallets = { ...prev };
       delete newWallets.ethereum;
       return newWallets;
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEthConnected, ethAddress, ethBalance]);
 
   useEffect(() => {
@@ -87,7 +89,7 @@ function ModalWallet({ onClose }: { onClose: () => void }) {
   async function onConnectBitcoin() {
     try {
       const bitcoinWallet = await bitcoinConnectInjected();
-      setWallets((prev) => ({ ...prev, bitcoin: bitcoinWallet }));
+      setWallets((prev: AtomWallet) => ({ ...prev, bitcoin: bitcoinWallet }));
     } catch (error) {
       console.error("Failed to connect Bitcoin wallet:", error);
     }
@@ -99,7 +101,7 @@ function ModalWallet({ onClose }: { onClose: () => void }) {
   }
 
   function onDisconnectBitcoin() {
-    setWallets((prev) => {
+    setWallets((prev: AtomWallet) => {
       const newWallets = { ...prev };
       delete newWallets.bitcoin;
       return newWallets;
