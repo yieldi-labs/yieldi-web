@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect, cloneElement } from "react";
+import { twMerge } from "tailwind-merge";
 import Button from "../Button";
 import SlidingMenu from "./SlidingMenu";
 import { Yieldi, Burger } from "../../svg";
@@ -21,6 +22,16 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
   const [isSticky, setIsSticky] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const containerClass = twMerge(
+    `fixed top-[20px] z-[200] mt-5 flex max-h-[96px] w-full transition-all duration-300`,
+    isSticky ? "translate-y-0" : "translate-y-[-10px]",
+  );
+
+  const navClass = twMerge(
+    `bg-transparent-radial text-neutral tablet:px-10 tablet:py-8 tablet:mx-18 mx-8 flex w-full items-center justify-between rounded-2xl border-4 border-white px-4 py-4 backdrop-blur-[30px]`,
+    isSticky ? "shadow-md" : "",
+  );
+
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
@@ -37,15 +48,12 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
   return (
     <>
       <nav
-        className={`fixed top-[20px] z-[200] mt-5 flex max-h-[96px] w-full transition-all duration-300`}
+        className={containerClass}
         style={{
           transition: "transform 0.3s ease-in-out",
-          transform: isSticky ? "translateY(0)" : "translateY(-10px)",
         }}
       >
-        <div
-          className={`bg-transparent-radial text-neutral tablet:px-10 tablet:py-8 tablet:mx-18 mx-8 flex w-full ${isSticky ? "shadow-md" : ""} items-center justify-between rounded-2xl border-4 border-white px-4 py-4 backdrop-blur-[30px]`}
-        >
+        <div className={navClass}>
           <Link href="/">
             <Yieldi className="tablet:w-[108px] w-[96px]" />
           </Link>
@@ -59,6 +67,7 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
           <div className="tablet:flex hidden">
             <LinkWithHoverEffect links={links} />
           </div>
+
           {buttons && (
             <div className="tablet:flex hidden items-center gap-5">
               {buttons.map((button, index) =>

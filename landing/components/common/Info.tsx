@@ -12,7 +12,7 @@ const Info = () => (
       {paragraphs.map((paragraph, index) => (
         <p
           key={index}
-          className="text-[14px] tablet:text-[16px] text-neutral-800 font-medium"
+          className="text-[14px] tablet:text-base text-neutral-800 font-medium"
         >
           {paragraph}
         </p>

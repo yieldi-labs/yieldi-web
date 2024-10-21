@@ -26,7 +26,7 @@ const Solution = () => (
         {text.map((item, index) => (
           <p
             key={index}
-            className={`text-[16px] tablet:text-[24px] ${
+            className={`text-base leading-normal tablet:text-[24px] ${
               item.type === "subheading"
                 ? "font-bold text-neutral-900"
                 : "text-neutral-800 font-medium font-gt-america"

@@ -19,7 +19,7 @@ const socials = [
 
 const CTA = () => (
   <div className="relative flex flex-col gap-[88px] font-gt-america-exp px-8 tablet:px-18 text-neutral-900 text-center font-bold pb-[35px] tablet:pb-[115px] overflow-hidden">
-    <h2 className="text-[16px] tablet:text-[38px]">
+    <h2 className="text-base tablet:text-[38px] leading-normal">
       Join the future of yield streaming with Yieldi and experience efficient,
       secure, and innovative financial growth.
     </h2>
@@ -30,7 +30,7 @@ const CTA = () => (
       <UIComponents.Button
         label="Restake Now"
         link="https://app.yieldi.xyz"
-        className="w-full uppercase font-medium tablet:py-[42px] py-[14px] tablet:text-[20px] text-[16px] font-gt-america-ext"
+        className="w-full uppercase font-medium tablet:py-[42px] py-[14px] tablet:text-[20px] text-base font-gt-america-ext"
       />
       <div className="flex items-center gap-[20px] tablet:gap-[32px]">
         {socials.map((social, index) => (

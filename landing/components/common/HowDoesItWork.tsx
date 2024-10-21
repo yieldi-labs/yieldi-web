@@ -19,7 +19,7 @@ const boxes = [
     image: <SVGComponents.Distribution />,
     header: "Yield Distribution",
     description:
-      "THORChain swaps the yield to native assets and holds it in a yield collector module assigned to the staker’s L1 address.",
+      "THORChain swaps the yield to native assets and holds it in a yield collector module assigned to the staker's L1 address.",
   },
 ];
 
@@ -47,7 +47,7 @@ const HowDoesItWork = () => (
               {box.header}
             </h3>
           </div>
-          <p className="font-gt-america font-medium text-neutral-800 text-[16px] tablet:text-[20px] mb-auto mt-[12px] desktop-sm:mt-[36px]">
+          <p className="font-gt-america font-medium text-neutral-800 text-base tablet:text-[20px] mb-auto mt-[12px] desktop-sm:mt-[36px] leading-normal">
             {box.description}
           </p>
         </div>

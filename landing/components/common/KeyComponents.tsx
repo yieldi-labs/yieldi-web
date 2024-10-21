@@ -52,7 +52,7 @@ const KeyComponents = () => (
             <h3 className="font-gt-america-exp font-bold text-neutral-900 tablet:text-[24px] text-[20px]">
               {component.header}
             </h3>
-            <p className="font-gt-america text-neutral-800 max-w-[410px] tablet:text-[24px] text-[16px]">
+            <p className="font-gt-america text-neutral-800 max-w-[410px] tablet:text-[24px] text-base leading-normal">
               {component.description}
             </p>
           </div>
