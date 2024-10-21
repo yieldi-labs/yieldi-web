@@ -8,6 +8,7 @@
   "peerDependencies": {
     "react": "^18",
     "react-dom": "^18",
-    "next": "^14"
+    "next": "^14",
+    "tailwind-merge": "^2.5.4"
   }
 }

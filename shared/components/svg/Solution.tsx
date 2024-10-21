@@ -1,12 +1,17 @@
+"use client";
 import * as React from "react";
 import { SVGProps } from "react";
 
-const IssuesCircle = (props: SVGProps<SVGSVGElement>) => (
+interface SolutionProps extends SVGProps<SVGSVGElement> {
+  className?: string;
+}
+
+const SolutionSVG = ({ className = "", ...props }: SolutionProps) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width={600}
-    height={586}
+    viewBox="0 0 600 600" // Update the viewBox to match the SVG's default dimensions
     fill="none"
+    className={className} // This allows Tailwind classes to control size
     {...props}
   >
     <circle cx={266} cy={289} r={266} fill="#627EEA" fillOpacity={0.17} />
@@ -366,4 +371,4 @@ const IssuesCircle = (props: SVGProps<SVGSVGElement>) => (
     </defs>
   </svg>
 );
-export default IssuesCircle;
+export default SolutionSVG;
