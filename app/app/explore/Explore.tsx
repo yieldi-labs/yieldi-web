@@ -28,7 +28,7 @@ const Explore = ({ pools, stats, savers }: ExploreProps) => {
   const runePriceUSD = parseFloat(stats.runePriceUSD);
 
   return (
-    <main className="mx-auto">
+    <main className="mx-16">
       <nav className="mb-4">
         <ul className="flex space-x-8 font-semibold font-gt-america-exp text-2xl">
           <li>
