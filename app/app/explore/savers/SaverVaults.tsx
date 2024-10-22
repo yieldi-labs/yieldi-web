@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import TranslucentCard from "../TranslucentCard";
-import TopCards from "./TopCards";
+import TranslucentCard from "@/app/TranslucentCard"
+import TopCards from "@/app/explore/TopCards";
 import { calculateSaverTVL, formatNumber } from "@/app/utils";
 import { getFormattedSaverTVL } from "@/app/utils";
 
