@@ -1,6 +1,6 @@
 "use client";
 
-import { Saver } from "@/app/explore/Explore";
+import { Saver } from "@/app/explore/types";
 import SaverVaults from "@/app/explore/savers/SaverVaults";
 import ExploreNav from "../components/ExploreNav";
 

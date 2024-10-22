@@ -9,6 +9,7 @@ import {
   getFormattedPoolTVL,
 } from "@/app/utils";
 import { PoolDetail, PoolDetails } from "@/midgard";
+import Link from "next/link";
 
 interface LiquidityPoolsProps {
   pools: PoolDetails;
@@ -147,38 +148,42 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
               const volumeUSD = calculateVolumeUSD(pool);
               const volumeDepthRatio = calculateVolumeDepthRatio(pool);
               return (
-                <TranslucentCard key={pool.asset} className="rounded-xl mb-1.5">
-                  <div className="flex items-center min-w-full">
-                    <div className="px-3 whitespace-nowrap flex-1 w-1/3">
-                      <div className="flex items-center">
-                        <Image
-                          src={getLogoPath(pool.asset)}
-                          alt={`${getAssetSymbol(pool.asset)} logo`}
-                          width={28}
-                          height={28}
-                          className="rounded-full"
-                        />
-                        <span className="ml-3 font-medium">
-                          {getAssetSymbol(pool.asset)}
-                        </span>
+                <Link
+                  key={pool.asset}
+                  href={`/explore/pools/${pool.asset}`}>
+                  <TranslucentCard key={pool.asset} className="rounded-xl mb-1.5">
+                    <div className="flex items-center min-w-full">
+                      <div className="px-3 whitespace-nowrap flex-1 w-1/3">
+                        <div className="flex items-center">
+                          <Image
+                            src={getLogoPath(pool.asset)}
+                            alt={`${getAssetSymbol(pool.asset)} logo`}
+                            width={28}
+                            height={28}
+                            className="rounded-full"
+                          />
+                          <span className="ml-3 font-medium">
+                            {getAssetSymbol(pool.asset)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-start flex-1 w-2/3">
+                        <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                          {addDollarSignAndSuffix(volumeUSD)}
+                        </div>
+                        <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                          {formatNumber(volumeDepthRatio, 2, 2)}
+                        </div>
+                        <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                          {getFormattedPoolTVL(pool, runePriceUSD)}
+                        </div>
+                        <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                          {formatNumber(parseFloat(pool.poolAPY) * 100, 2, 2)}%
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-start flex-1 w-2/3">
-                      <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                        {addDollarSignAndSuffix(volumeUSD)}
-                      </div>
-                      <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                        {formatNumber(volumeDepthRatio, 2, 2)}
-                      </div>
-                      <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                        {getFormattedPoolTVL(pool, runePriceUSD)}
-                      </div>
-                      <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                        {formatNumber(parseFloat(pool.poolAPY) * 100, 2, 2)}%
-                      </div>
-                    </div>
-                  </div>
-                </TranslucentCard>
+                  </TranslucentCard>
+                </Link>
               );
             })}
           </div>

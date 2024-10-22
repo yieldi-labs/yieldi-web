@@ -1,4 +1,5 @@
 export { default as Close } from "./Close";
+export { default as BackArrow } from "./BackArrow";
 export { default as Burger } from "./Burger";
 export { default as Yieldi } from "./Yieldi";
 export { default as Staking } from "./Staking";

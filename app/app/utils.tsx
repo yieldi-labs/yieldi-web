@@ -6,7 +6,7 @@ import * as viem from "viem";
 import { mainnet } from "viem/chains";
 import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "./wagmiConfig";
-import { Saver } from "./explore/Explore";
+import { Saver } from "@/app/explore/types";
 import { PoolDetail } from "@/midgard";
 
 export const parseUnits = viem.parseUnits;
