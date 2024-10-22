@@ -37,7 +37,9 @@ const Home = () => (
         name="twitter:title"
         content="Yieldi - The Yield Layer for Cross-Chain"
       />
-      <meta name="twitter:card" content="summary_large_image" />
+      <meta property="twitter:domain" content="yieldi.xyz" />
+      <meta property="twitter:url" content="https://www.yieldi.xyz" />
+      <meta name="twitter:image" content="/images/og-image.png" />
       <meta
         name="twitter:description"
         content="The only DeFi venue to stake and earn native Bitcoin yield with 15+ supported L1 assets."
