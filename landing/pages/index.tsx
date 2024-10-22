@@ -11,7 +11,7 @@ import Head from "next/head";
 const Home = () => (
   <>
     <Head>
-      <title>Yieldi</title>
+      <title>Yieldi - The Yield Layer for Cross-Chain</title>
 
       <meta property="url" content="https://www.yieldi.xyz" />
       <meta
@@ -44,6 +44,7 @@ const Home = () => (
         name="twitter:description"
         content="The only DeFi venue to stake and earn native Bitcoin yield with 15+ supported L1 assets."
       />
+      <meta name="twitter:card" content="/images/og-image.png" />
 
       {/* Misc */}
       <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
