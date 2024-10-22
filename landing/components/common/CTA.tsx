@@ -1,6 +1,6 @@
 import { Discord, Telegram, XLogo } from "../svg";
 import { landingGradientCircles } from "@shared/utils";
-import { CommonComponents, UIComponents } from "@shared/components";
+import { CommonComponents } from "@shared/components";
 
 const socials = [
   {
