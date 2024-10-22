@@ -5,21 +5,21 @@ import { SVGComponents, CommonComponents } from "@shared/components";
 const boxes = [
   {
     image: <SVGComponents.Staking />,
-    header: "Staking",
+    header: "Explore and Stake",
     description:
-      "Users deposit native assets (ETH/BTC) into the Liquid Staking Protocol (LSP).",
+      "Discover yield farms across any chain. Stake your assets and set your earnings to stream in the asset of your choice.",
   },
   {
     image: <SVGComponents.Calculator />,
-    header: "Yield Calculation",
+    header: "Single Hop Routing",
     description:
-      "The AVS computes the user's share of the yield and sends it via the Inter-Blockchain Communication (IBC) protocol to THORChain at regular intervals.",
+      "Yieldi automatically routes your assets to high-yield DeFi farms without the need for manual cross-chain bridging.",
   },
   {
     image: <SVGComponents.Distribution />,
-    header: "Yield Distribution",
+    header: "Yield Streaming",
     description:
-      "THORChain swaps the yield to native assets and holds it in a yield collector module assigned to the staker's L1 address.",
+      "Your yield is collected through THORChain’s Yield Collection Module, swapped to your choosen yield asset, and streamed to your wallet.",
   },
 ];
 
@@ -43,7 +43,7 @@ const HowDoesItWork = () => (
           })}
 
           <div className="desktop-sm:h-[92px] flex flex-col justify-center">
-            <h3 className="text-[32px] tablet:text-[36px] font-bold text-neutral max-w-[100px] leading-[46px]">
+            <h3 className="text-[32px] tablet:text-[36px] font-bold text-neutral leading-[46px]">
               {box.header}
             </h3>
           </div>
