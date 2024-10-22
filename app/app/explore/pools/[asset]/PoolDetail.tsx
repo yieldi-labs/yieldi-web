@@ -34,7 +34,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         ALL POOLS
       </Link>
 
-      <div className="grid grid-cols-12">
+      <div className="grid grid-cols-12 gap-20">
         {/* Left Column */}
         <div className="col-span-6">
           <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">OVERVIEW</h2>
@@ -65,11 +65,11 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         {/* Right Column */}
         <div className="col-span-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">YOUR POSITION</h2>
+            <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">YOUR POSITION</h2>
             <button className="text-red-500 font-medium">REMOVE</button>
           </div>
           
-          <TranslucentCard className="p-6">
+          <TranslucentCard className="p-6 rounded-2xl">
             <div className="mb-8">
               <div className="text-gray-500 mb-2">PRINCIPAL</div>
               <div className="flex justify-between">
