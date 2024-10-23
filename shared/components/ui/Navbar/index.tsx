@@ -23,7 +23,7 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const containerClass = twMerge(
-    `fixed top-[20px] z-[200] mt-5 flex max-h-[96px] w-full transition-all duration-300`,
+    `fixed top-[20px] z-[2] mt-5 flex max-h-[96px] w-full transition-all duration-300`,
     isSticky ? "translate-y-0" : "translate-y-[-10px]",
   );
 

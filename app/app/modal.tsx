@@ -4,7 +4,7 @@ export default function Modal({
   onClose,
   style,
 }: {
-  title: string;
+  title?: string;
   children: React.ReactNode;
   onClose: () => void;
   style?: object;
@@ -21,10 +21,11 @@ export default function Modal({
       onClick={onClose}
     >
       <div
-        className="relative z-20 bg-background max-w-lg mx-auto mb-auto mt-[5vh] w-[95%] border"
+        className="relative z-20 max-w-lg mx-auto mb-auto mt-[5vh] w-[95%] rounded-large border-4 border-white bg-secondary"
         onClick={(e) => e.stopPropagation()}
         style={style}
       >
+        {title &&
         <div className="flex border-b">
           <h2 className="flex-1 mt-0 leading-none font-bold text-2xl px-6  py-4 border-r tracking-wider">
             {title}
@@ -32,7 +33,7 @@ export default function Modal({
           <a className="cursor-pointer foreground p-4" onClick={onClose}>
             {xIcon}
           </a>
-        </div>
+        </div>}
         <div className="p-6">{children}</div>
       </div>
     </div>
