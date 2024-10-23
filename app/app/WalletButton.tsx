@@ -30,7 +30,7 @@ export default function WalletButton() {
   return (
     <>
       <a
-        className="flex w-48 px-7 py-3 justify-center items-center gap-2.5 flex-shrink-0 rounded-full bg-highlight
+        className="flex w-48 px-7 py-3 justify-center items-center gap-2.5 flex-shrink-0 rounded-full bg-primary
         text-gray-900 text-center font-sans text-sm font-bold leading-5"
         onClick={onClick}
       >
