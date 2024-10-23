@@ -4,6 +4,7 @@ import TranslucentCard from "@/app/TranslucentCard"
 import TopCards from "@/app/explore/TopCards";
 import { calculateSaverTVL, formatNumber } from "@/app/utils";
 import { getFormattedSaverTVL } from "@/app/utils";
+import { DoubleArrow } from "@shared/components/svg";
 
 interface Saver {
   asset: string;
@@ -95,6 +96,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
         items={topSaversData}
         getAssetSymbol={getAssetSymbol}
         getLogoPath={getLogoPath}
+        linkPath="savers"
       />
 
       {/* All Savers table */}
@@ -111,26 +113,14 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
                 onClick={() => sortData(SortKey.TVL)}
               >
                 TVL
-                <Image
-                  src="/arrow-unfold.svg"
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="ml-1"
-                />
+                <DoubleArrow className="ml-1" />
               </div>
               <div
                 className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
                 onClick={() => sortData(SortKey.APR)}
               >
                 APR
-                <Image
-                  src="/arrow-unfold.svg"
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="ml-1"
-                />
+                <DoubleArrow className="ml-1" />
               </div>
             </div>
           </div>

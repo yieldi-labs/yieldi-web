@@ -5,11 +5,14 @@ import TopCards from "@/app/explore/TopCards";
 import {
   addDollarSignAndSuffix,
   calculatePoolTVL,
+  calculateVolumeDepthRatio,
+  calculateVolumeUSD,
   formatNumber,
   getFormattedPoolTVL,
 } from "@/app/utils";
-import { PoolDetail, PoolDetails } from "@/midgard";
+import { PoolDetails } from "@/midgard";
 import Link from "next/link";
+import { DoubleArrow } from "@shared/components/svg";
 
 interface LiquidityPoolsProps {
   pools: PoolDetails;
@@ -70,17 +73,6 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
   };
 
-  const calculateVolumeUSD = (pool: PoolDetail) => {
-    const volumeInRune = parseFloat(pool.volume24h) / 1e8;
-    return volumeInRune * runePriceUSD;
-  };
-
-  const calculateVolumeDepthRatio = (pool: PoolDetail) => {
-    const volumeUSD = calculateVolumeUSD(pool);
-    const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
-    return volumeUSD / tvlUSD;
-  };
-
   const sortData = (key: SortKey) => {
     setSortConfig((prevConfig) => ({
       key,
@@ -104,6 +96,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
         items={topPoolsData}
         getAssetSymbol={getAssetSymbol}
         getLogoPath={getLogoPath}
+        linkPath="pools"
       />
 
       {/* All Pools table */}
@@ -120,33 +113,21 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                 onClick={() => sortData(SortKey.TVL)}
               >
                 TVL
-                <Image
-                  src="/arrow-unfold.svg"
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="ml-1"
-                />
+                <DoubleArrow className="ml-1" />
               </div>
               <div
                 className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
                 onClick={() => sortData(SortKey.APR)}
               >
                 APR
-                <Image
-                  src="/arrow-unfold.svg"
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="ml-1"
-                />
+                <DoubleArrow className="ml-1" />
               </div>
             </div>
           </div>
           <div className="min-w-full">
             {sortedPools.map((pool) => {
-              const volumeUSD = calculateVolumeUSD(pool);
-              const volumeDepthRatio = calculateVolumeDepthRatio(pool);
+              const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
+              const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
               return (
                 <Link
                   key={pool.asset}

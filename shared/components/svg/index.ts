@@ -6,3 +6,4 @@ export { default as Staking } from "./Staking";
 export { default as SolutionSVG } from "./Solution";
 export { default as Calculator } from "./Calculator";
 export { default as Distribution } from "./Distribution";
+export { default as DoubleArrow } from "./DoubleArrow";

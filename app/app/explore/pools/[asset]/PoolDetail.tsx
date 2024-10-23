@@ -1,8 +1,7 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import TranslucentCard from "@/app/TranslucentCard";
-import { calculatePoolTVL, formatNumber } from "@/app/utils";
+import { calculateVolumeDepthRatio, formatNumber, getFormattedPoolTVL } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
 import { TopCard } from "../../TopCard";
@@ -23,9 +22,8 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   };
 
   // Calculate pool metrics
-  const totalValueLockedUSD = calculatePoolTVL(pool, runePriceUSD);
-  const volume24hUSD = (parseFloat(pool.volume24h) / 1e8) * runePriceUSD;
-  const volumeDepthRatio = volume24hUSD / totalValueLockedUSD;
+  const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
+  const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD); 
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -41,7 +39,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           
           <TopCard
             asset={pool.asset}
-            formattedTVL={`$${formatNumber(totalValueLockedUSD, 0)}M`}
+            formattedTVL={formattedTVL}
             apr={parseFloat(pool.poolAPY)}
             getAssetSymbol={getAssetSymbol}
             getLogoPath={getLogoPath}
@@ -65,37 +63,37 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         {/* Right Column */}
         <div className="col-span-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">YOUR POSITION</h2>
+            <h2 className="text-2xl font-medium text-foreground font-gt-america-ext">YOUR POSITION</h2>
             <button className="text-red-500 font-medium">REMOVE</button>
           </div>
           
-          <TranslucentCard className="p-6 rounded-2xl">
-            <div className="mb-8">
-              <div className="text-gray-500 mb-2">PRINCIPAL</div>
+          <TranslucentCard className="p-6 rounded-2xl flex flex-col">
+            <div className="mb-8 bg-white rounded-xl w-full p-3">
+              <div className="text-gray-700 font-medium text-lg mb-2">PRINCIPAL</div>
               <div className="flex justify-between">
-                <div className="text-2xl font-bold">$1,000,000</div>
-                <div className="text-2xl font-bold">20 BTC</div>
+                <div className="text-2xl font-medium text-gray-900">$0,00</div>
+                <div className="text-2xl font-medium text-gray-900">0 BTC</div>
               </div>
             </div>
 
-            <div className="mb-8">
-              <div className="text-gray-500 mb-2">YIELD</div>
+            <div className="mb-8 bg-white rounded-xl w-full p-3">
+              <div className="text-gray-700 font-medium text-lg mb-2">YIELD</div>
               <div className="flex justify-between">
-                <div className="text-2xl font-bold">$10,000</div>
-                <div className="text-2xl font-bold">1,394 RUNE</div>
+                <div className="text-2xl font-medium text-gray-900">$0,00</div>
+                <div className="text-2xl font-medium text-gray-900">0 RUNE</div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <button className="w-full bg-[#88A0FF] text-white font-semibold py-3 rounded-lg">
+            <div className="grid grid-cols-2 gap-4 mb-5 w-full">
+              <button className="w-full bg-secondaryBtn text-white font-bold py-3 rounded-full text-sm">
                 Stream
               </button>
-              <button className="w-full bg-[#88A0FF] text-white font-semibold py-3 rounded-lg">
+              <button className="w-full bg-secondaryBtn text-white font-bold py-3 rounded-full text-sm">
                 Re-Invest
               </button>
             </div>
 
-            <button className="w-full border-2 border-[#88A0FF] text-[#88A0FF] font-semibold py-3 rounded-lg">
+            <button className="w-full border-2 border-secondaryBtn text-secondaryBtn font-bold text-sm py-3 rounded-full">
               Claim
             </button>
           </TranslucentCard>

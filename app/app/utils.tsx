@@ -459,3 +459,16 @@ export const calculatePoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
 export const getFormattedPoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
   return addDollarSignAndSuffix(calculatePoolTVL(pool, runePriceUSD));
 };
+
+export const calculateVolumeUSD = (pool: PoolDetail, runePriceUSD: number) => {
+  const volumeInRune = parseFloat(pool.volume24h) / 1e8;
+  return volumeInRune * runePriceUSD;
+};
+
+export const calculateVolumeDepthRatio = (pool: PoolDetail, runePriceUSD: number) => {
+    const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
+    const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
+    return volumeUSD / tvlUSD;
+  };
+
+
