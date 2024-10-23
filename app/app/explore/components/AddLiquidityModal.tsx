@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Button from '@/app/button';
 import Modal from '@/app/modal';
 import { Slider } from '@shared/components/ui';
+import { twMerge } from 'tailwind-merge';
 
 interface AddLiquidityModalProps {
   pool: {
@@ -24,6 +25,15 @@ export default function AddLiquidityModal({ pool, runePriceUSD, onClose }: AddLi
     return asset.split(".")[1] || asset;
   };
 
+  const getPercentage = (amount: number, max: number) => {
+    return (amount / max) * 100;
+  };
+
+  const isCloseToPercentage = (currentPercentage: number, targetPercentage: number) => {
+    const tolerance = 0.01;
+    return Math.abs(currentPercentage - targetPercentage) <= tolerance;
+  };
+
   const handlePercentageClick = (percentage: number, isRune: boolean = false) => {
     if (isRune) {
       setRuneAmount(1.2345 * (percentage / 100));
@@ -32,6 +42,13 @@ export default function AddLiquidityModal({ pool, runePriceUSD, onClose }: AddLi
     }
   };
 
+  const percentageButtonClasses = (isActive: boolean) => twMerge(
+    'px-6 py-2 rounded-full font-medium transition-colors',
+    isActive ? 'bg-secondaryBtn text-white' : 'bg-white text-secondaryBtn'
+  );
+
+  const getCurrentPercentage = (amount: number) => getPercentage(amount, 1.2345);
+
   return (
     <Modal onClose={onClose}>
       <div className="max-w-2xl mx-auto">
@@ -39,17 +56,19 @@ export default function AddLiquidityModal({ pool, runePriceUSD, onClose }: AddLi
         <div className="flex rounded-full bg-white p-1 mb-8">
           <button
             onClick={() => setSelectedTab('single')}
-            className={`flex-1 py-3 px-6 rounded-full text-sm font-medium ${
-              selectedTab === 'single' ? 'bg-background' : ''
-            }`}
+            className={twMerge(
+              'flex-1 py-3 px-6 rounded-full text-sm font-medium',
+              selectedTab === 'single' && 'bg-background'
+            )}
           >
             Add {getAssetSymbol(pool.asset)}
           </button>
           <button
             onClick={() => setSelectedTab('double')}
-            className={`flex-1 py-3 px-6 rounded-full text-sm font-medium ${
-              selectedTab === 'double' ? 'bg-background' : ''
-            }`}
+            className={twMerge(
+              'flex-1 py-3 px-6 rounded-full text-sm font-medium',
+              selectedTab === 'double' && 'bg-background'
+            )}
           >
             Add {getAssetSymbol(pool.asset)} + RUNE
           </button>
@@ -79,21 +98,21 @@ export default function AddLiquidityModal({ pool, runePriceUSD, onClose }: AddLi
             />
           </div>
 
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-end gap-2">
             <button
-              className="px-6 py-2 rounded-full bg-87A1FF text-white font-medium"
+              className={percentageButtonClasses(isCloseToPercentage(getCurrentPercentage(btcAmount), 25))}
               onClick={() => handlePercentageClick(25)}
             >
               25%
             </button>
             <button
-              className="px-6 py-2 rounded-full bg-white font-medium"
+              className={percentageButtonClasses(isCloseToPercentage(getCurrentPercentage(btcAmount), 50))}
               onClick={() => handlePercentageClick(50)}
             >
               50%
             </button>
             <button
-              className="px-6 py-2 rounded-full bg-white font-medium"
+              className={percentageButtonClasses(isCloseToPercentage(getCurrentPercentage(btcAmount), 100))}
               onClick={() => handlePercentageClick(100)}
             >
               MAX
@@ -106,7 +125,7 @@ export default function AddLiquidityModal({ pool, runePriceUSD, onClose }: AddLi
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg- rounded-full mr-3"></div>
+                <div className="w-8 h-8 bg-gray-200 rounded-full mr-3"></div>
                 <span className="text-xl font-medium">RUNE Balance</span>
               </div>
               <div className="text-xl font-medium">{runeAmount.toFixed(4)} ($100,000)</div>
@@ -120,21 +139,21 @@ export default function AddLiquidityModal({ pool, runePriceUSD, onClose }: AddLi
               />
             </div>
 
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-end gap-2">
               <button
-                className="px-6 py-2 rounded-full bg-white font-medium"
+                className={percentageButtonClasses(isCloseToPercentage(getCurrentPercentage(runeAmount), 25))}
                 onClick={() => handlePercentageClick(25, true)}
               >
                 25%
               </button>
               <button
-                className="px-6 py-2 rounded-full bg-white font-medium"
+                className={percentageButtonClasses(isCloseToPercentage(getCurrentPercentage(runeAmount), 50))}
                 onClick={() => handlePercentageClick(50, true)}
               >
                 50%
               </button>
               <button
-                className="px-6 py-2 rounded-full bg-purple text-white font-medium"
+                className={percentageButtonClasses(isCloseToPercentage(getCurrentPercentage(runeAmount), 100))}
                 onClick={() => handlePercentageClick(100, true)}
               >
                 MAX
@@ -144,7 +163,7 @@ export default function AddLiquidityModal({ pool, runePriceUSD, onClose }: AddLi
         )}
 
         <Button className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8">
-          Add Liquidity
+          Add
         </Button>
       </div>
     </Modal>
