@@ -1,14 +1,18 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import TranslucentCard from "../TranslucentCard";
-import TopCards from "./TopCards";
+import TranslucentCard from "@/app/TranslucentCard";
+import TopCards from "@/app/explore/TopCards";
 import {
   addDollarSignAndSuffix,
   calculatePoolTVL,
+  calculateVolumeDepthRatio,
+  calculateVolumeUSD,
   formatNumber,
   getFormattedPoolTVL,
 } from "@/app/utils";
-import { PoolDetail, PoolDetails } from "@/midgard";
+import { PoolDetails } from "@/midgard";
+import Link from "next/link";
+import { DoubleArrow } from "@shared/components/svg";
 
 interface LiquidityPoolsProps {
   pools: PoolDetails;
@@ -69,17 +73,6 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
   };
 
-  const calculateVolumeUSD = (pool: PoolDetail) => {
-    const volumeInRune = parseFloat(pool.volume24h) / 1e8;
-    return volumeInRune * runePriceUSD;
-  };
-
-  const calculateVolumeDepthRatio = (pool: PoolDetail) => {
-    const volumeUSD = calculateVolumeUSD(pool);
-    const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
-    return volumeUSD / tvlUSD;
-  };
-
   const sortData = (key: SortKey) => {
     setSortConfig((prevConfig) => ({
       key,
@@ -103,6 +96,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
         items={topPoolsData}
         getAssetSymbol={getAssetSymbol}
         getLogoPath={getLogoPath}
+        linkPath="pools"
       />
 
       {/* All Pools table */}
@@ -119,66 +113,58 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                 onClick={() => sortData(SortKey.TVL)}
               >
                 TVL
-                <Image
-                  src="/arrow-unfold.svg"
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="ml-1"
-                />
+                <DoubleArrow className="ml-1" />
               </div>
               <div
                 className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
                 onClick={() => sortData(SortKey.APR)}
               >
                 APR
-                <Image
-                  src="/arrow-unfold.svg"
-                  alt="Sort"
-                  width={16}
-                  height={16}
-                  className="ml-1"
-                />
+                <DoubleArrow className="ml-1" />
               </div>
             </div>
           </div>
           <div className="min-w-full">
             {sortedPools.map((pool) => {
-              const volumeUSD = calculateVolumeUSD(pool);
-              const volumeDepthRatio = calculateVolumeDepthRatio(pool);
+              const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
+              const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
               return (
-                <TranslucentCard key={pool.asset} className="rounded-xl mb-1.5">
-                  <div className="flex items-center min-w-full">
-                    <div className="px-3 whitespace-nowrap flex-1 w-1/3">
-                      <div className="flex items-center">
-                        <Image
-                          src={getLogoPath(pool.asset)}
-                          alt={`${getAssetSymbol(pool.asset)} logo`}
-                          width={28}
-                          height={28}
-                          className="rounded-full"
-                        />
-                        <span className="ml-3 font-medium">
-                          {getAssetSymbol(pool.asset)}
-                        </span>
+                <Link
+                  key={pool.asset}
+                  href={`/explore/pools/${pool.asset}`}>
+                  <TranslucentCard key={pool.asset} className="rounded-xl mb-1.5">
+                    <div className="flex items-center min-w-full">
+                      <div className="px-3 whitespace-nowrap flex-1 w-1/3">
+                        <div className="flex items-center">
+                          <Image
+                            src={getLogoPath(pool.asset)}
+                            alt={`${getAssetSymbol(pool.asset)} logo`}
+                            width={28}
+                            height={28}
+                            className="rounded-full"
+                          />
+                          <span className="ml-3 font-medium">
+                            {getAssetSymbol(pool.asset)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-start flex-1 w-2/3">
+                        <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                          {addDollarSignAndSuffix(volumeUSD)}
+                        </div>
+                        <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                          {formatNumber(volumeDepthRatio, 2, 2)}
+                        </div>
+                        <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                          {getFormattedPoolTVL(pool, runePriceUSD)}
+                        </div>
+                        <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                          {formatNumber(parseFloat(pool.poolAPY) * 100, 2, 2)}%
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-start flex-1 w-2/3">
-                      <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                        {addDollarSignAndSuffix(volumeUSD)}
-                      </div>
-                      <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                        {formatNumber(volumeDepthRatio, 2, 2)}
-                      </div>
-                      <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                        {getFormattedPoolTVL(pool, runePriceUSD)}
-                      </div>
-                      <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                        {formatNumber(parseFloat(pool.poolAPY) * 100, 2, 2)}%
-                      </div>
-                    </div>
-                  </div>
-                </TranslucentCard>
+                  </TranslucentCard>
+                </Link>
               );
             })}
           </div>
