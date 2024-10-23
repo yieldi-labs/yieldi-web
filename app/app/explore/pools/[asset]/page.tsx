@@ -1,6 +1,4 @@
-"use client";
-
-import PoolDetail from './PoolDetail';
+import PoolDetailClient from './PoolDetailClient';
 import { getPools, getStats } from "@/midgard";
 import { notFound } from 'next/navigation';
 
@@ -20,11 +18,9 @@ export default async function PoolDetailPage({
   if (!pool) return notFound();
 
   return (
-    <>
-      <PoolDetail 
-        pool={pool} 
-        runePriceUSD={parseFloat(statsData.data.runePriceUSD)}
-      />
-    </>
+    <PoolDetailClient 
+      pool={pool} 
+      runePriceUSD={parseFloat(statsData.data.runePriceUSD)}
+    />
   );
 }

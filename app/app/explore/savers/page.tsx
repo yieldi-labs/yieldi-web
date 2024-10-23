@@ -1,4 +1,3 @@
-import { getPools, getStats } from "@/midgard";
 import { fetchJson } from "@/utils/json";
 import SaversView from "./SaversView";
 import { Saver } from "@/app/explore/types";
