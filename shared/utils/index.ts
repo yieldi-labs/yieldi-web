@@ -1,1 +1,4 @@
-export { landingGradientCircles } from "./gradientCirclesConfig";
+export {
+  lpGradientCircles,
+  landingGradientCircles,
+} from "./gradientCirclesConfig";

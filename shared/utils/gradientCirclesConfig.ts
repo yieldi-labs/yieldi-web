@@ -62,3 +62,36 @@ export const landingGradientCircles = {
     { size: 710, color: "#FF6656", top: 650, left: -100 },
   ],
 };
+
+export const lpGradientCircles = [
+  {
+    size: 594,
+    color: "#FFD737",
+    bottom: 0,
+    right: 0,
+  },
+  {
+    size: 594,
+    color: "#A799FE",
+    top: -10,
+    left: 0,
+  },
+  {
+    size: 594,
+    color: "#FF6656",
+    bottom: -297,
+    left: 0,
+  },
+  {
+    size: 594,
+    color: "#007D98",
+    top: -20,
+    right: 50,
+  },
+  {
+    size: 594,
+    color: "#A1FD59",
+    top: -20,
+    right: 0,
+  },
+];
