@@ -4,7 +4,9 @@ import TranslucentCard from "@/app/TranslucentCard";
 import { calculateVolumeDepthRatio, formatNumber, getFormattedPoolTVL } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
-import { TopCard } from "../../TopCard";
+import { TopCard } from "@/app/explore/TopCard";
+import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
+import { useState } from "react";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -12,6 +14,8 @@ interface PoolDetailProps {
 }
 
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
+
+  const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const getAssetSymbol = (asset: string) => {
     return asset.split(".")[1] || asset;
   };
@@ -54,7 +58,8 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                 <span className="font-medium">3.6%</span>
               </div>
             </div>
-            <button className="w-full bg-[#A1FD59] text-black font-semibold py-3 rounded-full mt-8">
+            <button className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
+              onClick={() => setShowAddLiquidityModal(true)}>
               Add
             </button>
           </TopCard>
@@ -99,6 +104,13 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           </TranslucentCard>
         </div>
       </div>
+      {showAddLiquidityModal && (
+        <AddLiquidityModal
+          pool={pool}
+          runePriceUSD={runePriceUSD}
+          onClose={() => setShowAddLiquidityModal(false)}
+        />
+      )}
     </div>
   );
 }
