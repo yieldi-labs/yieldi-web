@@ -25,15 +25,16 @@ export default function Modal({
         onClick={(e) => e.stopPropagation()}
         style={style}
       >
-        {title &&
-        <div className="flex border-b">
-          <h2 className="flex-1 mt-0 leading-none font-bold text-2xl px-6  py-4 border-r tracking-wider">
-            {title}
-          </h2>
-          <a className="cursor-pointer foreground p-4" onClick={onClose}>
-            {xIcon}
-          </a>
-        </div>}
+        {title && (
+          <div className="flex border-b">
+            <h2 className="flex-1 mt-0 leading-none font-bold text-2xl px-6  py-4 border-r tracking-wider">
+              {title}
+            </h2>
+            <a className="cursor-pointer foreground p-4" onClick={onClose}>
+              {xIcon}
+            </a>
+          </div>
+        )}
         <div className="p-6">{children}</div>
       </div>
     </div>

@@ -465,10 +465,11 @@ export const calculateVolumeUSD = (pool: PoolDetail, runePriceUSD: number) => {
   return volumeInRune * runePriceUSD;
 };
 
-export const calculateVolumeDepthRatio = (pool: PoolDetail, runePriceUSD: number) => {
-    const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
-    const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
-    return volumeUSD / tvlUSD;
-  };
-
-
+export const calculateVolumeDepthRatio = (
+  pool: PoolDetail,
+  runePriceUSD: number,
+) => {
+  const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
+  const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
+  return volumeUSD / tvlUSD;
+};
