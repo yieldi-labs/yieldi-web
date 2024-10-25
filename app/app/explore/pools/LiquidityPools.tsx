@@ -8,7 +8,9 @@ import {
   calculateVolumeDepthRatio,
   calculateVolumeUSD,
   formatNumber,
+  getAssetCanonicalSymbol,
   getFormattedPoolTVL,
+  getLogoPath,
 } from "@/app/utils";
 import { PoolDetails } from "@/midgard";
 import Link from "next/link";
@@ -64,15 +66,6 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     return sortableItems;
   }, [pools, sortConfig, runePriceUSD]);
 
-  const getAssetSymbol = (asset: string) => {
-    return asset.split("-")[0] || asset;
-  };
-
-  const getLogoPath = (asset: string) => {
-    const assetLower = asset.toLowerCase();
-    return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
-  };
-
   const sortData = (key: SortKey) => {
     setSortConfig((prevConfig) => ({
       key,
@@ -94,7 +87,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     <>
       <TopCards
         items={topPoolsData}
-        getAssetSymbol={getAssetSymbol}
+        getAssetSymbol={getAssetCanonicalSymbol}
         getLogoPath={getLogoPath}
         linkPath="pools"
       />
@@ -142,13 +135,13 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                         <div className="flex items-center">
                           <Image
                             src={getLogoPath(pool.asset)}
-                            alt={`${getAssetSymbol(pool.asset)} logo`}
+                            alt={`${getAssetCanonicalSymbol(pool.asset)} logo`}
                             width={28}
                             height={28}
                             className="rounded-full"
                           />
                           <span className="ml-3 font-medium">
-                            {getAssetSymbol(pool.asset)}
+                            {getAssetCanonicalSymbol(pool.asset)}
                           </span>
                         </div>
                       </div>

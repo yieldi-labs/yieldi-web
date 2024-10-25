@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import TranslucentCard from "@/app/TranslucentCard";
 import TopCards from "@/app/explore/TopCards";
-import { calculateSaverTVL, formatNumber } from "@/app/utils";
+import { calculateSaverTVL, formatNumber, getLogoPath } from "@/app/utils";
 import { getFormattedSaverTVL } from "@/app/utils";
 import { DoubleArrow } from "@shared/components/svg";
 
@@ -63,15 +63,6 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     });
     return sortableItems;
   }, [savers, sortConfig]);
-
-  const getAssetSymbol = (asset: string) => {
-    return asset.split("-")[0] || asset;
-  };
-
-  const getLogoPath = (asset: string) => {
-    const assetLower = asset.toLowerCase();
-    return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
-  };
 
   const sortData = (key: SortKey) => {
     setSortConfig((prevConfig) => ({

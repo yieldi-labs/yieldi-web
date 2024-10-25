@@ -27,11 +27,6 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
     isSticky ? "translate-y-0" : "translate-y-[-10px]",
   );
 
-  const navClass = twMerge(
-    `bg-transparent-radial text-neutral tablet:px-10 tablet:py-8 tablet:mx-18 mx-8 flex w-full items-center justify-between rounded-2xl border-4 border-white px-4 py-4 backdrop-blur-[30px]`,
-    isSticky ? "shadow-md" : "",
-  );
-
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
@@ -53,7 +48,7 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
           transition: "transform 0.3s ease-in-out",
         }}
       >
-        <div className={navClass}>
+        <div className="bg-transparent-radial text-neutral tablet:px-10 tablet:py-8 tablet:mx-18 mx-8 flex w-full items-center justify-between rounded-2xl border-4 border-white px-4 py-4 backdrop-blur-[30px] shadow-md">
           <Link href="/">
             <Yieldi className="tablet:w-[108px] w-[96px]" />
           </Link>

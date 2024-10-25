@@ -6,6 +6,7 @@ import Button from "@/app/button";
 import Modal from "@/app/modal";
 import { Slider } from "@shared/components/ui";
 import { twMerge } from "tailwind-merge";
+import { getAssetShortSymbol, getLogoPath } from "@/app/utils";
 
 interface AddLiquidityModalProps {
   pool: {
@@ -24,10 +25,6 @@ export default function AddLiquidityModal({
   const [selectedTab, setSelectedTab] = useState("single");
   const [btcAmount, setBtcAmount] = useState(1.2345);
   const [runeAmount, setRuneAmount] = useState(1.2345);
-
-  const getAssetSymbol = (asset: string) => {
-    return asset.split(".")[1] || asset;
-  };
 
   const getPercentage = (amount: number, max: number) => {
     return (amount / max) * 100;
@@ -61,52 +58,53 @@ export default function AddLiquidityModal({
   const getCurrentPercentage = (amount: number) =>
     getPercentage(amount, 1.2345);
 
+  const tabClass = "flex-1 py-3 px-6 rounded-full text-sm font-medium";
+  const activeTabClass = "bg-white shadow-[0px_0px_18.1px_0px_rgba(98,126,234,0.24)] text-neutral-900";
+  const modalStyle = {
+    backgroundColor: "#F5F6F6",
+    maxWidth: "36rem",
+  }
+
   return (
-    <Modal onClose={onClose}>
-      <div className="max-w-2xl mx-auto">
+    <Modal onClose={onClose} style={modalStyle}>
+      <div>
         {/* Tab Selector */}
-        <div className="flex rounded-full bg-white p-1 mb-8">
+        <div className="flex rounded-full border-white border-2 mb-14 text-lg font-medium text-neutral-800">
           <button
             onClick={() => setSelectedTab("single")}
-            className={twMerge(
-              "flex-1 py-3 px-6 rounded-full text-sm font-medium",
-              selectedTab === "single" && "bg-background",
-            )}
+            className={twMerge(tabClass, selectedTab === "single" && activeTabClass)}
           >
-            Add {getAssetSymbol(pool.asset)}
+            Add {getAssetShortSymbol(pool.asset)}
           </button>
           <button
             onClick={() => setSelectedTab("double")}
-            className={twMerge(
-              "flex-1 py-3 px-6 rounded-full text-sm font-medium",
-              selectedTab === "double" && "bg-background",
-            )}
+            className={twMerge(tabClass, selectedTab === "double" && activeTabClass)}
           >
-            Add {getAssetSymbol(pool.asset)} + RUNE
+            Add {getAssetShortSymbol(pool.asset)} + RUNE
           </button>
         </div>
 
         {/* Asset Input Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div>
+          <div className="flex items-center justify-between mb-4 text-neutral text-2xl font-medium">
             <div className="flex items-center">
               <Image
-                src={`/logo-${getAssetSymbol(pool.asset).toLowerCase()}.svg`}
-                alt={getAssetSymbol(pool.asset)}
-                width={32}
-                height={32}
+                src={getLogoPath(pool.asset)}
+                alt={getAssetShortSymbol(pool.asset)}
+                width={42}
+                height={42}
                 className="mr-3"
               />
-              <span className="text-xl font-medium">
-                {getAssetSymbol(pool.asset)} Balance
+              <span className="font-gt-america-ext">
+                {getAssetShortSymbol(pool.asset)} Balance
               </span>
             </div>
-            <div className="text-xl font-medium">
+            <div>
               {btcAmount.toFixed(4)} ($100,000)
             </div>
           </div>
 
-          <div className="relative mb-4">
+          <div className="relative mb-6">
             <Slider value={btcAmount} max={1.2345} onChange={setBtcAmount} />
           </div>
 
@@ -140,14 +138,21 @@ export default function AddLiquidityModal({
 
         {/* RUNE Input Section */}
         {selectedTab === "double" && (
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-4 text-neutral text-2xl font-medium">
               <div className="flex items-center">
-                <div className="w-8 h-8 bg-gray-200 rounded-full mr-3"></div>
-                <span className="text-xl font-medium">RUNE Balance</span>
+                <Image
+                  src={getLogoPath("thor.rune")}
+                  alt="Rune"
+                  width={42}
+                  height={42}
+                  className="mr-3"
+                />
+                <span className="font-gt-america-ext">RUNE Balance</span>
               </div>
-              <div className="text-xl font-medium">
-                {runeAmount.toFixed(4)} (${(runeAmount * runePriceUSD).toFixed(2)})
+              <div>
+                {runeAmount.toFixed(4)} ($
+                {(runeAmount * runePriceUSD).toFixed(2)})
               </div>
             </div>
 

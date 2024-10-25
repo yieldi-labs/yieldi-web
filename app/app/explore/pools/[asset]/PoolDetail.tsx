@@ -4,6 +4,7 @@ import TranslucentCard from "@/app/TranslucentCard";
 import {
   calculateVolumeDepthRatio,
   formatNumber,
+  getAssetCanonicalSymbol,
   getFormattedPoolTVL,
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
@@ -11,6 +12,7 @@ import { BackArrow } from "@shared/components/svg";
 import { TopCard } from "@/app/explore/TopCard";
 import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
 import { useState } from "react";
+import { getLogoPath } from "@/app/utils";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -19,14 +21,6 @@ interface PoolDetailProps {
 
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
-  const getAssetSymbol = (asset: string) => {
-    return asset.split(".")[1] || asset;
-  };
-
-  const getLogoPath = (asset: string) => {
-    const assetLower = asset.toLowerCase();
-    return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
-  };
 
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
@@ -53,7 +47,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             asset={pool.asset}
             formattedTVL={formattedTVL}
             apr={parseFloat(pool.poolAPY)}
-            getAssetSymbol={getAssetSymbol}
+            getAssetSymbol={getAssetCanonicalSymbol}
             getLogoPath={getLogoPath}
           >
             <div className="space-y-4 w-full mt-8">
@@ -86,7 +80,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             <button className="text-red-500 font-medium">REMOVE</button>
           </div>
 
-          <TranslucentCard className="p-6 rounded-2xl flex flex-col">
+          <TranslucentCard className="p-6 rounded-2xl flex flex-col shadow-md">
             <div className="mb-8 bg-white rounded-xl w-full p-3">
               <div className="text-gray-700 font-medium text-lg mb-2">
                 PRINCIPAL

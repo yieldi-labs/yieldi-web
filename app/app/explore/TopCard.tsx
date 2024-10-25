@@ -21,7 +21,7 @@ export const TopCard: React.FC<TopCardProps> = ({
   children,
 }) => {
   return (
-    <TranslucentCard className="p-5 rounded-2xl flex flex-col items-start">
+    <TranslucentCard className="p-5 rounded-2xl flex flex-col items-start shadow-md">
       <div className="flex items-center mb-7">
         <Image
           src={getLogoPath(asset)}
