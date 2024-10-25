@@ -27,9 +27,7 @@ const TopCards: React.FC<TopCardsProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
       {items.map((item) => (
-        <Link
-          key={item.asset}
-          href={`/explore/${linkPath}/${item.asset}`}>
+        <Link key={item.asset} href={`/explore/${linkPath}/${item.asset}`}>
           <TopCard
             key={item.asset}
             asset={item.asset}

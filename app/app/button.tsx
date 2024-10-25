@@ -18,7 +18,7 @@ export default function Button({
   if (!className || !className.includes("bg-")) {
     className = (className || "") + " bg-primary";
   }
-  className = `py-2 px-2 font-semibold text-sm border ${disabled ? "opacity-75 " : ""}${className || ""}`;
+  className = `py-2 px-2 font-semibold text-sm ${disabled ? "opacity-75 " : ""}${className || ""}`;
   if (href) {
     return (
       <Link title={title} href={href} className={className}>
@@ -31,7 +31,7 @@ export default function Button({
       title={title}
       onClick={onClick}
       disabled={disabled}
-      className={`py-2 px-2 font-semibold text-sm border ${disabled ? "opacity-75 " : ""}${className || ""}`}
+      className={`py-2 px-2 font-semibold text-sm ${disabled ? "opacity-75 " : ""}${className || ""}`}
     >
       {children}
     </button>

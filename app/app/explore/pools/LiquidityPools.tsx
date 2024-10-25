@@ -127,12 +127,16 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
           <div className="min-w-full">
             {sortedPools.map((pool) => {
               const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
-              const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
+              const volumeDepthRatio = calculateVolumeDepthRatio(
+                pool,
+                runePriceUSD,
+              );
               return (
-                <Link
-                  key={pool.asset}
-                  href={`/explore/pools/${pool.asset}`}>
-                  <TranslucentCard key={pool.asset} className="rounded-xl mb-1.5">
+                <Link key={pool.asset} href={`/explore/pools/${pool.asset}`}>
+                  <TranslucentCard
+                    key={pool.asset}
+                    className="rounded-xl mb-1.5"
+                  >
                     <div className="flex items-center min-w-full">
                       <div className="px-3 whitespace-nowrap flex-1 w-1/3">
                         <div className="flex items-center">
