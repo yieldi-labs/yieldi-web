@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import WalletButton from "./WalletButton";
 import { Providers } from "./providers";
 import { UIComponents, CommonComponents } from "@shared/components";
 import "./globals.css";

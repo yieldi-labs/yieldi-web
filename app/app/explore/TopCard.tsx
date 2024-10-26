@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import TranslucentCard from "../TranslucentCard";
 import { formatNumber } from "@/app/utils";
 import { twMerge } from "tailwind-merge";
+import { useEffect, useState } from "react";
 
 // Individual TopCard component
 interface TopCardProps {
@@ -30,7 +33,11 @@ export const TopCard: React.FC<TopCardProps> = ({
     index! > 0 ? "text-base" : "text-xl",
   );
   const labelClass = "text-gray-700 md:text-base text-xs mt-1 font-medium";
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
 
   return (
     <TranslucentCard className="md:p-4 p-1 rounded-2xl flex flex-col items-start">

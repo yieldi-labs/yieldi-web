@@ -12,7 +12,7 @@ interface TopCardsProps {
   items: TopCardItem[];
   getAssetSymbol: (asset: string) => string;
   getLogoPath: (asset: string) => string;
-  linkPath: string;
+  linkPath?: string;
   children?: React.ReactNode;
 }
 
@@ -20,7 +20,6 @@ const TopCards: React.FC<TopCardsProps> = ({
   items,
   getAssetSymbol,
   getLogoPath,
-  linkPath,
   children,
 }) => {
   return (
