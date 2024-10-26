@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import WalletButton from "./WalletButton";
 import { Providers } from "./providers";
 import { UIComponents, CommonComponents } from "@shared/components";
 import "./globals.css";
@@ -46,13 +45,10 @@ export default function RootLayout({
         </div>
         <Providers>
           <UIComponents.Navbar
-            links={[
-              { label: "explore", href: "/explore" },
-              { label: "points", href: "/points" },
-            ]}
-            buttons={[{ component: <WalletButton /> }]}
+            links={[{ label: "explore", href: "/explore" }]}
+            // buttons={[{ component: <WalletButton /> }]}
           />
-          <div className="mx-auto p-4 mt-[130px]">{children}</div>
+          <div className="mx-auto p-4 md:mt-[130px] mt-24">{children}</div>
         </Providers>
       </body>
     </html>

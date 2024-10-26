@@ -1,25 +1,22 @@
-import PoolDetailClient from './PoolDetailClient';
+import PoolDetailClient from "./PoolDetailClient";
 import { getPools, getStats } from "@/midgard";
-import { notFound } from 'next/navigation';
+import { notFound } from "next/navigation";
 
-export default async function PoolDetailPage({ 
-  params 
-}: { 
-  params: { asset: string } 
+export default async function PoolDetailPage({
+  params,
+}: {
+  params: { asset: string };
 }) {
-  const [poolsData, statsData] = await Promise.all([
-    getPools(),
-    getStats()
-  ]);
+  const [poolsData, statsData] = await Promise.all([getPools(), getStats()]);
 
   if (!poolsData.data || !statsData.data) return null;
 
-  const pool = poolsData.data.find(p => p.asset === params.asset);
+  const pool = poolsData.data.find((p) => p.asset === params.asset);
   if (!pool) return notFound();
 
   return (
-    <PoolDetailClient 
-      pool={pool} 
+    <PoolDetailClient
+      pool={pool}
       runePriceUSD={parseFloat(statsData.data.runePriceUSD)}
     />
   );

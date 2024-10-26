@@ -11,9 +11,12 @@ interface PoolsViewProps {
 
 export default function PoolsView({ pools, stats }: PoolsViewProps) {
   return (
-    <main className="mx-16">
+    <main className="md:mx-16">
       <ExploreNav />
-      <LiquidityPools pools={pools} runePriceUSD={parseFloat(stats.runePriceUSD)} />
+      <LiquidityPools
+        pools={pools}
+        runePriceUSD={parseFloat(stats.runePriceUSD)}
+      />
     </main>
   );
 }

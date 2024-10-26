@@ -15,7 +15,7 @@ export default async function SaversPage() {
   if (!saversData) return null;
 
   const savers = Object.values(saversData as Savers).map(
-    (s) => s.savers as Saver
+    (s) => s.savers as Saver,
   );
 
   return <SaversView savers={savers} />;
