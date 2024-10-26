@@ -5,11 +5,18 @@ module.exports = {
       backgroundImage: {
         "transparent-radial":
           "radial-gradient(circle at 50% 30%, transparent 20%, #FFFFFF 100%)",
+        "white-radial":
+          "radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.7) 20%, rgba(255, 255, 255, 1) 100%)",
       },
       backdropBlur: { m: "5px", l: "10px", xl: "20px" },
       borderColor: { DEFAULT: "var(--border)" },
       colors: {
-        neutral: { DEFAULT: "#242628", 900: "#3A3D3F", 800: "#424648" },
+        neutral: {
+          DEFAULT: "#242628",
+          900: "#3A3D3F",
+          800: "#424648",
+          600: "#656D72",
+        },
         background: "var(--background)",
         foreground: "var(--foreground)",
         foreground2: "#6D655D",

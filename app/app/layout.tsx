@@ -3,7 +3,10 @@ import { Providers } from "./providers";
 import { metadata } from "@/utils/metadata";
 import { lpGradientCircles } from "@shared/utils";
 import { UIComponents, CommonComponents } from "@shared/components";
-import "./globals.css";
+import { AppStateProvider } from "@/utils/context";
+import WalletModal from "./components/modals/Wallet/WalletModal";
+
+import "./styles/globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
 
 export default function RootLayout({
@@ -13,14 +16,17 @@ export default function RootLayout({
     <html lang="en">
       <body className="relative">
         <Providers>
-          <UIComponents.Navbar
-            links={[
-              { label: "explore", href: "/explore" },
-              { label: "points", href: "/points" },
-            ]}
-            buttons={[{ component: <WalletButton /> }]}
-          />
-          <div className="max-w-5xl mx-auto p-4 mt-[130px]">{children}</div>
+          <AppStateProvider>
+            <UIComponents.Navbar
+              links={[
+                { label: "explore", href: "/explore" },
+                { label: "points", href: "/points" },
+              ]}
+              buttons={[{ component: <WalletButton /> }]}
+            />
+            <div className="max-w-5xl mx-auto p-4 mt-[130px]">{children}</div>
+            <WalletModal />
+          </AppStateProvider>
         </Providers>
         <CommonComponents.GradientCircles circles={lpGradientCircles} fixed />
       </body>
