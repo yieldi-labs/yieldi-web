@@ -11,7 +11,7 @@ interface PoolsViewProps {
 
 export default function PoolsView({ pools, stats }: PoolsViewProps) {
   return (
-    <main className="md:mx-16 mx-4">
+    <main className="md:mx-16">
       <ExploreNav />
       <LiquidityPools
         pools={pools}

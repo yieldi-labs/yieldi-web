@@ -91,79 +91,95 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
   }));
 
   return (
-    <>
-      <TopCards
-        items={topSaversData}
-        getAssetSymbol={getAssetSymbol}
-        getLogoPath={getLogoPath}
-        linkPath="savers"
-      />
+    <div className="w-full">
+      {/* Top section with cards */}
+      <div className="mb-8">
+        <TopCards
+          items={topSaversData}
+          getAssetSymbol={getAssetSymbol}
+          getLogoPath={getLogoPath}
+          linkPath="savers"
+        />
+      </div>
 
-      {/* All Savers table */}
-      <h2 className="text-xl font-medium mb-4">All Savers</h2>
-      <div className="overflow-hidden">
-        <div className="min-w-full">
-          <div className="flex text-left text-base text-gray-700">
-            <div className="px-3 py-3 w-1/2">Asset</div>
-            <div className="flex flex-1 w-1/2 justify-between">
-              <div className="px-3 py-3 w-1/4 ml-6">Savers</div>
-              <div className="px-3 py-3 w-1/4">Utilization</div>
-              <div
-                className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-                onClick={() => sortData(SortKey.TVL)}
-              >
-                TVL
-                <DoubleArrow className="ml-1" />
+      {/* All Savers section */}
+      <div className="mb-4">
+        <h2 className="text-base md:text-xl font-medium mb-4">All Savers</h2>
+      </div>
+
+      {/* Table section with horizontal scroll */}
+      <div className="relative -mx-4 md:mx-0">
+        <div className="overflow-x-auto">
+          <div className="inline-block min-w-full md:px-0">
+            <div className="min-w-[800px] px-4 md:px-0">
+              {/* Table Header */}
+              <div className="flex text-left text-sm md:text-base text-gray-700 mb-2">
+                <div className="w-48 md:w-1/3 p-3">Asset</div>
+                <div className="flex flex-1 justify-between">
+                  <div className="w-1/4 p-3">Savers</div>
+                  <div className="w-1/4 p-3">Utilization</div>
+                  <div
+                    className="w-1/4 p-3 flex items-center cursor-pointer"
+                    onClick={() => sortData(SortKey.TVL)}
+                  >
+                    TVL
+                    <DoubleArrow className="ml-1 w-4 h-4" />
+                  </div>
+                  <div
+                    className="w-1/4 p-3 flex items-center cursor-pointer"
+                    onClick={() => sortData(SortKey.APR)}
+                  >
+                    APR
+                    <DoubleArrow className="ml-1 w-4 h-4" />
+                  </div>
+                </div>
               </div>
-              <div
-                className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-                onClick={() => sortData(SortKey.APR)}
-              >
-                APR
-                <DoubleArrow className="ml-1" />
+
+              {/* Table Body */}
+              <div className="space-y-1.5">
+                {sortedSavers.map((saver) => (
+                  <TranslucentCard key={saver.asset} className="rounded-xl">
+                    <div className="flex items-center w-full">
+                      <div className="w-48 md:w-1/3 p-3">
+                        <div className="flex items-center">
+                          <Image
+                            src={getLogoPath(saver.asset)}
+                            alt={`${getAssetSymbol(saver.asset)} logo`}
+                            width={28}
+                            height={28}
+                            className="rounded-full"
+                          />
+                          <span className="ml-3 font-medium text-sm md:text-base">
+                            {getAssetSymbol(saver.asset)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-1 justify-between text-sm md:text-base">
+                        <div className="w-1/4 p-3">{saver.saversCount}</div>
+                        <div className="w-1/4 p-3">
+                          {formatNumber(saver.filled * 100, 2, 2)}%
+                        </div>
+                        <div className="w-1/4 p-3">
+                          {getFormattedSaverTVL(saver)}
+                        </div>
+                        <div className="w-1/4 p-3">
+                          {formatNumber(
+                            parseFloat(saver.saversReturn) * 100,
+                            2,
+                            2,
+                          )}
+                          %
+                        </div>
+                      </div>
+                    </div>
+                  </TranslucentCard>
+                ))}
               </div>
             </div>
           </div>
-          <div className="min-w-full">
-            {sortedSavers.map((saver) => (
-              <TranslucentCard key={saver.asset} className="rounded-xl mb-1.5">
-                <div className="flex items-center min-w-full">
-                  <div className="px-3 whitespace-nowrap flex-1 w-1/3">
-                    <div className="flex items-center">
-                      <Image
-                        src={getLogoPath(saver.asset)}
-                        alt={`${getAssetSymbol(saver.asset)} logo`}
-                        width={28}
-                        height={28}
-                        className="rounded-full"
-                      />
-                      <span className="ml-3 font-medium">
-                        {getAssetSymbol(saver.asset)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-start flex-1 w-2/3">
-                    <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                      {saver.saversCount}
-                    </div>
-                    <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                      {formatNumber(saver.filled * 100, 2, 2)}%
-                    </div>
-                    <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                      {getFormattedSaverTVL(saver)}
-                    </div>
-                    <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                      {formatNumber(parseFloat(saver.saversReturn) * 100, 2, 2)}
-                      %
-                    </div>
-                  </div>
-                </div>
-              </TranslucentCard>
-            ))}
-          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

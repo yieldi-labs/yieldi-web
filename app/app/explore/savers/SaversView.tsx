@@ -10,7 +10,7 @@ interface SaversViewProps {
 
 export default function SaversView({ savers }: SaversViewProps) {
   return (
-    <main className="mx-16">
+    <main className="md:mx-16">
       <ExploreNav />
       <SaverVaults savers={savers} />
     </main>

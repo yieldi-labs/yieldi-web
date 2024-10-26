@@ -24,7 +24,7 @@ const TopCards: React.FC<TopCardsProps> = ({
   children,
 }) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 md:gap-6 mb-12 gap-2">
+    <div className="grid grid-cols-2 md:grid-cols-3 md:gap-6 gap-2 md:mb-12 mb-6">
       {items.map((item, index) => (
         <div
           key={item.asset}

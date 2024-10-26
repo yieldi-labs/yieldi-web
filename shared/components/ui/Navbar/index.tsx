@@ -28,7 +28,7 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
   );
 
   const navClass = twMerge(
-    `bg-transparent-radial text-neutral tablet:px-10 tablet:py-8 tablet:mx-18 mx-8 flex w-full items-center justify-between rounded-2xl border-4 border-white px-4 py-4 backdrop-blur-[30px]`,
+    `bg-transparent-radial text-neutral tablet:px-10 tablet:py-8 tablet:mx-18 md:mx-8 mx-4 flex w-full items-center justify-between rounded-2xl border-4 border-white px-4 py-4 backdrop-blur-[30px]`,
     isSticky ? "shadow-md" : "",
   );
 
@@ -64,7 +64,7 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
             </button>
           </div>
 
-          <div className="tablet:flex hidden">
+          <div className="tablet:flex hidden w-full items-center justify-center">
             <LinkWithHoverEffect links={links} />
           </div>
 

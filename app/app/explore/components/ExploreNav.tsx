@@ -8,7 +8,7 @@ export default function ExploreNav() {
 
   return (
     <nav className="mb-4">
-      <ul className="flex space-x-8 font-semibold font-gt-america-exp text-2xl">
+      <ul className="flex md:space-x-8 space-x-4 font-semibold font-gt-america-exp md:text-2xl text-base">
         <li>
           <Link
             href="/explore/pools"

@@ -49,7 +49,7 @@ export default function RootLayout({
             links={[{ label: "explore", href: "/explore" }]}
             // buttons={[{ component: <WalletButton /> }]}
           />
-          <div className="mx-auto p-4 mt-[130px]">{children}</div>
+          <div className="mx-auto p-4 md:mt-[130px] mt-24">{children}</div>
         </Providers>
       </body>
     </html>
