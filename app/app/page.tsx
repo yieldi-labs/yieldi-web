@@ -24,7 +24,7 @@ import Modal from "@/app/modal";
 import ErrorCard from "@/app/errorCard";
 import Input from "@/app/input";
 import Button from "@/app/button";
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 interface TcPool {
   asset: string;

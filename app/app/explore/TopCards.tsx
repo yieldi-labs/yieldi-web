@@ -26,9 +26,9 @@ const TopCards: React.FC<TopCardsProps> = ({
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 md:gap-6 mb-12 gap-2">
       {items.map((item, index) => (
-        <div 
+        <div
           key={item.asset}
-          className={`${index === 0 ? 'col-span-2 md:col-span-1' : ''}`}
+          className={`${index === 0 ? "col-span-2 md:col-span-1" : ""}`}
         >
           <TopCard
             asset={item.asset}
@@ -36,6 +36,7 @@ const TopCards: React.FC<TopCardsProps> = ({
             apr={item.apr}
             getAssetSymbol={getAssetSymbol}
             getLogoPath={getLogoPath}
+            index={index}
           >
             {children}
           </TopCard>

@@ -1,7 +1,11 @@
 "use client";
 import Link from "next/link";
 import TranslucentCard from "@/app/TranslucentCard";
-import { calculateVolumeDepthRatio, formatNumber, getFormattedPoolTVL } from "@/app/utils";
+import {
+  calculateVolumeDepthRatio,
+  formatNumber,
+  getFormattedPoolTVL,
+} from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
 import { TopCard } from "../../TopCard";
@@ -23,11 +27,14 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
-  const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD); 
+  const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
 
   return (
     <div className="max-w-7xl mx-auto">
-      <Link href="/explore/pools" className="inline-flex items-center mb-8 text-foreground text-2xl font-bold font-gt-america-ext">
+      <Link
+        href="/explore/pools"
+        className="inline-flex items-center mb-8 text-foreground text-2xl font-bold font-gt-america-ext"
+      >
         <BackArrow className="mr-2" />
         ALL POOLS
       </Link>
@@ -35,8 +42,10 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
       <div className="grid grid-cols-12 gap-20">
         {/* Left Column */}
         <div className="col-span-6">
-          <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">OVERVIEW</h2>
-          
+          <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">
+            OVERVIEW
+          </h2>
+
           <TopCard
             asset={pool.asset}
             formattedTVL={formattedTVL}
@@ -47,7 +56,9 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             <div className="space-y-4 w-full mt-8">
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">Volume/Depth</span>
-                <span className="font-medium">{formatNumber(volumeDepthRatio, 2)}</span>
+                <span className="font-medium">
+                  {formatNumber(volumeDepthRatio, 2)}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">Total Fees</span>
@@ -63,13 +74,17 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         {/* Right Column */}
         <div className="col-span-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-medium text-foreground font-gt-america-ext">YOUR POSITION</h2>
+            <h2 className="text-2xl font-medium text-foreground font-gt-america-ext">
+              YOUR POSITION
+            </h2>
             <button className="text-red-500 font-medium">REMOVE</button>
           </div>
-          
+
           <TranslucentCard className="p-6 rounded-2xl flex flex-col">
             <div className="mb-8 bg-white rounded-xl w-full p-3">
-              <div className="text-gray-700 font-medium text-lg mb-2">PRINCIPAL</div>
+              <div className="text-gray-700 font-medium text-lg mb-2">
+                PRINCIPAL
+              </div>
               <div className="flex justify-between">
                 <div className="text-2xl font-medium text-gray-900">$0,00</div>
                 <div className="text-2xl font-medium text-gray-900">0 BTC</div>
@@ -77,7 +92,9 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             </div>
 
             <div className="mb-8 bg-white rounded-xl w-full p-3">
-              <div className="text-gray-700 font-medium text-lg mb-2">YIELD</div>
+              <div className="text-gray-700 font-medium text-lg mb-2">
+                YIELD
+              </div>
               <div className="flex justify-between">
                 <div className="text-2xl font-medium text-gray-900">$0,00</div>
                 <div className="text-2xl font-medium text-gray-900">0 RUNE</div>
