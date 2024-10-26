@@ -48,9 +48,8 @@ export default function RootLayout({
           <UIComponents.Navbar
             links={[
               { label: "explore", href: "/explore" },
-              { label: "points", href: "/points" },
             ]}
-            buttons={[{ component: <WalletButton /> }]}
+            // buttons={[{ component: <WalletButton /> }]}
           />
           <div className="mx-auto p-4 mt-[130px]">{children}</div>
         </Providers>

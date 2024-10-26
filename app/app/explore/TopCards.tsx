@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { TopCard } from "./TopCard";
 
 interface TopCardItem {
@@ -25,13 +24,13 @@ const TopCards: React.FC<TopCardsProps> = ({
   children,
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      {items.map((item) => (
-        <Link
+    <div className="grid grid-cols-2 md:grid-cols-3 md:gap-6 mb-12 gap-2">
+      {items.map((item, index) => (
+        <div 
           key={item.asset}
-          href={`/explore/${linkPath}/${item.asset}`}>
+          className={`${index === 0 ? 'col-span-2 md:col-span-1' : ''}`}
+        >
           <TopCard
-            key={item.asset}
             asset={item.asset}
             formattedTVL={item.formattedTVL}
             apr={item.apr}
@@ -40,7 +39,7 @@ const TopCards: React.FC<TopCardsProps> = ({
           >
             {children}
           </TopCard>
-        </Link>
+        </div>
       ))}
     </div>
   );

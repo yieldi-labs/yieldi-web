@@ -24,6 +24,7 @@ import Modal from "@/app/modal";
 import ErrorCard from "@/app/errorCard";
 import Input from "@/app/input";
 import Button from "@/app/button";
+import { redirect } from 'next/navigation';
 
 interface TcPool {
   asset: string;
@@ -40,6 +41,7 @@ interface ModalParams {
 }
 
 export default function Home() {
+  redirect("/explore/pools"); // Temporary redirect
   const [wallet] = useAtom(atomWallet);
   const [modal, setModal] = useState<undefined | ModalParams>();
   const [balance] = useState(0);

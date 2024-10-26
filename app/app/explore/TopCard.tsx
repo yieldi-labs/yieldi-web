@@ -21,8 +21,8 @@ export const TopCard: React.FC<TopCardProps> = ({
   children,
 }) => {
   return (
-    <TranslucentCard className="p-5 rounded-2xl flex flex-col items-start">
-      <div className="flex items-center mb-7">
+    <TranslucentCard className="md:p-5 p-1 rounded-2xl flex flex-col items-start">
+      <div className="flex items-center md:mb-7 p-1 md:p-0 mb-2">
         <Image
           src={getLogoPath(asset)}
           alt={`${getAssetSymbol(asset)} logo`}
