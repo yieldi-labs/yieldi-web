@@ -1,13 +1,8 @@
-import type { Metadata } from "next";
+import { metadata } from "@/utils";
 import { Providers } from "./providers";
 import { UIComponents, CommonComponents } from "@shared/components";
 import "./globals.css";
 import "@rainbow-me/rainbowkit/styles.css";
-
-export const metadata: Metadata = {
-  title: "Yieldi",
-  description: "Earn yield on native assets",
-};
 
 export default function RootLayout({
   children,
@@ -54,3 +49,9 @@ export default function RootLayout({
     </html>
   );
 }
+
+export { metadata };
+
+export const generateViewport = () => {
+  return "width=device-width, initial-scale=1";
+};
