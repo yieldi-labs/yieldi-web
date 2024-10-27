@@ -1,12 +1,28 @@
-const config = {
+import { DefaultSeoProps } from "next-seo";
+
+const config: DefaultSeoProps = {
   title: "Yieldi",
-  description: "Yieldi",
-  viewport: "width=device-width, initial-scale=1",
+  description:
+    "The only cross-chain DeFi venue to stake and earn native Bitcoin yield with 15+ supported L1 assets.",
   openGraph: {
-    title: "Yieldi",
-    description: "Yieldi",
-    url: "https://yiledi.xyz",
+    title: "Yieldi - The Yield Layer for Cross-Chain",
+    description:
+      "The only DeFi venue to stake and earn native Bitcoin yield with 15+ supported L1 assets.",
+    url: "https://www.yieldi.xyz",
     site_name: "Yieldi",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Yieldi OpenGraph Image",
+      },
+    ],
+  },
+  twitter: {
+    handle: "@yieldi_xyz",
+    site: "https://www.yieldi.xyz",
+    cardType: "summary_large_image",
   },
   additionalLinkTags: [
     {

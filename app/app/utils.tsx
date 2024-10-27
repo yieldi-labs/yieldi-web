@@ -5,7 +5,7 @@ import SatsConnect, { AddressPurpose } from "sats-connect";
 import * as viem from "viem";
 import { mainnet } from "viem/chains";
 import { getAccount } from "wagmi/actions";
-import { wagmiConfig } from "../utils/wallet/wagmiConfig";
+import { wagmiConfig } from "./wagmiConfig";
 import { Saver } from "./explore/Explore";
 import { PoolDetail } from "@/midgard";
 
@@ -458,4 +458,18 @@ export const calculatePoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
 
 export const getFormattedPoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
   return addDollarSignAndSuffix(calculatePoolTVL(pool, runePriceUSD));
+};
+
+export const calculateVolumeUSD = (pool: PoolDetail, runePriceUSD: number) => {
+  const volumeInRune = parseFloat(pool.volume24h) / 1e8;
+  return volumeInRune * runePriceUSD;
+};
+
+export const calculateVolumeDepthRatio = (
+  pool: PoolDetail,
+  runePriceUSD: number
+) => {
+  const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
+  const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
+  return volumeUSD / tvlUSD;
 };

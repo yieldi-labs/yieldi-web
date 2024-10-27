@@ -1,6 +1,6 @@
 import { Discord, Telegram, XLogo } from "../svg";
 import { landingGradientCircles } from "@shared/utils";
-import { CommonComponents, UIComponents } from "@shared/components";
+import { CommonComponents } from "@shared/components";
 
 const socials = [
   {
@@ -27,11 +27,13 @@ const CTA = () => (
       <h3 className="text-[20px] tablet:text-[42px]">
         Native Yield Streaming for Cross-Chain
       </h3>
+      {/* 
       <UIComponents.Button
         label="Restake Now"
         link="https://app.yieldi.xyz"
         className="w-full uppercase font-medium tablet:py-[42px] py-[14px] tablet:text-[20px] text-base font-gt-america-ext"
       />
+      */}
       <div className="flex items-center gap-[20px] tablet:gap-[32px]">
         {socials.map((social, index) => (
           <a

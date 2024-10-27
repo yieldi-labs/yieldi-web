@@ -51,6 +51,13 @@
 }
 
 @font-face {
+  font-family: "GT-America-Extended";
+  src: url("/fonts/GT-America-Extended-Bold-Trial.woff") format("woff");
+  font-style: normal;
+  font-weight: bold;
+}
+
+@font-face {
   font-family: "GT-America-Expanded";
   src: url("/fonts/GT-America-Expanded-Bold-Trial.woff") format("woff");
   font-style: normal;
