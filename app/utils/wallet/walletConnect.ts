@@ -36,8 +36,15 @@ export const connectUTXOWallet = async (wallet: any): Promise<any> => {
 
 export const connectEVMWallet = async (wallet: any): Promise<any> => {
   try {
-    const { accounts } = await wallet.connect();
-    const address = accounts[0];
+    let address = "";
+
+    if (!wallet.connect) {
+      const accounts = await wallet.request({ method: "eth_requestAccounts" });
+      address = accounts[0];
+    } else {
+      const { accounts } = await wallet.connect();
+      address = accounts[0];
+    }
 
     return {
       provider: wallet,

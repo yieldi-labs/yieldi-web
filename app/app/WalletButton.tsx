@@ -11,6 +11,7 @@ export default function WalletButton() {
 
   return (
     <Button
+      className="w-48"
       onClick={toggleWalletModal}
       label={
         wallet?.address ? formatAddress(wallet.address!) : "Connect Wallet"

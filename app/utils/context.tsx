@@ -21,7 +21,7 @@ interface AppStateContextType {
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const AppStateProvider = ({ children }: { children: ReactNode }) => {
@@ -67,16 +67,16 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         return () => {
           window.ethereum.removeListener(
             "accountsChanged",
-            handleAccountsChanged
+            handleAccountsChanged,
           );
           window.ethereum.removeListener(
             "networkChanged",
-            handleNetworkChanged
+            handleNetworkChanged,
           );
         };
       } else {
         console.warn(
-          "Provider does not support event listeners. Consider adding polling for updates."
+          "Provider does not support event listeners. Consider adding polling for updates.",
         );
       }
     }

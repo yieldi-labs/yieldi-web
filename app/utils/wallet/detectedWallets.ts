@@ -62,14 +62,22 @@ export const detectWallets = (): Wallet[] => {
     }
   });
 
+  if (window.vultisig) {
+    wallets.push({
+      id: "vultisig",
+      name: "Vultisig",
+      connect: async () => connectEVMWallet(window.vultisig),
+    });
+  }
+
   if (window.okxwallet) {
     wallets.push({
       id: "okx-utxo",
-      name: "OKX (UTXO)",
+      name: "OKX",
       connect: async () =>
         connectUTXOWallet({
           id: "okx-utxo",
-          name: "OKX Wallet (UTXO)",
+          name: "OKX Wallet",
           provider: window.okxwallet.bitcoin,
         }),
     });
@@ -78,11 +86,11 @@ export const detectWallets = (): Wallet[] => {
   if (window.xfi?.bitcoin)
     wallets.push({
       id: "xdefi-utxo",
-      name: "CTRL Wallet (UTXO)",
+      name: "CTRL",
       connect: async () =>
         connectUTXOWallet({
           id: "xdefi-utxo",
-          name: "CTRL Wallet (UTXO)",
+          name: "CTRL Wallet",
           provider: window?.xfi?.bitcoin,
         }),
     });
@@ -90,17 +98,16 @@ export const detectWallets = (): Wallet[] => {
   if (window.phantom) {
     wallets.push({
       id: "phantom-utxo",
-      name: "Phantom Wallet (UTXO)",
+      name: "Phantom Wallet",
       connect: async () =>
         connectUTXOWallet({
           id: "phantom-utxo",
-          name: "Phantom Wallet (UTXO)",
+          name: "Phantom Wallet",
           provider: window.phantom,
         }),
     });
   }
 
-  // Filter duplicates
   const seen = new Set();
   const walletsFiltered = wallets.filter((wallet) => {
     const duplicate = seen.has(wallet.id);
@@ -113,7 +120,7 @@ export const detectWallets = (): Wallet[] => {
 
 export const filterWalletsByChain = (
   wallets: Wallet[],
-  selectedChain: string
+  selectedChain: string,
 ): Wallet[] => {
   switch (selectedChain) {
     case "ethereum":
@@ -125,7 +132,7 @@ export const filterWalletsByChain = (
           "phantom",
           "walletconnect",
           "xdefi",
-        ].includes(wallet.id)
+        ].includes(wallet.id),
       );
 
     case "arbitrum":
@@ -133,8 +140,8 @@ export const filterWalletsByChain = (
     case "bsc":
       return wallets.filter((wallet) =>
         ["metamask", "trust", "okx", "walletconnect", "xdefi"].includes(
-          wallet.id
-        )
+          wallet.id,
+        ),
       );
 
     case "dogechain":
@@ -142,7 +149,7 @@ export const filterWalletsByChain = (
 
     case "bitcoin":
       return wallets.filter((wallet) =>
-        ["xdefi-utxo", "phantom-utxo", "okx-utxo"].includes(wallet.id)
+        ["xdefi-utxo", "phantom-utxo", "okx-utxo"].includes(wallet.id),
       );
 
     default:

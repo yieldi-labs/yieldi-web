@@ -3,7 +3,7 @@ import * as React from "react";
 import { SVGProps } from "react";
 
 const defaultWidth = 160;
-const defaultHeight = 60;
+const defaultHeight = 50;
 
 interface OKXProps extends SVGProps<SVGSVGElement> {
   className?: string;

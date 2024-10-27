@@ -5,8 +5,8 @@ import SatsConnect, { AddressPurpose } from "sats-connect";
 import * as viem from "viem";
 import { mainnet } from "viem/chains";
 import { getAccount } from "wagmi/actions";
-import { wagmiConfig } from "./wagmiConfig";
-import { Saver } from "./explore/Explore";
+import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
+import { Saver } from "@/app/explore/types";
 import { PoolDetail } from "@/midgard";
 
 export const parseUnits = viem.parseUnits;
@@ -17,7 +17,7 @@ export const ONE6 = BigInt("1000000");
 export const ONE12 = BigInt("1000000000000");
 export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 export const UINT_MAX = BigInt(
-  "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+  "115792089237316195423570985008687907853269984665640564039457584007913129639935",
 );
 export const UINT128_MAX = BigInt("340282366920938463463374607431768211455");
 
@@ -78,7 +78,7 @@ export function formatAddress(a: undefined | null | string) {
 export function formatNumber(
   amount: string | number,
   decimals = 8,
-  decimalsShown = 4
+  decimalsShown = 4,
 ) {
   if (!amount && amount != 0) return "-";
   if (typeof amount !== "number") {
@@ -95,7 +95,7 @@ export async function fetchJson(url: string, options?: object) {
   const res = await fetch(url, options);
   if (!res.ok) {
     throw new Error(
-      "fetchJson: http error: " + res.status + ": " + (await res.text())
+      "fetchJson: http error: " + res.status + ": " + (await res.text()),
     );
   }
   return await res.json();
@@ -115,7 +115,7 @@ function getAtom<V>(a: Atom<V>) {
 export function setAtom<V>(
   a: Atom<V>,
   b: ((prev: V) => V) | Partial<V> | string,
-  c?: any
+  c?: any,
 ): void {
   if (typeof b === "function") {
     a.v = (b as (prev: V) => V)(a.v);
@@ -162,7 +162,7 @@ export const walletClient = viem.createWalletClient({
   transport: viem.custom(
     typeof window === "undefined" || !window.ethereum
       ? { request: async () => undefined }
-      : window.ethereum
+      : window.ethereum,
   ),
 });
 
@@ -225,13 +225,13 @@ export async function checkAllowance(
   owner: string,
   asset: string,
   target: string,
-  amount: bigint
+  amount: bigint,
 ) {
   const allowance: bigint = await call(
     asset,
     "allowance-address,address-uint256",
     owner,
-    target
+    target,
   );
   if ((amount = UINT_MAX)) {
     amount = UINT128_MAX;
@@ -242,7 +242,7 @@ export async function checkAllowance(
       "+approve-address,address,uint256",
       asset,
       target,
-      amount
+      amount,
     );
   }
 }
@@ -365,7 +365,7 @@ interface Utxo {
 export async function bitcoinUtxos(address: string) {
   if (!address) throw new Error("Wallet not connected");
   const utxos: [Utxo] = await fetchJson(
-    `${mempoolUrl}/address/${address}/utxo`
+    `${mempoolUrl}/address/${address}/utxo`,
   );
   const confirmedUTXOs = utxos
     .filter((utxo) => utxo.status.confirmed)
@@ -467,7 +467,7 @@ export const calculateVolumeUSD = (pool: PoolDetail, runePriceUSD: number) => {
 
 export const calculateVolumeDepthRatio = (
   pool: PoolDetail,
-  runePriceUSD: number
+  runePriceUSD: number,
 ) => {
   const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
   const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
