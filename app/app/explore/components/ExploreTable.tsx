@@ -86,7 +86,7 @@ export default function ExploreTable({
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  });
+  }, []);
 
   const columns: Column[] =
     type === "pools"
@@ -122,11 +122,7 @@ export default function ExploreTable({
             label: "Volume/Depth",
             width: "w-1/4",
             render: (pool) =>
-              formatNumber(
-                calculateVolumeDepthRatio(pool, runePriceUSD!),
-                2,
-                2,
-              ),
+              formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD!), 2, 2),
           },
           {
             key: "tvl",
@@ -248,6 +244,40 @@ export default function ExploreTable({
     }));
   };
 
+  const renderMobileCard = (item: any) => (
+    <TranslucentCard key={item.asset} className="rounded-xl">
+      <div className="flex items-center w-full flex-col p-1">
+        <div className="w-full flex items-center mb-2">
+          <Image
+            src={getLogoPath(item.asset)}
+            alt={`${getAssetSymbol(item.asset)} logo`}
+            width={26}
+            height={26}
+            className="rounded-full"
+          />
+          <span className="ml-3 font-medium text-sm md:text-base">
+            {getAssetSymbol(item.asset)}
+          </span>
+        </div>
+        <div className="flex flex-row w-full gap-1">
+          {columns.slice(1).map((col) => (
+            <div
+              key={col.key}
+              className="flex-1 p-2 rounded-xl bg-white"
+            >
+              <p className="text-sm text-neutral mb-1">
+                {col.render(item)}
+              </p>
+              <p className="text-xs text-neutral-800">
+                {col.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </TranslucentCard>
+  );
+
   return (
     <div className="w-full">
       {/* Top cards, hidden on mobile*/}
@@ -260,14 +290,9 @@ export default function ExploreTable({
         />
       </div>
 
-      <div className="mb-4">
-        <h2 className="text-base md:text-xl font-medium mb-4">{title}</h2>
-      </div>
-
       <div className="relative -mx-4 md:mx-0">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full md:px-0">
-            {/* Desktop table */}
             <div className="w-full px-4 md:px-0">
               {!isMobile ? (
                 <>
@@ -303,44 +328,28 @@ export default function ExploreTable({
                   </div>
                 </>
               ) : (
-                <>
-                  {/* Mobile table */}
-                  <div className="space-y-1.5">
-                    {sortedData.map((item) => (
-                      <TranslucentCard key={item.asset} className="rounded-xl">
-                        <div className="flex items-center w-full flex-col p-1">
-                          <div className="w-full flex items-center mb-2">
-                            <Image
-                              src={getLogoPath(item.asset)}
-                              alt={`${getAssetSymbol(item.asset)} logo`}
-                              width={26}
-                              height={26}
-                              className="rounded-full"
-                            />
-                            <span className="ml-3 font-medium text-sm md:text-base">
-                              {getAssetSymbol(item.asset)}
-                            </span>
-                          </div>
-                          <div className="flex flex-row w-full gap-1">
-                            {columns.slice(1).map((col) => (
-                              <div
-                                key={col.key}
-                                className="flex-1 p-2 rounded-xl bg-white"
-                              >
-                                <p className="text-sm text-neutral mb-1">
-                                  {col.render(item)}
-                                </p>
-                                <p className="text-xs text-neutral-800">
-                                  {col.label}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </TranslucentCard>
-                    ))}
+                // Mobile layout with sections
+                <div className="space-y-2 mt-4">
+                  {/* Top Section */}
+                  <div>
+                    <h2 className="text-base font-medium mb-2 text-neutral-900">
+                      Top {type === "pools" ? "Pools" : "Vaults"}
+                    </h2>
+                    <div className="space-y-1.5">
+                      {sortedData.slice(0, 3).map(renderMobileCard)}
+                    </div>
                   </div>
-                </>
+
+                  {/* All Items Section */}
+                  <div>
+                    <h2 className="text-base font-medium mb-1 text-neutral-900">
+                      All {type === "pools" ? "Pools" : "Vaults"}
+                    </h2>
+                    <div className="space-y-1.5">
+                      {sortedData.slice(3).map(renderMobileCard)}
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
