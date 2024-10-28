@@ -1,8 +1,8 @@
 "use client";
 
 import { PoolDetails, StatsData } from "@/midgard";
-import LiquidityPools from "@/app/explore/pools/LiquidityPools";
 import ExploreNav from "../components/ExploreNav";
+import ExploreTable from "../components/ExploreTable";
 
 interface PoolsViewProps {
   pools: PoolDetails;
@@ -13,9 +13,11 @@ export default function PoolsView({ pools, stats }: PoolsViewProps) {
   return (
     <main className="md:mx-16">
       <ExploreNav />
-      <LiquidityPools
-        pools={pools}
+      <ExploreTable
+        type="pools"
+        data={pools}
         runePriceUSD={parseFloat(stats.runePriceUSD)}
+        title="All Vaults"
       />
     </main>
   );
