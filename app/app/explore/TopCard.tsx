@@ -33,11 +33,17 @@ export const TopCard: React.FC<TopCardProps> = ({
     index! > 0 ? "text-base" : "text-xl",
   );
   const labelClass = "text-gray-700 md:text-base text-xs mt-1 font-medium";
-  const [isMobile, setIsMobile] = useState(false);
 
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-  }, []);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  });
 
   return (
     <TranslucentCard className="md:p-4 p-1 rounded-2xl flex flex-col items-start">

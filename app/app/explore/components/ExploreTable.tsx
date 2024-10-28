@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import TranslucentCard from "@/app/TranslucentCard";
 import TopCards from "@/app/explore/TopCards";
@@ -72,9 +72,20 @@ export default function ExploreTable({
   runePriceUSD,
   title,
 }: ExploreTableProps) {
+  const [isMobile, setIsMobile] = useState(false);
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,
     direction: SortDirection.DESC,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   });
 
   const columns: Column[] =
@@ -139,7 +150,7 @@ export default function ExploreTable({
             label: "Asset",
             width: "w-48 md:w-1/3",
             render: (saver) => (
-              <div className="flex items-center">
+              <div className="flex md:items-center">
                 <Image
                   src={getLogoPath(saver.asset)}
                   alt={`${getAssetSymbol(saver.asset)} logo`}
@@ -239,7 +250,8 @@ export default function ExploreTable({
 
   return (
     <div className="w-full">
-      <div className="mb-8">
+      {/* Top cards, hidden on mobile*/}
+      <div className="mb-8 md:block hidden">
         <TopCards
           items={topItems}
           getAssetSymbol={getAssetSymbol}
@@ -255,33 +267,81 @@ export default function ExploreTable({
       <div className="relative -mx-4 md:mx-0">
         <div className="overflow-x-auto">
           <div className="inline-block min-w-full md:px-0">
-            <div className="min-w-[800px] px-4 md:px-0">
-              <div className="flex text-left text-sm md:text-base text-gray-700 mb-2">
-                {columns.map((col) => (
-                  <div
-                    key={col.key}
-                    className={`${col.width} p-3 ${col.sortable ? "cursor-pointer" : ""} flex items-center`}
-                    onClick={() => col.sortable && sortData(col.key as SortKey)}
-                  >
-                    {col.label}
-                    {col.sortable && <DoubleArrow className="ml-1 w-4 h-4" />}
+            {/* Desktop table */}
+            <div className="w-full px-4 md:px-0">
+              {!isMobile ? (
+                <>
+                  <div className="flex text-left text-sm md:text-base text-gray-700 mb-2">
+                    {columns.map((col) => (
+                      <div
+                        key={col.key}
+                        className={`${col.width} p-3 ${col.sortable ? "cursor-pointer" : ""} flex items-center`}
+                        onClick={() =>
+                          col.sortable && sortData(col.key as SortKey)
+                        }
+                      >
+                        {col.label}
+                        {col.sortable && (
+                          <DoubleArrow className="ml-1 w-4 h-4" />
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
 
-              <div className="space-y-1.5">
-                {sortedData.map((item) => (
-                  <TranslucentCard key={item.asset} className="rounded-xl">
-                    <div className="flex items-center w-full">
-                      {columns.map((col) => (
-                        <div key={col.key} className={`${col.width} p-3`}>
-                          {col.render(item)}
+                  <div className="space-y-1.5">
+                    {sortedData.map((item) => (
+                      <TranslucentCard key={item.asset} className="rounded-xl">
+                        <div className="flex items-center w-full">
+                          {columns.map((col) => (
+                            <div key={col.key} className={`${col.width} p-3`}>
+                              {col.render(item)}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
-                  </TranslucentCard>
-                ))}
-              </div>
+                      </TranslucentCard>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Mobile table */}
+                  <div className="space-y-1.5">
+                    {sortedData.map((item) => (
+                      <TranslucentCard key={item.asset} className="rounded-xl">
+                        <div className="flex items-center w-full flex-col p-1">
+                          <div className="w-full flex items-center mb-2">
+                            <Image
+                              src={getLogoPath(item.asset)}
+                              alt={`${getAssetSymbol(item.asset)} logo`}
+                              width={26}
+                              height={26}
+                              className="rounded-full"
+                            />
+                            <span className="ml-3 font-medium text-sm md:text-base">
+                              {getAssetSymbol(item.asset)}
+                            </span>
+                          </div>
+                          <div className="flex flex-row w-full gap-1">
+                            {columns.slice(1).map((col) => (
+                              <div
+                                key={col.key}
+                                className="flex-1 p-2 rounded-xl bg-white"
+                              >
+                                <p className="text-sm text-neutral mb-1">
+                                  {col.render(item)}
+                                </p>
+                                <p className="text-xs text-neutral-800">
+                                  {col.label}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </TranslucentCard>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
