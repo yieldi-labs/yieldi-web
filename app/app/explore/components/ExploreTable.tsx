@@ -14,6 +14,7 @@ import {
   getFormattedPoolTVL,
   getFormattedSaverTVL,
 } from "@/app/utils";
+import SortHeader, { SortKey } from "./SortHeader";
 
 interface Saver {
   asset: string;
@@ -25,11 +26,6 @@ interface Saver {
   saversDepth: string;
   assetDepth: string;
   synthSupply: string;
-}
-
-enum SortKey {
-  TVL = "tvl",
-  APR = "apr",
 }
 
 enum SortDirection {
@@ -122,7 +118,11 @@ export default function ExploreTable({
             label: "Volume/Depth",
             width: "w-1/4",
             render: (pool) =>
-              formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD!), 2, 2),
+              formatNumber(
+                calculateVolumeDepthRatio(pool, runePriceUSD!),
+                2,
+                2,
+              ),
           },
           {
             key: "tvl",
@@ -261,16 +261,9 @@ export default function ExploreTable({
         </div>
         <div className="flex flex-row w-full gap-1">
           {columns.slice(1).map((col) => (
-            <div
-              key={col.key}
-              className="flex-1 p-2 rounded-xl bg-white"
-            >
-              <p className="text-sm text-neutral mb-1">
-                {col.render(item)}
-              </p>
-              <p className="text-xs text-neutral-800">
-                {col.label}
-              </p>
+            <div key={col.key} className="flex-1 p-2 rounded-xl bg-white">
+              <p className="text-sm text-neutral mb-1">{col.render(item)}</p>
+              <p className="text-xs text-neutral-800">{col.label}</p>
             </div>
           ))}
         </div>
@@ -332,9 +325,17 @@ export default function ExploreTable({
                 <div className="space-y-2 mt-4">
                   {/* Top Section */}
                   <div>
-                    <h2 className="text-base font-medium mb-2 text-neutral-900">
-                      Top {type === "pools" ? "Pools" : "Vaults"}
-                    </h2>
+                    <div className="flex flex-row justify-between items-center">
+                      <h2 className="text-base font-medium mb-2 text-neutral-900">
+                        Top {type === "pools" ? "Pools" : "Vaults"}
+                      </h2>
+                      <SortHeader
+                        columns={columns}
+                        sortConfig={sortConfig}
+                        onSort={sortData}
+                      />
+                    </div>
+
                     <div className="space-y-1.5">
                       {sortedData.slice(0, 3).map(renderMobileCard)}
                     </div>
