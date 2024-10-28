@@ -12,10 +12,6 @@ interface Column {
 export enum SortKey {
   TVL = "tvl",
   APR = "apr",
-  VOLUME = "volume",
-  VOLUME_DEPTH = "volumeDepth",
-  SAVERS_COUNT = "saversCount",
-  FILLED = "filled",
 }
 
 enum SortDirection {
@@ -56,8 +52,6 @@ const SortHeader: React.FC<SortHeaderProps> = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  const currentColumn = columns.find((col) => col.key === sortConfig.key);
 
   return (
     <div className="relative" ref={dropdownRef}>

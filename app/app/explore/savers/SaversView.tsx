@@ -18,7 +18,6 @@ export default function SaversView({ savers, stats }: SaversViewProps) {
         type="savers"
         data={savers}
         runePriceUSD={parseFloat(stats.runePriceUSD)}
-        title="All Vaults"
       />
     </main>
   );

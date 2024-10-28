@@ -17,7 +17,6 @@ export default function PoolsView({ pools, stats }: PoolsViewProps) {
         type="pools"
         data={pools}
         runePriceUSD={parseFloat(stats.runePriceUSD)}
-        title="All Vaults"
       />
     </main>
   );

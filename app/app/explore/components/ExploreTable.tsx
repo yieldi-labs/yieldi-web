@@ -50,7 +50,6 @@ interface ExploreTableProps {
   type: "pools" | "savers";
   data: PoolDetails | Saver[];
   runePriceUSD?: number;
-  title: string;
 }
 
 const getAssetSymbol = (asset: string) => {
@@ -66,7 +65,6 @@ export default function ExploreTable({
   type,
   data,
   runePriceUSD,
-  title,
 }: ExploreTableProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [sortConfig, setSortConfig] = useState<SortConfig>({
