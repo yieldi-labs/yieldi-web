@@ -1,5 +1,6 @@
 import { DownArrow } from "@shared/components/svg";
 import { useState, useRef, useEffect } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface Column {
   key: string;
@@ -50,6 +51,13 @@ const SortHeader: React.FC<SortHeaderProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const getOptionClasses = (columnKey: string) => {
+    return twMerge(
+      "w-full text-left px-4 py-2 text-sm hover:bg-gray-50 whitespace-nowrap text-neutral-700",
+      sortConfig.key === columnKey && "text-neutral-900 font-medium",
+    );
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -69,8 +77,7 @@ const SortHeader: React.FC<SortHeaderProps> = ({
                 onSort(col.key as SortKey);
                 setIsOpen(false);
               }}
-              className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 whitespace-nowrap
-                ${sortConfig.key === col.key ? "text-neutral-900 font-medium" : "text-neutral-700"}`}
+              className={getOptionClasses(col.key)}
             >
               {col.label}
             </button>
