@@ -4,9 +4,6 @@ import { useState, useRef, useEffect } from "react";
 interface Column {
   key: string;
   label: string;
-  width: string;
-  sortable?: boolean;
-  render: (item: any) => React.ReactNode;
 }
 
 export enum SortKey {
@@ -37,7 +34,7 @@ const SortHeader: React.FC<SortHeaderProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const sortableColumns = columns.filter((col) => col.sortable);
+  const sortableColumns = columns;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

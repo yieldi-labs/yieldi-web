@@ -2,23 +2,17 @@
 
 import { Saver } from "@/app/explore/types";
 import ExploreNav from "../components/ExploreNav";
-import { StatsData } from "@/midgard";
-import ExploreTable from "../components/ExploreTable";
+import SaverVaults from "../components/SaverVaults";
 
 interface SaversViewProps {
   savers: Saver[];
-  stats: StatsData;
 }
 
-export default function SaversView({ savers, stats }: SaversViewProps) {
+export default function SaversView({ savers }: SaversViewProps) {
   return (
     <main className="md:mx-16">
       <ExploreNav />
-      <ExploreTable
-        type="savers"
-        data={savers}
-        runePriceUSD={parseFloat(stats.runePriceUSD)}
-      />
+      <SaverVaults savers={savers} />
     </main>
   );
 }
