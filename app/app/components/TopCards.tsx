@@ -10,18 +10,11 @@ interface TopCardItem {
 
 interface TopCardsProps {
   items: TopCardItem[];
-  getAssetSymbol: (asset: string) => string;
-  getLogoPath: (asset: string) => string;
   linkPath?: string;
   children?: React.ReactNode;
 }
 
-const TopCards: React.FC<TopCardsProps> = ({
-  items,
-  getAssetSymbol,
-  getLogoPath,
-  children,
-}) => {
+const TopCards: React.FC<TopCardsProps> = ({ items, children }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 md:gap-6 gap-2 md:mb-12 mb-6">
       {items.map((item, index) => (
@@ -33,8 +26,6 @@ const TopCards: React.FC<TopCardsProps> = ({
             asset={item.asset}
             formattedTVL={item.formattedTVL}
             apr={item.apr}
-            getAssetSymbol={getAssetSymbol}
-            getLogoPath={getLogoPath}
             index={index}
           >
             {children}

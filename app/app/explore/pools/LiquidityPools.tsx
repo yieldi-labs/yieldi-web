@@ -8,8 +8,8 @@ import {
   getLogoPath,
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
-import TopCards from "../TopCards";
-import SortHeader from "../components/SortHeader";
+import TopCards from "../../components/TopCards";
+import SortHeader from "../../components/SortHeader";
 import { useMobileDetection } from "@shared/hooks";
 
 interface LiquidityPoolsProps {
@@ -158,11 +158,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     <div className="w-full">
       {/* Top cards, hidden on mobile*/}
       <div className="mb-8 md:block hidden">
-        <TopCards
-          items={topPoolsData}
-          getAssetSymbol={getAssetSymbol}
-          getLogoPath={getLogoPath}
-        />
+        <TopCards items={topPoolsData} />
       </div>
 
       <div className="relative -mx-4 md:mx-0">

@@ -2,17 +2,14 @@
 
 import Image from "next/image";
 import TranslucentCard from "../TranslucentCard";
-import { formatNumber } from "@/app/utils";
+import { formatNumber, getAssetSymbol, getLogoPath } from "@/app/utils";
 import { twMerge } from "tailwind-merge";
-import { useEffect, useState } from "react";
+import { useMobileDetection } from "@shared/hooks";
 
-// Individual TopCard component
 interface TopCardProps {
   asset: string;
   formattedTVL: string;
   apr: number;
-  getAssetSymbol: (asset: string) => string;
-  getLogoPath: (asset: string) => string;
   children?: React.ReactNode;
   index?: number;
 }
@@ -21,8 +18,6 @@ export const TopCard: React.FC<TopCardProps> = ({
   asset,
   formattedTVL,
   apr,
-  getAssetSymbol,
-  getLogoPath,
   children,
   index,
 }) => {
@@ -33,17 +28,7 @@ export const TopCard: React.FC<TopCardProps> = ({
     index! > 0 ? "text-base" : "text-xl",
   );
   const labelClass = "text-gray-700 md:text-base text-xs mt-1 font-medium";
-
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  });
+  const isMobile = useMobileDetection();
 
   return (
     <TranslucentCard className="md:p-4 p-1 rounded-2xl flex flex-col items-start">

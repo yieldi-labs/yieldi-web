@@ -7,8 +7,8 @@ import {
   getLogoPath,
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
-import TopCards from "../TopCards";
-import SortHeader from "../components/SortHeader";
+import TopCards from "../../components/TopCards";
+import SortHeader from "../../components/SortHeader";
 import { useMobileDetection } from "@shared/hooks";
 
 interface Saver {
@@ -145,11 +145,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     <div className="w-full">
       {/* Top cards, hidden on mobile*/}
       <div className="mb-8 md:block hidden">
-        <TopCards
-          items={topSaversData}
-          getAssetSymbol={getAssetSymbol}
-          getLogoPath={getLogoPath}
-        />
+        <TopCards items={topSaversData} />
       </div>
 
       <div className="relative -mx-4 md:mx-0">
