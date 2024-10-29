@@ -12,6 +12,6 @@
       "@shared/*": ["../shared/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "../shared/components/ui/SortHeader.tsx"],
   "exclude": ["node_modules"]
 }

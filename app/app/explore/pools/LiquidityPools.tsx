@@ -9,7 +9,7 @@ import {
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
 import TopCards from "../../components/TopCards";
-import SortHeader from "../../components/SortHeader";
+import SortHeader from "../../../../shared/components/ui/SortHeader";
 import { useMobileDetection } from "@shared/hooks";
 
 interface LiquidityPoolsProps {

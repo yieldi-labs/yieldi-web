@@ -1,6 +1,8 @@
-import { DownArrow } from "@shared/components/svg";
+"use client";
+
 import { useState, useRef, useEffect } from "react";
 import { twMerge } from "tailwind-merge";
+import DownArrow from "../svg/DownArrow";
 
 interface Column {
   key: string;
@@ -53,7 +55,7 @@ const SortHeader: React.FC<SortHeaderProps> = ({
 
   const getOptionClasses = (columnKey: string) => {
     return twMerge(
-      "w-full text-left px-4 py-2 text-sm hover:bg-gray-50 whitespace-nowrap text-neutral-700",
+      "flex items-center gap-3 self-stretch px-1.5 py-1 rounded-md hover:bg-neutral-100 text-neutral-700 text-right font-gt-america text-xs font-medium leading-4",
       sortConfig.key === columnKey && "text-neutral-900 font-medium",
     );
   };
@@ -62,14 +64,17 @@ const SortHeader: React.FC<SortHeaderProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center text-sm font-medium text-neutral-800 hover:text-neutral-900"
+        className="flex items-center text-sm text-neutral-800 hover:text-neutral-900"
       >
-        Sort
+        Sort by {columns.find((col) => col.key === sortConfig.key)?.label}{" "}
+        {sortConfig.direction === SortDirection.ASC
+          ? "ascending"
+          : "descending"}
         <DownArrow className="w-4 h-4 inline-block ml-1" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1 py-1 bg-white rounded-lg shadow-lg border z-10">
+        <div className="absolute right-0 z-10 flex flex-col items-start p-2 gap-1.5 rounded-xl border-4 border-white bg-white shadow-dropdown min-w-28">
           {sortableColumns.map((col) => (
             <button
               key={col.key}
