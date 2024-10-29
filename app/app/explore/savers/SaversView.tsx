@@ -2,7 +2,7 @@
 
 import { Saver } from "@/app/explore/types";
 import ExploreNav from "../components/ExploreNav";
-import SaverVaults from "../components/SaverVaults";
+import SaverVaults from "./SaverVaults";
 
 interface SaversViewProps {
   savers: Saver[];

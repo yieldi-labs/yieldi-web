@@ -1,24 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
-import SortHeader from "./SortHeader";
-import { formatNumber } from "@/app/utils";
+import { PoolDetail, PoolDetails } from "@/midgard";
+import { formatNumber, addDollarSignAndSuffix } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
 import TopCards from "../TopCards";
+import SortHeader from "../components/SortHeader";
 
-interface Saver {
-  asset: string;
-  saversCount: number;
-  saversReturn: string;
-  earned: string;
-  filled: number;
-  assetPriceUSD: string;
-  saversDepth: string;
-  assetDepth: string;
-  synthSupply: string;
-}
-
-interface SaverVaultsProps {
-  savers: Saver[];
+interface LiquidityPoolsProps {
+  pools: PoolDetails;
+  runePriceUSD: number;
 }
 
 enum SortKey {
@@ -46,25 +36,35 @@ const getLogoPath = (asset: string): string => {
   return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
 };
 
-const calculateSaverTVL = (saver: Saver): number => {
-  const depth = parseFloat(saver.saversDepth) / 1e8;
-  const priceUSD = parseFloat(saver.assetPriceUSD);
-  return depth * priceUSD;
+const calculatePoolTVL = (pool: PoolDetail): number => {
+  const assetDepth = parseFloat(pool.assetDepth) / 1e8;
+  const assetPriceUSD = parseFloat(pool.assetPriceUSD);
+  return assetDepth * assetPriceUSD;
 };
 
-const getFormattedSaverTVL = (saver: Saver): string => {
-  const tvlUSD = calculateSaverTVL(saver);
-  if (tvlUSD >= 1e9) {
-    return `$${(tvlUSD / 1e9).toFixed(1)}B`;
-  } else if (tvlUSD >= 1e6) {
-    return `$${(tvlUSD / 1e6).toFixed(1)}M`;
-  } else if (tvlUSD >= 1e3) {
-    return `$${(tvlUSD / 1e3).toFixed(1)}K`;
-  }
-  return `$${tvlUSD.toFixed(2)}`;
+const calculateVolumeUSD = (pool: PoolDetail, runePriceUSD: number): number => {
+  const volumeInRune = parseFloat(pool.volume24h) / 1e8;
+  return volumeInRune * runePriceUSD;
 };
 
-const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
+const calculateVolumeDepthRatio = (
+  pool: PoolDetail,
+  runePriceUSD: number,
+): number => {
+  const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
+  const tvlUSD = calculatePoolTVL(pool);
+  return volumeUSD / tvlUSD;
+};
+
+const getFormattedPoolTVL = (pool: PoolDetail): string => {
+  const tvlUSD = calculatePoolTVL(pool);
+  return addDollarSignAndSuffix(tvlUSD);
+};
+
+const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
+  pools,
+  runePriceUSD,
+}) => {
   const [isMobile, setIsMobile] = useState(false);
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,
@@ -81,18 +81,18 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const sortedSavers = useMemo(() => {
-    const sortableItems = [...savers];
+  const sortedPools = useMemo(() => {
+    const sortableItems = [...pools];
     sortableItems.sort((a, b) => {
       if (sortConfig.key === SortKey.TVL) {
-        const aTvl = calculateSaverTVL(a);
-        const bTvl = calculateSaverTVL(b);
+        const aTvl = calculatePoolTVL(a);
+        const bTvl = calculatePoolTVL(b);
         return sortConfig.direction === SortDirection.ASC
           ? aTvl - bTvl
           : bTvl - aTvl;
       } else if (sortConfig.key === SortKey.APR) {
-        const aApr = parseFloat(a.saversReturn);
-        const bApr = parseFloat(b.saversReturn);
+        const aApr = parseFloat(a.poolAPY);
+        const bApr = parseFloat(b.poolAPY);
         return sortConfig.direction === SortDirection.ASC
           ? aApr - bApr
           : bApr - aApr;
@@ -100,7 +100,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
       return 0;
     });
     return sortableItems;
-  }, [savers, sortConfig]);
+  }, [pools, sortConfig]);
 
   const sortData = (key: SortKey) => {
     setSortConfig((prevConfig) => ({
@@ -112,48 +112,54 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     }));
   };
 
-  const topSavers = sortedSavers.slice(0, 3);
-  const topSaversData = topSavers.map((saver) => ({
-    asset: saver.asset,
-    formattedTVL: getFormattedSaverTVL(saver),
-    apr: parseFloat(saver.saversReturn),
+  const topPools = sortedPools.slice(0, 3);
+  const topPoolsData = topPools.map((pool) => ({
+    asset: pool.asset,
+    formattedTVL: getFormattedPoolTVL(pool),
+    apr: parseFloat(pool.poolAPY),
   }));
 
-  const renderMobileCard = (saver: Saver) => (
-    <TranslucentCard key={saver.asset} className="rounded-xl mb-1.5">
+  const renderMobileCard = (pool: PoolDetail) => (
+    <TranslucentCard key={pool.asset} className="rounded-xl mb-1.5">
       <div className="flex items-center w-full flex-col p-1">
         <div className="w-full flex items-center mb-2">
           <Image
-            src={getLogoPath(saver.asset)}
-            alt={`${getAssetSymbol(saver.asset)} logo`}
+            src={getLogoPath(pool.asset)}
+            alt={`${getAssetSymbol(pool.asset)} logo`}
             width={26}
             height={26}
             className="rounded-full"
           />
           <span className="ml-3 font-medium text-sm md:text-base">
-            {getAssetSymbol(saver.asset)}
+            {getAssetSymbol(pool.asset)}
           </span>
         </div>
         <div className="flex flex-row w-full gap-1">
           <div className="flex-1 p-2 rounded-xl bg-white">
-            <p className="text-sm text-neutral mb-1">{saver.saversCount}</p>
-            <p className="text-xs text-neutral-800">Savers</p>
-          </div>
-          <div className="flex-1 p-2 rounded-xl bg-white">
             <p className="text-sm text-neutral mb-1">
-              {formatNumber(saver.filled * 100, 2, 2)}%
+              {addDollarSignAndSuffix(calculateVolumeUSD(pool, runePriceUSD))}
             </p>
-            <p className="text-xs text-neutral-800">Utilization</p>
+            <p className="text-xs text-neutral-800">Volume (24h)</p>
           </div>
           <div className="flex-1 p-2 rounded-xl bg-white">
             <p className="text-sm text-neutral mb-1">
-              {getFormattedSaverTVL(saver)}
+              {formatNumber(
+                calculateVolumeDepthRatio(pool, runePriceUSD),
+                2,
+                2,
+              )}
+            </p>
+            <p className="text-xs text-neutral-800">Volume/Depth</p>
+          </div>
+          <div className="flex-1 p-2 rounded-xl bg-white">
+            <p className="text-sm text-neutral mb-1">
+              {getFormattedPoolTVL(pool)}
             </p>
             <p className="text-xs text-neutral-800">TVL</p>
           </div>
           <div className="flex-1 p-2 rounded-xl bg-white">
             <p className="text-sm text-neutral mb-1">
-              {formatNumber(parseFloat(saver.saversReturn) * 100, 2, 2)}%
+              {formatNumber(parseFloat(pool.poolAPY) * 100, 2, 2)}%
             </p>
             <p className="text-xs text-neutral-800">APR</p>
           </div>
@@ -167,7 +173,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
       {/* Top cards, hidden on mobile*/}
       <div className="mb-8 md:block hidden">
         <TopCards
-          items={topSaversData}
+          items={topPoolsData}
           getAssetSymbol={getAssetSymbol}
           getLogoPath={getLogoPath}
         />
@@ -182,8 +188,8 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
                   <div className="flex text-left text-base text-gray-700 mb-2">
                     <div className="px-3 py-3 w-1/2">Asset</div>
                     <div className="flex flex-1 w-1/2 justify-between">
-                      <div className="px-3 py-3 w-1/4 ml-6">Savers</div>
-                      <div className="px-3 py-3 w-1/4">Utilization</div>
+                      <div className="px-3 py-3 w-1/4 ml-6">Volume (24h)</div>
+                      <div className="px-3 py-3 w-1/4">Volume/Depth</div>
                       <div
                         className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
                         onClick={() => sortData(SortKey.TVL)}
@@ -214,36 +220,42 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
                   </div>
 
                   <div className="space-y-1.5">
-                    {sortedSavers.map((saver) => (
-                      <TranslucentCard key={saver.asset} className="rounded-xl">
+                    {sortedPools.map((pool) => (
+                      <TranslucentCard key={pool.asset} className="rounded-xl">
                         <div className="flex items-center w-full">
                           <div className="px-3 whitespace-nowrap flex-1 w-1/3">
                             <div className="flex items-center">
                               <Image
-                                src={getLogoPath(saver.asset)}
-                                alt={`${getAssetSymbol(saver.asset)} logo`}
+                                src={getLogoPath(pool.asset)}
+                                alt={`${getAssetSymbol(pool.asset)} logo`}
                                 width={28}
                                 height={28}
                                 className="rounded-full"
                               />
                               <span className="ml-3 font-medium">
-                                {getAssetSymbol(saver.asset)}
+                                {getAssetSymbol(pool.asset)}
                               </span>
                             </div>
                           </div>
                           <div className="flex items-start flex-1 w-2/3">
                             <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {saver.saversCount}
-                            </div>
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {formatNumber(saver.filled * 100, 2, 2)}%
-                            </div>
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {getFormattedSaverTVL(saver)}
+                              {addDollarSignAndSuffix(
+                                calculateVolumeUSD(pool, runePriceUSD),
+                              )}
                             </div>
                             <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
                               {formatNumber(
-                                parseFloat(saver.saversReturn) * 100,
+                                calculateVolumeDepthRatio(pool, runePriceUSD),
+                                2,
+                                2,
+                              )}
+                            </div>
+                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                              {getFormattedPoolTVL(pool)}
+                            </div>
+                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                              {formatNumber(
+                                parseFloat(pool.poolAPY) * 100,
                                 2,
                                 2,
                               )}
@@ -262,7 +274,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
                   <div>
                     <div className="flex flex-row justify-between items-center">
                       <h2 className="text-base font-medium mb-2 text-neutral-900">
-                        Top Vaults
+                        Top Pools
                       </h2>
                       <SortHeader
                         sortConfig={sortConfig}
@@ -280,17 +292,17 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      {sortedSavers.slice(0, 3).map(renderMobileCard)}
+                      {sortedPools.slice(0, 3).map(renderMobileCard)}
                     </div>
                   </div>
 
-                  {/* All Savers Section */}
+                  {/* All Pools Section */}
                   <div>
                     <h2 className="text-base font-medium mb-1 text-neutral-900">
-                      All Vaults
+                      All Pools
                     </h2>
                     <div className="space-y-1.5">
-                      {sortedSavers.slice(3).map(renderMobileCard)}
+                      {sortedPools.slice(3).map(renderMobileCard)}
                     </div>
                   </div>
                 </div>
@@ -303,4 +315,4 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
   );
 };
 
-export default SaverVaults;
+export default LiquidityPools;

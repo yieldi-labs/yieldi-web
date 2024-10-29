@@ -2,7 +2,7 @@
 
 import { PoolDetails, StatsData } from "@/midgard";
 import ExploreNav from "../components/ExploreNav";
-import LiquidityPools from "../components/LiquidityPools";
+import LiquidityPools from "./LiquidityPools";
 
 interface PoolsViewProps {
   pools: PoolDetails;
