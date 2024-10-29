@@ -1,10 +1,16 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import { PoolDetail, PoolDetails } from "@/midgard";
-import { formatNumber, addDollarSignAndSuffix } from "@/app/utils";
+import {
+  formatNumber,
+  addDollarSignAndSuffix,
+  getAssetSymbol,
+  getLogoPath,
+} from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
 import TopCards from "../TopCards";
 import SortHeader from "../components/SortHeader";
+import { useMobileDetection } from "@shared/hooks";
 
 interface LiquidityPoolsProps {
   pools: PoolDetails;
@@ -25,16 +31,6 @@ interface SortConfig {
   key: SortKey;
   direction: SortDirection;
 }
-
-// Utility functions
-const getAssetSymbol = (asset: string): string => {
-  return asset.split("-")[0] || asset;
-};
-
-const getLogoPath = (asset: string): string => {
-  const assetLower = asset.toLowerCase();
-  return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
-};
 
 const calculatePoolTVL = (pool: PoolDetail): number => {
   const assetDepth = parseFloat(pool.assetDepth) / 1e8;
@@ -65,21 +61,11 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
   pools,
   runePriceUSD,
 }) => {
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useMobileDetection();
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,
     direction: SortDirection.DESC,
   });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const sortedPools = useMemo(() => {
     const sortableItems = [...pools];

@@ -1,9 +1,15 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
-import { formatNumber } from "@/app/utils";
+import {
+  addDollarSignAndSuffix,
+  formatNumber,
+  getAssetSymbol,
+  getLogoPath,
+} from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
 import TopCards from "../TopCards";
 import SortHeader from "../components/SortHeader";
+import { useMobileDetection } from "@shared/hooks";
 
 interface Saver {
   asset: string;
@@ -36,16 +42,6 @@ interface SortConfig {
   direction: SortDirection;
 }
 
-// Utility functions
-const getAssetSymbol = (asset: string): string => {
-  return asset.split("-")[0] || asset;
-};
-
-const getLogoPath = (asset: string): string => {
-  const assetLower = asset.toLowerCase();
-  return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
-};
-
 const calculateSaverTVL = (saver: Saver): number => {
   const depth = parseFloat(saver.saversDepth) / 1e8;
   const priceUSD = parseFloat(saver.assetPriceUSD);
@@ -54,32 +50,15 @@ const calculateSaverTVL = (saver: Saver): number => {
 
 const getFormattedSaverTVL = (saver: Saver): string => {
   const tvlUSD = calculateSaverTVL(saver);
-  if (tvlUSD >= 1e9) {
-    return `$${(tvlUSD / 1e9).toFixed(1)}B`;
-  } else if (tvlUSD >= 1e6) {
-    return `$${(tvlUSD / 1e6).toFixed(1)}M`;
-  } else if (tvlUSD >= 1e3) {
-    return `$${(tvlUSD / 1e3).toFixed(1)}K`;
-  }
-  return `$${tvlUSD.toFixed(2)}`;
+  return addDollarSignAndSuffix(tvlUSD);
 };
 
 const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useMobileDetection();
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,
     direction: SortDirection.DESC,
   });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const sortedSavers = useMemo(() => {
     const sortableItems = [...savers];
