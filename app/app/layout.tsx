@@ -1,13 +1,12 @@
-import WalletButton from "./WalletButton";
+import { metadata } from "@/utils";
 import { Providers } from "./providers";
-import { metadata } from "@/utils/metadata";
+import WalletButton from "./WalletButton";
 import { lpGradientCircles } from "@shared/utils";
 import { UIComponents, CommonComponents } from "@shared/components";
 import { AppStateProvider } from "@/utils/context";
 import WalletModal from "./components/modals/Wallet/WalletModal";
 
 import "./styles/globals.css";
-import "@rainbow-me/rainbowkit/styles.css";
 
 export default function RootLayout({
   children,

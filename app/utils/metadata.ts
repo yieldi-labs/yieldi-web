@@ -2,8 +2,8 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Yieldi",
-  description: "Earn yield on native assets",
-
+  description:
+    "The only cross-chain DeFi venue to stake and earn native Bitcoin yield with 15+ supported L1 assets.",
   icons: {
     icon: [
       {
@@ -23,10 +23,19 @@ export const metadata: Metadata = {
   },
   manifest: "/site.webmanifest",
   openGraph: {
-    title: "Yieldi",
-    description: "Earn yield on native assets",
-    url: "https://app.yiledi.xyz",
+    title: "Yieldi - The Yield Layer for Cross-Chain",
+    description:
+      "The only DeFi venue to stake and earn native Bitcoin yield with 15+ supported L1 assets.",
+    url: "https://www.yieldi.xyz",
     siteName: "Yieldi",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Yieldi OpenGraph Image",
+      },
+    ],
   },
   appleWebApp: {
     title: "Yieldi",
