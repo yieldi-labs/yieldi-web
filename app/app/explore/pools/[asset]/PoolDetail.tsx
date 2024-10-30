@@ -8,7 +8,7 @@ import {
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
-import { TopCard } from "../../../components/TopCard";
+import { TopCard } from "@/app/components/TopCard";
 
 interface PoolDetailProps {
   pool: IPoolDetail;

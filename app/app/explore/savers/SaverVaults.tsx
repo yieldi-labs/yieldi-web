@@ -92,7 +92,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     if (isMobile && measureRef.current) {
       const height = measureRef.current.offsetHeight;
       setMobileRowHeight(height + MOBILE_MARGIN_BOTTOM);
-      measureRef.current.style.display = 'none';
+      measureRef.current.style.display = "none";
     }
   }, [isMobile]);
 
@@ -155,7 +155,13 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     </TranslucentCard>
   );
 
-  const MobileRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+  const MobileRow = ({
+    index,
+    style,
+  }: {
+    index: number;
+    style: React.CSSProperties;
+  }) => {
     const saver = sortedSavers[index];
     return (
       <div style={style}>

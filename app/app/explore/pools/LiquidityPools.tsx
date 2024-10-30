@@ -10,9 +10,9 @@ import {
   getLogoPath,
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
-import TopCards from "../../components/TopCards";
-import SortHeader from "../../../../shared/components/ui/SortHeader";
 import { useMobileDetection } from "@shared/hooks";
+import { SortHeader } from "@shared/components/ui";
+import TopCards from "@/app/components/TopCards";
 
 interface LiquidityPoolsProps {
   pools: PoolDetails;
@@ -99,7 +99,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     if (isMobile && measureRef.current) {
       const height = measureRef.current.offsetHeight;
       setMobileRowHeight(height + MOBILE_MARGIN_BOTTOM);
-      measureRef.current.style.display = 'none';
+      measureRef.current.style.display = "none";
     }
   }, [isMobile]);
 
@@ -143,7 +143,11 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
           </div>
           <div className="flex-1 p-2 rounded-xl bg-white">
             <p className="text-sm text-neutral mb-1">
-              {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD), 2, 2)}
+              {formatNumber(
+                calculateVolumeDepthRatio(pool, runePriceUSD),
+                2,
+                2,
+              )}
             </p>
             <p className="text-xs text-neutral-800">Volume/Depth</p>
           </div>
@@ -164,7 +168,13 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     </TranslucentCard>
   );
 
-  const MobileRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+  const MobileRow = ({
+    index,
+    style,
+  }: {
+    index: number;
+    style: React.CSSProperties;
+  }) => {
     const pool = sortedPools[index];
     return (
       <div style={style}>
@@ -274,10 +284,16 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                 </div>
                 <div className="flex items-start flex-1 w-2/3">
                   <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                    {addDollarSignAndSuffix(calculateVolumeUSD(pool, runePriceUSD))}
+                    {addDollarSignAndSuffix(
+                      calculateVolumeUSD(pool, runePriceUSD),
+                    )}
                   </div>
                   <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                    {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD), 2, 2)}
+                    {formatNumber(
+                      calculateVolumeDepthRatio(pool, runePriceUSD),
+                      2,
+                      2,
+                    )}
                   </div>
                   <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
                     {getFormattedPoolTVL(pool)}
