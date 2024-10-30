@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -11,7 +11,11 @@ import {
 import TranslucentCard from "@/app/TranslucentCard";
 import TopCards from "@/app/components/TopCards";
 import SortHeader from "@shared/components/ui/SortHeader";
-import { useBodyOverflow, useMeasureHeight, useMobileDetection } from "@shared/hooks";
+import {
+  useBodyOverflow,
+  useMeasureHeight,
+  useMobileDetection,
+} from "@shared/hooks";
 
 interface Saver {
   asset: string;
@@ -55,12 +59,13 @@ const getFormattedSaverTVL = (saver: Saver): string => {
   return addDollarSignAndSuffix(tvlUSD);
 };
 
-const MOBILE_MARGIN_BOTTOM = 6; // 6px bottom margin
-
 const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
   const isMobile = useMobileDetection();
   useBodyOverflow(isMobile);
-  const { height: mobileRowHeight, measureRef } = useMeasureHeight({isMobile, marginBottom: 6});
+  const { height: mobileRowHeight, measureRef } = useMeasureHeight({
+    isMobile,
+    marginBottom: 6,
+  });
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,

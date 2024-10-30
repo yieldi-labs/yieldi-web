@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import { PoolDetail, PoolDetails } from "@/midgard";
 import { FixedSizeList as List } from "react-window";
@@ -69,7 +69,10 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
 }) => {
   const isMobile = useMobileDetection();
   useBodyOverflow(isMobile);
-  const { height: mobileRowHeight, measureRef } = useMeasureHeight({isMobile, marginBottom: 6});
+  const { height: mobileRowHeight, measureRef } = useMeasureHeight({
+    isMobile,
+    marginBottom: 6,
+  });
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,
