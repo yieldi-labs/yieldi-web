@@ -10,7 +10,11 @@ import {
   getLogoPath,
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
-import { useMeasureHeight, useMobileDetection } from "@shared/hooks";
+import {
+  useBodyOverflow,
+  useMeasureHeight,
+  useMobileDetection,
+} from "@shared/hooks";
 import { SortHeader } from "@shared/components/ui";
 import TopCards from "@/app/components/TopCards";
 
@@ -64,20 +68,8 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
   runePriceUSD,
 }) => {
   const isMobile = useMobileDetection();
-  const { height: mobileRowHeight, measureRef } = useMeasureHeight({
-    isMobile,
-    marginBottom: 6,
-  }) 
-
-  // set overflow hidden on body if isMobile
-  useEffect(() => {
-    if (isMobile) {
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [isMobile]);
+  useBodyOverflow(isMobile);
+  const { height: mobileRowHeight, measureRef } = useMeasureHeight({isMobile, marginBottom: 6});
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,

@@ -9,9 +9,9 @@ import {
   getLogoPath,
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
-import TopCards from "../../components/TopCards";
-import SortHeader from "../../../../shared/components/ui/SortHeader";
-import { useMobileDetection } from "@shared/hooks";
+import TopCards from "@/app/components/TopCards";
+import SortHeader from "@shared/components/ui/SortHeader";
+import { useBodyOverflow, useMeasureHeight, useMobileDetection } from "@shared/hooks";
 
 interface Saver {
   asset: string;
@@ -59,12 +59,13 @@ const MOBILE_MARGIN_BOTTOM = 6; // 6px bottom margin
 
 const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
   const isMobile = useMobileDetection();
+  useBodyOverflow(isMobile);
+  const { height: mobileRowHeight, measureRef } = useMeasureHeight({isMobile, marginBottom: 6});
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,
     direction: SortDirection.DESC,
   });
-  const [mobileRowHeight, setMobileRowHeight] = useState(150);
-  const measureRef = useRef<HTMLDivElement>(null);
 
   const sortedSavers = useMemo(() => {
     const sortableItems = [...savers];
@@ -86,15 +87,6 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     });
     return sortableItems;
   }, [savers, sortConfig]);
-
-  // Measure mobile row height on first render
-  useEffect(() => {
-    if (isMobile && measureRef.current) {
-      const height = measureRef.current.offsetHeight;
-      setMobileRowHeight(height + MOBILE_MARGIN_BOTTOM);
-      measureRef.current.style.display = "none";
-    }
-  }, [isMobile]);
 
   const sortData = (key: SortKey) => {
     setSortConfig((prevConfig) => ({
@@ -199,6 +191,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
                 width={width}
                 itemCount={sortedSavers.length}
                 itemSize={mobileRowHeight}
+                className="pb-16"
               >
                 {MobileRow}
               </List>
