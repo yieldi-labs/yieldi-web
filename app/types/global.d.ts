@@ -9,6 +9,7 @@ interface WalletOption {
 
 interface ChainConfig {
   id: string;
+  chainId?: number;
   name: string;
   icon: JSX.Element;
   wallets: WalletOption[];

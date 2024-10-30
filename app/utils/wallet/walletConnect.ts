@@ -7,6 +7,35 @@ export const connectUTXOWallet = async (wallet: any): Promise<any> => {
     let address = "";
 
     switch (wallet.id) {
+      case "xdefi-kujira":
+      case "xdefi-cosmos":
+        await wallet.provider.enable(wallet.subchain);
+        const offlineSigner = wallet.provider.getOfflineSigner(wallet.subchain);
+        accounts = await offlineSigner.getAccounts();
+
+        return {
+          provider: wallet.provider,
+          address: accounts[0].address,
+        };
+      case "xdefi-thorchain":
+      case "xdefi-maya":
+      case "xdefi-bch":
+      case "xdefi-doge":
+      case "xdefi-ltc":
+        address = await new Promise((resolve, reject) => {
+          wallet.provider.request(
+            { method: "request_accounts", params: [] },
+            (error: any, accounts: string[]) => {
+              if (error) reject(error);
+              else resolve(accounts[0]);
+            },
+          );
+        });
+
+        return {
+          provider: wallet.provider,
+          address,
+        };
       case "xdefi-utxo":
         address = await wallet.provider.getAccounts();
         return {
@@ -14,10 +43,17 @@ export const connectUTXOWallet = async (wallet: any): Promise<any> => {
           address: address[0],
         };
       case "phantom-utxo":
-        accounts = await wallet.provider.bitcoin.requestAccounts();
+        accounts = await wallet.provider.requestAccounts();
         return {
-          provider: wallet.provider.bitcoin,
+          provider: wallet.provider,
           address: accounts[0].address,
+        };
+      case "phantom-solana":
+        const resp = await wallet.provider.connect();
+
+        return {
+          provider: wallet.provider,
+          address: resp.publicKey.toString(),
         };
       case "okx-utxo":
         accounts = await wallet.provider.connect();

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "@/app/modal";
 import WalletList from "./WalletList";
 import { useAppState } from "@/utils/context";
@@ -10,6 +10,7 @@ import { useWalletList, useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
 
 export default function WalletModal() {
+  const [isHWDisabled, setIsHWDisabled] = useState(false);
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
   const { toggleWalletModal, isWalletModalOpen, setWalletState } =
     useAppState();
@@ -20,8 +21,21 @@ export default function WalletModal() {
     detectedWallets,
   );
 
-  const handleHardwareWalletSelect = async (walletType: string) => {
-    console.log("Connecting to hardware wallet:", walletType);
+  useEffect(() => {
+    switch (selectedChain) {
+      case "solana":
+      case "kujira":
+      case "mayachain":
+      case "binance-smart-chain":
+        setIsHWDisabled(true);
+        break;
+      default:
+        setIsHWDisabled(false);
+    }
+  }, [selectedChain]);
+
+  const handleHardwareWalletSelect = async (wallet: any) => {
+    setWalletState(wallet);
   };
 
   if (!isWalletModalOpen) return null;
@@ -58,6 +72,7 @@ export default function WalletModal() {
             onBack={() => setShowHardwareWallets(false)}
             onWalletSelect={handleHardwareWalletSelect}
             selectedChain={selectedChain}
+            isDisabled={isHWDisabled}
           />
         )}
 

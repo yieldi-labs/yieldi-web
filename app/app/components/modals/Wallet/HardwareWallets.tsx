@@ -6,14 +6,16 @@ import { IconSvg, WalletSvg } from "@/svg";
 
 interface HardwareWalletsProps {
   onBack: () => void;
-  onWalletSelect: (wallet: string, address: string) => void;
+  onWalletSelect: (wallet: any) => void;
   selectedChain: string | null;
+  isDisabled: boolean;
 }
 
 export default function HardwareWallets({
   onBack,
   onWalletSelect,
   selectedChain,
+  isDisabled,
 }: HardwareWalletsProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,10 @@ export default function HardwareWallets({
         throw new Error(`No address received from Ledger for ${selectedChain}`);
       }
 
-      onWalletSelect("ledger", address);
+      onWalletSelect({
+        provider: transport,
+        address,
+      });
 
       await transport.close();
     } catch (err) {
@@ -70,6 +75,7 @@ export default function HardwareWallets({
             transition-all duration-75 min-h-[58px]
             border-transparent hover:border-primary
             disabled:opacity-50 disabled:cursor-not-allowed
+            ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}
           `}
         >
           <WalletSvg.Ledger className="w-[30px]" />

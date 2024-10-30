@@ -56,6 +56,13 @@ export const detectWallets = (): Wallet[] => {
             connect: async () => connectEVMWallet(wallet),
           });
           break;
+        case "phantom":
+          wallets.push({
+            id: "phantom",
+            name: "Phantom Wallet",
+            connect: async () => connectEVMWallet(wallet),
+          });
+          break;
         default:
           break;
       }
@@ -71,41 +78,165 @@ export const detectWallets = (): Wallet[] => {
   }
 
   if (window.okxwallet) {
-    wallets.push({
-      id: "okx-utxo",
-      name: "OKX",
-      connect: async () =>
-        connectUTXOWallet({
-          id: "okx-utxo",
-          name: "OKX Wallet",
-          provider: window.okxwallet.bitcoin,
-        }),
-    });
+    if (window.okxwallet.bitcoin) {
+      wallets.push({
+        id: "okx-utxo",
+        name: "OKX",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "okx-utxo",
+            name: "OKX Wallet",
+            provider: window.okxwallet.bitcoin,
+          }),
+      });
+    }
   }
 
-  if (window.xfi?.bitcoin)
-    wallets.push({
-      id: "xdefi-utxo",
-      name: "CTRL",
-      connect: async () =>
-        connectUTXOWallet({
-          id: "xdefi-utxo",
-          name: "CTRL Wallet",
-          provider: window?.xfi?.bitcoin,
-        }),
-    });
-
   if (window.phantom) {
-    wallets.push({
-      id: "phantom-utxo",
-      name: "Phantom Wallet",
-      connect: async () =>
-        connectUTXOWallet({
-          id: "phantom-utxo",
-          name: "Phantom Wallet",
-          provider: window.phantom,
-        }),
-    });
+    if (window.phantom.bitcoin) {
+      wallets.push({
+        id: "phantom-utxo",
+        name: "Phantom Wallet",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "phantom-utxo",
+            name: "Phantom Wallet",
+            provider: window.phantom.bitcoin,
+          }),
+      });
+    }
+
+    if (window.phantom.solana) {
+      wallets.push({
+        id: "phantom-solana",
+        name: "Phantom Wallet",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "phantom-solana",
+            name: "Phantom Wallet",
+            provider: window.phantom.solana,
+          }),
+      });
+    }
+  }
+
+  if (window.xfi) {
+    if (window.xfi.bitcoincash) {
+      wallets.push({
+        id: "xdefi-bch",
+        name: "CTRL",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-bch",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.bitcoincash,
+          }),
+      });
+    }
+
+    if (window.xfi.bitcoin) {
+      wallets.push({
+        id: "xdefi-utxo",
+        name: "CTRL",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-utxo",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.bitcoin,
+          }),
+      });
+    }
+
+    if (window.xfi.dogecoin) {
+      wallets.push({
+        id: "xdefi-doge",
+        name: "CTRL",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-doge",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.dogecoin,
+          }),
+      });
+    }
+
+    if (window.xfi.litecoin) {
+      wallets.push({
+        id: "xdefi-ltc",
+        name: "CTRL",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-ltc",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.litecoin,
+          }),
+      });
+    }
+
+    if (window.xfi.mayachain) {
+      wallets.push({
+        id: "xdefi-maya",
+        name: "CTRL Wallet",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-maya",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.mayachain,
+          }),
+      });
+    }
+
+    if (window.xfi.thorchain) {
+      wallets.push({
+        id: "xdefi-thorchain",
+        name: "CTRL Wallet",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-thorchain",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.thorchain,
+          }),
+      });
+    }
+
+    // if (window.xfi.solana) {
+    //   wallets.push({
+    //     id: "xdefi-solana",
+    //     name: "CTRL Wallet",
+    //     connect: async () =>
+    //       connectUTXOWallet({
+    //         id: "xdefi-solana",
+    //         name: "CTRL Wallet",
+    //         provider: window?.xfi?.solana,
+    //       }),
+    //   });
+    // }
+
+    if (window.xfi.keplr) {
+      wallets.push({
+        id: "xdefi-cosmos",
+        name: "CTRL Wallet",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-cosmos",
+            name: "CTRL Wallet",
+            subchain: "cosmoshub-4",
+            provider: window?.xfi?.keplr,
+          }),
+      });
+
+      wallets.push({
+        id: "xdefi-kujira",
+        name: "CTRL Wallet",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-kujira",
+            name: "CTRL Wallet",
+            subchain: "kaiyo-1",
+            provider: window?.xfi?.keplr,
+          }),
+      });
+    }
   }
 
   const seen = new Set();
@@ -116,43 +247,4 @@ export const detectWallets = (): Wallet[] => {
   });
 
   return walletsFiltered;
-};
-
-export const filterWalletsByChain = (
-  wallets: Wallet[],
-  selectedChain: string,
-): Wallet[] => {
-  switch (selectedChain) {
-    case "ethereum":
-      return wallets.filter((wallet) =>
-        [
-          "metamask",
-          "trust",
-          "okx",
-          "phantom",
-          "walletconnect",
-          "xdefi",
-        ].includes(wallet.id),
-      );
-
-    case "arbitrum":
-    case "avalanche":
-    case "bsc":
-      return wallets.filter((wallet) =>
-        ["metamask", "trust", "okx", "walletconnect", "xdefi"].includes(
-          wallet.id,
-        ),
-      );
-
-    case "dogechain":
-      return wallets.filter((wallet) => ["xdefi"].includes(wallet.id));
-
-    case "bitcoin":
-      return wallets.filter((wallet) =>
-        ["xdefi-utxo", "phantom-utxo", "okx-utxo"].includes(wallet.id),
-      );
-
-    default:
-      return [];
-  }
 };

@@ -16,10 +16,10 @@ export function ChainSelector({
       <h3 className="text-base text-neutral-900 font-medium font-gt-america">
         Select Chain
       </h3>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4 w-full bg-white rounded-2xl p-3">
         {chains.map((chain) => (
           <button
-            className={`border-[2px] rounded-2xl p-[0.5px] transition-all duration-75 ${
+            className={`flex items-center justify-center border-[3px] rounded-2xl p-[1px] transition-all duration-75 ${
               selectedChain === chain.id
                 ? "border-primary"
                 : "border-transparent"

@@ -1,4 +1,190 @@
 import { ChainSvg, WalletSvg } from "@/svg";
+import { arbitrum, avalanche, bsc, mainnet } from "wagmi/chains";
+
+// Base wallet configurations
+const baseWalletConfig = {
+  CTRL: {
+    name: "CTRL",
+    icon: <WalletSvg.Ctrl />,
+    downloadUrl: "https://ctrl.xyz/",
+  },
+  MetaMask: {
+    name: "MetaMask",
+    icon: <WalletSvg.Metamask />,
+    downloadUrl: "https://metamask.io/",
+  },
+  OKX: {
+    name: "OKX",
+    icon: <WalletSvg.OKX />,
+    downloadUrl: "https://www.okx.com/web3",
+  },
+  WalletConnect: {
+    name: "WalletConnect",
+    icon: <WalletSvg.WalletConnect />,
+  },
+  Vultisig: {
+    name: "Vultisig",
+    icon: <WalletSvg.Vultisig />,
+    downloadUrl: "https://vultisig.com/",
+  },
+  Phantom: {
+    name: "Phantom",
+    icon: <WalletSvg.Phantom />,
+    downloadUrl: "https://phantom.app/",
+  },
+};
+
+// Wallet groups
+const evmWallets = [
+  { id: "metamask", ...baseWalletConfig.MetaMask },
+  { id: "walletconnect", ...baseWalletConfig.WalletConnect },
+  { id: "xdefi", ...baseWalletConfig.CTRL },
+  { id: "okx", ...baseWalletConfig.OKX },
+  { id: "vultisig", ...baseWalletConfig.Vultisig },
+  { id: "phantom", ...baseWalletConfig.Phantom },
+];
+
+const utxoWallets = [
+  { id: "xdefi-utxo", ...baseWalletConfig.CTRL },
+  { id: "okx-utxo", ...baseWalletConfig.OKX },
+  { id: "metamask", ...baseWalletConfig.MetaMask, disabled: true },
+  { id: "vultisig", ...baseWalletConfig.Vultisig, disabled: true },
+  { id: "walletconnect", ...baseWalletConfig.WalletConnect, disabled: true },
+];
+
+const disabledEvmWallets = [
+  { id: "metamask", ...baseWalletConfig.MetaMask, disabled: true },
+  { id: "walletconnect", ...baseWalletConfig.WalletConnect, disabled: true },
+  { id: "vultisig", ...baseWalletConfig.Vultisig, disabled: true },
+];
+
+const singleWalletChains = [
+  {
+    id: "dogecoin",
+    name: "Dogecoin",
+    icon: <ChainSvg.Dogechain />,
+    wallets: [
+      { id: "xdefi-doge", ...baseWalletConfig.CTRL },
+      { id: "okx-doge", ...baseWalletConfig.OKX, disabled: true },
+      { id: "phantom-doge", ...baseWalletConfig.Phantom, disabled: true },
+      ...disabledEvmWallets,
+    ],
+  },
+  {
+    id: "bitcoincash",
+    name: "Bitcoin Cash",
+    icon: <ChainSvg.BitcoinCash />,
+    wallets: [
+      { id: "xdefi-bch", ...baseWalletConfig.CTRL },
+      { id: "okx-bch", ...baseWalletConfig.OKX, disabled: true },
+      { id: "phantom-bch", ...baseWalletConfig.Phantom, disabled: true },
+      ...disabledEvmWallets,
+    ],
+  },
+  {
+    id: "litecoin",
+    name: "Litecoin",
+    icon: <ChainSvg.Litecoin />,
+    wallets: [
+      { id: "xdefi-ltc", ...baseWalletConfig.CTRL },
+      { id: "okx-ltc", ...baseWalletConfig.OKX, disabled: true },
+      { id: "phantom-ltc", ...baseWalletConfig.Phantom, disabled: true },
+      ...disabledEvmWallets,
+    ],
+  },
+  {
+    id: "mayachain",
+    name: "Maya",
+    icon: <ChainSvg.Maya />,
+    wallets: [
+      { id: "xdefi-maya", ...baseWalletConfig.CTRL },
+      { id: "okx-maya", ...baseWalletConfig.OKX, disabled: true },
+      { id: "phantom-maya", ...baseWalletConfig.Phantom, disabled: true },
+      ...disabledEvmWallets,
+    ],
+  },
+  {
+    id: "thorchain",
+    name: "THORChain",
+    icon: <ChainSvg.Thorchain />,
+    wallets: [
+      { id: "xdefi-thorchain", ...baseWalletConfig.CTRL },
+      { id: "okx-thorchain", ...baseWalletConfig.OKX, disabled: true },
+      { id: "phantom-thorchain", ...baseWalletConfig.Phantom, disabled: true },
+      ...disabledEvmWallets,
+    ],
+  },
+  {
+    id: "cosmos",
+    name: "Cosmos",
+    icon: <ChainSvg.Cosmos />,
+    wallets: [
+      { id: "xdefi-cosmos", ...baseWalletConfig.CTRL },
+      { id: "okx-cosmos", ...baseWalletConfig.OKX, disabled: true },
+      { id: "phantom-cosmos", ...baseWalletConfig.Phantom, disabled: true },
+      ...disabledEvmWallets,
+    ],
+  },
+  {
+    id: "kujira",
+    name: "Kujira",
+    icon: <ChainSvg.Kujira />,
+    wallets: [
+      { id: "xdefi-kujira", ...baseWalletConfig.CTRL },
+      { id: "okx-kujira", ...baseWalletConfig.OKX, disabled: true },
+      { id: "phantom-kujira", ...baseWalletConfig.Phantom, disabled: true },
+      ...disabledEvmWallets,
+    ],
+  },
+  {
+    id: "solana",
+    name: "Solana",
+    icon: <ChainSvg.Solana />,
+    wallets: [
+      { id: "phantom-solana", ...baseWalletConfig.Phantom },
+      { id: "xdefi-solana", ...baseWalletConfig.CTRL, disabled: true },
+      { id: "okx-solana", ...baseWalletConfig.OKX, disabled: true },
+      ...disabledEvmWallets,
+    ],
+  },
+];
+
+const evmChains = [
+  {
+    id: "ethereum",
+    name: "Ethereum",
+    icon: <ChainSvg.Ethereum />,
+    chainId: mainnet.id,
+    wallets: evmWallets,
+  },
+  {
+    id: "binance-smart-chain",
+    name: "Binance Smart Chain",
+    icon: <ChainSvg.BSC />,
+    chainId: bsc.id,
+    wallets: evmWallets.map((wallet) =>
+      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet,
+    ),
+  },
+  {
+    id: "avalanche",
+    name: "Avalanche",
+    icon: <ChainSvg.Avax />,
+    chainId: avalanche.id,
+    wallets: evmWallets.map((wallet) =>
+      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet,
+    ),
+  },
+  {
+    id: "arbitrum",
+    name: "Arbitrum",
+    icon: <ChainSvg.Arbitrum />,
+    chainId: arbitrum.id,
+    wallets: evmWallets.map((wallet) =>
+      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet,
+    ),
+  },
+];
 
 export const chainConfig: ChainConfig[] = [
   {
@@ -6,72 +192,10 @@ export const chainConfig: ChainConfig[] = [
     name: "Bitcoin",
     icon: <ChainSvg.Bitcoin />,
     wallets: [
-      {
-        id: "xdefi-utxo",
-        name: "CTRL",
-        icon: <WalletSvg.Ctrl />,
-        downloadUrl: "https://ctrl.xyz/",
-      },
-      {
-        id: "okx-utxo",
-        name: "OKX",
-        icon: <WalletSvg.OKX />,
-        downloadUrl: "https://www.okx.com/web3",
-      },
-      {
-        id: "metamask",
-        name: "MetaMask",
-        icon: <WalletSvg.Metamask />,
-        disabled: true,
-      },
-      {
-        id: "vultisig",
-        name: "Vultisig",
-        icon: <WalletSvg.Vultisig />,
-        disabled: true,
-      },
-      {
-        id: "walletconnect",
-        name: "WalletConnect",
-        icon: <WalletSvg.WalletConnect />,
-        disabled: true,
-      },
+      ...utxoWallets,
+      { id: "phantom-utxo", ...baseWalletConfig.Phantom },
     ],
   },
-  {
-    id: "ethereum",
-    name: "Ethereum",
-    icon: <ChainSvg.Ethereum />,
-    wallets: [
-      {
-        id: "metamask",
-        name: "MetaMask",
-        icon: <WalletSvg.Metamask />,
-        downloadUrl: "https://metamask.io/",
-      },
-      {
-        id: "walletconnect",
-        name: "WalletConnect",
-        icon: <WalletSvg.WalletConnect />,
-      },
-      {
-        id: "xdefi",
-        name: "CTRL",
-        icon: <WalletSvg.Ctrl />,
-        downloadUrl: "https://ctrl.xyz/",
-      },
-      {
-        id: "okx",
-        name: "OKX",
-        icon: <WalletSvg.OKX />,
-        downloadUrl: "https://www.okx.com/web3",
-      },
-      {
-        id: "vultisig",
-        name: "Vultisig",
-        icon: <WalletSvg.Vultisig />,
-        downloadUrl: "https://vultisig.com/",
-      },
-    ],
-  },
+  ...evmChains,
+  ...singleWalletChains,
 ];
