@@ -10,7 +10,7 @@ import {
   getLogoPath,
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
-import { useMobileDetection } from "@shared/hooks";
+import { useMeasureHeight, useMobileDetection } from "@shared/hooks";
 import { SortHeader } from "@shared/components/ui";
 import TopCards from "@/app/components/TopCards";
 
@@ -59,19 +59,30 @@ const getFormattedPoolTVL = (pool: PoolDetail): string => {
   return addDollarSignAndSuffix(tvlUSD);
 };
 
-const MOBILE_MARGIN_BOTTOM = 6; // 6px bottom margin
-
 const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
   pools,
   runePriceUSD,
 }) => {
   const isMobile = useMobileDetection();
+  const { height: mobileRowHeight, measureRef } = useMeasureHeight({
+    isMobile,
+    marginBottom: 6,
+  }) 
+
+  // set overflow hidden on body if isMobile
+  useEffect(() => {
+    if (isMobile) {
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isMobile]);
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,
     direction: SortDirection.DESC,
   });
-  const [mobileRowHeight, setMobileRowHeight] = useState(150);
-  const measureRef = useRef<HTMLDivElement>(null);
 
   const sortedPools = useMemo(() => {
     const sortableItems = [...pools];
@@ -93,15 +104,6 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     });
     return sortableItems;
   }, [pools, sortConfig]);
-
-  // Measure mobile row height on first render
-  useEffect(() => {
-    if (isMobile && measureRef.current) {
-      const height = measureRef.current.offsetHeight;
-      setMobileRowHeight(height + MOBILE_MARGIN_BOTTOM);
-      measureRef.current.style.display = "none";
-    }
-  }, [isMobile]);
 
   const sortData = (key: SortKey) => {
     setSortConfig((prevConfig) => ({
@@ -212,6 +214,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                 width={width}
                 itemCount={sortedPools.length}
                 itemSize={mobileRowHeight}
+                className="pb-16"
               >
                 {MobileRow}
               </List>
