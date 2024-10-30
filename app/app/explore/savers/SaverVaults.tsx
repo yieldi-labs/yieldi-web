@@ -1,5 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
+import { FixedSizeList as List } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
 import {
   addDollarSignAndSuffix,
   formatNumber,
@@ -53,12 +55,16 @@ const getFormattedSaverTVL = (saver: Saver): string => {
   return addDollarSignAndSuffix(tvlUSD);
 };
 
+const MOBILE_MARGIN_BOTTOM = 6; // 6px bottom margin
+
 const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
   const isMobile = useMobileDetection();
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: SortKey.TVL,
     direction: SortDirection.DESC,
   });
+  const [mobileRowHeight, setMobileRowHeight] = useState(150);
+  const measureRef = useRef<HTMLDivElement>(null);
 
   const sortedSavers = useMemo(() => {
     const sortableItems = [...savers];
@@ -81,6 +87,15 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     return sortableItems;
   }, [savers, sortConfig]);
 
+  // Measure mobile row height on first render
+  useEffect(() => {
+    if (isMobile && measureRef.current) {
+      const height = measureRef.current.offsetHeight;
+      setMobileRowHeight(height + MOBILE_MARGIN_BOTTOM);
+      measureRef.current.style.display = 'none';
+    }
+  }, [isMobile]);
+
   const sortData = (key: SortKey) => {
     setSortConfig((prevConfig) => ({
       key,
@@ -91,15 +106,14 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     }));
   };
 
-  const topSavers = sortedSavers.slice(0, 3);
-  const topSaversData = topSavers.map((saver) => ({
+  const topSaversData = sortedSavers.slice(0, 3).map((saver) => ({
     asset: saver.asset,
     formattedTVL: getFormattedSaverTVL(saver),
     apr: parseFloat(saver.saversReturn),
   }));
 
-  const renderMobileCard = (saver: Saver) => (
-    <TranslucentCard key={saver.asset} className="rounded-xl mb-1.5">
+  const MobileCard = ({ saver }: { saver: Saver }) => (
+    <TranslucentCard className="rounded-xl mb-1.5">
       <div className="flex items-center w-full flex-col p-1">
         <div className="w-full flex items-center mb-2">
           <Image
@@ -141,137 +155,131 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     </TranslucentCard>
   );
 
+  const MobileRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+    const saver = sortedSavers[index];
+    return (
+      <div style={style}>
+        <MobileCard saver={saver} />
+      </div>
+    );
+  };
+
+  if (isMobile) {
+    return (
+      <div className="w-full">
+        {/* Hidden measurement div */}
+        <div ref={measureRef}>
+          <MobileCard saver={sortedSavers[0]} />
+        </div>
+
+        {/* Sort header */}
+        <div className="mb-4 flex flex-1 justify-end">
+          <SortHeader
+            sortConfig={sortConfig}
+            onSort={sortData}
+            columns={[
+              { key: SortKey.TVL, label: "TVL" },
+              { key: SortKey.APR, label: "APR" },
+            ]}
+          />
+        </div>
+
+        {/* Virtualized list */}
+        <div className="h-[calc(100vh-170px)]">
+          <AutoSizer>
+            {({ height, width }) => (
+              <List
+                height={height}
+                width={width}
+                itemCount={sortedSavers.length}
+                itemSize={mobileRowHeight}
+              >
+                {MobileRow}
+              </List>
+            )}
+          </AutoSizer>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop view without virtualization
   return (
     <div className="w-full">
-      {/* Top cards, hidden on mobile*/}
-      <div className="mb-8 md:block hidden">
+      <div className="mb-8">
         <TopCards items={topSaversData} />
       </div>
 
-      <div className="relative -mx-4 md:mx-0">
-        <div className="overflow-x-auto">
-          <div className="inline-block min-w-full md:px-0">
-            <div className="w-full px-4 md:px-0">
-              {!isMobile ? (
-                <>
-                  <div className="flex text-left text-base text-gray-700 mb-2">
-                    <div className="px-3 py-3 w-1/2">Asset</div>
-                    <div className="flex flex-1 w-1/2 justify-between">
-                      <div className="px-3 py-3 w-1/4 ml-6">Savers</div>
-                      <div className="px-3 py-3 w-1/4">Utilization</div>
-                      <div
-                        className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-                        onClick={() => sortData(SortKey.TVL)}
-                      >
-                        TVL
-                        <Image
-                          src="/arrow-unfold.svg"
-                          alt="Sort"
-                          width={16}
-                          height={16}
-                          className="ml-1"
-                        />
-                      </div>
-                      <div
-                        className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-                        onClick={() => sortData(SortKey.APR)}
-                      >
-                        APR
-                        <Image
-                          src="/arrow-unfold.svg"
-                          alt="Sort"
-                          width={16}
-                          height={16}
-                          className="ml-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    {sortedSavers.map((saver) => (
-                      <TranslucentCard key={saver.asset} className="rounded-xl">
-                        <div className="flex items-center w-full">
-                          <div className="px-3 whitespace-nowrap flex-1 w-1/3">
-                            <div className="flex items-center">
-                              <Image
-                                src={getLogoPath(saver.asset)}
-                                alt={`${getAssetSymbol(saver.asset)} logo`}
-                                width={28}
-                                height={28}
-                                className="rounded-full"
-                              />
-                              <span className="ml-3 font-medium">
-                                {getAssetSymbol(saver.asset)}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-start flex-1 w-2/3">
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {saver.saversCount}
-                            </div>
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {formatNumber(saver.filled * 100, 2, 2)}%
-                            </div>
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {getFormattedSaverTVL(saver)}
-                            </div>
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {formatNumber(
-                                parseFloat(saver.saversReturn) * 100,
-                                2,
-                                2,
-                              )}
-                              %
-                            </div>
-                          </div>
-                        </div>
-                      </TranslucentCard>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                // Mobile layout with sections
-                <div className="space-y-2 mt-4">
-                  {/* Top Section */}
-                  <div>
-                    <div className="flex flex-row justify-between items-center">
-                      <h2 className="text-base font-medium mb-2 text-neutral-900">
-                        Top Vaults
-                      </h2>
-                      <SortHeader
-                        sortConfig={sortConfig}
-                        onSort={sortData}
-                        columns={[
-                          {
-                            key: SortKey.TVL,
-                            label: "TVL",
-                          },
-                          {
-                            key: SortKey.APR,
-                            label: "APR",
-                          },
-                        ]}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      {sortedSavers.slice(0, 3).map(renderMobileCard)}
-                    </div>
-                  </div>
-
-                  {/* All Savers Section */}
-                  <div>
-                    <h2 className="text-base font-medium mb-1 text-neutral-900">
-                      All Vaults
-                    </h2>
-                    <div className="space-y-1.5">
-                      {sortedSavers.slice(3).map(renderMobileCard)}
-                    </div>
-                  </div>
-                </div>
-              )}
+      <div className="relative">
+        <div className="flex text-left text-base text-gray-700 mb-2 px-4">
+          <div className="px-3 py-3 w-1/2">Asset</div>
+          <div className="flex flex-1 w-1/2 justify-between">
+            <div className="px-3 py-3 w-1/4 ml-6">Savers</div>
+            <div className="px-3 py-3 w-1/4">Utilization</div>
+            <div
+              className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
+              onClick={() => sortData(SortKey.TVL)}
+            >
+              TVL
+              <Image
+                src="/arrow-unfold.svg"
+                alt="Sort"
+                width={16}
+                height={16}
+                className="ml-1"
+              />
+            </div>
+            <div
+              className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
+              onClick={() => sortData(SortKey.APR)}
+            >
+              APR
+              <Image
+                src="/arrow-unfold.svg"
+                alt="Sort"
+                width={16}
+                height={16}
+                className="ml-1"
+              />
             </div>
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          {sortedSavers.map((saver) => (
+            <TranslucentCard key={saver.asset} className="rounded-xl mx-4">
+              <div className="flex items-center w-full">
+                <div className="px-3 whitespace-nowrap flex-1 w-1/3">
+                  <div className="flex items-center">
+                    <Image
+                      src={getLogoPath(saver.asset)}
+                      alt={`${getAssetSymbol(saver.asset)} logo`}
+                      width={28}
+                      height={28}
+                      className="rounded-full"
+                    />
+                    <span className="ml-3 font-medium">
+                      {getAssetSymbol(saver.asset)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start flex-1 w-2/3">
+                  <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                    {saver.saversCount}
+                  </div>
+                  <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                    {formatNumber(saver.filled * 100, 2, 2)}%
+                  </div>
+                  <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                    {getFormattedSaverTVL(saver)}
+                  </div>
+                  <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                    {formatNumber(parseFloat(saver.saversReturn) * 100, 2, 2)}%
+                  </div>
+                </div>
+              </div>
+            </TranslucentCard>
+          ))}
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
 import { PoolDetail, PoolDetails } from "@/midgard";
+import { FixedSizeList as List } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
 import {
   formatNumber,
   addDollarSignAndSuffix,
@@ -57,6 +59,8 @@ const getFormattedPoolTVL = (pool: PoolDetail): string => {
   return addDollarSignAndSuffix(tvlUSD);
 };
 
+const MOBILE_MARGIN_BOTTOM = 6; // 6px bottom margin
+
 const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
   pools,
   runePriceUSD,
@@ -66,6 +70,8 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     key: SortKey.TVL,
     direction: SortDirection.DESC,
   });
+  const [mobileRowHeight, setMobileRowHeight] = useState(150);
+  const measureRef = useRef<HTMLDivElement>(null);
 
   const sortedPools = useMemo(() => {
     const sortableItems = [...pools];
@@ -88,6 +94,15 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     return sortableItems;
   }, [pools, sortConfig]);
 
+  // Measure mobile row height on first render
+  useEffect(() => {
+    if (isMobile && measureRef.current) {
+      const height = measureRef.current.offsetHeight;
+      setMobileRowHeight(height + MOBILE_MARGIN_BOTTOM);
+      measureRef.current.style.display = 'none';
+    }
+  }, [isMobile]);
+
   const sortData = (key: SortKey) => {
     setSortConfig((prevConfig) => ({
       key,
@@ -98,15 +113,14 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     }));
   };
 
-  const topPools = sortedPools.slice(0, 3);
-  const topPoolsData = topPools.map((pool) => ({
+  const topPoolsData = sortedPools.slice(0, 3).map((pool) => ({
     asset: pool.asset,
     formattedTVL: getFormattedPoolTVL(pool),
     apr: parseFloat(pool.poolAPY),
   }));
 
-  const renderMobileCard = (pool: PoolDetail) => (
-    <TranslucentCard key={pool.asset} className="rounded-xl mb-1.5">
+  const MobileCard = ({ pool }: { pool: PoolDetail }) => (
+    <TranslucentCard className="rounded-xl mb-1.5">
       <div className="flex items-center w-full flex-col p-1">
         <div className="w-full flex items-center mb-2">
           <Image
@@ -129,11 +143,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
           </div>
           <div className="flex-1 p-2 rounded-xl bg-white">
             <p className="text-sm text-neutral mb-1">
-              {formatNumber(
-                calculateVolumeDepthRatio(pool, runePriceUSD),
-                2,
-                2,
-              )}
+              {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD), 2, 2)}
             </p>
             <p className="text-xs text-neutral-800">Volume/Depth</p>
           </div>
@@ -154,143 +164,131 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     </TranslucentCard>
   );
 
+  const MobileRow = ({ index, style }: { index: number; style: React.CSSProperties }) => {
+    const pool = sortedPools[index];
+    return (
+      <div style={style}>
+        <MobileCard pool={pool} />
+      </div>
+    );
+  };
+
+  if (isMobile) {
+    return (
+      <div className="w-full">
+        {/* Hidden measurement div */}
+        <div ref={measureRef}>
+          <MobileCard pool={sortedPools[0]} />
+        </div>
+
+        {/* Sort header */}
+        <div className="mb-4 flex flex-1 justify-end">
+          <SortHeader
+            sortConfig={sortConfig}
+            onSort={sortData}
+            columns={[
+              { key: SortKey.TVL, label: "TVL" },
+              { key: SortKey.APR, label: "APR" },
+            ]}
+          />
+        </div>
+
+        {/* Virtualized list */}
+        <div className="h-[calc(100vh-170px)]">
+          <AutoSizer>
+            {({ height, width }) => (
+              <List
+                height={height}
+                width={width}
+                itemCount={sortedPools.length}
+                itemSize={mobileRowHeight}
+              >
+                {MobileRow}
+              </List>
+            )}
+          </AutoSizer>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop view without virtualization
   return (
     <div className="w-full">
-      {/* Top cards, hidden on mobile*/}
-      <div className="mb-8 md:block hidden">
+      <div className="mb-8">
         <TopCards items={topPoolsData} />
       </div>
 
       <div className="relative -mx-4 md:mx-0">
-        <div className="overflow-x-auto">
-          <div className="inline-block min-w-full md:px-0">
-            <div className="w-full px-4 md:px-0">
-              {!isMobile ? (
-                <>
-                  <div className="flex text-left text-base text-gray-700 mb-2">
-                    <div className="px-3 py-3 w-1/2">Asset</div>
-                    <div className="flex flex-1 w-1/2 justify-between">
-                      <div className="px-3 py-3 w-1/4 ml-6">Volume (24h)</div>
-                      <div className="px-3 py-3 w-1/4">Volume/Depth</div>
-                      <div
-                        className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-                        onClick={() => sortData(SortKey.TVL)}
-                      >
-                        TVL
-                        <Image
-                          src="/arrow-unfold.svg"
-                          alt="Sort"
-                          width={16}
-                          height={16}
-                          className="ml-1"
-                        />
-                      </div>
-                      <div
-                        className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-                        onClick={() => sortData(SortKey.APR)}
-                      >
-                        APR
-                        <Image
-                          src="/arrow-unfold.svg"
-                          alt="Sort"
-                          width={16}
-                          height={16}
-                          className="ml-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    {sortedPools.map((pool) => (
-                      <TranslucentCard key={pool.asset} className="rounded-xl">
-                        <div className="flex items-center w-full">
-                          <div className="px-3 whitespace-nowrap flex-1 w-1/3">
-                            <div className="flex items-center">
-                              <Image
-                                src={getLogoPath(pool.asset)}
-                                alt={`${getAssetSymbol(pool.asset)} logo`}
-                                width={28}
-                                height={28}
-                                className="rounded-full"
-                              />
-                              <span className="ml-3 font-medium">
-                                {getAssetSymbol(pool.asset)}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-start flex-1 w-2/3">
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {addDollarSignAndSuffix(
-                                calculateVolumeUSD(pool, runePriceUSD),
-                              )}
-                            </div>
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {formatNumber(
-                                calculateVolumeDepthRatio(pool, runePriceUSD),
-                                2,
-                                2,
-                              )}
-                            </div>
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {getFormattedPoolTVL(pool)}
-                            </div>
-                            <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                              {formatNumber(
-                                parseFloat(pool.poolAPY) * 100,
-                                2,
-                                2,
-                              )}
-                              %
-                            </div>
-                          </div>
-                        </div>
-                      </TranslucentCard>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                // Mobile layout with sections
-                <div className="space-y-2 mt-4">
-                  {/* Top Section */}
-                  <div>
-                    <div className="flex flex-row justify-between items-center">
-                      <h2 className="text-base font-medium mb-2 text-neutral-900">
-                        Top Pools
-                      </h2>
-                      <SortHeader
-                        sortConfig={sortConfig}
-                        onSort={sortData}
-                        columns={[
-                          {
-                            key: SortKey.TVL,
-                            label: "TVL",
-                          },
-                          {
-                            key: SortKey.APR,
-                            label: "APR",
-                          },
-                        ]}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      {sortedPools.slice(0, 3).map(renderMobileCard)}
-                    </div>
-                  </div>
-
-                  {/* All Pools Section */}
-                  <div>
-                    <h2 className="text-base font-medium mb-1 text-neutral-900">
-                      All Pools
-                    </h2>
-                    <div className="space-y-1.5">
-                      {sortedPools.slice(3).map(renderMobileCard)}
-                    </div>
-                  </div>
-                </div>
-              )}
+        <div className="flex text-left text-base text-gray-700 mb-2 px-4">
+          <div className="px-3 py-3 w-1/2">Asset</div>
+          <div className="flex flex-1 w-1/2 justify-between">
+            <div className="px-3 py-3 w-1/4 ml-6">Volume (24h)</div>
+            <div className="px-3 py-3 w-1/4">Volume/Depth</div>
+            <div
+              className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
+              onClick={() => sortData(SortKey.TVL)}
+            >
+              TVL
+              <Image
+                src="/arrow-unfold.svg"
+                alt="Sort"
+                width={16}
+                height={16}
+                className="ml-1"
+              />
+            </div>
+            <div
+              className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
+              onClick={() => sortData(SortKey.APR)}
+            >
+              APR
+              <Image
+                src="/arrow-unfold.svg"
+                alt="Sort"
+                width={16}
+                height={16}
+                className="ml-1"
+              />
             </div>
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          {sortedPools.map((pool) => (
+            <TranslucentCard key={pool.asset} className="rounded-xl mx-4">
+              <div className="flex items-center w-full">
+                <div className="px-3 whitespace-nowrap flex-1 w-1/3">
+                  <div className="flex items-center">
+                    <Image
+                      src={getLogoPath(pool.asset)}
+                      alt={`${getAssetSymbol(pool.asset)} logo`}
+                      width={28}
+                      height={28}
+                      className="rounded-full"
+                    />
+                    <span className="ml-3 font-medium">
+                      {getAssetSymbol(pool.asset)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start flex-1 w-2/3">
+                  <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                    {addDollarSignAndSuffix(calculateVolumeUSD(pool, runePriceUSD))}
+                  </div>
+                  <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                    {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD), 2, 2)}
+                  </div>
+                  <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                    {getFormattedPoolTVL(pool)}
+                  </div>
+                  <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
+                    {formatNumber(parseFloat(pool.poolAPY) * 100, 2, 2)}%
+                  </div>
+                </div>
+              </div>
+            </TranslucentCard>
+          ))}
         </div>
       </div>
     </div>
