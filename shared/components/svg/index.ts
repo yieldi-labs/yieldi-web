@@ -7,4 +7,5 @@ export { default as DoubleArrow } from "./DoubleArrow";
 export { default as DownArrow} from "./DownArrow";
 export { default as SolutionSVG } from "./Solution";
 export { default as Staking } from "./Staking";
+export { default as UpArrow } from "./UpArrow";
 export { default as Yieldi } from "./Yieldi";

@@ -9,8 +9,8 @@ const DownArrow = (props: SVGProps<SVGSVGElement>) => (
     fill="none"
     {...props}
   >
-    <path d="M4.66663 6.66667L7.99996 10" stroke="#585E62" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M8 10L11.3333 6.66667" stroke="#242628" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M7 10L12 15" stroke="#242628" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 15L17 10" stroke="#242628" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   </svg>
 );
 

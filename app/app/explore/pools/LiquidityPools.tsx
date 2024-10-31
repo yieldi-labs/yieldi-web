@@ -100,14 +100,23 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     return sortableItems;
   }, [pools, sortConfig]);
 
-  const sortData = (key: SortKey) => {
-    setSortConfig((prevConfig) => ({
-      key,
-      direction:
-        prevConfig.key === key && prevConfig.direction === SortDirection.ASC
-          ? SortDirection.DESC
-          : SortDirection.ASC,
-    }));
+  const sortData = (key: SortKey, direction?: SortDirection) => {
+    if (direction) {
+      setSortConfig({ key, direction });
+      return;
+    }
+    // Toggle sort direction if the same key is clicked
+    if (sortConfig.key === key) {
+      setSortConfig({
+        key,
+        direction:
+          sortConfig.direction === SortDirection.ASC
+            ? SortDirection.DESC
+            : SortDirection.ASC,
+      });
+    } else {
+      setSortConfig({ key, direction: SortDirection.DESC });
+    }
   };
 
   const topPoolsData = sortedPools.slice(0, 3).map((pool) => ({
