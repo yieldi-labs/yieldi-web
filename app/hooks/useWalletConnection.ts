@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
 import { detectWallets } from "@/utils/wallet/detectedWallets";
 import { chainConfig } from "@/utils/wallet/chainConfig";
-import { useSwitchChain } from "wagmi";
+import { useConnectors, useSwitchChain } from "wagmi";
 
 export function useWalletConnection(
   setWalletState: any,
   toggleWalletModal: () => void,
 ) {
   const { switchChain } = useSwitchChain();
+  const ethConnectors = useConnectors();
 
   const [selectedChain, setSelectedChain] = useState<string | null>("bitcoin");
   const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
 
   useEffect(() => {
-    const wallets = detectWallets();
+    const wallets = detectWallets(ethConnectors);
     const walletsWithIcons = wallets
       .map((detectedWallet) => {
         for (const chain of chainConfig) {
@@ -108,6 +109,8 @@ export function useWalletConnection(
       const isNonEVM = detectedWalletForChain.id.includes("-");
       const isVultisig = detectedWalletForChain.id.includes("vultisig");
       const connectedWallet = await detectedWalletForChain.connect();
+
+      console.log(connectedWallet);
 
       const provider =
         isVultisig || isNonEVM

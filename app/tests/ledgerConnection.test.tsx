@@ -24,6 +24,7 @@ describe("HardwareWallets Component", () => {
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
         selectedChain="ethereum"
+        isDisabled={false}
       />,
     );
 
@@ -37,6 +38,7 @@ describe("HardwareWallets Component", () => {
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
         selectedChain="ethereum"
+        isDisabled={false}
       />,
     );
 
@@ -57,6 +59,7 @@ describe("HardwareWallets Component", () => {
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
         selectedChain="ethereum"
+        isDisabled={false}
       />,
     );
 
@@ -85,6 +88,7 @@ describe("HardwareWallets Component", () => {
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
         selectedChain="bitcoin"
+        isDisabled={false}
       />,
     );
 
@@ -106,6 +110,7 @@ describe("HardwareWallets Component", () => {
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
         selectedChain="ethereum"
+        isDisabled={false}
       />,
     );
 

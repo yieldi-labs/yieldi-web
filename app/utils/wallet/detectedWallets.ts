@@ -1,5 +1,4 @@
-import { getConnectors } from "@wagmi/core";
-import { wagmiConfig } from "./wagmiConfig";
+import { GetConnectorsReturnType } from "wagmi/actions";
 import {
   connectEVMWallet,
   connectUTXOWallet,
@@ -12,9 +11,9 @@ export interface Wallet {
   connect: () => Promise<string | void>;
 }
 
-const ethConnectors = getConnectors(wagmiConfig);
-
-export const detectWallets = (): Wallet[] => {
+export const detectWallets = (
+  ethConnectors: GetConnectorsReturnType,
+): Wallet[] => {
   const wallets: Wallet[] = [];
 
   ethConnectors.forEach((wallet) => {

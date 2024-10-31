@@ -22,6 +22,7 @@ export default function WalletModal() {
   );
 
   useEffect(() => {
+    console.log("WalletModal");
     switch (selectedChain) {
       case "solana":
       case "kujira":
