@@ -172,19 +172,6 @@ export const detectWallets = (
       });
     }
 
-    if (window.xfi.mayachain) {
-      wallets.push({
-        id: "xdefi-maya",
-        name: "CTRL Wallet",
-        connect: async () =>
-          connectUTXOWallet({
-            id: "xdefi-maya",
-            name: "CTRL Wallet",
-            provider: window?.xfi?.mayachain,
-          }),
-      });
-    }
-
     if (window.xfi.thorchain) {
       wallets.push({
         id: "xdefi-thorchain",
@@ -210,32 +197,6 @@ export const detectWallets = (
     //       }),
     //   });
     // }
-
-    if (window.xfi.keplr) {
-      wallets.push({
-        id: "xdefi-cosmos",
-        name: "CTRL Wallet",
-        connect: async () =>
-          connectUTXOWallet({
-            id: "xdefi-cosmos",
-            name: "CTRL Wallet",
-            subchain: "cosmoshub-4",
-            provider: window?.xfi?.keplr,
-          }),
-      });
-
-      wallets.push({
-        id: "xdefi-kujira",
-        name: "CTRL Wallet",
-        connect: async () =>
-          connectUTXOWallet({
-            id: "xdefi-kujira",
-            name: "CTRL Wallet",
-            subchain: "kaiyo-1",
-            provider: window?.xfi?.keplr,
-          }),
-      });
-    }
   }
 
   const seen = new Set();

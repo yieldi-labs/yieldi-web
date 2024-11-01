@@ -44,57 +44,26 @@ export function useWalletConnection(
     }
 
     try {
+      const chainIdentifiers: Record<string, string> = {
+        solana: "solana",
+        thorchain: "thorchain",
+        litecoin: "ltc",
+        dogecoin: "doge",
+        bitcoincash: "bch",
+        bitcoin: "utxo",
+      };
+
       const detectedWalletForChain = detectedWallets.find((w) => {
-        switch (selectedChain) {
-          case "solana":
-            if (w.id.includes("solana") || wallet.id.includes("solana")) {
-              return w.id === wallet.id;
-            }
-            break;
-          case "kujira":
-            if (w.id.includes("kujira") || wallet.id.includes("kujira")) {
-              return w.id === wallet.id;
-            }
-            break;
-          case "cosmos":
-            if (w.id.includes("cosmos") || wallet.id.includes("cosmos")) {
-              return w.id === wallet.id;
-            }
-            break;
-          case "thorchain":
-            if (w.id.includes("thorchain") || wallet.id.includes("thorchain")) {
-              return w.id === wallet.id;
-            }
-            break;
-          case "mayachain":
-            if (w.id.includes("maya") || wallet.id.includes("maya")) {
-              return w.id === wallet.id;
-            }
-            break;
-          case "litecoin":
-            if (w.id.includes("ltc") || wallet.id.includes("ltc")) {
-              return w.id === wallet.id;
-            }
-            break;
-          case "dogecoin":
-            if (w.id.includes("doge") || wallet.id.includes("doge")) {
-              return w.id === wallet.id;
-            }
-            break;
-          case "bitcoincash":
-            if (w.id.includes("bch") || wallet.id.includes("bch")) {
-              return w.id === wallet.id;
-            }
-            break;
-          case "bitcoin":
-            if (w.id.includes("utxo") || wallet.id.includes("utxo")) {
-              return w.id === wallet.id;
-            }
-            break;
-          default:
-            return w.id.split("-")[0] === wallet.id.split("-")[0];
+        const identifier = chainIdentifiers[selectedChain];
+
+        if (!identifier) {
+          return w.id.split("-")[0] === wallet.id.split("-")[0];
         }
-        return false;
+
+        return (
+          (w.id.includes(identifier) || wallet.id.includes(identifier)) &&
+          w.id === wallet.id
+        );
       });
 
       if (!detectedWalletForChain) {

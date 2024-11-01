@@ -8,6 +8,7 @@ import { ChainSelector } from "./ChainSelector";
 import HardwareWallets from "./HardwareWallets";
 import { useWalletList, useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
+import { twMerge } from "tailwind-merge";
 
 export default function WalletModal() {
   const [isHWDisabled, setIsHWDisabled] = useState(false);
@@ -22,11 +23,9 @@ export default function WalletModal() {
   );
 
   useEffect(() => {
-    console.log("WalletModal");
     switch (selectedChain) {
       case "solana":
       case "kujira":
-      case "mayachain":
       case "binance-smart-chain":
         setIsHWDisabled(true);
         break;
@@ -60,9 +59,15 @@ export default function WalletModal() {
             />
             <div
               onClick={() => setShowHardwareWallets(true)}
-              className="flex items-center justify-between bg-white rounded-2xl p-4 border-transparent hover:border-primary cursor-pointer border-[2px] transition-all duration-75"
+              className={twMerge(
+                "flex items-center justify-between",
+                "bg-white rounded-2xl p-4",
+                "border-2 border-transparent",
+                "hover:border-primary cursor-pointer",
+                "transition-all duration-75",
+              )}
             >
-              <h3 className="text-[14px] text-neutral-900 font-medium font-gt-america">
+              <h3 className="text-sm text-neutral-900 font-medium font-gt-america">
                 Hardware Wallets
               </h3>
               <IconSvg.Wallet />
@@ -77,7 +82,7 @@ export default function WalletModal() {
           />
         )}
 
-        <p className="text-neutral-600 text-sm mt-2 max-w-[390px]">
+        <p className="text-sm text-neutral-600 mt-2 max-w-[390px]">
           By connecting a wallet, you agree to Yieldi&apos;s Terms of Use and
           Privacy Policy
         </p>

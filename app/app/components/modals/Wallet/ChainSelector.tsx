@@ -1,3 +1,4 @@
+import { UIComponents } from "@shared/components";
 import { cloneElement } from "react";
 
 interface ChainSelectorProps {
@@ -27,7 +28,9 @@ export function ChainSelector({
             key={chain.id}
             onClick={() => onChainSelect(chain.id)}
           >
-            {cloneElement(chain.icon)}
+            <UIComponents.Tooltip text={chain.name}>
+              {cloneElement(chain.icon)}
+            </UIComponents.Tooltip>
           </button>
         ))}
       </div>

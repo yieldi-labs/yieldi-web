@@ -9,12 +9,12 @@ import {
   phantomWallet,
   xdefiWallet,
 } from "@rainbow-me/rainbowkit/wallets";
-import { mainnet, arbitrum, bsc, avalanche } from "wagmi/chains";
+import { mainnet, bsc, avalanche } from "wagmi/chains";
 
 export const wagmiConfig = getDefaultConfig({
   appName: "Yieldi",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECTID || "",
-  chains: [bsc, mainnet, arbitrum, avalanche],
+  chains: [bsc, mainnet, avalanche],
   wallets: [
     {
       groupName: "Recommended",

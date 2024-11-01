@@ -1,5 +1,5 @@
 import { ChainSvg, WalletSvg } from "@/svg";
-import { arbitrum, avalanche, bsc, mainnet } from "wagmi/chains";
+import { avalanche, bsc, mainnet } from "wagmi/chains";
 
 // Base wallet configurations
 const baseWalletConfig = {
@@ -93,17 +93,6 @@ const singleWalletChains = [
     ],
   },
   {
-    id: "mayachain",
-    name: "Maya",
-    icon: <ChainSvg.Maya />,
-    wallets: [
-      { id: "xdefi-maya", ...baseWalletConfig.CTRL },
-      { id: "okx-maya", ...baseWalletConfig.OKX, disabled: true },
-      { id: "phantom-maya", ...baseWalletConfig.Phantom, disabled: true },
-      ...disabledEvmWallets,
-    ],
-  },
-  {
     id: "thorchain",
     name: "THORChain",
     icon: <ChainSvg.Thorchain />,
@@ -111,28 +100,6 @@ const singleWalletChains = [
       { id: "xdefi-thorchain", ...baseWalletConfig.CTRL },
       { id: "okx-thorchain", ...baseWalletConfig.OKX, disabled: true },
       { id: "phantom-thorchain", ...baseWalletConfig.Phantom, disabled: true },
-      ...disabledEvmWallets,
-    ],
-  },
-  {
-    id: "cosmos",
-    name: "Cosmos",
-    icon: <ChainSvg.Cosmos />,
-    wallets: [
-      { id: "xdefi-cosmos", ...baseWalletConfig.CTRL },
-      { id: "okx-cosmos", ...baseWalletConfig.OKX, disabled: true },
-      { id: "phantom-cosmos", ...baseWalletConfig.Phantom, disabled: true },
-      ...disabledEvmWallets,
-    ],
-  },
-  {
-    id: "kujira",
-    name: "Kujira",
-    icon: <ChainSvg.Kujira />,
-    wallets: [
-      { id: "xdefi-kujira", ...baseWalletConfig.CTRL },
-      { id: "okx-kujira", ...baseWalletConfig.OKX, disabled: true },
-      { id: "phantom-kujira", ...baseWalletConfig.Phantom, disabled: true },
       ...disabledEvmWallets,
     ],
   },
@@ -159,7 +126,7 @@ const evmChains = [
   },
   {
     id: "binance-smart-chain",
-    name: "Binance Smart Chain",
+    name: "BSC",
     icon: <ChainSvg.BSC />,
     chainId: bsc.id,
     wallets: evmWallets.map((wallet) =>
@@ -171,15 +138,6 @@ const evmChains = [
     name: "Avalanche",
     icon: <ChainSvg.Avax />,
     chainId: avalanche.id,
-    wallets: evmWallets.map((wallet) =>
-      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet,
-    ),
-  },
-  {
-    id: "arbitrum",
-    name: "Arbitrum",
-    icon: <ChainSvg.Arbitrum />,
-    chainId: arbitrum.id,
     wallets: evmWallets.map((wallet) =>
       wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet,
     ),

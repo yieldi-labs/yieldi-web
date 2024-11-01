@@ -35,50 +35,55 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const provider = wallet?.provider;
 
-    if (provider) {
-      if (typeof provider.on === "function") {
-        const handleAccountsChanged = (accounts: string[]) => {
-          setWalletState({ ...wallet, address: accounts[0] || null });
-        };
+    if (!provider) {
+      console.warn(
+        "Provider does not support event listeners. Consider adding polling for updates.",
+      );
+      return;
+    }
 
-        const handleNetworkChanged = (networkId: string) => {
-          setWalletState({ ...wallet, network: networkId });
-        };
+    if (typeof provider.on === "function") {
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (!wallet) return;
+        setWalletState({ ...wallet, address: accounts[0] || null });
+      };
 
-        provider.on("accountsChanged", handleAccountsChanged);
-        provider.on("networkChanged", handleNetworkChanged);
+      const handleNetworkChanged = (networkId: string) => {
+        if (!wallet) return;
+        setWalletState({
+          ...wallet,
+          network: networkId,
+        });
+      };
 
-        return () => {
-          provider.removeListener("accountsChanged", handleAccountsChanged);
-          provider.removeListener("networkChanged", handleNetworkChanged);
-        };
-      } else if (window.ethereum) {
-        const handleAccountsChanged = (accounts: string[]) => {
-          setWalletState({ ...wallet, address: accounts[0] || null });
-        };
+      provider.on("accountsChanged", handleAccountsChanged);
+      provider.on("networkChanged", handleNetworkChanged);
 
-        const handleNetworkChanged = (networkId: string) => {
-          setWalletState({ ...wallet, network: networkId });
-        };
+      return () => {
+        provider.removeListener("accountsChanged", handleAccountsChanged);
+        provider.removeListener("networkChanged", handleNetworkChanged);
+      };
+    } else if (window.ethereum) {
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (!wallet) return;
+        setWalletState({ ...wallet, address: accounts[0] || null });
+      };
 
-        window.ethereum.on("accountsChanged", handleAccountsChanged);
-        window.ethereum.on("networkChanged", handleNetworkChanged);
+      const handleNetworkChanged = (networkId: string) => {
+        if (!wallet) return;
+        setWalletState({ ...wallet, network: networkId });
+      };
 
-        return () => {
-          window.ethereum.removeListener(
-            "accountsChanged",
-            handleAccountsChanged,
-          );
-          window.ethereum.removeListener(
-            "networkChanged",
-            handleNetworkChanged,
-          );
-        };
-      } else {
-        console.warn(
-          "Provider does not support event listeners. Consider adding polling for updates.",
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("networkChanged", handleNetworkChanged);
+
+      return () => {
+        window.ethereum.removeListener(
+          "accountsChanged",
+          handleAccountsChanged,
         );
-      }
+        window.ethereum.removeListener("networkChanged", handleNetworkChanged);
+      };
     }
   }, [wallet?.provider]);
 
