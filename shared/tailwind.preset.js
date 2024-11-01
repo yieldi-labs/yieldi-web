@@ -6,10 +6,19 @@ module.exports = {
         "transparent-radial":
           "radial-gradient(circle at 50% 30%, transparent 20%, #FFFFFF 100%)",
       },
+      boxShadow: {
+        'dropdown': '0px 2px 9.4px 0px rgba(98, 126, 234, 0.19)',
+      },
       backdropBlur: { m: "5px", l: "10px", xl: "20px" },
       borderColor: { DEFAULT: "var(--border)" },
       colors: {
-        neutral: { DEFAULT: "#242628", 900: "#3A3D3F", 800: "#424648" },
+        neutral: {
+          DEFAULT: "#242628",
+          100: '#F5F6F6',
+          700: '#585E62',
+          800: "#424648",
+          900: "#3A3D3F"
+        },
         background: "var(--background)",
         foreground: "var(--foreground)",
         foreground2: "#6D655D",
@@ -31,7 +40,8 @@ module.exports = {
       },
       borderRadius: {
         nav: "40px",
-        large: "20px",
+        sm: "6px",
+        lg: "20px",
       },
       fontWeight: {
         light: "300",

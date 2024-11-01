@@ -473,3 +473,12 @@ export const calculateVolumeDepthRatio = (
   const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
   return volumeUSD / tvlUSD;
 };
+
+export const getAssetSymbol = (asset: string): string => {
+  return asset.split("-")[0] || asset;
+};
+
+export const getLogoPath = (asset: string): string => {
+  const assetLower = asset.toLowerCase();
+  return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
+};

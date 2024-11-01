@@ -1,8 +1,8 @@
 "use client";
 
 import { PoolDetails, StatsData } from "@/midgard";
-import LiquidityPools from "@/app/explore/pools/LiquidityPools";
 import ExploreNav from "../components/ExploreNav";
+import LiquidityPools from "./LiquidityPools";
 
 interface PoolsViewProps {
   pools: PoolDetails;
