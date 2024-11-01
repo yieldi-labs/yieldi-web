@@ -15,26 +15,25 @@ import {
   useMeasureHeight,
   useMobileDetection,
 } from "@shared/hooks";
-import { SortHeader } from "@shared/components/ui";
+import MobileSortableHeader from "@shared/components/ui/MobileSortableHeader";
 import TopCards from "@/app/components/TopCards";
+import { SortDirection } from "@shared/components/ui/types";
+import { SortableHeader } from "@shared/components/ui";
 
 interface LiquidityPoolsProps {
   pools: PoolDetails;
   runePriceUSD: number;
 }
 
-enum SortKey {
+enum PoolSortKey {
+  VOLUME = "volume",
+  VOLUME_DEPTH = "volumeDepth",
   TVL = "tvl",
   APR = "apr",
 }
 
-enum SortDirection {
-  ASC = "asc",
-  DESC = "desc",
-}
-
 interface SortConfig {
-  key: SortKey;
+  key: PoolSortKey;
   direction: SortDirection;
 }
 
@@ -75,47 +74,61 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
   });
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: SortKey.TVL,
+    key: PoolSortKey.TVL,
     direction: SortDirection.DESC,
   });
+
+  const sortOptions = [
+    { key: PoolSortKey.VOLUME, label: "Volume (24h)" },
+    { key: PoolSortKey.VOLUME_DEPTH, label: "Volume/Depth" },
+    { key: PoolSortKey.TVL, label: "TVL" },
+    { key: PoolSortKey.APR, label: "APR" },
+  ];
 
   const sortedPools = useMemo(() => {
     const sortableItems = [...pools];
     sortableItems.sort((a, b) => {
-      if (sortConfig.key === SortKey.TVL) {
-        const aTvl = calculatePoolTVL(a);
-        const bTvl = calculatePoolTVL(b);
-        return sortConfig.direction === SortDirection.ASC
-          ? aTvl - bTvl
-          : bTvl - aTvl;
-      } else if (sortConfig.key === SortKey.APR) {
-        const aApr = parseFloat(a.poolAPY);
-        const bApr = parseFloat(b.poolAPY);
-        return sortConfig.direction === SortDirection.ASC
-          ? aApr - bApr
-          : bApr - aApr;
+      let aValue: number, bValue: number;
+      
+      switch (sortConfig.key) {
+        case PoolSortKey.VOLUME:
+          aValue = calculateVolumeUSD(a, runePriceUSD);
+          bValue = calculateVolumeUSD(b, runePriceUSD);
+          break;
+        case PoolSortKey.VOLUME_DEPTH:
+          aValue = calculateVolumeDepthRatio(a, runePriceUSD);
+          bValue = calculateVolumeDepthRatio(b, runePriceUSD);
+          break;
+        case PoolSortKey.TVL:
+          aValue = calculatePoolTVL(a);
+          bValue = calculatePoolTVL(b);
+          break;
+        case PoolSortKey.APR:
+          aValue = parseFloat(a.poolAPY);
+          bValue = parseFloat(b.poolAPY);
+          break;
+        default:
+          return 0;
       }
-      return 0;
+      
+      return sortConfig.direction === SortDirection.ASC
+        ? aValue - bValue
+        : bValue - aValue;
     });
     return sortableItems;
-  }, [pools, sortConfig]);
+  }, [pools, sortConfig, runePriceUSD]);
 
-  const sortData = (key: SortKey, direction?: SortDirection) => {
+  const sortData = (key: PoolSortKey, direction?: SortDirection) => {
     if (direction) {
       setSortConfig({ key, direction });
-      return;
-    }
-    // Toggle sort direction if the same key is clicked
-    if (sortConfig.key === key) {
-      setSortConfig({
+    } else {
+      setSortConfig((prevConfig) => ({
         key,
         direction:
-          sortConfig.direction === SortDirection.ASC
+          prevConfig.key === key && prevConfig.direction === SortDirection.ASC
             ? SortDirection.DESC
             : SortDirection.ASC,
-      });
-    } else {
-      setSortConfig({ key, direction: SortDirection.DESC });
+      }));
     }
   };
 
@@ -149,18 +162,12 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
           </div>
           <div className="flex-1 p-2 rounded-xl bg-white">
             <p className="text-sm text-neutral mb-1">
-              {formatNumber(
-                calculateVolumeDepthRatio(pool, runePriceUSD),
-                2,
-                2,
-              )}
+              {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD), 2, 2)}
             </p>
             <p className="text-xs text-neutral-800">Volume/Depth</p>
           </div>
           <div className="flex-1 p-2 rounded-xl bg-white">
-            <p className="text-sm text-neutral mb-1">
-              {getFormattedPoolTVL(pool)}
-            </p>
+            <p className="text-sm text-neutral mb-1">{getFormattedPoolTVL(pool)}</p>
             <p className="text-xs text-neutral-800">TVL</p>
           </div>
           <div className="flex-1 p-2 rounded-xl bg-white">
@@ -199,7 +206,11 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
 
         {/* Sort header */}
         <div className="mb-4 flex flex-1 justify-end">
-          <SortHeader sortConfig={sortConfig} onSort={sortData} />
+          <MobileSortableHeader<PoolSortKey>
+            sortConfig={sortConfig}
+            options={sortOptions}
+            onSort={sortData}
+          />
         </div>
 
         {/* Virtualized list */}
@@ -222,7 +233,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     );
   }
 
-  // Desktop view without virtualization
+  // Desktop view with sortable columns
   return (
     <div className="w-full">
       <div className="mb-8">
@@ -233,36 +244,44 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
         <div className="flex text-left text-base text-gray-700 mb-2 px-4">
           <div className="px-3 py-3 w-1/2">Asset</div>
           <div className="flex flex-1 w-1/2 justify-between">
-            <div className="px-3 py-3 w-1/4 ml-6">Volume (24h)</div>
-            <div className="px-3 py-3 w-1/4">Volume/Depth</div>
-            <div
-              className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-              onClick={() => sortData(SortKey.TVL)}
-            >
-              TVL
-              <Image
-                src="/arrow-unfold.svg"
-                alt="Sort"
-                width={16}
-                height={16}
-                className="ml-1"
+            <div className="w-1/4">
+              <SortableHeader<PoolSortKey>
+                label="Volume (24h)"
+                sortKey={PoolSortKey.VOLUME}
+                currentSortKey={sortConfig.key}
+                sortDirection={sortConfig.direction}
+                onSort={sortData}
               />
             </div>
-            <div
-              className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-              onClick={() => sortData(SortKey.APR)}
-            >
-              APR
-              <Image
-                src="/arrow-unfold.svg"
-                alt="Sort"
-                width={16}
-                height={16}
-                className="ml-1"
+            <div className="w-1/4">
+              <SortableHeader<PoolSortKey>
+                label="Volume/Depth"
+                sortKey={PoolSortKey.VOLUME_DEPTH}
+                currentSortKey={sortConfig.key}
+                sortDirection={sortConfig.direction}
+                onSort={sortData}
+              />
+            </div>
+            <div className="w-1/4">
+              <SortableHeader<PoolSortKey>
+                label="TVL"
+                sortKey={PoolSortKey.TVL}
+                currentSortKey={sortConfig.key}
+                sortDirection={sortConfig.direction}
+                onSort={sortData}
+              />
+            </div>
+            <div className="w-1/4">
+              <SortableHeader<PoolSortKey>
+                label="APR"
+                sortKey={PoolSortKey.APR}
+                currentSortKey={sortConfig.key}
+                sortDirection={sortConfig.direction}
+                onSort={sortData}
               />
             </div>
           </div>
-        </div>
+        </div> 
 
         <div className="space-y-1.5">
           {sortedPools.map((pool) => (
@@ -284,16 +303,10 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                 </div>
                 <div className="flex items-start flex-1 w-2/3">
                   <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                    {addDollarSignAndSuffix(
-                      calculateVolumeUSD(pool, runePriceUSD),
-                    )}
+                    {addDollarSignAndSuffix(calculateVolumeUSD(pool, runePriceUSD))}
                   </div>
                   <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                    {formatNumber(
-                      calculateVolumeDepthRatio(pool, runePriceUSD),
-                      2,
-                      2,
-                    )}
+                    {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD), 2, 2)}
                   </div>
                   <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
                     {getFormattedPoolTVL(pool)}

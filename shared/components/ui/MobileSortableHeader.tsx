@@ -1,28 +1,28 @@
 "use client";
-
 import { twMerge } from "tailwind-merge";
 import { ChevronDown, ArrowUp, ArrowDown } from "../svg";
 import { useState, useRef, useEffect } from "react";
+import { SortDirection } from "./types";
 
-export enum SortKey {
-  TVL = "tvl",
-  APR = "apr",
+interface SortOption<T> {
+  key: T;
+  label: string;
 }
 
-enum SortDirection {
-  ASC = "asc",
-  DESC = "desc",
-}
-
-interface SortHeaderProps {
+interface SortHeaderProps<T> {
   sortConfig: {
-    key: SortKey;
+    key: T;
     direction: SortDirection;
   };
-  onSort: (key: SortKey, direction: SortDirection) => void;
+  options: SortOption<T>[];
+  onSort: (key: T, direction?: SortDirection) => void;
 }
 
-const SortHeader: React.FC<SortHeaderProps> = ({ sortConfig, onSort }) => {
+function MobileSortableHeader<T extends string>({ 
+  sortConfig, 
+  options,
+  onSort 
+}: SortHeaderProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +37,7 @@ const SortHeader: React.FC<SortHeaderProps> = ({ sortConfig, onSort }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleOptionClick = (key: SortKey) => {
+  const handleOptionClick = (key: T) => {
     // If clicking the current sort key, toggle direction
     if (key === sortConfig.key) {
       const newDirection = sortConfig.direction === SortDirection.ASC
@@ -50,11 +50,6 @@ const SortHeader: React.FC<SortHeaderProps> = ({ sortConfig, onSort }) => {
     }
     setIsOpen(false);
   };
-
-  const options = [
-    { key: SortKey.TVL, label: "TVL" },
-    { key: SortKey.APR, label: "APR" }
-  ];
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -72,13 +67,18 @@ const SortHeader: React.FC<SortHeaderProps> = ({ sortConfig, onSort }) => {
             <button
               key={option.key}
               onClick={() => handleOptionClick(option.key)}
-              className={twMerge("flex items-center justify-between w-full px-3 py-1 text-sm rounded-sm", option.key === sortConfig.key ? "bg-neutral-100" : "")}
+              className={twMerge(
+                "flex items-center justify-between w-full px-3 py-1 text-sm rounded-sm",
+                option.key === sortConfig.key ? "bg-neutral-100" : ""
+              )}
             >
               <span className={option.key === sortConfig.key ? "font-bold" : "font-medium"}>
                 {option.label}
               </span>
               {option.key === sortConfig.key && (
-                sortConfig.direction === SortDirection.ASC ? <ArrowUp className="w-5 h-5" /> : <ArrowDown className="w-5 h-5" />
+                sortConfig.direction === SortDirection.ASC 
+                  ? <ArrowUp className="w-5 h-5" /> 
+                  : <ArrowDown className="w-5 h-5" />
               )}
             </button>
           ))}
@@ -86,6 +86,6 @@ const SortHeader: React.FC<SortHeaderProps> = ({ sortConfig, onSort }) => {
       )}
     </div>
   );
-};
+}
 
-export default SortHeader;
+export default MobileSortableHeader;
