@@ -177,10 +177,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
 
         {/* Sort header */}
         <div className="mb-4 flex flex-1 justify-end">
-          <SortHeader
-            sortConfig={sortConfig}
-            onSort={sortData}
-          />
+          <SortHeader sortConfig={sortConfig} onSort={sortData} />
         </div>
 
         {/* Virtualized list */}

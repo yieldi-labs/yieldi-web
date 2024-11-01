@@ -12,8 +12,8 @@ module.exports = {
       backdropBlur: { m: "5px", l: "10px", xl: "20px" },
       borderColor: { DEFAULT: "var(--border)" },
       colors: {
-        neutral: { 
-          DEFAULT: "#242628", 
+        neutral: {
+          DEFAULT: "#242628",
           100: '#F5F6F6',
           700: '#585E62',
           800: "#424648",
@@ -40,7 +40,8 @@ module.exports = {
       },
       borderRadius: {
         nav: "40px",
-        large: "20px",
+        sm: "6px",
+        lg: "20px",
       },
       fontWeight: {
         light: "300",
