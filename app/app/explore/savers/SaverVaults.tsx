@@ -11,13 +11,13 @@ import {
 import TranslucentCard from "@/app/TranslucentCard";
 import TopCards from "@/app/components/TopCards";
 import MobileSortableHeader from "@shared/components/ui/MobileSortableHeader";
-import { ArrowUp, ArrowDown } from "@shared/components/svg";
 import {
   useBodyOverflow,
   useMeasureHeight,
   useMobileDetection,
 } from "@shared/hooks";
 import { SortDirection } from "@shared/components/ui/types";
+import { SortableHeader } from "@shared/components/ui";
 
 interface Saver {
   asset: string;
@@ -123,27 +123,6 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
             : SortDirection.ASC,
       }));
     }
-  };
-
-  const SortableHeader: React.FC<{
-    label: string;
-    sortKey: SaverSortKey;
-  }> = ({ label, sortKey }) => {
-    const isActive = sortConfig.key === sortKey;
-    return (
-      <div
-        className="px-3 py-3 flex items-center cursor-pointer"
-        onClick={() => sortData(sortKey)}
-      >
-        <span className={isActive ? "font-bold" : "font-normal"}>{label}</span>
-        {isActive &&
-          (sortConfig.direction === SortDirection.ASC ? (
-            <ArrowUp className="w-4 h-4 ml-1" />
-          ) : (
-            <ArrowDown className="w-4 h-4 ml-1" />
-          ))}
-      </div>
-    );
   };
 
   const topSaversData = sortedSavers.slice(0, 3).map((saver) => ({
@@ -259,19 +238,40 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
           <div className="px-3 py-3 w-1/2">Asset</div>
           <div className="flex flex-1 w-1/2 justify-between">
             <div className="w-1/4">
-              <SortableHeader label="Savers" sortKey={SaverSortKey.SAVERS} />
-            </div>
-            <div className="w-1/4">
-              <SortableHeader
-                label="Utilization"
-                sortKey={SaverSortKey.UTILIZATION}
+              <SortableHeader<SaverSortKey>
+                label="Savers"
+                sortKey={SaverSortKey.SAVERS}
+                currentSortKey={sortConfig.key}
+                onSort={sortData}
+                sortDirection={sortConfig.direction}
               />
             </div>
             <div className="w-1/4">
-              <SortableHeader label="TVL" sortKey={SaverSortKey.TVL} />
+              <SortableHeader<SaverSortKey>
+                label="Utilization"
+                sortKey={SaverSortKey.UTILIZATION}
+                currentSortKey={sortConfig.key}
+                onSort={sortData}
+                sortDirection={sortConfig.direction}
+              />
             </div>
             <div className="w-1/4">
-              <SortableHeader label="APR" sortKey={SaverSortKey.APR} />
+              <SortableHeader<SaverSortKey>
+                label="TVL"
+                sortKey={SaverSortKey.TVL}
+                currentSortKey={sortConfig.key}
+                onSort={sortData}
+                sortDirection={sortConfig.direction}
+              />
+            </div>
+            <div className="w-1/4">
+              <SortableHeader<SaverSortKey>
+                label="APR"
+                sortKey={SaverSortKey.APR}
+                currentSortKey={sortConfig.key}
+                onSort={sortData}
+                sortDirection={sortConfig.direction}
+              />
             </div>
           </div>
         </div>
