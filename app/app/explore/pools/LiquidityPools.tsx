@@ -202,10 +202,6 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
           <SortHeader
             sortConfig={sortConfig}
             onSort={sortData}
-            columns={[
-              { key: SortKey.TVL, label: "TVL" },
-              { key: SortKey.APR, label: "APR" },
-            ]}
           />
         </div>
 

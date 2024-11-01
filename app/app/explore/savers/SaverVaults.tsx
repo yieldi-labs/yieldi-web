@@ -180,10 +180,6 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
           <SortHeader
             sortConfig={sortConfig}
             onSort={sortData}
-            columns={[
-              { key: SortKey.TVL, label: "TVL" },
-              { key: SortKey.APR, label: "APR" },
-            ]}
           />
         </div>
 
