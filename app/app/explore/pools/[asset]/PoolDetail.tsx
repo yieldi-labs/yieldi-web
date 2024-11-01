@@ -8,7 +8,7 @@ import {
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
-import { TopCard } from "../../TopCard";
+import { TopCard } from "@/app/components/TopCard";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -16,15 +16,6 @@ interface PoolDetailProps {
 }
 
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
-  const getAssetSymbol = (asset: string) => {
-    return asset.split(".")[1] || asset;
-  };
-
-  const getLogoPath = (asset: string) => {
-    const assetLower = asset.toLowerCase();
-    return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
-  };
-
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
   const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
@@ -50,8 +41,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             asset={pool.asset}
             formattedTVL={formattedTVL}
             apr={parseFloat(pool.poolAPY)}
-            getAssetSymbol={getAssetSymbol}
-            getLogoPath={getLogoPath}
           >
             <div className="space-y-4 w-full mt-8">
               <div className="flex justify-between items-center">
