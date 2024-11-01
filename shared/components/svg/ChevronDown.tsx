@@ -1,11 +1,12 @@
 import * as React from "react";
 import { SVGProps } from "react";
 
-const DownArrow = (props: SVGProps<SVGSVGElement>) => (
+const ChevronDown = (props: SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={24}
     height={24}
+    viewBox="0 0 24 24"
     fill="none"
     {...props}
   >
@@ -14,4 +15,4 @@ const DownArrow = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export default DownArrow;
+export default ChevronDown;
