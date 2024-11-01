@@ -39,7 +39,7 @@ function SortableHeader<T extends string>({
             )
           ) : (
             <div className="opacity-0 group-hover:opacity-100">
-              <ArrowUp className="w-4 h-4" />
+              <ArrowDown className="w-4 h-4" />
             </div>
           )}
         </div>

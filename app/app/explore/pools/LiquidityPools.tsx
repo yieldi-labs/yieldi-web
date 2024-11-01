@@ -125,9 +125,9 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
       setSortConfig((prevConfig) => ({
         key,
         direction:
-          prevConfig.key === key && prevConfig.direction === SortDirection.ASC
-            ? SortDirection.DESC
-            : SortDirection.ASC,
+          prevConfig.key === key && prevConfig.direction === SortDirection.DESC
+            ? SortDirection.ASC
+            : SortDirection.DESC,
       }));
     }
   };
