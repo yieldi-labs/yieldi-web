@@ -10,12 +10,14 @@ import {
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
 import TopCards from "@/app/components/TopCards";
-import SortHeader from "@shared/components/ui/SortHeader";
+import MobileSortableHeader from "@shared/components/ui/MobileSortableHeader";
 import {
   useBodyOverflow,
   useMeasureHeight,
   useMobileDetection,
 } from "@shared/hooks";
+import { SortDirection } from "@shared/components/ui/types";
+import { SortableHeader } from "@shared/components/ui";
 
 interface Saver {
   asset: string;
@@ -33,18 +35,15 @@ interface SaverVaultsProps {
   savers: Saver[];
 }
 
-enum SortKey {
+enum SaverSortKey {
+  SAVERS = "savers",
+  UTILIZATION = "utilization",
   TVL = "tvl",
   APR = "apr",
 }
 
-enum SortDirection {
-  ASC = "asc",
-  DESC = "desc",
-}
-
 interface SortConfig {
-  key: SortKey;
+  key: SaverSortKey;
   direction: SortDirection;
 }
 
@@ -68,39 +67,62 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
   });
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: SortKey.TVL,
+    key: SaverSortKey.TVL,
     direction: SortDirection.DESC,
   });
+
+  const sortOptions = [
+    { key: SaverSortKey.SAVERS, label: "Savers" },
+    { key: SaverSortKey.UTILIZATION, label: "Utilization" },
+    { key: SaverSortKey.TVL, label: "TVL" },
+    { key: SaverSortKey.APR, label: "APR" },
+  ];
 
   const sortedSavers = useMemo(() => {
     const sortableItems = [...savers];
     sortableItems.sort((a, b) => {
-      if (sortConfig.key === SortKey.TVL) {
-        const aTvl = calculateSaverTVL(a);
-        const bTvl = calculateSaverTVL(b);
-        return sortConfig.direction === SortDirection.ASC
-          ? aTvl - bTvl
-          : bTvl - aTvl;
-      } else if (sortConfig.key === SortKey.APR) {
-        const aApr = parseFloat(a.saversReturn);
-        const bApr = parseFloat(b.saversReturn);
-        return sortConfig.direction === SortDirection.ASC
-          ? aApr - bApr
-          : bApr - aApr;
+      let aValue: number, bValue: number;
+
+      switch (sortConfig.key) {
+        case SaverSortKey.SAVERS:
+          aValue = a.saversCount;
+          bValue = b.saversCount;
+          break;
+        case SaverSortKey.UTILIZATION:
+          aValue = a.filled;
+          bValue = b.filled;
+          break;
+        case SaverSortKey.TVL:
+          aValue = calculateSaverTVL(a);
+          bValue = calculateSaverTVL(b);
+          break;
+        case SaverSortKey.APR:
+          aValue = parseFloat(a.saversReturn);
+          bValue = parseFloat(b.saversReturn);
+          break;
+        default:
+          return 0;
       }
-      return 0;
+
+      return sortConfig.direction === SortDirection.ASC
+        ? aValue - bValue
+        : bValue - aValue;
     });
     return sortableItems;
   }, [savers, sortConfig]);
 
-  const sortData = (key: SortKey) => {
-    setSortConfig((prevConfig) => ({
-      key,
-      direction:
-        prevConfig.key === key && prevConfig.direction === SortDirection.ASC
-          ? SortDirection.DESC
-          : SortDirection.ASC,
-    }));
+  const sortData = (key: SaverSortKey, direction?: SortDirection) => {
+    if (direction) {
+      setSortConfig({ key, direction });
+    } else {
+      setSortConfig((prevConfig) => ({
+        key,
+        direction:
+          prevConfig.key === key && prevConfig.direction === SortDirection.DESC
+            ? SortDirection.ASC
+            : SortDirection.DESC,
+      }));
+    }
   };
 
   const topSaversData = sortedSavers.slice(0, 3).map((saver) => ({
@@ -177,7 +199,11 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
 
         {/* Sort header */}
         <div className="mb-4 flex flex-1 justify-end">
-          <SortHeader sortConfig={sortConfig} onSort={sortData} />
+          <MobileSortableHeader<SaverSortKey>
+            sortConfig={sortConfig}
+            options={sortOptions}
+            onSort={sortData}
+          />
         </div>
 
         {/* Virtualized list */}
@@ -200,7 +226,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     );
   }
 
-  // Desktop view without virtualization
+  // Desktop view with sortable columns
   return (
     <div className="w-full">
       <div className="mb-8">
@@ -211,32 +237,40 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
         <div className="flex text-left text-base text-gray-700 mb-2 px-4">
           <div className="px-3 py-3 w-1/2">Asset</div>
           <div className="flex flex-1 w-1/2 justify-between">
-            <div className="px-3 py-3 w-1/4 ml-6">Savers</div>
-            <div className="px-3 py-3 w-1/4">Utilization</div>
-            <div
-              className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-              onClick={() => sortData(SortKey.TVL)}
-            >
-              TVL
-              <Image
-                src="/arrow-unfold.svg"
-                alt="Sort"
-                width={16}
-                height={16}
-                className="ml-1"
+            <div className="w-1/4">
+              <SortableHeader<SaverSortKey>
+                label="Savers"
+                sortKey={SaverSortKey.SAVERS}
+                currentSortKey={sortConfig.key}
+                onSort={sortData}
+                sortDirection={sortConfig.direction}
               />
             </div>
-            <div
-              className="px-3 py-3 w-1/4 flex items-center cursor-pointer"
-              onClick={() => sortData(SortKey.APR)}
-            >
-              APR
-              <Image
-                src="/arrow-unfold.svg"
-                alt="Sort"
-                width={16}
-                height={16}
-                className="ml-1"
+            <div className="w-1/4">
+              <SortableHeader<SaverSortKey>
+                label="Utilization"
+                sortKey={SaverSortKey.UTILIZATION}
+                currentSortKey={sortConfig.key}
+                onSort={sortData}
+                sortDirection={sortConfig.direction}
+              />
+            </div>
+            <div className="w-1/4">
+              <SortableHeader<SaverSortKey>
+                label="TVL"
+                sortKey={SaverSortKey.TVL}
+                currentSortKey={sortConfig.key}
+                onSort={sortData}
+                sortDirection={sortConfig.direction}
+              />
+            </div>
+            <div className="w-1/4">
+              <SortableHeader<SaverSortKey>
+                label="APR"
+                sortKey={SaverSortKey.APR}
+                currentSortKey={sortConfig.key}
+                onSort={sortData}
+                sortDirection={sortConfig.direction}
               />
             </div>
           </div>
