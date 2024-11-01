@@ -82,7 +82,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     const sortableItems = [...savers];
     sortableItems.sort((a, b) => {
       let aValue: number, bValue: number;
-      
+
       switch (sortConfig.key) {
         case SaverSortKey.SAVERS:
           aValue = a.saversCount;
@@ -103,7 +103,7 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
         default:
           return 0;
       }
-      
+
       return sortConfig.direction === SortDirection.ASC
         ? aValue - bValue
         : bValue - aValue;
@@ -125,13 +125,10 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
     }
   };
 
-  const SortableHeader: React.FC<{ 
-    label: string; 
+  const SortableHeader: React.FC<{
+    label: string;
     sortKey: SaverSortKey;
-  }> = ({
-    label,
-    sortKey,
-  }) => {
+  }> = ({ label, sortKey }) => {
     const isActive = sortConfig.key === sortKey;
     return (
       <div
@@ -139,11 +136,12 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
         onClick={() => sortData(sortKey)}
       >
         <span className={isActive ? "font-bold" : "font-normal"}>{label}</span>
-        {isActive && (
-          sortConfig.direction === SortDirection.ASC 
-            ? <ArrowUp className="w-4 h-4 ml-1" />
-            : <ArrowDown className="w-4 h-4 ml-1" />
-        )}
+        {isActive &&
+          (sortConfig.direction === SortDirection.ASC ? (
+            <ArrowUp className="w-4 h-4 ml-1" />
+          ) : (
+            <ArrowDown className="w-4 h-4 ml-1" />
+          ))}
       </div>
     );
   };
@@ -264,7 +262,10 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
               <SortableHeader label="Savers" sortKey={SaverSortKey.SAVERS} />
             </div>
             <div className="w-1/4">
-              <SortableHeader label="Utilization" sortKey={SaverSortKey.UTILIZATION} />
+              <SortableHeader
+                label="Utilization"
+                sortKey={SaverSortKey.UTILIZATION}
+              />
             </div>
             <div className="w-1/4">
               <SortableHeader label="TVL" sortKey={SaverSortKey.TVL} />
