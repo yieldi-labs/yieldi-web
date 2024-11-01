@@ -162,7 +162,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
           </div>
           <div className="flex-1 p-2 rounded-xl bg-white">
             <p className="text-sm text-neutral mb-1">
-              {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD), 2, 2)}
+              {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD) * 100, 2, 2)}%
             </p>
             <p className="text-xs text-neutral-800">Volume/Depth</p>
           </div>
@@ -306,7 +306,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                     {addDollarSignAndSuffix(calculateVolumeUSD(pool, runePriceUSD))}
                   </div>
                   <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                    {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD), 2, 2)}
+                    {formatNumber(calculateVolumeDepthRatio(pool, runePriceUSD) * 100, 2, 2)}%
                   </div>
                   <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
                     {getFormattedPoolTVL(pool)}
