@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { scrollToElement } from "../../utils/scrollToElement";
-import { useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 interface LinkWithHoverEffectProps {
   links: { label: string; href: string }[];
@@ -14,18 +15,17 @@ const LinkWithHoverEffect = ({
   column,
   toggleMenu,
 }: LinkWithHoverEffectProps) => {
-  const [pathname, setPathname] = useState("");
-
-  useEffect(() => {
-    setPathname(window.location.pathname);
-  }, []);
+  const pathname = usePathname();
 
   return (
     <ul
-      className={`desktop:gap-20 flex items-center gap-14 font-medium uppercase ${column && "flex-col"}`}
+      className={twMerge(
+        "desktop:gap-20 flex items-center gap-14 font-medium uppercase",
+        column && "flex-col",
+      )}
     >
       {links.map(({ label, href }, index) => {
-        const isActive = pathname === href;
+        const isActive = pathname === href || pathname === `${href}/`;
 
         return (
           <li key={index} className="group relative cursor-pointer">
@@ -47,7 +47,11 @@ const LinkWithHoverEffect = ({
             )}
             {/* Background effect for hover and active states */}
             <div
-              className={`pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-300 ease-in-out ${isActive ? "opacity-100" : "opacity-0"} group-hover:opacity-100`}
+              className={twMerge(
+                "pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-300 ease-in-out",
+                isActive ? "opacity-100" : "opacity-0",
+                "group-hover:opacity-100",
+              )}
               style={{
                 background: `radial-gradient(circle at center, rgba(98, 126, 234, 0.26) 35%, rgba(98, 126, 234, 0) 100%)`,
                 borderRadius: "50%",

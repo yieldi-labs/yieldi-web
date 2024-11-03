@@ -1,50 +1,33 @@
 import { metadata } from "@/utils";
 import { Providers } from "./providers";
+import WalletButton from "./WalletButton";
+import { lpGradientCircles } from "@shared/utils";
 import { UIComponents, CommonComponents } from "@shared/components";
-import "./globals.css";
-import "@rainbow-me/rainbowkit/styles.css";
+import { AppStateProvider } from "@/utils/context";
+import WalletModal from "./components/modals/Wallet/WalletModal";
+
+import "./styles/globals.css";
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="shortcut icon" href="/favicon.png" />
-      </head>
-      <body>
-        <div
-          className={`fixed bottom-0 right-0 translate-x-[20%] translate-y-[20%]`}
-        >
-          <CommonComponents.BlurredCircle size={594} color="yellow" />
-        </div>
-        <div
-          className={`fixed top-[10px] left-0 translate-x-[-20%] translate-y-[-20%]`}
-        >
-          <CommonComponents.BlurredCircle size={594} color="#A799FE" />
-        </div>
-        <div
-          className={`fixed bottom-[-297px] left-0 translate-x-[-20%] translate-y-[-20%]`}
-        >
-          <CommonComponents.BlurredCircle size={594} color="#FF6656" />
-        </div>
-        <div
-          className={`fixed top-[-20px] right-[50px] translate-x-[-20%] translate-y-[-20%]`}
-        >
-          <CommonComponents.BlurredCircle size={594} color="#007D98" />
-        </div>
-        <div
-          className={`fixed top-[-20px] right-0 translate-x-[40%] translate-y-[-20%]`}
-        >
-          <CommonComponents.BlurredCircle size={594} color="#A1FD59" />
-        </div>
+      <body className="relative">
         <Providers>
-          <UIComponents.Navbar
-            links={[{ label: "explore", href: "/explore" }]}
-            // buttons={[{ component: <WalletButton /> }]}
-          />
-          <div className="mx-auto p-4 md:mt-[130px] mt-24">{children}</div>
+          <AppStateProvider>
+            <UIComponents.Navbar
+              links={[
+                { label: "explore", href: "/explore" },
+                { label: "points", href: "/points" },
+              ]}
+              buttons={[{ component: <WalletButton /> }]}
+            />
+            <div className="p-4 mt-[130px]">{children}</div>
+            <WalletModal />
+          </AppStateProvider>
         </Providers>
+        <CommonComponents.GradientCircles circles={lpGradientCircles} fixed />
       </body>
     </html>
   );
