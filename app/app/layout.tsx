@@ -19,7 +19,6 @@ export default function RootLayout({
             <UIComponents.Navbar
               links={[
                 { label: "explore", href: "/explore" },
-                { label: "points", href: "/points" },
               ]}
               buttons={[{ component: <WalletButton /> }]}
             />
