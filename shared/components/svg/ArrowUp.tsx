@@ -10,8 +10,8 @@ const ArrowUp = (props: SVGProps<SVGSVGElement>) => (
     fill="none"
     {...props}
   >
-    <path d="M12 5L12 19" stroke="#242628" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M19 12L12 5L5 12" stroke="#242628" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 5L12 19" stroke="#242628" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M19 12L12 5L5 12" stroke="#242628" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 

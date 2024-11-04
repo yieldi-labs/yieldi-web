@@ -34,6 +34,20 @@ const nextConfig = {
 
     return config;
   },
+  redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/explore",
+        permanent: false,
+      },
+      {
+        source: "/explore",
+        destination: "/explore/pools",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

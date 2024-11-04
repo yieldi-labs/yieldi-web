@@ -25,7 +25,7 @@ const LinkWithHoverEffect = ({
       )}
     >
       {links.map(({ label, href }, index) => {
-        const isActive = pathname === href || pathname === `${href}/`;
+        const isActive = pathname === href || pathname === `${href}/` || pathname.startsWith(href);
 
         return (
           <li key={index} className="group relative cursor-pointer">
