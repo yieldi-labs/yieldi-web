@@ -4,7 +4,7 @@ export default function Modal({
   onClose,
   style,
 }: {
-  title: string;
+  title?: string;
   children: React.ReactNode;
   onClose: () => void;
   style?: object;
@@ -15,26 +15,27 @@ export default function Modal({
       <line x1="6" y1="6" x2="18" y2="18"></line>
     </svg>
   );
-
   return (
     <div
-      className="fixed z-[1000] inset-0 w-full h-full bg-[rgb(0,0,0,0.5)] flex items-center justify-center"
+      className="fixed z-10 inset-0 w-full h-full overflow-y-auto bg-[rgb(0,0,0,0.5)] flex justify-center text-left"
       onClick={onClose}
     >
       <div
-        className="bg-neutral-100 backdrop-blur-md border-4 border-white max-h-[95vh] no-scrollbar relative z-20 max-w-lg w-[95%] mx-auto rounded-xl p-7 overflow-y-auto"
+        className="relative z-20 max-w-2xl mx-auto mb-auto mt-[5vh] w-[95%] rounded-large border-4 border-white bg-secondary"
         onClick={(e) => e.stopPropagation()}
         style={style}
       >
-        <div className="flex mb-4">
-          <h2 className="flex-1 mt-0 leading-none text-xl font-gt-america font-medium">
-            {title}
-          </h2>
-          <a className="cursor-pointer foreground pb-4" onClick={onClose}>
-            {xIcon}
-          </a>
-        </div>
-        <div>{children}</div>
+        {title && (
+          <div className="flex border-b">
+            <h2 className="flex-1 mt-0 leading-none font-bold text-2xl px-6  py-4 border-r tracking-wider">
+              {title}
+            </h2>
+            <a className="cursor-pointer foreground p-4" onClick={onClose}>
+              {xIcon}
+            </a>
+          </div>
+        )}
+        <div className="p-6">{children}</div>
       </div>
     </div>
   );

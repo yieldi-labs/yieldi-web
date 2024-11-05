@@ -4,10 +4,14 @@ import TranslucentCard from "@/app/TranslucentCard";
 import {
   calculateVolumeDepthRatio,
   formatNumber,
+  getAssetCanonicalSymbol,
   getFormattedPoolTVL,
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
+import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
+import { useState } from "react";
+import { getLogoPath } from "@/app/utils";
 import { TopCard } from "@/app/components/TopCard";
 
 interface PoolDetailProps {
@@ -16,6 +20,8 @@ interface PoolDetailProps {
 }
 
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
+  const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
+
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
   const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
@@ -54,7 +60,10 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                 <span className="font-medium">3.6%</span>
               </div>
             </div>
-            <button className="w-full bg-[#A1FD59] text-black font-semibold py-3 rounded-full mt-8">
+            <button
+              className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
+              onClick={() => setShowAddLiquidityModal(true)}
+            >
               Add
             </button>
           </TopCard>
@@ -69,7 +78,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             <button className="text-red-500 font-medium">REMOVE</button>
           </div>
 
-          <TranslucentCard className="p-6 rounded-2xl flex flex-col">
+          <TranslucentCard className="p-6 rounded-2xl flex flex-col shadow-md">
             <div className="mb-8 bg-white rounded-xl w-full p-3">
               <div className="text-gray-700 font-medium text-lg mb-2">
                 PRINCIPAL
@@ -105,6 +114,13 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           </TranslucentCard>
         </div>
       </div>
+      {showAddLiquidityModal && (
+        <AddLiquidityModal
+          pool={pool}
+          runePriceUSD={runePriceUSD}
+          onClose={() => setShowAddLiquidityModal(false)}
+        />
+      )}
     </div>
   );
 }
