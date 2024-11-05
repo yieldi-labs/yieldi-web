@@ -70,6 +70,7 @@ export default function AddLiquidityModal({
     <Modal onClose={onClose} style={modalStyle}>
       <div>
         {/* Tab Selector */}
+        {/* Uncomment after multi wallet support
         <div className="flex rounded-full border-white border-2 mb-14 text-lg font-medium text-neutral-800">
           <button
             onClick={() => setSelectedTab("single")}
@@ -89,7 +90,7 @@ export default function AddLiquidityModal({
           >
             Add {getAssetShortSymbol(pool.asset)} + RUNE
           </button>
-        </div>
+        </div>*/}
 
         {/* Asset Input Section */}
         <div>
