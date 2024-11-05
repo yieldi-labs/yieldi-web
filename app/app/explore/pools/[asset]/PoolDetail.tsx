@@ -4,14 +4,12 @@ import TranslucentCard from "@/app/TranslucentCard";
 import {
   calculateVolumeDepthRatio,
   formatNumber,
-  getAssetCanonicalSymbol,
   getFormattedPoolTVL,
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
 import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
 import { useState } from "react";
-import { getLogoPath } from "@/app/utils";
 import { TopCard } from "@/app/components/TopCard";
 
 interface PoolDetailProps {

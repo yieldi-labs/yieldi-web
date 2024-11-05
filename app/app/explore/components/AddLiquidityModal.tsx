@@ -22,7 +22,7 @@ export default function AddLiquidityModal({
   runePriceUSD,
   onClose,
 }: AddLiquidityModalProps) {
-  const [selectedTab, setSelectedTab] = useState("single");
+  const [selectedTab, ] = useState("single");
   const [btcAmount, setBtcAmount] = useState(1.2345);
   const [runeAmount, setRuneAmount] = useState(1.2345);
 
@@ -58,9 +58,11 @@ export default function AddLiquidityModal({
   const getCurrentPercentage = (amount: number) =>
     getPercentage(amount, 1.2345);
 
+  /*
   const tabClass = "flex-1 py-3 px-6 rounded-full text-sm font-medium";
   const activeTabClass =
     "bg-white shadow-[0px_0px_18.1px_0px_rgba(98,126,234,0.24)] text-neutral-900";
+  */
   const modalStyle = {
     backgroundColor: "#F5F6F6",
     maxWidth: "36rem",
