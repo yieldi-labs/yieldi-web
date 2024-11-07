@@ -1,6 +1,8 @@
 import { UIComponents } from "@shared/components";
 import { cloneElement } from "react";
 
+import { Button } from "../../../../../shared/components/ui";
+
 interface ChainSelectorProps {
   chains: ChainConfig[];
   selectedChain: string | null;
@@ -14,9 +16,12 @@ export function ChainSelector({
 }: ChainSelectorProps) {
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="text-base text-neutral-900 font-medium font-gt-america">
-        Select Chain
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-base text-neutral-900 font-medium font-gt-america">
+          Select Chain
+        </h3>
+        <Button label="select/deselect all" className="text-xs py-1.5 px-3" />
+      </div>
       <div className="flex flex-wrap gap-4 w-full bg-white rounded-2xl p-3">
         {chains.map((chain) => (
           <button

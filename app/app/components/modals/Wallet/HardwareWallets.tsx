@@ -3,6 +3,7 @@ import Eth from "@ledgerhq/hw-app-eth";
 import Btc from "@ledgerhq/hw-app-btc";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { IconSvg, WalletSvg } from "@/svg";
+import { useAppState } from "@/utils/context";
 
 interface HardwareWalletsProps {
   onBack: () => void;
@@ -19,6 +20,7 @@ export default function HardwareWallets({
 }: HardwareWalletsProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toggleWalletModal } = useAppState();
 
   const connectLedger = async () => {
     try {
@@ -34,8 +36,9 @@ export default function HardwareWallets({
         address = result.address;
       } else {
         const btc = new Btc({ transport });
-        const { bitcoinAddress } =
-          await btc.getWalletPublicKey("44'/0'/0'/0/0");
+        const { bitcoinAddress } = await btc.getWalletPublicKey(
+          "44'/0'/0'/0/0"
+        );
         address = bitcoinAddress;
       }
 
@@ -49,6 +52,7 @@ export default function HardwareWallets({
       });
 
       await transport.close();
+      toggleWalletModal();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to connect Ledger");
     } finally {

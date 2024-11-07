@@ -15,11 +15,16 @@ export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
   const { toggleWalletModal, isWalletModalOpen, setWalletState } =
     useAppState();
-  const { selectedChain, setSelectedChain, handleConnect, detectedWallets } =
-    useWalletConnection(setWalletState, toggleWalletModal);
+  const {
+    selectedChain,
+    setSelectedChain,
+    handleConnect,
+    detectedWallets,
+    handleSelectChain,
+  } = useWalletConnection(setWalletState, toggleWalletModal);
   const { detected, undetected, isWalletValidForChain } = useWalletList(
     selectedChain,
-    detectedWallets,
+    detectedWallets
   );
 
   useEffect(() => {
@@ -34,9 +39,8 @@ export default function WalletModal() {
     }
   }, [selectedChain]);
 
-  const handleHardwareWalletSelect = async (wallet: any) => {
+  const handleHardwareWalletSelect = async (wallet: any) =>
     setWalletState(wallet);
-  };
 
   if (!isWalletModalOpen) return null;
 
@@ -46,9 +50,8 @@ export default function WalletModal() {
         <ChainSelector
           chains={chainConfig}
           selectedChain={selectedChain}
-          onChainSelect={setSelectedChain}
+          onChainSelect={handleSelectChain}
         />
-
         {!showHardwareWallets ? (
           <>
             <WalletList
@@ -64,7 +67,7 @@ export default function WalletModal() {
                 "bg-white rounded-2xl p-4",
                 "border-2 border-transparent",
                 "hover:border-primary cursor-pointer",
-                "transition-all duration-75",
+                "transition-all duration-75"
               )}
             >
               <h3 className="text-sm text-neutral-900 font-medium font-gt-america">

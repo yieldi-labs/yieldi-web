@@ -5,7 +5,7 @@ import { useConnectors, useSwitchChain } from "wagmi";
 
 export function useWalletConnection(
   setWalletState: any,
-  toggleWalletModal: () => void,
+  toggleWalletModal: () => void
 ) {
   const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
@@ -19,7 +19,7 @@ export function useWalletConnection(
       .map((detectedWallet) => {
         for (const chain of chainConfig) {
           const matchingWallet = chain.wallets.find(
-            (w) => w.id === detectedWallet.id,
+            (w) => w.id === detectedWallet.id
           );
           if (matchingWallet) {
             return {
@@ -72,14 +72,12 @@ export function useWalletConnection(
       }
 
       const selectedChainConfig = chainConfig.find(
-        (chain) => chain.id === selectedChain,
+        (chain) => chain.id === selectedChain
       );
 
       const isNonEVM = detectedWalletForChain.id.includes("-");
       const isVultisig = detectedWalletForChain.id.includes("vultisig");
       const connectedWallet = await detectedWalletForChain.connect();
-
-      console.log(connectedWallet);
 
       const provider =
         isVultisig || isNonEVM
@@ -93,8 +91,8 @@ export function useWalletConnection(
       const chainId = isVultisig
         ? vultiChainId
         : isNonEVM
-          ? undefined
-          : await connectedWallet.provider.getChainId();
+        ? undefined
+        : await connectedWallet.provider.getChainId();
 
       if (selectedChainConfig?.chainId) {
         if (chainId !== selectedChainConfig.chainId) {
@@ -120,9 +118,19 @@ export function useWalletConnection(
     }
   };
 
+  const handleSelectChain = (chainId: string) =>
+    setSelectedChain((prev) => {
+      if (prev === chainId) {
+        return null;
+      } else {
+        return chainId;
+      }
+    });
+
   return {
     selectedChain,
     setSelectedChain,
+    handleSelectChain,
     handleConnect,
     detectedWallets,
   };
