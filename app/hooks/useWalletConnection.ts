@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { detectWallets } from "@/utils/wallet/detectedWallets";
 import { chainConfig } from "@/utils/wallet/chainConfig";
 import { useConnectors, useSwitchChain } from "wagmi";
+import { createSwapKit, WalletOption } from "@swapkit/sdk";
 
 export function useWalletConnection(
   setWalletState: any,
@@ -11,6 +12,7 @@ export function useWalletConnection(
   const ethConnectors = useConnectors();
   const [selectedChain, setSelectedChain] = useState<string | null>("bitcoin");
   const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
+  const swapKitClient = createSwapKit();
 
   useEffect(() => {
     const wallets = detectWallets(ethConnectors);
