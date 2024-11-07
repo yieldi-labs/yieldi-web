@@ -24,7 +24,7 @@ const boxes = [
 ];
 
 const HowDoesItWork = () => (
-  <div className="relative flex flex-col justify-center items-center tablet:mb-[170px] mb-[60px] px-8 tablet:px-18 font-gt-america-ext gap-[34px] tablet:gap-[70px]">
+  <div className="relative max-w-7xl mx-auto flex flex-col justify-center items-center tablet:mb-[170px] mb-[60px] px-8 tablet:px-18 font-gt-america-ext gap-[34px] tablet:gap-[70px]">
     <h2 className="uppercase text-neutral-900 text-[18px] tablet:text-[24px] font-bold text-center">
       How Does Yieldi Work<span className="font-sans">?</span>
     </h2>

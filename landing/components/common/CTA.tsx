@@ -18,7 +18,7 @@ const socials = [
 ];
 
 const CTA = () => (
-  <div className="relative flex flex-col gap-[88px] font-gt-america-exp px-8 tablet:px-18 text-neutral-900 text-center font-bold pb-[35px] tablet:pb-[115px] overflow-hidden">
+  <div className="relative max-w-7xl mx-auto flex flex-col gap-[88px] font-gt-america-exp px-8 tablet:px-18 text-neutral-900 text-center font-bold pb-[35px] tablet:pb-[115px] overflow-hidden">
     <h2 className="text-base tablet:text-[38px] leading-normal">
       Join the yield revolution and access the best DeFi yields across 15+
       chains today.

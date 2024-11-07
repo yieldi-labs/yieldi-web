@@ -21,7 +21,7 @@ const text = [
 ];
 
 const Solution = () => (
-  <div className="relative flex flex-col gap-[36px] tablet:gap-[110px] font-gt-america-ext text-neutral-900 w-full mb-[53px] tablet:mb-[150px] px-8 tablet:px-18">
+  <div className="relative max-w-7xl mx-auto flex flex-col gap-[36px] tablet:gap-[110px] font-gt-america-ext text-neutral-900 w-full mb-[53px] tablet:mb-[150px] px-8 tablet:px-18">
     <h2 className="text-[32px] tablet:text-[64px] text-left desktop-sm:text-center font-bold leading-[40px] tablet:leading-[68px] max-w-[300px] tablet:max-w-full">
       What Problem Does Yieldi Solve<span className="font-sans">?</span>
     </h2>
