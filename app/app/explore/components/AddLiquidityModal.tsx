@@ -22,7 +22,7 @@ export default function AddLiquidityModal({
   runePriceUSD,
   onClose,
 }: AddLiquidityModalProps) {
-  const [selectedTab, ] = useState("single");
+  const [selectedTab] = useState("single");
   const [btcAmount, setBtcAmount] = useState(1.2345);
   const [runeAmount, setRuneAmount] = useState(1.2345);
 

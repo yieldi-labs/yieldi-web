@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { detectWallets } from "@/utils/wallet/detectedWallets";
 import { chainConfig } from "@/utils/wallet/chainConfig";
 import { useConnectors, useSwitchChain } from "wagmi";
-import { createSwapKit, WalletOption } from "@swapkit/sdk";
+import { createSwapKit, EVMChains, SwapKit, WalletOption } from "@swapkit/sdk";
+import { ThorchainPlugin } from "@swapkit/thorchain";
+import { AssetValue, Chain } from "@swapkit/helpers";
 
 export function useWalletConnection(
   setWalletState: any,
@@ -12,7 +14,18 @@ export function useWalletConnection(
   const ethConnectors = useConnectors();
   const [selectedChain, setSelectedChain] = useState<string | null>("bitcoin");
   const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
-  const swapKitClient = createSwapKit();
+  const swapKitClient = createSwapKit({
+    config: {
+      stagenet: false,
+      covalentApiKey: process.env.NEXT_PUBLIC_COVALENT_API_KEY,
+      ethplorerApiKey: process.env.NEXT_PUBLIC_ETHPLORER_API_KEY,
+      walletConnectProjectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECTID,
+    },
+    plugins: {
+      ...ThorchainPlugin,
+    },
+  });
+  const swapKitChains = [EVMChains[3]];
 
   useEffect(() => {
     const wallets = detectWallets(ethConnectors);
@@ -43,6 +56,8 @@ export function useWalletConnection(
       console.error("No chain selected.");
       return;
     }
+
+    console.log({ selectedChain });
 
     try {
       const chainIdentifiers: Record<string, string> = {
@@ -122,10 +137,15 @@ export function useWalletConnection(
         }
       }
 
+      await swapKitClient.connectEVMWallet(swapKitChains, WalletOption.METAMASK);
+      const wallets = await Promise.all(swapKitChains.map((swapKitClient.getWallet)));
+      console.log({ wallets });
+
       setWalletState({
         provider: provider,
         address: connectedWallet.address,
         network: selectedChain,
+        swapKitClient: swapKitClient,
       });
       toggleWalletModal();
     } catch (error) {
