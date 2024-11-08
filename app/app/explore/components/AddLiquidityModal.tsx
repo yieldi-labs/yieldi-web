@@ -4,16 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Button from "@/app/button";
 import Modal from "@/app/modal";
+import { PoolDetail as IPoolDetail } from "@/midgard";
 import { Slider } from "@shared/components/ui";
 import { twMerge } from "tailwind-merge";
 import { getAssetShortSymbol, getLogoPath } from "@/app/utils";
 import { useAppState } from "@/utils/context";
 
 interface AddLiquidityModalProps {
-  pool: {
-    asset: string;
-    poolAPY: string;
-  };
+  pool: IPoolDetail;
   runePriceUSD: number;
   onClose: () => void;
 }
@@ -35,7 +33,9 @@ export default function AddLiquidityModal({
     return wallet?.balances.find((balance) => balance.asset === "thor.rune");
   }, [wallet]);
   const assetBalance = useMemo(() => {
-    return wallet?.balances.find((balance) => balance.symbol === pool.asset.split(".")[1]);
+    return wallet?.balances.find(
+      (balance) => balance.symbol === pool.asset.split(".")[1],
+    );
   }, [wallet, pool.asset]);
   const currentAssetPercentage = useMemo(() => {
     return getPercentage(assetAmount, Number(assetBalance));
@@ -57,10 +57,16 @@ export default function AddLiquidityModal({
     isRune: boolean = false,
   ) => {
     if (isRune) {
-      const newRuneAmount = Number(runeBalance?.bigIntValue) / Number(runeBalance?.decimalMultiplier) * (percentage / 100);
+      const newRuneAmount =
+        (Number(runeBalance?.bigIntValue) /
+          Number(runeBalance?.decimalMultiplier)) *
+        (percentage / 100);
       setRuneAmount(newRuneAmount);
     } else {
-      const newAssetAmount = Number(assetBalance?.bigIntValue) / Number(assetBalance?.decimalMultiplier) * (percentage / 100);
+      const newAssetAmount =
+        (Number(assetBalance?.bigIntValue) /
+          Number(assetBalance?.decimalMultiplier)) *
+        (percentage / 100);
       setAssetAmount(newAssetAmount);
     }
   };
@@ -121,11 +127,21 @@ export default function AddLiquidityModal({
                 {getAssetShortSymbol(pool.asset)} Balance
               </span>
             </div>
-            <div>{assetAmount.toPrecision(6)}</div>
+            <div>
+              {assetAmount.toPrecision(6)} ($
+              {(parseFloat(pool.assetPriceUSD) * assetAmount).toFixed(2)})
+            </div>
           </div>
 
           <div className="relative mb-6">
-            <Slider value={assetAmount} max={Number(assetBalance?.bigIntValue) / Number(assetBalance?.decimalMultiplier)} onChange={setAssetAmount} />
+            <Slider
+              value={assetAmount}
+              max={
+                Number(assetBalance?.bigIntValue) /
+                Number(assetBalance?.decimalMultiplier)
+              }
+              onChange={setAssetAmount}
+            />
           </div>
 
           <div className="flex justify-end gap-2">

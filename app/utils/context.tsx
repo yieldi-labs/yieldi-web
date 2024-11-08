@@ -40,7 +40,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     if (typeof provider.on === "function") {
       const handleAccountsChanged = (accounts: string[]) => {
         if (!wallet) return;
-        setWalletState({ ...wallet, address: accounts[0] || '' });
+        setWalletState({ ...wallet, address: accounts[0] || "" });
       };
 
       const handleNetworkChanged = (networkId: string) => {
@@ -61,7 +61,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     } else if (window.ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
         if (!wallet) return;
-        setWalletState({ ...wallet, address: accounts[0] || '' });
+        setWalletState({ ...wallet, address: accounts[0] || "" });
       };
 
       const handleNetworkChanged = (networkId: string) => {
