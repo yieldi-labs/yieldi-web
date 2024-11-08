@@ -44,10 +44,6 @@ export default function AddLiquidityModal({
     return getPercentage(runeAmount, Number(runeBalance));
   }, [runeAmount, runeBalance]);
 
-  useEffect(() => {
-    console.log({ assetAmount, runeAmount, assetBalance, runeBalance });
-  }, [assetAmount, runeAmount, assetBalance, runeBalance]);
-
   const isCloseToPercentage = (
     currentPercentage: number,
     targetPercentage: number,
@@ -60,14 +56,11 @@ export default function AddLiquidityModal({
     percentage: number,
     isRune: boolean = false,
   ) => {
-    console.log("handle percentage click", {percentage, assetBalance, wallet});
     if (isRune) {
       const newRuneAmount = Number(runeBalance?.bigIntValue) / Number(runeBalance?.decimalMultiplier) * (percentage / 100);
       setRuneAmount(newRuneAmount);
-      console.log({newRuneAmount});
     } else {
       const newAssetAmount = Number(assetBalance?.bigIntValue) / Number(assetBalance?.decimalMultiplier) * (percentage / 100);
-      console.log({newAssetAmount});
       setAssetAmount(newAssetAmount);
     }
   };
@@ -128,11 +121,11 @@ export default function AddLiquidityModal({
                 {getAssetShortSymbol(pool.asset)} Balance
               </span>
             </div>
-            <div>{assetAmount.toPrecision(6)} ($100,000)</div>
+            <div>{assetAmount.toPrecision(6)}</div>
           </div>
 
           <div className="relative mb-6">
-            <Slider value={assetAmount} max={Number(assetBalance)} onChange={setAssetAmount} />
+            <Slider value={assetAmount} max={Number(assetBalance?.bigIntValue) / Number(assetBalance?.decimalMultiplier)} onChange={setAssetAmount} />
           </div>
 
           <div className="flex justify-end gap-2">
