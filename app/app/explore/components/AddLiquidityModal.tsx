@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Button from "@/app/button";
 import Modal from "@/app/modal";
 import { Slider } from "@shared/components/ui";
 import { twMerge } from "tailwind-merge";
 import { getAssetShortSymbol, getLogoPath } from "@/app/utils";
+import { useAppState } from "@/utils/context";
 
 interface AddLiquidityModalProps {
   pool: {
@@ -22,13 +23,30 @@ export default function AddLiquidityModal({
   runePriceUSD,
   onClose,
 }: AddLiquidityModalProps) {
+  const { wallet } = useAppState();
   const [selectedTab] = useState("single");
-  const [btcAmount, setBtcAmount] = useState(1.2345);
-  const [runeAmount, setRuneAmount] = useState(1.2345);
+  const [assetAmount, setAssetAmount] = useState(0);
+  const [runeAmount, setRuneAmount] = useState(0);
 
   const getPercentage = (amount: number, max: number) => {
     return (amount / max) * 100;
   };
+  const runeBalance = useMemo(() => {
+    return wallet?.balances.find((balance) => balance.asset === "thor.rune");
+  }, [wallet]);
+  const assetBalance = useMemo(() => {
+    return wallet?.balances.find((balance) => balance.symbol === pool.asset.split(".")[1]);
+  }, [wallet, pool.asset]);
+  const currentAssetPercentage = useMemo(() => {
+    return getPercentage(assetAmount, Number(assetBalance));
+  }, [assetAmount, assetBalance]);
+  const currentRunePercentage = useMemo(() => {
+    return getPercentage(runeAmount, Number(runeBalance));
+  }, [runeAmount, runeBalance]);
+
+  useEffect(() => {
+    console.log({ assetAmount, runeAmount, assetBalance, runeBalance });
+  }, [assetAmount, runeAmount, assetBalance, runeBalance]);
 
   const isCloseToPercentage = (
     currentPercentage: number,
@@ -42,10 +60,15 @@ export default function AddLiquidityModal({
     percentage: number,
     isRune: boolean = false,
   ) => {
+    console.log("handle percentage click", {percentage, assetBalance, wallet});
     if (isRune) {
-      setRuneAmount(1.2345 * (percentage / 100));
+      const newRuneAmount = Number(runeBalance?.bigIntValue) / Number(runeBalance?.decimalMultiplier) * (percentage / 100);
+      setRuneAmount(newRuneAmount);
+      console.log({newRuneAmount});
     } else {
-      setBtcAmount(1.2345 * (percentage / 100));
+      const newAssetAmount = Number(assetBalance?.bigIntValue) / Number(assetBalance?.decimalMultiplier) * (percentage / 100);
+      console.log({newAssetAmount});
+      setAssetAmount(newAssetAmount);
     }
   };
 
@@ -54,10 +77,6 @@ export default function AddLiquidityModal({
       "px-6 py-2 rounded-full font-medium transition-colors",
       isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
     );
-
-  const getCurrentPercentage = (amount: number) =>
-    getPercentage(amount, 1.2345);
-
   /*
   const tabClass = "flex-1 py-3 px-6 rounded-full text-sm font-medium";
   const activeTabClass =
@@ -109,17 +128,17 @@ export default function AddLiquidityModal({
                 {getAssetShortSymbol(pool.asset)} Balance
               </span>
             </div>
-            <div>{btcAmount.toFixed(4)} ($100,000)</div>
+            <div>{assetAmount.toPrecision(6)} ($100,000)</div>
           </div>
 
           <div className="relative mb-6">
-            <Slider value={btcAmount} max={1.2345} onChange={setBtcAmount} />
+            <Slider value={assetAmount} max={Number(assetBalance)} onChange={setAssetAmount} />
           </div>
 
           <div className="flex justify-end gap-2">
             <button
               className={percentageButtonClasses(
-                isCloseToPercentage(getCurrentPercentage(btcAmount), 25),
+                isCloseToPercentage(currentAssetPercentage, 25),
               )}
               onClick={() => handlePercentageClick(25)}
             >
@@ -127,7 +146,7 @@ export default function AddLiquidityModal({
             </button>
             <button
               className={percentageButtonClasses(
-                isCloseToPercentage(getCurrentPercentage(btcAmount), 50),
+                isCloseToPercentage(currentAssetPercentage, 50),
               )}
               onClick={() => handlePercentageClick(50)}
             >
@@ -135,7 +154,7 @@ export default function AddLiquidityModal({
             </button>
             <button
               className={percentageButtonClasses(
-                isCloseToPercentage(getCurrentPercentage(btcAmount), 100),
+                isCloseToPercentage(currentAssetPercentage, 100),
               )}
               onClick={() => handlePercentageClick(100)}
             >
@@ -159,7 +178,7 @@ export default function AddLiquidityModal({
                 <span className="font-gt-america-ext">RUNE Balance</span>
               </div>
               <div>
-                {runeAmount.toFixed(4)} ($
+                {runeAmount.toFixed(6)} ($
                 {(runeAmount * runePriceUSD).toFixed(2)})
               </div>
             </div>
@@ -167,7 +186,7 @@ export default function AddLiquidityModal({
             <div className="relative mb-4">
               <Slider
                 value={runeAmount}
-                max={1.2345}
+                max={Number(runeBalance)}
                 onChange={setRuneAmount}
               />
             </div>
@@ -175,7 +194,7 @@ export default function AddLiquidityModal({
             <div className="flex justify-end gap-2">
               <button
                 className={percentageButtonClasses(
-                  isCloseToPercentage(getCurrentPercentage(runeAmount), 25),
+                  isCloseToPercentage(currentRunePercentage, 25),
                 )}
                 onClick={() => handlePercentageClick(25, true)}
               >
@@ -183,7 +202,7 @@ export default function AddLiquidityModal({
               </button>
               <button
                 className={percentageButtonClasses(
-                  isCloseToPercentage(getCurrentPercentage(runeAmount), 50),
+                  isCloseToPercentage(currentRunePercentage, 50),
                 )}
                 onClick={() => handlePercentageClick(50, true)}
               >
@@ -191,7 +210,7 @@ export default function AddLiquidityModal({
               </button>
               <button
                 className={percentageButtonClasses(
-                  isCloseToPercentage(getCurrentPercentage(runeAmount), 100),
+                  isCloseToPercentage(currentRunePercentage, 100),
                 )}
                 onClick={() => handlePercentageClick(100, true)}
               >

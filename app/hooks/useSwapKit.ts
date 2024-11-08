@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Chain, WalletOption, createSwapKit, SwapKit } from '@swapkit/sdk';
+import { Chain, WalletOption, createSwapKit, SwapKit, ChainWallet, AssetValue } from '@swapkit/sdk';
 import { ThorchainPlugin } from '@swapkit/thorchain';
 type SwapKitType = typeof SwapKit;
 
@@ -15,6 +15,7 @@ interface ConnectWalletResult {
   provider?: any;
   error?: string;
   swapKitClient?: SwapKitType;
+  allBalances: AssetValue[];
 }
 
 export function useSwapKit() {
@@ -51,9 +52,9 @@ export function useSwapKit() {
 
   const getChainsByWalletType = useCallback((walletType: WalletOption): Chain[] => {
     const chainMappings: Record<WalletOption, Chain[]> = {
-      [WalletOption.METAMASK]: [Chain.Ethereum],
-      [WalletOption.XDEFI]: [Chain.Bitcoin, Chain.Ethereum, Chain.THORChain],
-      [WalletOption.PHANTOM]: [Chain.Solana],
+      [WalletOption.METAMASK]: [Chain.Ethereum, Chain.Avalanche, Chain.BinanceSmartChain],
+      [WalletOption.XDEFI]: [Chain.Bitcoin, Chain.Ethereum, Chain.THORChain, Chain.Avalanche, Chain.BinanceSmartChain, Chain.Solana],
+      [WalletOption.PHANTOM]: [Chain.Solana, Chain.Ethereum],
       [WalletOption.WALLETCONNECT]: [Chain.Ethereum],
       [WalletOption.LEDGER]: [Chain.Bitcoin, Chain.Ethereum],
       [WalletOption.TREZOR]: [Chain.Bitcoin, Chain.Ethereum],
@@ -135,9 +136,14 @@ export function useSwapKit() {
       }
 
       const connectedWallets = await Promise.all(
-        connectChains.map(chain => client.getWallet(chain))
+        connectChains.map(chain => client.getWalletWithBalance(chain))
       );
-      
+
+      // Get all balances by iterating over connected wallets and getting the wallet.balance array and concatenating them
+      const allBalances: AssetValue[] = [];
+      for (const wallet of connectedWallets) {
+        allBalances.push(...wallet.balance);
+      }
       const primaryWallet = connectedWallets[0];
 
       return {
@@ -145,6 +151,7 @@ export function useSwapKit() {
         address: primaryWallet?.address,
         provider: result,
         swapKitClient: client,
+        allBalances: allBalances,
       };
 
     } catch (error) {

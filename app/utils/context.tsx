@@ -1,4 +1,5 @@
 "use client";
+import { WalletState } from "@/hooks/useWalletConnection";
 import React, {
   createContext,
   useContext,
@@ -6,12 +7,6 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-
-interface WalletState {
-  provider: any;
-  address: string | null;
-  network: string | null;
-}
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
@@ -45,7 +40,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     if (typeof provider.on === "function") {
       const handleAccountsChanged = (accounts: string[]) => {
         if (!wallet) return;
-        setWalletState({ ...wallet, address: accounts[0] || null });
+        setWalletState({ ...wallet, address: accounts[0] || '' });
       };
 
       const handleNetworkChanged = (networkId: string) => {
@@ -66,7 +61,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     } else if (window.ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
         if (!wallet) return;
-        setWalletState({ ...wallet, address: accounts[0] || null });
+        setWalletState({ ...wallet, address: accounts[0] || '' });
       };
 
       const handleNetworkChanged = (networkId: string) => {
