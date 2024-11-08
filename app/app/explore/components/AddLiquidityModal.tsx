@@ -30,11 +30,13 @@ export default function AddLiquidityModal({
     return (amount / max) * 100;
   };
   const runeBalance = useMemo(() => {
-    return wallet?.balances.find((balance) => balance.asset === "thor.rune");
+    return wallet?.balances.find((balance) => balance.symbol === "thor.rune");
   }, [wallet]);
   const assetBalance = useMemo(() => {
+    console.log("Balances", { balances: wallet?.balances });
+    console.log("pool.asset", { poolAsset: pool.asset });
     return wallet?.balances.find(
-      (balance) => balance.symbol === pool.asset.split(".")[1],
+      (balance) => balance.symbol.toUpperCase() === pool.asset.split(".")[1].toUpperCase(),
     );
   }, [wallet, pool.asset]);
   const currentAssetPercentage = useMemo(() => {
@@ -68,7 +70,10 @@ export default function AddLiquidityModal({
           Number(assetBalance?.decimalMultiplier)) *
         (percentage / 100);
       setAssetAmount(newAssetAmount);
+      console.log("Asset Balance", { assetBalance });
+      console.log("Percentage Clicked", { percentage, newAssetAmount, isRune});
     }
+
   };
 
   const percentageButtonClasses = (isActive: boolean) =>

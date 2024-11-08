@@ -488,5 +488,5 @@ export const getAssetCanonicalSymbol = (asset: string) => {
 };
 
 export const getAssetShortSymbol = (asset: string) => {
-  return getAssetCanonicalSymbol(asset).split(".")[0] || asset;
+  return getAssetCanonicalSymbol(asset).split(".")[1] || asset;
 };
