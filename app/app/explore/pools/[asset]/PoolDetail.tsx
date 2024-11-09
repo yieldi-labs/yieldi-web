@@ -9,8 +9,10 @@ import {
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
 import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TopCard } from "@/app/components/TopCard";
+import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
+import { useAppState } from "@/utils/context";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -18,11 +20,51 @@ interface PoolDetailProps {
 }
 
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
+  const { wallet } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
+  const { position, loading, error, getMemberDetails, removeLiquidity } =
+    useLiquidityPosition();
 
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
   const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
+
+  // Fetch position when wallet connects
+  useEffect(() => {
+    if (wallet?.address) {
+      getMemberDetails(wallet.address, pool.asset);
+    }
+  }, [wallet?.address, pool.asset, getMemberDetails]);
+
+  const handleRemove = async () => {
+    if (!wallet?.address) {
+      // Show connect wallet modal or error
+      return;
+    }
+
+    try {
+      await removeLiquidity({
+        asset: pool.asset,
+        percentage: 100, // Remove all - could make this configurable
+        address: wallet.address,
+      });
+    } catch (err) {
+      console.error("Failed to remove liquidity:", err);
+      // Handle error - could show toast/notification
+    }
+  };
+
+  // Calculate position metrics
+  const assetValue = position ? parseFloat(position.assetDeposit) / 1e8 : 0;
+  const usdValue = assetValue * parseFloat(pool.assetPriceUSD);
+
+  // Calculate yield metrics
+  const assetDeposited = position ? parseFloat(position.assetAdded) / 1e8 : 0;
+  const assetWithdrawn = position
+    ? parseFloat(position.assetWithdrawn) / 1e8
+    : 0;
+  const assetYield = assetValue - assetDeposited + assetWithdrawn;
+  const yieldUsdValue = assetYield * parseFloat(pool.assetPriceUSD);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -61,8 +103,9 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             <button
               className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
               onClick={() => setShowAddLiquidityModal(true)}
+              disabled={loading}
             >
-              Add
+              {loading ? "Loading..." : "Add"}
             </button>
           </TopCard>
         </div>
@@ -73,7 +116,15 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             <h2 className="text-2xl font-medium text-foreground font-gt-america-ext">
               YOUR POSITION
             </h2>
-            <button className="text-red-500 font-medium">REMOVE</button>
+            {position && (
+              <button
+                className="text-red-500 font-medium"
+                onClick={handleRemove}
+                disabled={loading}
+              >
+                {loading ? "Removing..." : "REMOVE"}
+              </button>
+            )}
           </div>
 
           <TranslucentCard className="p-6 rounded-2xl flex flex-col shadow-md">
@@ -82,8 +133,12 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                 PRINCIPAL
               </div>
               <div className="flex justify-between">
-                <div className="text-2xl font-medium text-gray-900">$0,00</div>
-                <div className="text-2xl font-medium text-gray-900">0 BTC</div>
+                <div className="text-2xl font-medium text-gray-900">
+                  ${formatNumber(usdValue, 2)}
+                </div>
+                <div className="text-2xl font-medium text-gray-900">
+                  {formatNumber(assetValue)} {pool.asset.split(".")[1]}
+                </div>
               </div>
             </div>
 
@@ -92,32 +147,52 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                 YIELD
               </div>
               <div className="flex justify-between">
-                <div className="text-2xl font-medium text-gray-900">$0,00</div>
-                <div className="text-2xl font-medium text-gray-900">0 RUNE</div>
+                <div className="text-2xl font-medium text-gray-900">
+                  ${formatNumber(yieldUsdValue, 2)}
+                </div>
+                <div className="text-2xl font-medium text-gray-900">
+                  {formatNumber(assetYield)} {pool.asset.split(".")[1]}
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-5 w-full">
-              <button className="w-full bg-secondaryBtn text-white font-bold py-3 rounded-full text-sm">
+              <button
+                className="w-full bg-secondaryBtn text-white font-bold py-3 rounded-full text-sm"
+                disabled={!position || loading}
+              >
                 Stream
               </button>
-              <button className="w-full bg-secondaryBtn text-white font-bold py-3 rounded-full text-sm">
+              <button
+                className="w-full bg-secondaryBtn text-white font-bold py-3 rounded-full text-sm"
+                disabled={!position || loading}
+              >
                 Re-Invest
               </button>
             </div>
 
-            <button className="w-full border-2 border-secondaryBtn text-secondaryBtn font-bold text-sm py-3 rounded-full">
+            <button
+              className="w-full border-2 border-secondaryBtn text-secondaryBtn font-bold text-sm py-3 rounded-full"
+              disabled={!position || loading}
+            >
               Claim
             </button>
           </TranslucentCard>
         </div>
       </div>
+
       {showAddLiquidityModal && (
         <AddLiquidityModal
           pool={pool}
           runePriceUSD={runePriceUSD}
           onClose={() => setShowAddLiquidityModal(false)}
         />
+      )}
+
+      {error && (
+        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg">
+          {error}
+        </div>
       )}
     </div>
   );

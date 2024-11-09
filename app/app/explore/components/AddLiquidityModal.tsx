@@ -9,6 +9,8 @@ import { Slider } from "@shared/components/ui";
 import { twMerge } from "tailwind-merge";
 import { getAssetShortSymbol, getLogoPath } from "@/app/utils";
 import { useAppState } from "@/utils/context";
+import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
+import ErrorCard from "@/app/errorCard";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -22,6 +24,7 @@ export default function AddLiquidityModal({
   onClose,
 }: AddLiquidityModalProps) {
   const { wallet } = useAppState();
+  const { loading, error, addLiquidity } = useLiquidityPosition();
   const [selectedTab] = useState("single");
   const [assetAmount, setAssetAmount] = useState(0);
   const [runeAmount, setRuneAmount] = useState(0);
@@ -29,19 +32,22 @@ export default function AddLiquidityModal({
   const getPercentage = (amount: number, max: number) => {
     return (amount / max) * 100;
   };
+
   const runeBalance = useMemo(() => {
     return wallet?.balances.find((balance) => balance.symbol === "thor.rune");
   }, [wallet]);
+
   const assetBalance = useMemo(() => {
-    console.log("Balances", { balances: wallet?.balances });
-    console.log("pool.asset", { poolAsset: pool.asset });
     return wallet?.balances.find(
-      (balance) => balance.symbol.toUpperCase() === pool.asset.split(".")[1].toUpperCase(),
+      (balance) =>
+        balance.symbol.toUpperCase() === pool.asset.split(".")[1].toUpperCase(),
     );
   }, [wallet, pool.asset]);
+
   const currentAssetPercentage = useMemo(() => {
     return getPercentage(assetAmount, Number(assetBalance));
   }, [assetAmount, assetBalance]);
+
   const currentRunePercentage = useMemo(() => {
     return getPercentage(runeAmount, Number(runeBalance));
   }, [runeAmount, runeBalance]);
@@ -70,10 +76,30 @@ export default function AddLiquidityModal({
           Number(assetBalance?.decimalMultiplier)) *
         (percentage / 100);
       setAssetAmount(newAssetAmount);
-      console.log("Asset Balance", { assetBalance });
-      console.log("Percentage Clicked", { percentage, newAssetAmount, isRune});
+    }
+  };
+
+  const handleAddLiquidity = async () => {
+    if (!wallet?.address) {
+      // Could integrate with your wallet modal here
+      alert("Please connect your wallet first");
+      return;
     }
 
+    try {
+      const success = await addLiquidity({
+        asset: pool.asset,
+        amount: assetAmount,
+        runeAmount: selectedTab === "double" ? runeAmount : undefined,
+        address: wallet.address,
+      });
+
+      if (success) {
+        onClose();
+      }
+    } catch (err) {
+      console.error("Failed to add liquidity:", err);
+    }
   };
 
   const percentageButtonClasses = (isActive: boolean) =>
@@ -81,11 +107,7 @@ export default function AddLiquidityModal({
       "px-6 py-2 rounded-full font-medium transition-colors",
       isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
     );
-  /*
-  const tabClass = "flex-1 py-3 px-6 rounded-full text-sm font-medium";
-  const activeTabClass =
-    "bg-white shadow-[0px_0px_18.1px_0px_rgba(98,126,234,0.24)] text-neutral-900";
-  */
+
   const modalStyle = {
     backgroundColor: "#F5F6F6",
     maxWidth: "36rem",
@@ -94,28 +116,7 @@ export default function AddLiquidityModal({
   return (
     <Modal onClose={onClose} style={modalStyle}>
       <div>
-        {/* Tab Selector */}
-        {/* Uncomment after multi wallet support
-        <div className="flex rounded-full border-white border-2 mb-14 text-lg font-medium text-neutral-800">
-          <button
-            onClick={() => setSelectedTab("single")}
-            className={twMerge(
-              tabClass,
-              selectedTab === "single" && activeTabClass,
-            )}
-          >
-            Add {getAssetShortSymbol(pool.asset)}
-          </button>
-          <button
-            onClick={() => setSelectedTab("double")}
-            className={twMerge(
-              tabClass,
-              selectedTab === "double" && activeTabClass,
-            )}
-          >
-            Add {getAssetShortSymbol(pool.asset)} + RUNE
-          </button>
-        </div>*/}
+        {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
         {/* Asset Input Section */}
         <div>
@@ -234,8 +235,12 @@ export default function AddLiquidityModal({
           </div>
         )}
 
-        <Button className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8">
-          Add
+        <Button 
+          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
+          onClick={handleAddLiquidity}
+          disabled={loading}
+        >
+          {loading ? "Adding Liquidity..." : "Add"}
         </Button>
       </div>
     </Modal>
