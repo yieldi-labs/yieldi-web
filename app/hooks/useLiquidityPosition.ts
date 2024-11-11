@@ -55,43 +55,43 @@ export function useLiquidityPosition({
   const [pool, setPool] = useState<PoolDetail>(poolProp);
 
   // More robust asset parsing
-  const [assetChain = '', assetIdentifier = ''] = pool.asset.split('.');
-  
+  const [assetChain = "", assetIdentifier = ""] = pool.asset.split(".");
+
   // Check if it's a native asset (e.g., ETH.ETH, AVAX.AVAX)
   const isNativeAsset = useMemo(() => {
-    return !assetIdentifier || 
-      assetIdentifier === assetChain || 
-      assetIdentifier.toUpperCase() === assetChain.toUpperCase();
+    return (
+      !assetIdentifier ||
+      assetIdentifier === assetChain ||
+      assetIdentifier.toUpperCase() === assetChain.toUpperCase()
+    );
   }, [assetChain, assetIdentifier]);
 
   // Only attempt to get token address for non-native assets
   const tokenAddress = useMemo(() => {
     if (isNativeAsset) return undefined;
-    
+
     try {
       // For tokens like ETH.USDT-0x... format
-      const [_, addressPart] = assetIdentifier.split('-');
-      return addressPart ? normalizeAddress(addressPart) as Address : undefined;
+      const [_, addressPart] = assetIdentifier.split("-");
+      return addressPart
+        ? (normalizeAddress(addressPart) as Address)
+        : undefined;
     } catch (err) {
-      console.warn('Failed to parse token address:', err);
+      console.warn("Failed to parse token address:", err);
       return undefined;
     }
   }, [assetIdentifier, isNativeAsset]);
 
   // Initialize contract hooks with proper type checking
-  const {
-    approveSpending,
-    getAllowance,
-    depositWithExpiry,
-    parseAmount
-  } = useContracts({
-    tokenAddress: tokenAddress as Address | undefined,
-    provider: wallet?.provider,
-  });
+  const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
+    useContracts({
+      tokenAddress: tokenAddress as Address | undefined,
+      provider: wallet?.provider,
+    });
 
   const getInboundAddresses = async (): Promise<InboundAddress[]> => {
     const response = await fetch(
-      "https://thornode.ninerealms.com/thorchain/inbound_addresses"
+      "https://thornode.ninerealms.com/thorchain/inbound_addresses",
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -128,7 +128,7 @@ export function useLiquidityPosition({
         }
 
         const poolPosition = memberResponse.data.pools.find(
-          (p) => p.pool === asset
+          (p) => p.pool === asset,
         );
 
         if (poolPosition) {
@@ -145,14 +145,16 @@ export function useLiquidityPosition({
         };
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to fetch position details"
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch position details",
         );
         return null;
       } finally {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   const addLiquidity = useCallback(
@@ -168,7 +170,7 @@ export function useLiquidityPosition({
         const inboundAddresses = await getInboundAddresses();
         const [assetChain, assetIdentifier] = asset.split(".");
         const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase()
+          (i) => i.chain === assetChain.toUpperCase(),
         );
 
         if (!inbound) {
@@ -189,7 +191,7 @@ export function useLiquidityPosition({
 
         if (!supportedChains.includes(chainLower)) {
           throw new Error(
-            `Unsupported chain: ${assetChain}. Only EVM chains are supported.`
+            `Unsupported chain: ${assetChain}. Only EVM chains are supported.`,
           );
         }
 
@@ -217,8 +219,9 @@ export function useLiquidityPosition({
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300);
 
         // Check if the asset is a token or native
-        const isNativeAsset = !assetIdentifier || 
-          assetIdentifier === assetChain || 
+        const isNativeAsset =
+          !assetIdentifier ||
+          assetIdentifier === assetChain ||
           assetIdentifier.toUpperCase() === assetChain.toUpperCase();
 
         let txHash;
@@ -226,7 +229,7 @@ export function useLiquidityPosition({
         if (!isNativeAsset && tokenAddress) {
           // Handle ERC20 token deposit
           const parsedAmount = parseAmount(amount.toString());
-          
+
           // Check and handle allowance
           const currentAllowance = await getAllowance(routerAddress);
           if (currentAllowance < parsedAmount) {
@@ -239,21 +242,23 @@ export function useLiquidityPosition({
             tokenAddress,
             parsedAmount,
             memo,
-            expiry
+            expiry,
           );
         } else {
           // Handle native asset deposit
           const parsedAmount = parseUnits(amount.toString(), 18);
-          
+
           // For native assets, use a direct transaction
           txHash = await wallet.provider.request({
             method: "eth_sendTransaction",
-            params: [{
-              from: wallet.address,
-              to: routerAddress,
-              value: `0x${parsedAmount.toString(16)}`,
-              data: "0x",
-            }],
+            params: [
+              {
+                from: wallet.address,
+                to: routerAddress,
+                value: `0x${parsedAmount.toString(16)}`,
+                data: "0x",
+              },
+            ],
           });
         }
 
@@ -276,7 +281,7 @@ export function useLiquidityPosition({
       parseAmount,
       tokenAddress,
       getAllowance,
-    ]
+    ],
   );
 
   const removeLiquidity = useCallback(
@@ -292,7 +297,7 @@ export function useLiquidityPosition({
         const inboundAddresses = await getInboundAddresses();
         const [assetChain] = asset.split(".");
         const inbound = inboundAddresses.find(
-          (i) => i.chain === assetChain.toUpperCase()
+          (i) => i.chain === assetChain.toUpperCase(),
         );
 
         if (!inbound) {
@@ -337,7 +342,7 @@ export function useLiquidityPosition({
         setLoading(false);
       }
     },
-    [wallet, getMemberDetails]
+    [wallet, getMemberDetails],
   );
 
   return {

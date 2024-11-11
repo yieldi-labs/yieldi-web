@@ -8,7 +8,6 @@ import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { Saver } from "@/app/explore/types";
 import { PoolDetail } from "@/midgard";
-import { useAppState } from "@/utils/context";
 
 export const ONE = BigInt("1000000000000000000");
 export const ONE6 = BigInt("1000000");
@@ -49,7 +48,7 @@ export async function ethereumGetWalletClient() {
     getBalance: async () => {
       if (!account.address) throw new Error("Account address is undefined");
       const b = await publicClient.getBalance({ address: account.address });
-      return parseFloat(formatUnits(b, 18));
+      return parseFloat(viem.formatUnits(b, 18));
     },
   };
 }
@@ -164,17 +163,6 @@ export const walletClient = viem.createWalletClient({
   ),
 });
 
-interface ABI {
-  name: string;
-  stateMutability: string;
-}
-
-import { parseUnits, formatUnits } from "viem";
-interface EVMTokenData {
-  address?: string; // Contract address for ERC20 tokens
-  decimals: number;
-}
-
 export async function ethereumConnectInjected() {
   try {
     if (!window.ethereum) throw new Error("No web wallet installed");
@@ -195,7 +183,7 @@ export async function ethereumConnectInjected() {
       address: address,
       getBalance: async () => {
         const b = await publicClient.getBalance({ address });
-        return parseFloat(formatUnits(b, 18));
+        return parseFloat(viem.formatUnits(b, 18));
       },
     };
   } catch (e: Error | any) {
@@ -422,4 +410,4 @@ export const getAssetShortSymbol = (asset: string) => {
 export const normalizeAddress = (address: string) => {
   const cleanAddr = address.toLowerCase().replace("0x", "");
   return `0x${cleanAddr}` as `0x${string}`;
-}
+};

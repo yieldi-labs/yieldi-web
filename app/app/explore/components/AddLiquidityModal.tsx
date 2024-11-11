@@ -5,12 +5,15 @@ import Modal from "@/app/modal";
 import { Balance, getBalance, PoolDetail as IPoolDetail } from "@/midgard";
 import { Slider } from "@shared/components/ui";
 import { twMerge } from "tailwind-merge";
-import { getAssetShortSymbol, getLogoPath, normalizeAddress } from "@/app/utils";
+import {
+  getAssetShortSymbol,
+  getLogoPath,
+  normalizeAddress,
+} from "@/app/utils";
 import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { useContracts } from "@/hooks/useContracts";
-import { Address } from "viem";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -30,7 +33,7 @@ export default function AddLiquidityModal({
   const [runeAmount, setRuneAmount] = useState(0);
   const [txHash, setTxHash] = useState<string | null>(null);
 
-    // Initialize contract hooks
+  // Initialize contract hooks
   const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
   const tokenAddress = normalizeAddress(poolViemAddress);
 
@@ -61,7 +64,7 @@ export default function AddLiquidityModal({
     const { data: runeBalance } = await getBalance({
       path: {
         address: wallet.address,
-      }
+      },
     });
     return runeBalance;
   }, [wallet]);
@@ -149,8 +152,8 @@ export default function AddLiquidityModal({
     );
 
   return (
-    <Modal 
-      onClose={onClose} 
+    <Modal
+      onClose={onClose}
       style={{ backgroundColor: "#F5F6F6", maxWidth: "36rem" }}
     >
       <div className="p-6">
@@ -193,7 +196,7 @@ export default function AddLiquidityModal({
               <button
                 key={percent}
                 className={percentageButtonClasses(
-                  isCloseToPercentage(currentAssetPercentage, percent)
+                  isCloseToPercentage(currentAssetPercentage, percent),
                 )}
                 onClick={() => handlePercentageClick(percent)}
               >
@@ -238,7 +241,7 @@ export default function AddLiquidityModal({
                 <button
                   key={percent}
                   className={percentageButtonClasses(
-                    isCloseToPercentage(currentRunePercentage, percent)
+                    isCloseToPercentage(currentRunePercentage, percent),
                   )}
                   onClick={() => handlePercentageClick(percent, true)}
                 >

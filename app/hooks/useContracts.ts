@@ -22,9 +22,9 @@ interface UseContractProps {
 }
 
 interface TokenMetadata {
-  name?: string;
-  symbol?: string;
-  decimals?: number;
+  name: string | undefined;
+  symbol: string | undefined;
+  decimals: number | undefined;
 }
 
 async function waitForTransaction(
@@ -41,7 +41,7 @@ async function waitForTransaction(
 
         if (receipt) {
           if (receipt.status === "0x1") {
-            resolve(txHash)
+            resolve(txHash);
           }
         } else {
           setTimeout(checkReceipt, 1000);
@@ -62,7 +62,11 @@ export function useContracts({
   console.log("useContracts:", { tokenAddress, routerAddress, provider });
   const { address: walletAddress } = useAccount();
   const [error, setError] = useState<string>();
-  const [tokenMetadata, setTokenMetadata] = useState<TokenMetadata>({});
+  const [tokenMetadata, setTokenMetadata] = useState<TokenMetadata>({
+    name: undefined,
+    symbol: undefined,
+    decimals: undefined,
+  });
 
   // Get token balance
   const { data: balance } = useBalance({
@@ -115,19 +119,19 @@ export function useContracts({
         abi: ERC20_ABI,
         functionName: "name",
         data: nameHex,
-      });
+      }) as string | undefined;
 
       const symbol = decodeFunctionResult({
         abi: ERC20_ABI,
         functionName: "symbol",
         data: symbolHex,
-      });
+      }) as string | undefined;
 
       const decimals = decodeFunctionResult({
         abi: ERC20_ABI,
         functionName: "decimals",
         data: decimalsHex,
-      });
+      }) as number | undefined;
 
       console.log("Token metadata:", { name, symbol, decimals });
       setTokenMetadata({ name, symbol, decimals });
