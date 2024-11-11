@@ -3,7 +3,7 @@ import { cloneElement } from "react";
 interface WalletProps {
   wallet: WalletOption;
   isSupported: boolean;
-  onSelect: () => void;
+  onSelect?: () => void;
 }
 
 const Wallet = ({ wallet, isSupported, onSelect }: WalletProps) => (

@@ -17,10 +17,10 @@ export default function WalletModal() {
     useAppState();
   const {
     selectedChain,
-    setSelectedChain,
-    handleConnect,
     detectedWallets,
     handleSelectChain,
+    handleConnect,
+    setSelectedChain,
   } = useWalletConnection(setWalletState, toggleWalletModal);
   const { detected, undetected, isWalletValidForChain } = useWalletList(
     selectedChain,
@@ -28,14 +28,11 @@ export default function WalletModal() {
   );
 
   useEffect(() => {
-    switch (selectedChain) {
-      case "solana":
-      case "kujira":
-      case "binance-smart-chain":
-        setIsHWDisabled(true);
-        break;
-      default:
-        setIsHWDisabled(false);
+    const restrictedChains = ["solana", "kujira", "binance-smart-chain"];
+    if (selectedChain.some((chain) => restrictedChains.includes(chain))) {
+      setIsHWDisabled(true);
+    } else {
+      setIsHWDisabled(false);
     }
   }, [selectedChain]);
 
@@ -44,6 +41,22 @@ export default function WalletModal() {
 
   if (!isWalletModalOpen) return null;
 
+  const handleSelectDeSelect =
+    selectedChain.length !== 9
+      ? () =>
+          setSelectedChain([
+            "bitcoin",
+            "ethereum",
+            "binance-smart-chain",
+            "avalanche",
+            "dogecoin",
+            "bitcoincash",
+            "litecoin",
+            "thorchain",
+            "solana",
+          ])
+      : () => setSelectedChain([]);
+
   return (
     <Modal onClose={toggleWalletModal} title="Connect Wallet">
       <div className="flex flex-col gap-4">
@@ -51,6 +64,7 @@ export default function WalletModal() {
           chains={chainConfig}
           selectedChain={selectedChain}
           onChainSelect={handleSelectChain}
+          handleDeselect={handleSelectDeSelect}
         />
         {!showHardwareWallets ? (
           <>

@@ -10,7 +10,7 @@ export function useWalletConnection(
   const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
 
-  const [selectedChain, setSelectedChain] = useState<string | null>("bitcoin");
+  const [selectedChain, setSelectedChain] = useState<string[]>(["bitcoin"]);
   const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function useWalletConnection(
       };
 
       const detectedWalletForChain = detectedWallets.find((w) => {
-        const identifier = chainIdentifiers[selectedChain];
+        const identifier = chainIdentifiers["solana"];
 
         if (!identifier) {
           return w.id.split("-")[0] === wallet.id.split("-")[0];
@@ -71,8 +71,8 @@ export function useWalletConnection(
         return;
       }
 
-      const selectedChainConfig = chainConfig.find(
-        (chain) => chain.id === selectedChain
+      const selectedChainConfig = chainConfig.find((chain) =>
+        selectedChain.includes(chain.id)
       );
 
       const isNonEVM = detectedWalletForChain.id.includes("-");
@@ -83,11 +83,13 @@ export function useWalletConnection(
         isVultisig || isNonEVM
           ? connectedWallet.provider
           : await connectedWallet.provider.getProvider();
+
       const vultiChainId = isVultisig
         ? await connectedWallet.provider.request({
             method: "eth_chainId",
           })
         : undefined;
+
       const chainId = isVultisig
         ? vultiChainId
         : isNonEVM
@@ -118,20 +120,19 @@ export function useWalletConnection(
     }
   };
 
-  const handleSelectChain = (chainId: string) =>
-    setSelectedChain((prev) => {
-      if (prev === chainId) {
-        return null;
-      } else {
-        return chainId;
-      }
-    });
+  const handleSelectChain = (chainId: string) => {
+    if (selectedChain.length && selectedChain.includes(chainId)) {
+      setSelectedChain((prev) => prev.filter((item) => item !== chainId));
+    } else {
+      setSelectedChain((prev) => [...prev, chainId]);
+    }
+  };
 
   return {
     selectedChain,
     setSelectedChain,
-    handleSelectChain,
     handleConnect,
+    handleSelectChain,
     detectedWallets,
   };
 }

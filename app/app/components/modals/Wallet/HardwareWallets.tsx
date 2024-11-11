@@ -8,7 +8,7 @@ import { useAppState } from "@/utils/context";
 interface HardwareWalletsProps {
   onBack: () => void;
   onWalletSelect: (wallet: any) => void;
-  selectedChain: string | null;
+  selectedChain: string[];
   isDisabled: boolean;
 }
 
@@ -30,7 +30,7 @@ export default function HardwareWallets({
       const transport = await TransportWebUSB.create();
 
       let address: string;
-      if (selectedChain === "ethereum") {
+      if (selectedChain.includes("ethereum")) {
         const eth = new Eth(transport);
         const result = await eth.getAddress("44'/60'/0'/0/0");
         address = result.address;
