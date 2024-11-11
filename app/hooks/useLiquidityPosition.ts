@@ -2,9 +2,9 @@ import { useState, useCallback } from "react";
 import { useAppState } from "@/utils/context";
 import { client, getMemberDetail, getPool } from "@/midgard";
 import type { MemberPool, PoolDetail } from "@/midgard";
-import * as btc from "@scure/btc-signer";
 import { hex } from "@scure/base";
-import { parseUnits, formatUnits } from "viem";
+import { parseUnits } from "viem";
+import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 
 interface InboundAddress {
   chain: string;
@@ -40,12 +40,99 @@ interface RemoveLiquidityParams {
   address: string;
 }
 
-const BITCOIN_NETWORK = {
-  bech32: "bc",
-  pubKeyHash: 0x00,
-  scriptHash: 0x05,
-  wif: 0x80,
-};
+async function getTokenDecimals(provider: any, tokenAddress: string): Promise<number> {
+  try {
+    const decimalsSelector = "0x313ce567";
+    const result = await provider.request({
+      method: "eth_call",
+      params: [
+        {
+          to: tokenAddress,
+          data: decimalsSelector
+        },
+        "latest"
+      ]
+    });
+    return parseInt(result, 16);
+  } catch (error) {
+    console.error(`Error fetching decimals for token ${tokenAddress}:`, error);
+    return 18;
+  }
+}
+
+async function checkAndApproveToken(
+  provider: any,
+  params: {
+    tokenAddress: string;
+    spenderAddress: string;
+    amount: bigint;
+    fromAddress: string;
+  }
+) {
+  const { tokenAddress, spenderAddress, amount, fromAddress } = params;
+
+  // Check allowance
+  const allowanceSelector = "0xdd62ed3e" + 
+    fromAddress.slice(2).padStart(64, '0') +
+    spenderAddress.slice(2).padStart(64, '0');
+
+  const allowanceResult = await provider.request({
+    method: "eth_call",
+    params: [
+      {
+        to: tokenAddress,
+        data: allowanceSelector
+      },
+      "latest"
+    ]
+  });
+
+  const currentAllowance = BigInt(allowanceResult);
+  if (currentAllowance >= amount) {
+    return true;
+  }
+
+  // Approve if needed
+  const approveSelector = "0x095ea7b3" + 
+    spenderAddress.slice(2).padStart(64, '0') +
+    amount.toString(16).padStart(64, '0');
+
+  const approveTx = {
+    from: fromAddress,
+    to: tokenAddress,
+    data: approveSelector
+  };
+
+  const approveTxHash = await provider.request({
+    method: "eth_sendTransaction",
+    params: [approveTx]
+  });
+
+  // Wait for approval transaction
+  return await waitForTransaction(provider, approveTxHash);
+}
+
+async function waitForTransaction(provider: any, txHash: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const checkReceipt = async () => {
+      try {
+        const receipt = await provider.request({
+          method: "eth_getTransactionReceipt",
+          params: [txHash]
+        });
+        
+        if (receipt) {
+          resolve(receipt.status === "0x1");
+        } else {
+          setTimeout(checkReceipt, 1000);
+        }
+      } catch (error) {
+        reject(error);
+      }
+    };
+    checkReceipt();
+  });
+}
 
 export function useLiquidityPosition() {
   const { wallet } = useAppState();
@@ -55,7 +142,9 @@ export function useLiquidityPosition() {
   const [pool, setPool] = useState<PoolDetail | null>(null);
 
   const getInboundAddresses = async (): Promise<InboundAddress[]> => {
-    const response = await fetch('https://thornode.ninerealms.com/thorchain/inbound_addresses');
+    const response = await fetch(
+      "https://thornode.ninerealms.com/thorchain/inbound_addresses"
+    );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -91,7 +180,7 @@ export function useLiquidityPosition() {
         }
 
         const poolPosition = memberResponse.data.pools.find(
-          (p) => p.pool === asset,
+          (p) => p.pool === asset
         );
 
         if (poolPosition) {
@@ -110,110 +199,15 @@ export function useLiquidityPosition() {
         setError(
           err instanceof Error
             ? err.message
-            : "Failed to fetch position details",
+            : "Failed to fetch position details"
         );
         return null;
       } finally {
         setLoading(false);
       }
     },
-    [],
+    []
   );
-
-  const sendUTXOTransaction = async (
-    inbound: InboundAddress,
-    memo: string,
-    amount: number,
-    chain: string,
-  ) => {
-    if (!wallet) throw new Error("Wallet not connected");
-    if (!wallet.provider) throw new Error("Wallet provider not found");
-
-    const isXDEFI = wallet.id?.includes("xdefi");
-    const isPhantom = wallet.id?.includes("phantom");
-    const isOKX = wallet.id?.includes("okx");
-
-    // Handle different UTXO wallet providers
-    if (isXDEFI && window.xfi?.[chain]) {
-      const provider = window.xfi[chain];
-      return await provider.request({
-        method: "request_accounts",
-        params: [
-          {
-            memo,
-            recipient: inbound.address,
-            amount: String(amount),
-          },
-        ],
-      });
-    } else if (isPhantom && window.phantom?.[chain]) {
-      const provider = window.phantom[chain];
-      return await provider.request({
-        method: "request_accounts",
-        params: [
-          {
-            memo,
-            recipient: inbound.address,
-            amount: String(amount),
-          },
-        ],
-      });
-    } else if (isOKX && window.okxwallet?.[chain]) {
-      const provider = window.okxwallet[chain];
-      return await provider.request({
-        method: "request_accounts",
-        params: [
-          {
-            memo,
-            recipient: inbound.address,
-            amount: String(amount),
-          },
-        ],
-      });
-    }
-
-    throw new Error("Unsupported wallet for UTXO chain");
-  };
-
-  const sendEVMTransaction = async (
-    inbound: InboundAddress,
-    memo: string,
-    amount: bigint,
-    chainId?: number,
-  ) => {
-    if (!wallet?.provider) throw new Error("Wallet provider not found");
-
-    const provider = wallet.provider;
-
-    if (chainId) {
-      const currentChainId = await provider.request({ method: "eth_chainId" });
-      if (currentChainId !== chainId) {
-        if (wallet.id === "xdefi") {
-          await provider.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId }],
-          });
-        }
-      }
-    }
-
-    // Call contract for deposit
-    const memoBytes = Buffer.from(memo, "utf-8");
-    const encodedMemo = hex.encode(memoBytes);
-    const tx = {
-      to: inbound.router,
-      value: Number(amount),
-      data: `0x${encodedMemo}`, // Encode memo as hex
-    };
-    console.log("Sending transaction", tx);
-
-    const result = await provider.request({
-      method: "eth_sendTransaction",
-      params: [tx],
-    });
-    console.log({ result });
-    return result;
-  };
 
   const addLiquidity = useCallback(
     async ({ asset, amount, runeAmount, address }: AddLiquidityParams) => {
@@ -227,9 +221,9 @@ export function useLiquidityPosition() {
 
         const inboundAddresses = await getInboundAddresses();
 
-        const assetChain = asset.split(".")[0].toLowerCase();
+        const [assetChain, assetAddress] = asset.split(".");
         const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase(),
+          (i) => i.chain === assetChain.toUpperCase()
         );
 
         if (!inbound) {
@@ -240,57 +234,116 @@ export function useLiquidityPosition() {
           throw new Error("Network is halted");
         }
 
-        // Construct memo for single or symmetric add
-        const memo = runeAmount
-          ? `+:${asset}:${address}` // Symmetric add
-          : `+:${asset}:${address}`; // Single-sided add
+        // single sided liquidity memo
+        const memo = `+:${asset}`;
+
+        const supportedChains = ['ethereum', 'avalanche', 'bsc'];
+        const chainLower = assetChain.toLowerCase();
+        
+        if (!supportedChains.includes(chainLower)) {
+          throw new Error(`Unsupported chain: ${assetChain}. Only EVM chains are supported.`);
+        }
+
+        const chainIdMap: Record<string, number> = {
+          ethereum: 1,
+          avalanche: 43114,
+          bsc: 56
+        };
+
+        // Switch chain if needed
+        const currentChainId = await wallet.provider.request({ method: "eth_chainId" });
+        const targetChainId = chainIdMap[chainLower];
+        if (parseInt(currentChainId, 16) !== targetChainId) {
+          await wallet.provider.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+          });
+        }
+
+        // Ensure router address has 0x prefix
+        const routerAddress = inbound.router?.startsWith('0x') 
+          ? inbound.router 
+          : `0x${inbound.router}`;
+
+        // Check if the asset is a token (has contract address) or native
+        const isToken = assetAddress && assetAddress !== assetChain.toUpperCase();
 
         let txHash;
 
-        // Handle transaction based on chain type
-        switch (assetChain) {
-          // UTXO chains
-          case "bitcoin":
-          case "litecoin":
-          case "bitcoincash":
-          case "dogecoin":
-            txHash = await sendUTXOTransaction(
-              inbound,
-              memo,
-              amount,
-              assetChain,
-            );
-            break;
+        if (isToken && routerAddress) {
+          // Format token address correctly
+          const formattedTokenAddress = asset.split("-")[1];
 
-          // EVM chains
-          case "ethereum":
-          case "avalanche":
-          case "bsc": {
-            const parsedAmount = parseUnits(amount.toString(), 18);
-            txHash = await sendEVMTransaction(
-              inbound,
-              memo,
-              parsedAmount,
-            );
-            break;
+          // Get decimals and parse amount
+          const decimals = await getTokenDecimals(wallet.provider, formattedTokenAddress);
+          const parsedAmount = parseUnits(amount.toString(), decimals);
+
+          // Check and approve if needed
+          const approved = await checkAndApproveToken(wallet.provider, {
+            tokenAddress: formattedTokenAddress,
+            spenderAddress: routerAddress,
+            amount: parsedAmount,
+            fromAddress: wallet.address
+          });
+
+          if (!approved) {
+            throw new Error("Token approval failed");
           }
 
-          default:
-            throw new Error(`Unsupported chain: ${assetChain}`);
+          // Generate the deposit transaction data
+          const depositSelector = "0x44bc937b"; // Function selector for depositWithExpiry
+          // Use ABCI call
+          const depositData = depositSelector +
+            routerAddress.slice(2).padStart(64, '0') +                    // router address
+            formattedTokenAddress.slice(2).padStart(64, '0') +            // token address 
+            parsedAmount.toString(16).padStart(64, '0') +                 // amount
+            "00000000000000000000000000000000000000000000000000000000000000a0" + // memo offset
+            ((Math.floor(Date.now() / 1000) + 300).toString(16)).padStart(64, '0') + // expiry (current time + 5 min)
+            memo.length.toString(16).padStart(64, '0') +                  // memo length
+            hex.encode(Buffer.from(memo, 'utf-8')).padEnd(64, '0');      // memo data
+
+          const depositTx = {
+            from: wallet.address,
+            to: routerAddress,
+            data: depositData,
+            value: "0x0" // No native token value for ERC20 deposits
+          };
+
+          txHash = await wallet.provider.request({
+            method: "eth_sendTransaction",
+            params: [depositTx]
+          });
+        } else {
+          // Handle native token
+          const parsedAmount = parseUnits(amount.toString(), 18);
+          const memoBytes = Buffer.from(memo, "utf-8");
+          const encodedMemo = hex.encode(memoBytes);
+          
+          const tx = {
+            from: wallet.address,
+            to: routerAddress,
+            value: `0x${parsedAmount.toString(16)}`,
+            data: `0x${encodedMemo}`
+          };
+
+          txHash = await wallet.provider.request({
+            method: "eth_sendTransaction",
+            params: [tx]
+          });
         }
 
         await getMemberDetails(address, asset);
         return txHash;
+
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to add liquidity",
-        );
-        return false;
+        const errorMessage = err instanceof Error ? err.message : "Failed to add liquidity";
+        setError(errorMessage);
+        throw new Error(errorMessage);
       } finally {
         setLoading(false);
       }
     },
-    [wallet, pool, getMemberDetails],
+    [wallet, getMemberDetails]
   );
 
   const removeLiquidity = useCallback(
@@ -305,9 +358,9 @@ export function useLiquidityPosition() {
 
         const inboundAddresses = await getInboundAddresses();
 
-        const assetChain = asset.split(".")[0].toLowerCase();
+        const [assetChain] = asset.split(".");
         const inbound = inboundAddresses.find(
-          (i) => i.chain === assetChain.toUpperCase(),
+          (i) => i.chain === assetChain.toUpperCase()
         );
 
         if (!inbound) {
@@ -321,42 +374,32 @@ export function useLiquidityPosition() {
         const basisPoints = percentage * 100;
         const memo = `-:${asset}:${basisPoints}`;
 
-        let txHash;
+        const memoBytes = Buffer.from(memo, "utf-8");
+        const encodedMemo = hex.encode(memoBytes);
 
-        switch (assetChain) {
-          case "bitcoin":
-          case "litecoin":
-          case "bitcoincash":
-          case "dogecoin":
-            txHash = await sendUTXOTransaction(inbound, memo, 0, assetChain); // Amount 0 for withdrawal
-            break;
+        const tx = {
+          from: wallet.address,
+          to: inbound.router,
+          value: "0x0",
+          data: `0x${encodedMemo}`
+        };
 
-          case "ethereum":
-          case "avalanche":
-          case "binance-smart-chain":
-            txHash = await sendEVMTransaction(
-              inbound,
-              memo,
-              BigInt(0),
-            ); // Amount 0 for withdrawal
-            break;
-
-          default:
-            throw new Error(`Unsupported chain: ${assetChain}`);
-        }
+        const txHash = await wallet.provider.request({
+          method: "eth_sendTransaction",
+          params: [tx]
+        });
 
         await getMemberDetails(address, asset);
         return txHash;
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to remove liquidity",
-        );
-        return false;
+        const errorMessage = err instanceof Error ? err.message : "Failed to remove liquidity";
+        setError(errorMessage);
+        throw new Error(errorMessage);
       } finally {
         setLoading(false);
       }
     },
-    [wallet, pool, getMemberDetails],
+    [wallet, getMemberDetails]
   );
 
   return {

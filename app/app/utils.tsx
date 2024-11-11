@@ -8,9 +8,7 @@ import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { Saver } from "@/app/explore/types";
 import { PoolDetail } from "@/midgard";
-
-export const parseUnits = viem.parseUnits;
-export const formatUnits = viem.formatUnits;
+import { useAppState } from "@/utils/context";
 
 export const ONE = BigInt("1000000000000000000");
 export const ONE6 = BigInt("1000000");
@@ -171,11 +169,153 @@ interface ABI {
   stateMutability: string;
 }
 
-export async function call(
+import { parseUnits, formatUnits } from "viem";
+interface EVMTokenData {
+  address?: string;  // Contract address for ERC20 tokens
+  decimals: number;
+}
+
+// ABI for ERC20 token interactions
+const ERC20_ABI = [
+  {
+    name: "transfer",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "recipient", type: "address" },
+      { name: "amount", type: "uint256" }
+    ],
+    outputs: [{ name: "", type: "bool" }]
+  },
+  {
+    name: "approve",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" }
+    ],
+    outputs: [{ name: "", type: "bool" }]
+  }
+];
+
+export async function sendEVMTransaction(
+  provider: any,
+  params: {
+    inbound: {
+      address: string;
+      router?: string;
+    };
+    memo: string;
+    amount: number;
+    token?: EVMTokenData;
+    fromAddress: string;
+    chainId?: number;
+  }
+) {
+  const { inbound, memo, amount, token, fromAddress, chainId } = params;
+
+  // Switch chain if needed
+  if (chainId) {
+    const currentChainId = await provider.request({ method: "eth_chainId" });
+    if (currentChainId !== chainId.toString(16)) {
+      await provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: `0x${chainId.toString(16)}` }],
+      });
+    }
+  }
+
+  const memoBytes = Buffer.from(memo, "utf-8");
+  const encodedMemo = hex.encode(memoBytes);
+
+  // Handle ERC20 tokens vs native tokens
+  if (token?.address) {
+    // For ERC20 tokens
+    const decimals = token.decimals;
+    const parsedAmount = parseUnits(amount.toString(), decimals);
+    
+    // First approve the router to spend tokens
+    if (!inbound.router) throw new Error("Router address not provided");
+    const approveData = encodeERC20Function(
+      "approve",
+      [inbound.router, parsedAmount.toString()]
+    );
+
+    const approveTx = {
+      from: fromAddress,
+      to: token.address,
+      data: approveData,
+    };
+
+    // Send approve transaction
+    await provider.request({
+      method: "eth_sendTransaction",
+      params: [approveTx]
+    });
+
+    // Then send the actual deposit transaction
+    const depositData = `0x${encodedMemo}`;
+    const depositTx = {
+      from: fromAddress,
+      to: inbound.router,
+      data: depositData,
+      value: "0x0" // No native token value for ERC20 deposits
+    };
+
+    return await provider.request({
+      method: "eth_sendTransaction",
+      params: [depositTx]
+    });
+
+  } else {
+    // For native tokens
+    const parsedAmount = parseUnits(amount.toString(), 18);
+    
+    const tx = {
+      from: fromAddress,
+      to: inbound.router,
+      value: `0x${parsedAmount.toString(16)}`,
+      data: `0x${encodedMemo}`
+    };
+
+    return await provider.request({
+      method: "eth_sendTransaction",
+      params: [tx]
+    });
+  }
+}
+
+// Helper function to encode ERC20 function calls
+function encodeERC20Function(functionName: string, params: string[]) {
+  const functionABI = ERC20_ABI.find(x => x.name === functionName);
+  if (!functionABI) throw new Error(`Function ${functionName} not found in ABI`);
+
+  // Create function signature
+  const functionSignature = `${functionName}(${functionABI.inputs.map(i => i.type).join(',')})`;
+  const functionSelector = hex.encode(Buffer.from(functionSignature).slice(0, 4));
+
+  // Encode parameters
+  const encodedParams = params.map((param, i) => {
+    const paramType = functionABI.inputs[i].type;
+    if (paramType === 'address') {
+      return param.padStart(64, '0');
+    } else if (paramType === 'uint256') {
+      return BigInt(param).toString(16).padStart(64, '0');
+    }
+    throw new Error(`Unsupported parameter type: ${paramType}`);
+  }).join('');
+
+  return `0x${functionSelector}${encodedParams}`;
+}
+
+export async function evmCall(
   address: string,
   fn: string | ABI,
   ...args: Array<string | number | bigint>
 ): Promise<any> {
+  walletClient;
+  const { wallet } = useAppState();
   let abi;
   let fnName;
   let isView;
@@ -204,7 +344,7 @@ export async function call(
       functionName: fnName,
     });
   } else {
-    const account = getAtom(atomWallet)?.ethereum?.address;
+    const account = wallet?.address;
     if (!account) throw new Error("Wallet not connected");
     const { request } = await publicClient.simulateContract({
       address: address as viem.Address,
@@ -227,7 +367,7 @@ export async function checkAllowance(
   target: string,
   amount: bigint,
 ) {
-  const allowance: bigint = await call(
+  const allowance: bigint = await evmCall(
     asset,
     "allowance-address,address-uint256",
     owner,
@@ -237,7 +377,7 @@ export async function checkAllowance(
     amount = UINT128_MAX;
   }
   if (allowance < amount) {
-    await call(
+    await evmCall(
       owner,
       "+approve-address,address,uint256",
       asset,

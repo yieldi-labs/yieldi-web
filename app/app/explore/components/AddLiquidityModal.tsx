@@ -26,22 +26,22 @@ export default function AddLiquidityModal({
   const { wallet } = useAppState();
   const { loading, error, addLiquidity } = useLiquidityPosition();
   const [selectedTab] = useState("single");
-  const [assetAmount, setAssetAmount] = useState(0);
+  const [assetAmount, setAssetAmount] = useState(0.0001);
   const [runeAmount, setRuneAmount] = useState(0);
+  const [txHash, setTxHash] = useState<string | null>(null);
 
   const getPercentage = (amount: number, max: number) => {
     return (amount / max) * 100;
   };
 
+  // Load rune balance with midgard client
   const runeBalance = useMemo(() => {
-    return wallet?.balances.find((balance) => balance.symbol === "thor.rune");
+    return 0;
   }, [wallet]);
 
   const assetBalance = useMemo(() => {
-    return wallet?.balances.find(
-      (balance) =>
-        balance.symbol.toUpperCase() === pool.asset.split(".")[1].toUpperCase(),
-    );
+    //Load from RPC
+    return 10;
   }, [wallet, pool.asset]);
 
   const currentAssetPercentage = useMemo(() => {
@@ -65,36 +65,35 @@ export default function AddLiquidityModal({
     isRune: boolean = false,
   ) => {
     if (isRune) {
-      const newRuneAmount =
-        (Number(runeBalance?.bigIntValue) /
-          Number(runeBalance?.decimalMultiplier)) *
-        (percentage / 100);
+      const newRuneAmount = runeBalance * (percentage / 100);
       setRuneAmount(newRuneAmount);
     } else {
-      const newAssetAmount =
-        (Number(assetBalance?.bigIntValue) /
-          Number(assetBalance?.decimalMultiplier)) *
-        (percentage / 100);
+      const newAssetAmount = assetBalance * (percentage / 100);
       setAssetAmount(newAssetAmount);
     }
   };
 
   const handleAddLiquidity = async () => {
     if (!wallet?.address) {
-      // Could integrate with your wallet modal here
       alert("Please connect your wallet first");
       return;
     }
 
+    if (assetAmount <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+
     try {
-      const success = await addLiquidity({
+      const hash = await addLiquidity({
         asset: pool.asset,
         amount: assetAmount,
         runeAmount: selectedTab === "double" ? runeAmount : undefined,
         address: wallet.address,
       });
 
-      if (success) {
+      setTxHash(hash);
+      if (hash) {
         onClose();
       }
     } catch (err) {
@@ -115,7 +114,7 @@ export default function AddLiquidityModal({
 
   return (
     <Modal onClose={onClose} style={modalStyle}>
-      <div>
+      <div className="p-6">
         {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
         {/* Asset Input Section */}
@@ -130,7 +129,7 @@ export default function AddLiquidityModal({
                 className="mr-3"
               />
               <span className="font-gt-america-ext">
-                {getAssetShortSymbol(pool.asset)} Balance
+                {getAssetShortSymbol(pool.asset)} Balance: {assetBalance.toFixed(6)}
               </span>
             </div>
             <div>
@@ -142,11 +141,9 @@ export default function AddLiquidityModal({
           <div className="relative mb-6">
             <Slider
               value={assetAmount}
-              max={
-                Number(assetBalance?.bigIntValue) /
-                Number(assetBalance?.decimalMultiplier)
-              }
+              max={Number(assetBalance)}
               onChange={setAssetAmount}
+              step={0.000001}
             />
           </div>
 
@@ -185,12 +182,14 @@ export default function AddLiquidityModal({
               <div className="flex items-center">
                 <Image
                   src={getLogoPath("thor.rune")}
-                  alt="Rune"
+                  alt="RUNE"
                   width={42}
                   height={42}
                   className="mr-3"
                 />
-                <span className="font-gt-america-ext">RUNE Balance</span>
+                <span className="font-gt-america-ext">
+                  RUNE Balance: {runeBalance.toFixed(6)}
+                </span>
               </div>
               <div>
                 {runeAmount.toFixed(6)} ($
@@ -203,6 +202,7 @@ export default function AddLiquidityModal({
                 value={runeAmount}
                 max={Number(runeBalance)}
                 onChange={setRuneAmount}
+                step={0.000001}
               />
             </div>
 
@@ -235,13 +235,19 @@ export default function AddLiquidityModal({
           </div>
         )}
 
-        <Button 
+        <Button
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
           onClick={handleAddLiquidity}
-          disabled={loading}
+          disabled={loading || assetAmount <= 0}
         >
-          {loading ? "Adding Liquidity..." : "Add"}
+          {loading ? "Adding Liquidity..." : "Add Liquidity"}
         </Button>
+
+        {txHash && (
+          <div className="mt-4 text-sm text-center text-gray-600">
+            Transaction submitted: {txHash}
+          </div>
+        )}
       </div>
     </Modal>
   );
