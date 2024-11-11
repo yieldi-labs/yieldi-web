@@ -34,7 +34,7 @@ const components = [
 ];
 
 const KeyComponents = () => (
-  <div className="relative flex flex-col gap-[28px] tablet:gap-[75px] tablet:mb-[150px] mb-[90px] px-8 tablet:px-18 font-gt-america-ext h-fit">
+  <div className="relative max-w-7xl mx-auto flex flex-col gap-[28px] tablet:gap-[75px] tablet:mb-[150px] mb-[90px] px-8 tablet:px-18 font-gt-america-ext h-fit">
     <h2 className="text-[32px] tablet:text-[64px] font-bold text-neutral-900">
       Key Features
     </h2>
