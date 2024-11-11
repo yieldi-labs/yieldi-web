@@ -30,7 +30,7 @@ interface TokenMetadata {
 async function waitForTransaction(
   provider: any,
   txHash: string,
-): Promise<boolean> {
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const checkReceipt = async () => {
       try {
@@ -40,7 +40,9 @@ async function waitForTransaction(
         });
 
         if (receipt) {
-          resolve(receipt.status === "0x1");
+          if (receipt.status === "0x1") {
+            resolve(txHash)
+          }
         } else {
           setTimeout(checkReceipt, 1000);
         }
@@ -57,6 +59,7 @@ export function useContracts({
   routerAddress,
   provider,
 }: UseContractProps) {
+  console.log("useContracts:", { tokenAddress, routerAddress, provider });
   const { address: walletAddress } = useAccount();
   const [error, setError] = useState<string>();
   const [tokenMetadata, setTokenMetadata] = useState<TokenMetadata>({});
@@ -71,6 +74,7 @@ export function useContracts({
   const loadMetadata = useCallback(async () => {
     if (!tokenAddress || !provider) return;
 
+    console.log("Loading token metadata for:", tokenAddress);
     try {
       // Name
       const nameData = encodeFunctionData({
@@ -105,6 +109,8 @@ export function useContracts({
         }),
       ]);
 
+      console.log("Token metadata hex:", { nameHex, symbolHex, decimalsHex });
+
       const name = decodeFunctionResult({
         abi: ERC20_ABI,
         functionName: "name",
@@ -123,6 +129,7 @@ export function useContracts({
         data: decimalsHex,
       });
 
+      console.log("Token metadata:", { name, symbol, decimals });
       setTokenMetadata({ name, symbol, decimals });
     } catch (err) {
       console.error("Error loading token metadata:", err);

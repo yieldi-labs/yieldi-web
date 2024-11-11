@@ -418,3 +418,8 @@ export const getAssetCanonicalSymbol = (asset: string) => {
 export const getAssetShortSymbol = (asset: string) => {
   return getAssetCanonicalSymbol(asset).split(".")[1] || asset;
 };
+
+export const normalizeAddress = (address: string) => {
+  const cleanAddr = address.toLowerCase().replace("0x", "");
+  return `0x${cleanAddr}` as `0x${string}`;
+}

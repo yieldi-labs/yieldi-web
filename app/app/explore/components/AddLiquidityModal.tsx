@@ -1,16 +1,16 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Button from "@/app/button";
 import Modal from "@/app/modal";
-import { PoolDetail as IPoolDetail } from "@/midgard";
+import { Balance, getBalance, PoolDetail as IPoolDetail } from "@/midgard";
 import { Slider } from "@shared/components/ui";
 import { twMerge } from "tailwind-merge";
-import { getAssetShortSymbol, getLogoPath } from "@/app/utils";
+import { getAssetShortSymbol, getLogoPath, normalizeAddress } from "@/app/utils";
 import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
+import { useContracts } from "@/hooks/useContracts";
+import { Address } from "viem";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -26,30 +26,71 @@ export default function AddLiquidityModal({
   const { wallet } = useAppState();
   const { loading, error, addLiquidity } = useLiquidityPosition({ pool });
   const [selectedTab] = useState("single");
-  const [assetAmount, setAssetAmount] = useState(0.0001);
+  const [assetAmount, setAssetAmount] = useState(0);
   const [runeAmount, setRuneAmount] = useState(0);
   const [txHash, setTxHash] = useState<string | null>(null);
 
+    // Initialize contract hooks
+  const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
+  const tokenAddress = normalizeAddress(poolViemAddress);
+
+  // Use useContracts for ERC20 interaction
+  const {
+    balance: tokenBalance,
+    error: tokenError,
+    loadMetadata,
+  } = useContracts({
+    tokenAddress,
+    provider: wallet?.provider,
+  });
+
+  // Load token metadata on mount
+  useEffect(() => {
+    if (wallet?.provider) {
+      loadMetadata();
+    }
+  }, [wallet?.provider, loadMetadata]);
+
   const getPercentage = (amount: number, max: number) => {
-    return (amount / max) * 100;
+    return max > 0 ? (amount / max) * 100 : 0;
   };
 
-  // Load rune balance with midgard client
-  const runeBalance = useMemo(() => {
-    return 0;
+  const [runeBalance, setRuneBalance] = useState(0);
+  const getRuneBalance = useCallback(async () => {
+    if (!wallet?.address) return;
+    const { data: runeBalance } = await getBalance({
+      path: {
+        address: wallet.address,
+      }
+    });
+    return runeBalance;
   }, [wallet]);
 
+  // Fetch RUNE balance on mount and every 10 seconds
+  useEffect(() => {
+    const fetchRuneBalance = async () => {
+      const balance: Balance | undefined = await getRuneBalance();
+      const amountStr: string = balance?.coins[0]?.amount || "0";
+      setRuneBalance(parseInt(amountStr));
+    };
+
+    fetchRuneBalance();
+    const intervalId = setInterval(fetchRuneBalance, 10000);
+    return () => clearInterval(intervalId);
+  }, [getRuneBalance]);
+
+  // Get formatted asset balance from tokenBalance
   const assetBalance = useMemo(() => {
-    //Load from RPC
-    return 10;
-  }, [wallet, pool.asset]);
+    if (!tokenBalance?.formatted) return 0;
+    return Number(tokenBalance.formatted);
+  }, [tokenBalance]);
 
   const currentAssetPercentage = useMemo(() => {
-    return getPercentage(assetAmount, Number(assetBalance));
+    return getPercentage(assetAmount, assetBalance);
   }, [assetAmount, assetBalance]);
 
   const currentRunePercentage = useMemo(() => {
-    return getPercentage(runeAmount, Number(runeBalance));
+    return getPercentage(runeAmount, runeBalance);
   }, [runeAmount, runeBalance]);
 
   const isCloseToPercentage = (
@@ -107,15 +148,15 @@ export default function AddLiquidityModal({
       isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
     );
 
-  const modalStyle = {
-    backgroundColor: "#F5F6F6",
-    maxWidth: "36rem",
-  };
-
   return (
-    <Modal onClose={onClose} style={modalStyle}>
+    <Modal 
+      onClose={onClose} 
+      style={{ backgroundColor: "#F5F6F6", maxWidth: "36rem" }}
+    >
       <div className="p-6">
-        {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
+        {(error || tokenError) && (
+          <ErrorCard className="mb-4">{error || tokenError}</ErrorCard>
+        )}
 
         {/* Asset Input Section */}
         <div>
@@ -142,37 +183,23 @@ export default function AddLiquidityModal({
           <div className="relative mb-6">
             <Slider
               value={assetAmount}
-              max={Number(assetBalance)}
+              max={assetBalance}
               onChange={setAssetAmount}
-              step={0.000001}
             />
           </div>
 
           <div className="flex justify-end gap-2">
-            <button
-              className={percentageButtonClasses(
-                isCloseToPercentage(currentAssetPercentage, 25),
-              )}
-              onClick={() => handlePercentageClick(25)}
-            >
-              25%
-            </button>
-            <button
-              className={percentageButtonClasses(
-                isCloseToPercentage(currentAssetPercentage, 50),
-              )}
-              onClick={() => handlePercentageClick(50)}
-            >
-              50%
-            </button>
-            <button
-              className={percentageButtonClasses(
-                isCloseToPercentage(currentAssetPercentage, 100),
-              )}
-              onClick={() => handlePercentageClick(100)}
-            >
-              MAX
-            </button>
+            {[25, 50, 100].map((percent) => (
+              <button
+                key={percent}
+                className={percentageButtonClasses(
+                  isCloseToPercentage(currentAssetPercentage, percent)
+                )}
+                onClick={() => handlePercentageClick(percent)}
+              >
+                {percent === 100 ? "MAX" : `${percent}%`}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -201,37 +228,23 @@ export default function AddLiquidityModal({
             <div className="relative mb-4">
               <Slider
                 value={runeAmount}
-                max={Number(runeBalance)}
+                max={runeBalance}
                 onChange={setRuneAmount}
-                step={0.000001}
               />
             </div>
 
             <div className="flex justify-end gap-2">
-              <button
-                className={percentageButtonClasses(
-                  isCloseToPercentage(currentRunePercentage, 25),
-                )}
-                onClick={() => handlePercentageClick(25, true)}
-              >
-                25%
-              </button>
-              <button
-                className={percentageButtonClasses(
-                  isCloseToPercentage(currentRunePercentage, 50),
-                )}
-                onClick={() => handlePercentageClick(50, true)}
-              >
-                50%
-              </button>
-              <button
-                className={percentageButtonClasses(
-                  isCloseToPercentage(currentRunePercentage, 100),
-                )}
-                onClick={() => handlePercentageClick(100, true)}
-              >
-                MAX
-              </button>
+              {[25, 50, 100].map((percent) => (
+                <button
+                  key={percent}
+                  className={percentageButtonClasses(
+                    isCloseToPercentage(currentRunePercentage, percent)
+                  )}
+                  onClick={() => handlePercentageClick(percent, true)}
+                >
+                  {percent === 100 ? "MAX" : `${percent}%`}
+                </button>
+              ))}
             </div>
           </div>
         )}

@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useAppState } from "@/utils/context";
 import { client, getMemberDetail, getPool } from "@/midgard";
 import type { MemberPool, PoolDetail } from "@/midgard";
 import { hex } from "@scure/base";
 import { parseUnits, Address } from "viem";
 import { useContracts } from "./useContracts";
+import { normalizeAddress } from "@/app/utils";
 
 interface InboundAddress {
   chain: string;
@@ -36,17 +37,12 @@ interface AddLiquidityParams {
 
 interface RemoveLiquidityParams {
   asset: string;
-  percentage: number; // 1-100
+  percentage: number;
   address: string;
 }
 
 interface UseLiquidityPositionProps {
   pool: PoolDetail;
-}
-
-function normalizeAddress(address: string): `0x${string}` {
-  const cleanAddr = address.toLowerCase().replace("0x", "");
-  return `0x${cleanAddr}` as `0x${string}`;
 }
 
 export function useLiquidityPosition({
@@ -58,19 +54,44 @@ export function useLiquidityPosition({
   const [position, setPosition] = useState<MemberPool | null>(null);
   const [pool, setPool] = useState<PoolDetail>(poolProp);
 
-  // Initialize contract hooks
-  const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
-  const tokenAddress = normalizeAddress(poolViemAddress);
+  // More robust asset parsing
+  const [assetChain = '', assetIdentifier = ''] = pool.asset.split('.');
+  
+  // Check if it's a native asset (e.g., ETH.ETH, AVAX.AVAX)
+  const isNativeAsset = useMemo(() => {
+    return !assetIdentifier || 
+      assetIdentifier === assetChain || 
+      assetIdentifier.toUpperCase() === assetChain.toUpperCase();
+  }, [assetChain, assetIdentifier]);
 
-  const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
-    useContracts({
-      tokenAddress,
-      provider: wallet?.provider,
-    });
+  // Only attempt to get token address for non-native assets
+  const tokenAddress = useMemo(() => {
+    if (isNativeAsset) return undefined;
+    
+    try {
+      // For tokens like ETH.USDT-0x... format
+      const [_, addressPart] = assetIdentifier.split('-');
+      return addressPart ? normalizeAddress(addressPart) as Address : undefined;
+    } catch (err) {
+      console.warn('Failed to parse token address:', err);
+      return undefined;
+    }
+  }, [assetIdentifier, isNativeAsset]);
+
+  // Initialize contract hooks with proper type checking
+  const {
+    approveSpending,
+    getAllowance,
+    depositWithExpiry,
+    parseAmount
+  } = useContracts({
+    tokenAddress: tokenAddress as Address | undefined,
+    provider: wallet?.provider,
+  });
 
   const getInboundAddresses = async (): Promise<InboundAddress[]> => {
     const response = await fetch(
-      "https://thornode.ninerealms.com/thorchain/inbound_addresses",
+      "https://thornode.ninerealms.com/thorchain/inbound_addresses"
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -107,7 +128,7 @@ export function useLiquidityPosition({
         }
 
         const poolPosition = memberResponse.data.pools.find(
-          (p) => p.pool === asset,
+          (p) => p.pool === asset
         );
 
         if (poolPosition) {
@@ -124,16 +145,14 @@ export function useLiquidityPosition({
         };
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to fetch position details",
+          err instanceof Error ? err.message : "Failed to fetch position details"
         );
         return null;
       } finally {
         setLoading(false);
       }
     },
-    [],
+    []
   );
 
   const addLiquidity = useCallback(
@@ -147,9 +166,9 @@ export function useLiquidityPosition({
         setError(null);
 
         const inboundAddresses = await getInboundAddresses();
-        const [assetChain, assetAddress] = asset.split(".");
+        const [assetChain, assetIdentifier] = asset.split(".");
         const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase(),
+          (i) => i.chain === assetChain.toUpperCase()
         );
 
         if (!inbound) {
@@ -170,21 +189,22 @@ export function useLiquidityPosition({
 
         if (!supportedChains.includes(chainLower)) {
           throw new Error(
-            `Unsupported chain: ${assetChain}. Only EVM chains are supported.`,
+            `Unsupported chain: ${assetChain}. Only EVM chains are supported.`
           );
         }
 
+        // Handle chain switching
         const chainIdMap: Record<string, number> = {
           ethereum: 1,
           avalanche: 43114,
           bsc: 56,
         };
 
-        // Switch chain if needed
         const currentChainId = await wallet.provider.request({
           method: "eth_chainId",
         });
         const targetChainId = chainIdMap[chainLower];
+
         if (parseInt(currentChainId, 16) !== targetChainId) {
           await wallet.provider.request({
             method: "wallet_switchEthereumChain",
@@ -192,55 +212,49 @@ export function useLiquidityPosition({
           });
         }
 
-        // For both native and token assets, use router's depositWithExpiry
         const routerAddress = normalizeAddress(inbound.router);
         const vaultAddress = normalizeAddress(inbound.address);
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300);
 
         // Check if the asset is a token or native
-        const isToken =
-          assetAddress && assetAddress !== assetChain.toUpperCase();
+        const isNativeAsset = !assetIdentifier || 
+          assetIdentifier === assetChain || 
+          assetIdentifier.toUpperCase() === assetChain.toUpperCase();
+
         let txHash;
 
-        if (isToken) {
-          // For tokens
+        if (!isNativeAsset && tokenAddress) {
+          // Handle ERC20 token deposit
           const parsedAmount = parseAmount(amount.toString());
-
-          // Check current allowance
+          
+          // Check and handle allowance
           const currentAllowance = await getAllowance(routerAddress);
-          console.log("Current allowance:", currentAllowance.toString());
-          console.log("Required amount:", parsedAmount.toString());
-
-          // Only approve if current allowance is insufficient
           if (currentAllowance < parsedAmount) {
-            console.log("Approving token spending...");
             await approveSpending(routerAddress, parsedAmount);
-          } else {
-            console.log("Sufficient allowance exists");
           }
 
           txHash = await depositWithExpiry(
-            routerAddress, // The router contract address
+            routerAddress,
             vaultAddress,
-            tokenAddress, // The token address
+            tokenAddress,
             parsedAmount,
             memo,
-            expiry,
+            expiry
           );
         } else {
-          // For native assets
+          // Handle native asset deposit
           const parsedAmount = parseUnits(amount.toString(), 18);
-          const zeroAddress =
-            "0x0000000000000000000000000000000000000000" as `0x${string}`;
-
-          txHash = await depositWithExpiry(
-            routerAddress, // The router contract address
-            vaultAddress,
-            zeroAddress, // Zero address for native assets
-            parsedAmount,
-            memo,
-            expiry,
-          );
+          
+          // For native assets, use a direct transaction
+          txHash = await wallet.provider.request({
+            method: "eth_sendTransaction",
+            params: [{
+              from: wallet.address,
+              to: routerAddress,
+              value: `0x${parsedAmount.toString(16)}`,
+              data: "0x",
+            }],
+          });
         }
 
         await getMemberDetails(address, asset);
@@ -262,7 +276,7 @@ export function useLiquidityPosition({
       parseAmount,
       tokenAddress,
       getAllowance,
-    ],
+    ]
   );
 
   const removeLiquidity = useCallback(
@@ -278,7 +292,7 @@ export function useLiquidityPosition({
         const inboundAddresses = await getInboundAddresses();
         const [assetChain] = asset.split(".");
         const inbound = inboundAddresses.find(
-          (i) => i.chain === assetChain.toUpperCase(),
+          (i) => i.chain === assetChain.toUpperCase()
         );
 
         if (!inbound) {
@@ -323,7 +337,7 @@ export function useLiquidityPosition({
         setLoading(false);
       }
     },
-    [wallet, getMemberDetails],
+    [wallet, getMemberDetails]
   );
 
   return {
