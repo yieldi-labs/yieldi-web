@@ -3,8 +3,8 @@ import { useAppState } from "@/utils/context";
 import { client, getMemberDetail, getPool } from "@/midgard";
 import type { MemberPool, PoolDetail } from "@/midgard";
 import { hex } from "@scure/base";
-import { parseUnits } from "viem";
-import { connectorsForWallets } from "@rainbow-me/rainbowkit";
+import { parseUnits, Address } from "viem";
+import { useContracts } from "./useContracts";
 
 interface InboundAddress {
   chain: string;
@@ -40,110 +40,37 @@ interface RemoveLiquidityParams {
   address: string;
 }
 
-async function getTokenDecimals(provider: any, tokenAddress: string): Promise<number> {
-  try {
-    const decimalsSelector = "0x313ce567";
-    const result = await provider.request({
-      method: "eth_call",
-      params: [
-        {
-          to: tokenAddress,
-          data: decimalsSelector
-        },
-        "latest"
-      ]
-    });
-    return parseInt(result, 16);
-  } catch (error) {
-    console.error(`Error fetching decimals for token ${tokenAddress}:`, error);
-    return 18;
-  }
+interface UseLiquidityPositionProps {
+  pool: PoolDetail;
 }
 
-async function checkAndApproveToken(
-  provider: any,
-  params: {
-    tokenAddress: string;
-    spenderAddress: string;
-    amount: bigint;
-    fromAddress: string;
-  }
-) {
-  const { tokenAddress, spenderAddress, amount, fromAddress } = params;
-
-  // Check allowance
-  const allowanceSelector = "0xdd62ed3e" + 
-    fromAddress.slice(2).padStart(64, '0') +
-    spenderAddress.slice(2).padStart(64, '0');
-
-  const allowanceResult = await provider.request({
-    method: "eth_call",
-    params: [
-      {
-        to: tokenAddress,
-        data: allowanceSelector
-      },
-      "latest"
-    ]
-  });
-
-  const currentAllowance = BigInt(allowanceResult);
-  if (currentAllowance >= amount) {
-    return true;
-  }
-
-  // Approve if needed
-  const approveSelector = "0x095ea7b3" + 
-    spenderAddress.slice(2).padStart(64, '0') +
-    amount.toString(16).padStart(64, '0');
-
-  const approveTx = {
-    from: fromAddress,
-    to: tokenAddress,
-    data: approveSelector
-  };
-
-  const approveTxHash = await provider.request({
-    method: "eth_sendTransaction",
-    params: [approveTx]
-  });
-
-  // Wait for approval transaction
-  return await waitForTransaction(provider, approveTxHash);
+function normalizeAddress(address: string): `0x${string}` {
+  const cleanAddr = address.toLowerCase().replace("0x", "");
+  return `0x${cleanAddr}` as `0x${string}`;
 }
 
-async function waitForTransaction(provider: any, txHash: string): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const checkReceipt = async () => {
-      try {
-        const receipt = await provider.request({
-          method: "eth_getTransactionReceipt",
-          params: [txHash]
-        });
-        
-        if (receipt) {
-          resolve(receipt.status === "0x1");
-        } else {
-          setTimeout(checkReceipt, 1000);
-        }
-      } catch (error) {
-        reject(error);
-      }
-    };
-    checkReceipt();
-  });
-}
-
-export function useLiquidityPosition() {
+export function useLiquidityPosition({
+  pool: poolProp,
+}: UseLiquidityPositionProps) {
   const { wallet } = useAppState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = useState<MemberPool | null>(null);
-  const [pool, setPool] = useState<PoolDetail | null>(null);
+  const [pool, setPool] = useState<PoolDetail>(poolProp);
+
+  // Initialize contract hooks
+  const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
+  const tokenAddress = normalizeAddress(poolViemAddress);
+
+  const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
+    useContracts({
+      tokenAddress,
+      provider: wallet?.provider,
+    });
 
   const getInboundAddresses = async (): Promise<InboundAddress[]> => {
     const response = await fetch(
-      "https://thornode.ninerealms.com/thorchain/inbound_addresses"
+      "https://thornode.ninerealms.com/thorchain/inbound_addresses",
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -180,7 +107,7 @@ export function useLiquidityPosition() {
         }
 
         const poolPosition = memberResponse.data.pools.find(
-          (p) => p.pool === asset
+          (p) => p.pool === asset,
         );
 
         if (poolPosition) {
@@ -199,14 +126,14 @@ export function useLiquidityPosition() {
         setError(
           err instanceof Error
             ? err.message
-            : "Failed to fetch position details"
+            : "Failed to fetch position details",
         );
         return null;
       } finally {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   const addLiquidity = useCallback(
@@ -220,38 +147,43 @@ export function useLiquidityPosition() {
         setError(null);
 
         const inboundAddresses = await getInboundAddresses();
-
         const [assetChain, assetAddress] = asset.split(".");
         const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase()
+          (i) => i.chain === assetChain.toUpperCase(),
         );
 
         if (!inbound) {
           throw new Error(`No inbound address found for ${assetChain}`);
         }
 
+        if (!inbound.router) {
+          throw new Error("Router address not found");
+        }
+
         if (inbound.halted) {
           throw new Error("Network is halted");
         }
 
-        // single sided liquidity memo
         const memo = `+:${asset}`;
-
-        const supportedChains = ['ethereum', 'avalanche', 'bsc'];
+        const supportedChains = ["ethereum", "avalanche", "bsc"];
         const chainLower = assetChain.toLowerCase();
-        
+
         if (!supportedChains.includes(chainLower)) {
-          throw new Error(`Unsupported chain: ${assetChain}. Only EVM chains are supported.`);
+          throw new Error(
+            `Unsupported chain: ${assetChain}. Only EVM chains are supported.`,
+          );
         }
 
         const chainIdMap: Record<string, number> = {
           ethereum: 1,
           avalanche: 43114,
-          bsc: 56
+          bsc: 56,
         };
 
         // Switch chain if needed
-        const currentChainId = await wallet.provider.request({ method: "eth_chainId" });
+        const currentChainId = await wallet.provider.request({
+          method: "eth_chainId",
+        });
         const targetChainId = chainIdMap[chainLower];
         if (parseInt(currentChainId, 16) !== targetChainId) {
           await wallet.provider.request({
@@ -260,90 +192,77 @@ export function useLiquidityPosition() {
           });
         }
 
-        // Ensure router address has 0x prefix
-        const routerAddress = inbound.router?.startsWith('0x') 
-          ? inbound.router 
-          : `0x${inbound.router}`;
+        // For both native and token assets, use router's depositWithExpiry
+        const routerAddress = normalizeAddress(inbound.router);
+        const vaultAddress = normalizeAddress(inbound.address);
+        const expiry = BigInt(Math.floor(Date.now() / 1000) + 300);
 
-        // Check if the asset is a token (has contract address) or native
-        const isToken = assetAddress && assetAddress !== assetChain.toUpperCase();
-
+        // Check if the asset is a token or native
+        const isToken =
+          assetAddress && assetAddress !== assetChain.toUpperCase();
         let txHash;
 
-        if (isToken && routerAddress) {
-          // Format token address correctly
-          const formattedTokenAddress = asset.split("-")[1];
+        if (isToken) {
+          // For tokens
+          const parsedAmount = parseAmount(amount.toString());
 
-          // Get decimals and parse amount
-          const decimals = await getTokenDecimals(wallet.provider, formattedTokenAddress);
-          const parsedAmount = parseUnits(amount.toString(), decimals);
+          // Check current allowance
+          const currentAllowance = await getAllowance(routerAddress);
+          console.log("Current allowance:", currentAllowance.toString());
+          console.log("Required amount:", parsedAmount.toString());
 
-          // Check and approve if needed
-          const approved = await checkAndApproveToken(wallet.provider, {
-            tokenAddress: formattedTokenAddress,
-            spenderAddress: routerAddress,
-            amount: parsedAmount,
-            fromAddress: wallet.address
-          });
-
-          if (!approved) {
-            throw new Error("Token approval failed");
+          // Only approve if current allowance is insufficient
+          if (currentAllowance < parsedAmount) {
+            console.log("Approving token spending...");
+            await approveSpending(routerAddress, parsedAmount);
+          } else {
+            console.log("Sufficient allowance exists");
           }
 
-          // Generate the deposit transaction data
-          const depositSelector = "0x44bc937b"; // Function selector for depositWithExpiry
-          // Use ABCI call
-          const depositData = depositSelector +
-            routerAddress.slice(2).padStart(64, '0') +                    // router address
-            formattedTokenAddress.slice(2).padStart(64, '0') +            // token address 
-            parsedAmount.toString(16).padStart(64, '0') +                 // amount
-            "00000000000000000000000000000000000000000000000000000000000000a0" + // memo offset
-            ((Math.floor(Date.now() / 1000) + 300).toString(16)).padStart(64, '0') + // expiry (current time + 5 min)
-            memo.length.toString(16).padStart(64, '0') +                  // memo length
-            hex.encode(Buffer.from(memo, 'utf-8')).padEnd(64, '0');      // memo data
-
-          const depositTx = {
-            from: wallet.address,
-            to: routerAddress,
-            data: depositData,
-            value: "0x0" // No native token value for ERC20 deposits
-          };
-
-          txHash = await wallet.provider.request({
-            method: "eth_sendTransaction",
-            params: [depositTx]
-          });
+          txHash = await depositWithExpiry(
+            routerAddress, // The router contract address
+            vaultAddress,
+            tokenAddress, // The token address
+            parsedAmount,
+            memo,
+            expiry,
+          );
         } else {
-          // Handle native token
+          // For native assets
           const parsedAmount = parseUnits(amount.toString(), 18);
-          const memoBytes = Buffer.from(memo, "utf-8");
-          const encodedMemo = hex.encode(memoBytes);
-          
-          const tx = {
-            from: wallet.address,
-            to: routerAddress,
-            value: `0x${parsedAmount.toString(16)}`,
-            data: `0x${encodedMemo}`
-          };
+          const zeroAddress =
+            "0x0000000000000000000000000000000000000000" as `0x${string}`;
 
-          txHash = await wallet.provider.request({
-            method: "eth_sendTransaction",
-            params: [tx]
-          });
+          txHash = await depositWithExpiry(
+            routerAddress, // The router contract address
+            vaultAddress,
+            zeroAddress, // Zero address for native assets
+            parsedAmount,
+            memo,
+            expiry,
+          );
         }
 
         await getMemberDetails(address, asset);
         return txHash;
-
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to add liquidity";
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to add liquidity";
         setError(errorMessage);
         throw new Error(errorMessage);
       } finally {
         setLoading(false);
       }
     },
-    [wallet, getMemberDetails]
+    [
+      wallet,
+      getMemberDetails,
+      approveSpending,
+      depositWithExpiry,
+      parseAmount,
+      tokenAddress,
+      getAllowance,
+    ],
   );
 
   const removeLiquidity = useCallback(
@@ -357,10 +276,9 @@ export function useLiquidityPosition() {
         setError(null);
 
         const inboundAddresses = await getInboundAddresses();
-
         const [assetChain] = asset.split(".");
         const inbound = inboundAddresses.find(
-          (i) => i.chain === assetChain.toUpperCase()
+          (i) => i.chain === assetChain.toUpperCase(),
         );
 
         if (!inbound) {
@@ -371,35 +289,41 @@ export function useLiquidityPosition() {
           throw new Error("Network is halted");
         }
 
+        if (!inbound.router) {
+          throw new Error("Router address not found");
+        }
+
         const basisPoints = percentage * 100;
         const memo = `-:${asset}:${basisPoints}`;
-
         const memoBytes = Buffer.from(memo, "utf-8");
         const encodedMemo = hex.encode(memoBytes);
 
+        const routerAddress = normalizeAddress(inbound.router);
+
         const tx = {
           from: wallet.address,
-          to: inbound.router,
+          to: routerAddress,
           value: "0x0",
-          data: `0x${encodedMemo}`
+          data: `0x${encodedMemo}`,
         };
 
         const txHash = await wallet.provider.request({
           method: "eth_sendTransaction",
-          params: [tx]
+          params: [tx],
         });
 
         await getMemberDetails(address, asset);
         return txHash;
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to remove liquidity";
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to remove liquidity";
         setError(errorMessage);
         throw new Error(errorMessage);
       } finally {
         setLoading(false);
       }
     },
-    [wallet, getMemberDetails]
+    [wallet, getMemberDetails],
   );
 
   return {

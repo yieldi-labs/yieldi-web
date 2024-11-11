@@ -23,7 +23,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const { wallet } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const { position, loading, error, getMemberDetails, removeLiquidity } =
-    useLiquidityPosition();
+    useLiquidityPosition({ pool });
 
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);

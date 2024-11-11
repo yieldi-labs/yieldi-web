@@ -24,7 +24,7 @@ export default function AddLiquidityModal({
   onClose,
 }: AddLiquidityModalProps) {
   const { wallet } = useAppState();
-  const { loading, error, addLiquidity } = useLiquidityPosition();
+  const { loading, error, addLiquidity } = useLiquidityPosition({ pool });
   const [selectedTab] = useState("single");
   const [assetAmount, setAssetAmount] = useState(0.0001);
   const [runeAmount, setRuneAmount] = useState(0);
@@ -129,7 +129,8 @@ export default function AddLiquidityModal({
                 className="mr-3"
               />
               <span className="font-gt-america-ext">
-                {getAssetShortSymbol(pool.asset)} Balance: {assetBalance.toFixed(6)}
+                {getAssetShortSymbol(pool.asset)} Balance:{" "}
+                {assetBalance.toFixed(6)}
               </span>
             </div>
             <div>
