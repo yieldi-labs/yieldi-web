@@ -59,7 +59,6 @@ export function useContracts({
   routerAddress,
   provider,
 }: UseContractProps) {
-  console.log("useContracts:", { tokenAddress, routerAddress, provider });
   const { address: walletAddress } = useAccount();
   const [error, setError] = useState<string>();
   const [tokenMetadata, setTokenMetadata] = useState<TokenMetadata>({
@@ -78,7 +77,6 @@ export function useContracts({
   const loadMetadata = useCallback(async () => {
     if (!tokenAddress || !provider) return;
 
-    console.log("Loading token metadata for:", tokenAddress);
     try {
       // Name
       const nameData = encodeFunctionData({
@@ -113,8 +111,6 @@ export function useContracts({
         }),
       ]);
 
-      console.log("Token metadata hex:", { nameHex, symbolHex, decimalsHex });
-
       const name = decodeFunctionResult({
         abi: ERC20_ABI,
         functionName: "name",
@@ -133,7 +129,6 @@ export function useContracts({
         data: decimalsHex,
       }) as number | undefined;
 
-      console.log("Token metadata:", { name, symbol, decimals });
       setTokenMetadata({ name, symbol, decimals });
     } catch (err) {
       console.error("Error loading token metadata:", err);
@@ -170,7 +165,6 @@ export function useContracts({
           data: result,
         }) as bigint;
 
-        console.log("Current allowance:", allowance.toString());
         return allowance;
       } catch (err) {
         console.error("Error checking allowance:", err);
@@ -229,14 +223,6 @@ export function useContracts({
           args: [vault, asset, amount, memo],
         });
 
-        console.log("Deposit params:", {
-          vault,
-          asset,
-          amount: amount.toString(),
-          memo,
-          data,
-        });
-
         const txHash = await provider.request({
           method: "eth_sendTransaction",
           params: [
@@ -277,22 +263,11 @@ export function useContracts({
       }
 
       try {
-        console.log("Deposit with expiry params:", {
-          router,
-          vault,
-          asset,
-          amount: amount.toString(),
-          memo,
-          expiration: expiration.toString(),
-        });
-
         const data = encodeFunctionData({
           abi: ROUTER_ABI,
           functionName: "depositWithExpiry",
           args: [vault, asset, amount, memo, expiration],
         });
-
-        console.log("Deposit with expiry encoded data:", data);
 
         const txHash = await provider.request({
           method: "eth_sendTransaction",
