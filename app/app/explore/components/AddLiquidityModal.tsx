@@ -8,6 +8,7 @@ import { twMerge } from "tailwind-merge";
 import {
   getAssetShortSymbol,
   getLogoPath,
+  isERC20,
   normalizeAddress,
 } from "@/app/utils";
 import { useAppState } from "@/utils/context";
@@ -35,7 +36,9 @@ export default function AddLiquidityModal({
 
   // Initialize contract hooks
   const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
-  const tokenAddress = normalizeAddress(poolViemAddress);
+  const tokenAddress = isERC20(pool.asset)
+    ? normalizeAddress(poolViemAddress)
+    : ""; // Set to empty string for non-ERC20 assets
 
   // Use useContracts for ERC20 interaction
   const {
@@ -174,7 +177,7 @@ export default function AddLiquidityModal({
               />
               <span className="font-gt-america-ext">
                 {getAssetShortSymbol(pool.asset)} Balance:{" "}
-                {assetBalance.toFixed(6)}
+                {isERC20(pool.asset) ? assetBalance.toFixed(6) : "N/A"}
               </span>
             </div>
             <div>

@@ -411,3 +411,7 @@ export const normalizeAddress = (address: string) => {
   const cleanAddr = address.toLowerCase().replace("0x", "");
   return `0x${cleanAddr}` as `0x${string}`;
 };
+
+export const isERC20 = (asset: string) => {
+  return asset.includes("-");
+};
