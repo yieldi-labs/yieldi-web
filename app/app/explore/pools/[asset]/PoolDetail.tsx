@@ -137,7 +137,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                   ${formatNumber(usdValue, 2)}
                 </div>
                 <div className="text-2xl font-medium text-gray-900">
-                  {formatNumber(assetValue)} {pool.asset.split(".")[1]}
+                  {formatNumber(assetValue)} {pool.asset.split(".")[1].split("-")[0]}
                 </div>
               </div>
             </div>
@@ -151,7 +151,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                   ${formatNumber(yieldUsdValue, 2)}
                 </div>
                 <div className="text-2xl font-medium text-gray-900">
-                  {formatNumber(assetYield)} {pool.asset.split(".")[1]}
+                  {formatNumber(assetYield)} {pool.asset.split(".")[1].split("-")[0]}
                 </div>
               </div>
             </div>
