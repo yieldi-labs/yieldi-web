@@ -54,22 +54,14 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
       try {
         // Fetch pool and LP data
-        const [poolData, liquidityProvidersData] = await Promise.all([
+        const [poolData, liquidityProvider] = await Promise.all([
           fetchJson(
             `https://thornode.ninerealms.com/thorchain/pool/${pool.asset}`,
           ),
           fetchJson(
-            `https://thornode.ninerealms.com/thorchain/pool/${pool.asset}/liquidity_providers`,
+            `https://thornode.ninerealms.com/thorchain/pool/${pool.asset}/liquidity_provider/${wallet.address}`,
           ),
         ]);
-
-        // Find user's LP position
-        const liquidityProvider = liquidityProvidersData.find(
-          (lp: LiquidityProvider) =>
-            wallet.address.toLowerCase() === lp.asset_address?.toLowerCase(),
-        );
-
-        if (!liquidityProvider) return;
 
         // Initial Deposit Calculation (R0 + A0)
         const assetRunePrice =
