@@ -1,15 +1,17 @@
 "use client";
+
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import TranslucentCard from "@/app/TranslucentCard";
 import {
   calculateVolumeDepthRatio,
   formatNumber,
   getFormattedPoolTVL,
+  fetchJson,
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
 import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
-import { useState, useEffect } from "react";
 import { TopCard } from "@/app/components/TopCard";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import { useAppState } from "@/utils/context";
@@ -19,12 +21,100 @@ interface PoolDetailProps {
   runePriceUSD: number;
 }
 
+interface MemberStats {
+  deposit: {
+    asset: number;
+    usd: number;
+  };
+  gain: {
+    asset: number;
+    usd: number;
+  };
+}
+
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const { wallet } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const { position, loading, error, getMemberDetails, removeLiquidity } =
     useLiquidityPosition({ pool });
+  const [memberStats, setMemberStats] = useState({
+    deposit: {
+      asset: 0,
+      usd: 0,
+    },
+    gain: {
+      asset: 0,
+      usd: 0,
+    },
+  } as MemberStats);
 
+  useEffect(() => {
+    const loadThornodePool = async () => {
+      if (!pool?.asset || !wallet?.address) return;
+
+      try {
+        // Fetch pool and LP data
+        const [poolData, liquidityProvidersData] = await Promise.all([
+          fetchJson(
+            `https://thornode.ninerealms.com/thorchain/pool/${pool.asset}`,
+          ),
+          fetchJson(
+            `https://thornode.ninerealms.com/thorchain/pool/${pool.asset}/liquidity_providers`,
+          ),
+        ]);
+
+        // Find user's LP position
+        const liquidityProvider = liquidityProvidersData.find(
+          (lp: LiquidityProvider) =>
+            wallet.address.toLowerCase() === lp.asset_address?.toLowerCase(),
+        );
+
+        if (!liquidityProvider) return;
+
+        // Initial Deposit Calculation (R0 + A0)
+        const assetRunePrice =
+          parseFloat(poolData.balance_asset) /
+          parseFloat(poolData.balance_rune);
+        const assetPriceUSD = runePriceUSD / assetRunePrice;
+
+        const initialRuneInAsset =
+          parseFloat(liquidityProvider.rune_deposit_value) * assetRunePrice; // R0
+        const initialAsset = parseFloat(liquidityProvider.asset_deposit_value); // A0
+        const totalInitialDeposit = initialRuneInAsset + initialAsset; // total_deposit
+        const totalInitialDepositFormatted = totalInitialDeposit / 1e8;
+
+        // Current Position Calculation (R1 + A1)
+        const memberShares =
+          parseFloat(liquidityProvider.units) / parseFloat(poolData.LP_units);
+        const currentRuneInAsset =
+          memberShares * parseFloat(poolData.balance_rune) * assetRunePrice; // R1
+        const currentAsset = memberShares * parseFloat(poolData.balance_asset); // A1
+        const totalCurrentDeposit = currentRuneInAsset + currentAsset; // total_deposit_current
+
+        // Gain Calculation
+        const gainValue = (totalCurrentDeposit - totalInitialDeposit) / 1e8; // Gain
+
+        // USD Conversions
+        const depositUsdValue = (totalInitialDeposit / 1e8) * assetPriceUSD;
+        const gainUsdValue = gainValue * assetPriceUSD;
+
+        setMemberStats({
+          deposit: {
+            asset: totalInitialDepositFormatted,
+            usd: depositUsdValue,
+          },
+          gain: {
+            asset: gainValue,
+            usd: gainUsdValue,
+          },
+        });
+      } catch (err) {
+        console.error("Failed to load thornode pool data:", err);
+      }
+    };
+
+    loadThornodePool();
+  }, [pool?.asset, wallet?.address, position]);
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
   const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
@@ -38,33 +128,20 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
   const handleRemove = async () => {
     if (!wallet?.address) {
-      // Show connect wallet modal or error
       return;
     }
 
     try {
       await removeLiquidity({
         asset: pool.asset,
-        percentage: 100, // Remove all - could make this configurable
+        percentage: 100,
         address: wallet.address,
       });
     } catch (err) {
       console.error("Failed to remove liquidity:", err);
-      // Handle error - could show toast/notification
     }
   };
-
-  // Calculate position metrics
-  const assetValue = position ? parseFloat(position.assetDeposit) / 1e8 : 0;
-  const usdValue = assetValue * parseFloat(pool.assetPriceUSD);
-
-  // Calculate yield metrics
-  const assetDeposited = position ? parseFloat(position.assetAdded) / 1e8 : 0;
-  const assetWithdrawn = position
-    ? parseFloat(position.assetWithdrawn) / 1e8
-    : 0;
-  const assetYield = assetValue - assetDeposited + assetWithdrawn;
-  const yieldUsdValue = assetYield * parseFloat(pool.assetPriceUSD);
+  const assetSymbol = pool.asset.split(".")[1].split("-")[0];
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -130,30 +207,26 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           <TranslucentCard className="p-6 rounded-2xl flex flex-col shadow-md">
             <div className="mb-8 bg-white rounded-xl w-full p-3">
               <div className="text-gray-700 font-medium text-lg mb-2">
-                PRINCIPAL
+                DEPOSIT
               </div>
               <div className="flex justify-between">
                 <div className="text-2xl font-medium text-gray-900">
-                  ${formatNumber(usdValue, 2)}
+                  ${formatNumber(memberStats.deposit.usd, 2)}
                 </div>
                 <div className="text-2xl font-medium text-gray-900">
-                  {formatNumber(assetValue)}{" "}
-                  {pool.asset.split(".")[1].split("-")[0]}
+                  {formatNumber(memberStats.deposit.asset)} {assetSymbol}
                 </div>
               </div>
             </div>
 
             <div className="mb-8 bg-white rounded-xl w-full p-3">
-              <div className="text-gray-700 font-medium text-lg mb-2">
-                YIELD
-              </div>
+              <div className="text-gray-700 font-medium text-lg mb-2">GAIN</div>
               <div className="flex justify-between">
                 <div className="text-2xl font-medium text-gray-900">
-                  ${formatNumber(yieldUsdValue, 2)}
+                  ${formatNumber(memberStats.gain.usd, 2)}
                 </div>
                 <div className="text-2xl font-medium text-gray-900">
-                  {formatNumber(assetYield)}{" "}
-                  {pool.asset.split(".")[1].split("-")[0]}
+                  {formatNumber(memberStats.gain.asset)} {assetSymbol}
                 </div>
               </div>
             </div>

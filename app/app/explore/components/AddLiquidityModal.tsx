@@ -38,7 +38,7 @@ export default function AddLiquidityModal({
   const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
   const tokenAddress = isERC20(pool.asset)
     ? normalizeAddress(poolViemAddress)
-    : ""; // Set to empty string for non-ERC20 assets
+    : undefined; // Set to undefined for non-ERC20 assets
 
   // Use useContracts for ERC20 interaction
   const {

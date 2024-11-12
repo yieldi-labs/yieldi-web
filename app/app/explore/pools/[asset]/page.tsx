@@ -7,7 +7,15 @@ export default async function PoolDetailPage({
 }: {
   params: { asset: string };
 }) {
-  const [poolsData, statsData] = await Promise.all([getPools(), getStats()]);
+  const [poolsData, statsData] = await Promise.all([
+    getPools({
+      query: {
+        period: "30d",
+        status: "available",
+      },
+    }),
+    getStats(),
+  ]);
 
   if (!poolsData.data || !statsData.data) return null;
 
