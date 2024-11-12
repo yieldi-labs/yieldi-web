@@ -5,7 +5,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import {
   addDollarSignAndSuffix,
   formatNumber,
-  getAssetSimpleSymbol,
+  getAssetSymbol,
   getLogoPath,
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
@@ -137,13 +137,13 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
         <div className="w-full flex items-center mb-2">
           <Image
             src={getLogoPath(saver.asset)}
-            alt={`${getAssetSimpleSymbol(saver.asset)} logo`}
+            alt={`${getAssetSymbol(saver.asset)} logo`}
             width={26}
             height={26}
             className="rounded-full"
           />
           <span className="ml-3 font-medium text-sm md:text-base">
-            {getAssetSimpleSymbol(saver.asset)}
+            {getAssetSymbol(saver.asset)}
           </span>
         </div>
         <div className="flex flex-row w-full gap-1">
@@ -284,13 +284,13 @@ const SaverVaults: React.FC<SaverVaultsProps> = ({ savers }) => {
                   <div className="flex items-center">
                     <Image
                       src={getLogoPath(saver.asset)}
-                      alt={`${getAssetSimpleSymbol(saver.asset)} logo`}
+                      alt={`${getAssetSymbol(saver.asset)} logo`}
                       width={28}
                       height={28}
                       className="rounded-full"
                     />
                     <span className="ml-3 font-medium">
-                      {getAssetSimpleSymbol(saver.asset)}
+                      {getAssetSymbol(saver.asset)}
                     </span>
                   </div>
                 </div>

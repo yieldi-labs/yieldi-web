@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import { twMerge } from 'tailwind-merge';
 
 const Slider = ({ value, max, onChange }: { value: number; max: number; onChange: (value: number) => void }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -52,24 +53,19 @@ const Slider = ({ value, max, onChange }: { value: number; max: number; onChange
   return (
     <div 
       ref={sliderRef}
-      className="relative h-2 w-full rounded-full cursor-pointer"
-      style={{ backgroundColor: '#CED2D3' }}
+      className="relative h-2 w-full rounded-full cursor-pointer bg-gray-300"
       onMouseDown={handleMouseDown}
     >
       <div 
-        className="absolute h-full rounded-full"
-        style={{ 
-          backgroundColor: '#627EEA',
-          width: `${percentage}%`
-        }}
+        className="absolute h-full rounded-full bg-[#627EEA]"
+        style={{ width: `${percentage}%` }}
       />
       <div 
-        className="absolute w-5 h-5 rounded-full top-1/2 -mt-2.5 -ml-2.5"
-        style={{ 
-          backgroundColor: '#627EEA',
-          left: `${percentage}%`,
-          cursor: isDragging ? 'grabbing' : 'grab'
-        }}
+        className={twMerge(
+          "absolute w-5 h-5 rounded-full top-1/2 -mt-2.5 -ml-2.5 bg-[#627EEA]",
+          isDragging ? "cursor-grabbing" : "cursor-grab"
+        )}
+        style={{ left: `${percentage}%` }}
       />
     </div>
   );
