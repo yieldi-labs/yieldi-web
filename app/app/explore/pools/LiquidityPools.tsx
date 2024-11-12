@@ -116,7 +116,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
         ? aValue - bValue
         : bValue - aValue;
     });
-    return sortableItems;
+    return sortableItems.filter((pool) => pool.status === "available");
   }, [pools, sortConfig, runePriceUSD]);
 
   const sortData = (key: PoolSortKey, direction?: SortDirection) => {
