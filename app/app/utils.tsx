@@ -419,3 +419,12 @@ export const isERC20 = (asset: string) => {
 export const getPercentage = (amount: number, max: number): number => {
   return max > 0 ? (amount / max) * 100 : 0;
 };
+
+/**
+ * Extracts the symbol from a pool asset identifier
+ * @param asset Pool asset identifier (e.g. "BTC.BTC" or "ETH.USDT-0x...")
+ * @returns The asset symbol (e.g. "BTC" or "USDT")
+ */
+export const getAssetSimpleSymbol = (asset: string): string => {
+  return asset.split(".")[1]?.split("-")[0] || asset;
+};

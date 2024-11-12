@@ -233,9 +233,7 @@ export default function AddLiquidityModal({
         <Button
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
           onClick={
-            wallet?.address
-              ? handleAddLiquidity
-              : () => toggleWalletModal() 
+            wallet?.address ? handleAddLiquidity : () => toggleWalletModal()
           }
           disabled={
             wallet?.address ? loading || runeLoading || assetAmount <= 0 : false

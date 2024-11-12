@@ -8,6 +8,7 @@ import {
   formatNumber,
   getFormattedPoolTVL,
   fetchJson,
+  getAssetSimpleSymbol,
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
@@ -106,7 +107,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     };
 
     loadThornodePool();
-  }, [pool?.asset, wallet?.address, position]);
+  }, [pool?.asset, wallet?.address, position, runePriceUSD]);
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
   const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
@@ -133,7 +134,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
       console.error("Failed to remove liquidity:", err);
     }
   };
-  const assetSymbol = pool.asset.split(".")[1].split("-")[0];
+  const assetSymbol = getAssetSimpleSymbol(pool.asset);
 
   return (
     <div className="max-w-7xl mx-auto">

@@ -6,7 +6,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import {
   formatNumber,
   addDollarSignAndSuffix,
-  getAssetSymbol,
+  getAssetSimpleSymbol,
   getLogoPath,
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
@@ -145,13 +145,13 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
         <div className="w-full flex items-center mb-2">
           <Image
             src={getLogoPath(pool.asset)}
-            alt={`${getAssetSymbol(pool.asset)} logo`}
+            alt={`${getAssetSimpleSymbol(pool.asset)} logo`}
             width={26}
             height={26}
             className="rounded-full"
           />
           <span className="ml-3 font-medium text-sm md:text-base">
-            {getAssetSymbol(pool.asset)}
+            {getAssetSimpleSymbol(pool.asset)}
           </span>
         </div>
         <div className="flex flex-row w-full gap-1">
@@ -303,13 +303,13 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                     <div className="flex items-center">
                       <Image
                         src={getLogoPath(pool.asset)}
-                        alt={`${getAssetSymbol(pool.asset)} logo`}
+                        alt={`${getAssetSimpleSymbol(pool.asset)} logo`}
                         width={28}
                         height={28}
                         className="rounded-full"
                       />
                       <span className="ml-3 font-medium">
-                        {getAssetSymbol(pool.asset)}
+                        {getAssetSimpleSymbol(pool.asset)}
                       </span>
                     </div>
                   </div>

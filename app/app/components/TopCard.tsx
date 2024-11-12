@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import TranslucentCard from "../TranslucentCard";
-import { formatNumber, getAssetSymbol, getLogoPath } from "@/app/utils";
+import { formatNumber, getAssetSimpleSymbol, getLogoPath } from "@/app/utils";
 import { twMerge } from "tailwind-merge";
 import { useMobileDetection } from "@shared/hooks";
 
@@ -35,13 +35,13 @@ export const TopCard: React.FC<TopCardProps> = ({
       <div className="flex items-center md:mb-7 p-1 md:p-0 mb-2">
         <Image
           src={getLogoPath(asset)}
-          alt={`${getAssetSymbol(asset)} logo`}
+          alt={`${getAssetSimpleSymbol(asset)} logo`}
           width={isMobile ? 32 : 42}
           height={isMobile ? 32 : 42}
           className="rounded-full"
         />
         <span className="ml-2 md:text-2xl text-lg font-medium font-gt-america-ext">
-          {getAssetSymbol(asset)}
+          {getAssetSimpleSymbol(asset)}
         </span>
       </div>
       <div className="grid-cols-2 md:gap-2 gap-1 w-full flex">
