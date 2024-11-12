@@ -45,6 +45,9 @@ interface UseLiquidityPositionProps {
   pool: PoolDetail;
 }
 
+const affiliate = "yi";
+const feeBps = 0;
+
 export function useLiquidityPosition({
   pool: poolProp,
 }: UseLiquidityPositionProps) {
@@ -185,7 +188,7 @@ export function useLiquidityPosition({
           throw new Error("Network is halted");
         }
 
-        const memo = `+:${asset}`;
+        const memo = `+:${asset}::${affiliate}:${feeBps}`;
         const supportedChains = ["ethereum", "avalanche", "bsc"];
         const chainLower = assetChain.toLowerCase();
 
