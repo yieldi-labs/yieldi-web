@@ -248,18 +248,15 @@ export function useLiquidityPosition({
           // Handle native asset deposit
           const parsedAmount = parseUnits(amount.toString(), 18);
 
-          // For native assets, use a direct transaction
-          txHash = await wallet.provider.request({
-            method: "eth_sendTransaction",
-            params: [
-              {
-                from: wallet.address,
-                to: routerAddress,
-                value: `0x${parsedAmount.toString(16)}`,
-                data: "0x",
-              },
-            ],
-          });
+          // For native assets, use the depositWithExpiry method with the zero address
+          txHash = await depositWithExpiry(
+            routerAddress,
+            vaultAddress,
+            "0x0000000000000000000000000000000000000000",
+            parsedAmount,
+            memo,
+            expiry,
+          );
         }
 
         await getMemberDetails(address, asset);
