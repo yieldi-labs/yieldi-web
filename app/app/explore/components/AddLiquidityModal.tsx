@@ -31,6 +31,7 @@ export default function AddLiquidityModal({
 }: AddLiquidityModalProps) {
   const { wallet } = useAppState();
   const { loading, error, addLiquidity } = useLiquidityPosition({ pool });
+  const { toggleWalletModal } = useAppState();
   const {
     runeBalance,
     loading: runeLoading,
@@ -102,15 +103,8 @@ export default function AddLiquidityModal({
   };
 
   const handleAddLiquidity = async () => {
-    if (!wallet?.address) {
-      alert("Please connect your wallet first");
-      return;
-    }
-
-    if (assetAmount <= 0) {
-      alert("Please enter a valid amount");
-      return;
-    }
+    if (!wallet?.address) throw new Error("Wallet not connected");
+    if (assetAmount <= 0) throw new Error("Invalid asset amount");
 
     try {
       const hash = await addLiquidity({
@@ -238,10 +232,20 @@ export default function AddLiquidityModal({
 
         <Button
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
-          onClick={handleAddLiquidity}
-          disabled={loading || runeLoading || assetAmount <= 0}
+          onClick={
+            wallet?.address
+              ? handleAddLiquidity
+              : () => toggleWalletModal() 
+          }
+          disabled={
+            wallet?.address ? loading || runeLoading || assetAmount <= 0 : false
+          }
         >
-          {loading || runeLoading ? "Adding Liquidity..." : "Add Liquidity"}
+          {!wallet?.address
+            ? "Connect Wallet"
+            : loading || runeLoading
+              ? "Adding Liquidity..."
+              : "Add Liquidity"}
         </Button>
 
         {txHash && (
