@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { twMerge } from "tailwind-merge";
 
 export default function Button({
   className,
@@ -31,7 +32,10 @@ export default function Button({
       title={title}
       onClick={onClick}
       disabled={disabled}
-      className={`py-2 px-2 font-semibold text-sm ${disabled ? "opacity-75 " : ""}${className || ""}`}
+      className={twMerge(
+        `py-2 px-2 font-semibold text-sm`,
+        disabled ? "opacity-75 " : "",
+      )}
     >
       {children}
     </button>

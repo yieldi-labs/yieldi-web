@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Button from "@/app/button";
 import Modal from "@/app/modal";
-import { Balance, getBalance, PoolDetail as IPoolDetail } from "@/midgard";
+import { PoolDetail as IPoolDetail } from "@/midgard";
 import { Slider } from "@shared/components/ui";
 import { twMerge } from "tailwind-merge";
 import {
   getAssetShortSymbol,
   getLogoPath,
+  getPercentage,
   isERC20,
   normalizeAddress,
 } from "@/app/utils";
@@ -15,6 +16,7 @@ import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { useContracts } from "@/hooks/useContracts";
+import { useRuneBalance } from "@/hooks";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -29,6 +31,13 @@ export default function AddLiquidityModal({
 }: AddLiquidityModalProps) {
   const { wallet } = useAppState();
   const { loading, error, addLiquidity } = useLiquidityPosition({ pool });
+  const {
+    runeBalance,
+    loading: runeLoading,
+    error: runeError,
+  } = useRuneBalance({
+    wallet,
+  });
   const [selectedTab] = useState("single");
   const [assetAmount, setAssetAmount] = useState(0);
   const [runeAmount, setRuneAmount] = useState(0);
@@ -56,34 +65,6 @@ export default function AddLiquidityModal({
       loadMetadata();
     }
   }, [wallet?.provider, loadMetadata]);
-
-  const getPercentage = (amount: number, max: number) => {
-    return max > 0 ? (amount / max) * 100 : 0;
-  };
-
-  const [runeBalance, setRuneBalance] = useState(0);
-  const getRuneBalance = useCallback(async () => {
-    if (!wallet?.address) return;
-    const { data: runeBalance } = await getBalance({
-      path: {
-        address: wallet.address,
-      },
-    });
-    return runeBalance;
-  }, [wallet]);
-
-  // Fetch RUNE balance on mount and every 10 seconds
-  useEffect(() => {
-    const fetchRuneBalance = async () => {
-      const balance: Balance | undefined = await getRuneBalance();
-      const amountStr: string = balance?.coins[0]?.amount || "0";
-      setRuneBalance(parseInt(amountStr));
-    };
-
-    fetchRuneBalance();
-    const intervalId = setInterval(fetchRuneBalance, 10000);
-    return () => clearInterval(intervalId);
-  }, [getRuneBalance]);
 
   // Get formatted asset balance from tokenBalance
   const assetBalance = useMemo(() => {
@@ -160,7 +141,7 @@ export default function AddLiquidityModal({
       style={{ backgroundColor: "#F5F6F6", maxWidth: "36rem" }}
     >
       <div className="p-6">
-        {(error || tokenError) && (
+        {(error || tokenError || runeError) && (
           <ErrorCard className="mb-4">{error || tokenError}</ErrorCard>
         )}
 
@@ -258,9 +239,9 @@ export default function AddLiquidityModal({
         <Button
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
           onClick={handleAddLiquidity}
-          disabled={loading || assetAmount <= 0}
+          disabled={loading || runeLoading || assetAmount <= 0}
         >
-          {loading ? "Adding Liquidity..." : "Add Liquidity"}
+          {loading || runeLoading ? "Adding Liquidity..." : "Add Liquidity"}
         </Button>
 
         {txHash && (

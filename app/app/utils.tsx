@@ -415,3 +415,7 @@ export const normalizeAddress = (address: string) => {
 export const isERC20 = (asset: string) => {
   return asset.includes("-");
 };
+
+export const getPercentage = (amount: number, max: number): number => {
+  return max > 0 ? (amount / max) * 100 : 0;
+};
