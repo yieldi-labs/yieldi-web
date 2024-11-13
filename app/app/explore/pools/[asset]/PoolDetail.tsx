@@ -71,21 +71,21 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         const assetPriceUSD = runePriceUSD / assetRunePrice;
 
         const initialRuneInAsset =
-          parseFloat(liquidityProvider.rune_deposit_value) * assetRunePrice; // R0
-        const initialAsset = parseFloat(liquidityProvider.asset_deposit_value); // A0
-        const totalInitialDeposit = initialRuneInAsset + initialAsset; // total_deposit
+          parseFloat(liquidityProvider.rune_deposit_value) * assetRunePrice;
+        const initialAsset = parseFloat(liquidityProvider.asset_deposit_value);
+        const totalInitialDeposit = initialRuneInAsset + initialAsset;
         const totalInitialDepositFormatted = totalInitialDeposit / 1e8;
 
         // Current Position Calculation (R1 + A1)
         const memberShares =
           parseFloat(liquidityProvider.units) / parseFloat(poolData.LP_units);
         const currentRuneInAsset =
-          memberShares * parseFloat(poolData.balance_rune) * assetRunePrice; // R1
-        const currentAsset = memberShares * parseFloat(poolData.balance_asset); // A1
-        const totalCurrentDeposit = currentRuneInAsset + currentAsset; // total_deposit_current
+          memberShares * parseFloat(poolData.balance_rune) * assetRunePrice;
+        const currentAsset = memberShares * parseFloat(poolData.balance_asset);
+        const totalCurrentDeposit = currentRuneInAsset + currentAsset;
 
         // Gain Calculation
-        const gainValue = (totalCurrentDeposit - totalInitialDeposit) / 1e8; // Gain
+        const gainValue = (totalCurrentDeposit - totalInitialDeposit) / 1e8;
 
         // USD Conversions
         const depositUsdValue = (totalInitialDeposit / 1e8) * assetPriceUSD;
@@ -108,6 +108,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
     loadThornodePool();
   }, [pool?.asset, wallet?.address, position, runePriceUSD]);
+
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
   const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
@@ -120,9 +121,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   }, [wallet?.address, pool.asset, getMemberDetails]);
 
   const handleRemove = async () => {
-    if (!wallet?.address) {
-      return;
-    }
+    if (!wallet?.address) return;
 
     try {
       await removeLiquidity({
@@ -134,13 +133,14 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
       console.error("Failed to remove liquidity:", err);
     }
   };
+
   const assetSymbol = getAssetSimpleSymbol(pool.asset);
 
   return (
     <div className="max-w-7xl mx-auto">
       <Link
         href="/explore/pools"
-        className="inline-flex items-center mb-8 text-foreground text-2xl font-bold font-gt-america-ext"
+        className="inline-flex items-center mb-8 text-foreground text-2xl font-bold font-gt-america-ext hover:opacity-50 transition-opacity"
       >
         <BackArrow className="mr-2" />
         ALL POOLS
@@ -171,7 +171,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
               </div>
             </div>
             <button
-              className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
+              className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={() => setShowAddLiquidityModal(true)}
               disabled={loading}
             >
@@ -182,20 +182,9 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
         {/* Right Column */}
         <div className="col-span-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-medium text-foreground font-gt-america-ext">
-              YOUR POSITION
-            </h2>
-            {position && (
-              <button
-                className="text-red-500 font-medium"
-                onClick={handleRemove}
-                disabled={loading}
-              >
-                {loading ? "Removing..." : "REMOVE"}
-              </button>
-            )}
-          </div>
+          <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">
+            YOUR POSITION
+          </h2>
 
           <TranslucentCard className="p-6 rounded-2xl flex flex-col shadow-md">
             <div className="mb-8 bg-white rounded-xl w-full p-3">
@@ -224,27 +213,15 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-5 w-full">
+            {position && (
               <button
-                className="w-full bg-secondaryBtn text-white font-bold py-3 rounded-full text-sm"
-                disabled={!position || loading}
+                className="w-full border-red-500 border-2 text-red-500 font-bold py-3 rounded-full hover:text-opacity-50 hover:border-opacity-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleRemove}
+                disabled={loading}
               >
-                Stream
+                {loading ? "Removing..." : "Remove Position"}
               </button>
-              <button
-                className="w-full bg-secondaryBtn text-white font-bold py-3 rounded-full text-sm"
-                disabled={!position || loading}
-              >
-                Re-Invest
-              </button>
-            </div>
-
-            <button
-              className="w-full border-2 border-secondaryBtn text-secondaryBtn font-bold text-sm py-3 rounded-full"
-              disabled={!position || loading}
-            >
-              Claim
-            </button>
+            )}
           </TranslucentCard>
         </div>
       </div>
