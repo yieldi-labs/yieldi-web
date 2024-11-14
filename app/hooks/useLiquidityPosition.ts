@@ -39,6 +39,7 @@ interface RemoveLiquidityParams {
   asset: string;
   percentage: number;
   address: string;
+  withdrawAsset?: string; // Optional: for single-sided withdrawals
 }
 
 interface UseLiquidityPositionProps {
@@ -57,7 +58,7 @@ export function useLiquidityPosition({
   const [position, setPosition] = useState<MemberPool | null>(null);
   const [pool, setPool] = useState<PoolDetail>(poolProp);
 
-  // More robust asset parsing
+  // Parse asset details
   const [assetChain = "", assetIdentifier = ""] = pool.asset.split(".");
 
   // Check if it's a native asset (e.g., ETH.ETH, AVAX.AVAX)
@@ -69,12 +70,11 @@ export function useLiquidityPosition({
     );
   }, [assetChain, assetIdentifier]);
 
-  // Only attempt to get token address for non-native assets
+  // Get token address for non-native assets
   const tokenAddress = useMemo(() => {
     if (isNativeAsset) return undefined;
 
     try {
-      // For tokens like ETH.USDT-0x... format
       const [_, addressPart] = assetIdentifier.split("-");
       return addressPart
         ? (normalizeAddress(addressPart) as Address)
@@ -85,7 +85,7 @@ export function useLiquidityPosition({
     }
   }, [assetIdentifier, isNativeAsset]);
 
-  // Initialize contract hooks with proper type checking
+  // Initialize contract hooks
   const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
     useContracts({
       tokenAddress: tokenAddress as Address | undefined,
@@ -188,6 +188,10 @@ export function useLiquidityPosition({
           throw new Error("Network is halted");
         }
 
+        if (inbound.chain_lp_actions_paused) {
+          throw new Error("LP actions are paused for this chain");
+        }
+
         const memo = `+:${asset}::${affiliate}:${feeBps}`;
         const supportedChains = ["ethereum", "avalanche", "bsc"];
         const chainLower = assetChain.toLowerCase();
@@ -219,16 +223,10 @@ export function useLiquidityPosition({
 
         const routerAddress = normalizeAddress(inbound.router);
         const vaultAddress = normalizeAddress(inbound.address);
-        const expiry = BigInt(Math.floor(Date.now() / 1000) + 300);
+        const expiry = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes expiry
 
-        // Check if the asset is a token or native
-        const isNativeAsset =
-          !assetIdentifier ||
-          assetIdentifier === assetChain ||
-          assetIdentifier.toUpperCase() === assetChain.toUpperCase();
-
+        // Handle token or native asset deposit
         let txHash;
-
         if (!isNativeAsset && tokenAddress) {
           // Handle ERC20 token deposit
           const parsedAmount = parseAmount(amount.toString());
@@ -250,8 +248,6 @@ export function useLiquidityPosition({
         } else {
           // Handle native asset deposit
           const parsedAmount = parseUnits(amount.toString(), 18);
-
-          // For native assets, use the depositWithExpiry method with the zero address
           txHash = await depositWithExpiry(
             routerAddress,
             vaultAddress,
@@ -281,11 +277,17 @@ export function useLiquidityPosition({
       parseAmount,
       tokenAddress,
       getAllowance,
+      isNativeAsset,
     ],
   );
 
   const removeLiquidity = useCallback(
-    async ({ asset, percentage, address }: RemoveLiquidityParams) => {
+    async ({
+      asset,
+      percentage,
+      address,
+      withdrawAsset,
+    }: RemoveLiquidityParams) => {
       if (!wallet?.address) {
         throw new Error("Wallet not connected");
       }
@@ -295,8 +297,8 @@ export function useLiquidityPosition({
         setError(null);
 
         const inboundAddresses = await getInboundAddresses();
-        const [assetChain] = asset.split(".");
-        const inbound = inboundAddresses.find(
+        const [assetChain, assetIdentifier] = asset.split(".");
+        const inbound = inboundAddresses?.find(
           (i) => i.chain === assetChain.toUpperCase(),
         );
 
@@ -304,32 +306,69 @@ export function useLiquidityPosition({
           throw new Error(`No inbound address found for ${assetChain}`);
         }
 
-        if (inbound.halted) {
-          throw new Error("Network is halted");
-        }
-
         if (!inbound.router) {
           throw new Error("Router address not found");
         }
 
-        const basisPoints = percentage * 100;
-        const memo = `-:${asset}:${basisPoints}`;
-        const memoBytes = Buffer.from(memo, "utf-8");
-        const encodedMemo = hex.encode(memoBytes);
+        if (inbound.halted) {
+          throw new Error("Network is halted");
+        }
 
-        const routerAddress = normalizeAddress(inbound.router);
+        if (inbound.chain_lp_actions_paused) {
+          throw new Error("LP actions are paused for this chain");
+        }
 
-        const tx = {
-          from: wallet.address,
-          to: routerAddress,
-          value: "0x0",
-          data: `0x${encodedMemo}`,
+        const basisPoints = Math.round(percentage * 100);
+        if (basisPoints < 0 || basisPoints > 10000) {
+          throw new Error("Percentage must be between 0 and 100");
+        }
+
+        // Construct memo based on withdrawal type
+        const memo = withdrawAsset
+          ? `-:${asset}:${basisPoints}:${withdrawAsset}` // Single-sided
+          : `-:${asset}:${basisPoints}`; // Dual-sided
+
+        const supportedChains = ["ethereum", "avalanche", "bsc"];
+        const chainLower = assetChain.toLowerCase();
+
+        if (!supportedChains.includes(chainLower)) {
+          throw new Error(
+            `Unsupported chain: ${assetChain}. Only EVM chains are supported.`,
+          );
+        }
+
+        // Handle chain switching
+        const chainIdMap: Record<string, number> = {
+          ethereum: 1,
+          avalanche: 43114,
+          bsc: 56,
         };
 
-        const txHash = await wallet.provider.request({
-          method: "eth_sendTransaction",
-          params: [tx],
+        const currentChainId = await wallet.provider.request({
+          method: "eth_chainId",
         });
+        const targetChainId = chainIdMap[chainLower];
+
+        if (parseInt(currentChainId, 16) !== targetChainId) {
+          await wallet.provider.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+          });
+        }
+
+        const routerAddress = normalizeAddress(inbound.router);
+        const vaultAddress = normalizeAddress(inbound.address);
+        const expiry = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes expiry
+
+        // Use the depositWithExpiry function with base unit for withdrawal
+        const txHash = await depositWithExpiry(
+          routerAddress,
+          vaultAddress,
+          "0x0000000000000000000000000000000000000000", // Use zero address for withdrawals
+          BigInt(10), // Base unit for withdrawals
+          memo,
+          expiry,
+        );
 
         await getMemberDetails(address, asset);
         return txHash;
@@ -342,7 +381,7 @@ export function useLiquidityPosition({
         setLoading(false);
       }
     },
-    [wallet, getMemberDetails],
+    [wallet, getMemberDetails, depositWithExpiry],
   );
 
   return {

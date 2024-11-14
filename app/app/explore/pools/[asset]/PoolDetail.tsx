@@ -128,6 +128,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         asset: pool.asset,
         percentage: 100,
         address: wallet.address,
+        withdrawAsset: pool.asset,
       });
     } catch (err) {
       console.error("Failed to remove liquidity:", err);
