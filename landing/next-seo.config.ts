@@ -3,11 +3,11 @@ import { DefaultSeoProps } from "next-seo";
 const config: DefaultSeoProps = {
   title: "Yieldi",
   description:
-    "The only cross-chain DeFi venue to stake and earn native Bitcoin yield with 15+ supported L1 assets.",
+    "The only cross-chain DeFi venue to deposit and earn native Bitcoin yield plut eight other L1 assets.",
   openGraph: {
     title: "Yieldi - The Yield Layer for Cross-Chain",
     description:
-      "The only DeFi venue to stake and earn native Bitcoin yield with 15+ supported L1 assets.",
+      "The only cross-chain DeFi venue to deposit and earn native Bitcoin yield plus eight other L1 assets.",
     url: "https://www.yieldi.xyz",
     site_name: "Yieldi",
     images: [

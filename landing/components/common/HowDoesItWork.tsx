@@ -5,21 +5,21 @@ import { SVGComponents, CommonComponents } from "@shared/components";
 const boxes = [
   {
     image: <SVGComponents.Staking />,
-    header: "Explore and Stake",
+    header: "Explore and Deposit",
     description:
-      "Discover yield farms across any chain. Stake your assets and set your earnings to stream in the asset of your choice.",
+      "Discover yield farms across any chain. Deposit your assets and set your earnings to stream in the asset of your choice.",
   },
   {
     image: <SVGComponents.Calculator />,
     header: "Single Hop Routing",
     description:
-      "Yieldi automatically routes your assets to high-yield DeFi farms without the need for manual cross-chain bridging.",
+      "Yieldi automatically routes your assets to high-yield DeFi farms without the need for manual cross-chain bridging. (coming soon)",
   },
   {
     image: <SVGComponents.Distribution />,
     header: "Yield Streaming",
     description:
-      "Your yield is collected through THORChain’s Yield Collection Module, swapped to your choosen yield asset, and streamed to your wallet.",
+      "Your yield is collected, swapped to your choosen yield asset, and streamed to your wallet. (coming soon)",
   },
 ];
 
