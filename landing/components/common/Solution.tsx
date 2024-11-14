@@ -4,7 +4,7 @@ import { SVGComponents, CommonComponents } from "@shared/components";
 const text = [
   {
     subheading: "Native Yield on L1 Assets",
-    text: "Real native yield on assets like Bitcoin do not exist in the market. Yieldi is the only place where you can stake and earn real Bitcoin.",
+    text: "Real native yield on assets like Bitcoin do not exist in the market. Yieldi is the only place where you can deposit and earn real Bitcoin.",
   },
   {
     subheading: "Simplifying Cross-Chain Yield",
