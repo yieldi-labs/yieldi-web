@@ -5,7 +5,7 @@ import type { MemberPool, PoolDetail } from "@/midgard";
 import { hex } from "@scure/base";
 import { parseUnits, Address } from "viem";
 import { useContracts } from "./useContracts";
-import { normalizeAddress } from "@/app/utils";
+import { normalizeAddress, SupportedChain } from "@/app/utils";
 
 interface InboundAddress {
   chain: string;
@@ -63,11 +63,7 @@ export function useLiquidityPosition({
 
   // Check if it's a native asset (e.g., ETH.ETH, AVAX.AVAX)
   const isNativeAsset = useMemo(() => {
-    return (
-      !assetIdentifier ||
-      assetIdentifier === assetChain ||
-      assetIdentifier.toUpperCase() === assetChain.toUpperCase()
-    );
+    return assetIdentifier.indexOf("-") === -1;
   }, [assetChain, assetIdentifier]);
 
   // Get token address for non-native assets
@@ -193,14 +189,7 @@ export function useLiquidityPosition({
         }
 
         const memo = `+:${asset}::${affiliate}:${feeBps}`;
-        const supportedChains = ["ethereum", "avalanche", "bsc"];
         const chainLower = assetChain.toLowerCase();
-
-        if (!supportedChains.includes(chainLower)) {
-          throw new Error(
-            `Unsupported chain: ${assetChain}. Only EVM chains are supported.`,
-          );
-        }
 
         // Handle chain switching
         const chainIdMap: Record<string, number> = {
@@ -298,6 +287,12 @@ export function useLiquidityPosition({
 
         const inboundAddresses = await getInboundAddresses();
         const [assetChain, assetIdentifier] = asset.split(".");
+
+        const supportedChain = getSupportedChainByAssetChain(assetChain);
+        if (!supportedChain) {
+          throw new Error(`Chain not supported: ${assetChain}`);
+        }
+
         const inbound = inboundAddresses?.find(
           (i) => i.chain === assetChain.toUpperCase(),
         );
@@ -328,14 +323,7 @@ export function useLiquidityPosition({
           ? `-:${asset}:${basisPoints}:${withdrawAsset}` // Single-sided
           : `-:${asset}:${basisPoints}`; // Dual-sided
 
-        const supportedChains = ["ethereum", "avalanche", "bsc"];
         const chainLower = assetChain.toLowerCase();
-
-        if (!supportedChains.includes(chainLower)) {
-          throw new Error(
-            `Unsupported chain: ${assetChain}. Only EVM chains are supported.`,
-          );
-        }
 
         // Handle chain switching
         const chainIdMap: Record<string, number> = {
@@ -361,11 +349,14 @@ export function useLiquidityPosition({
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes expiry
 
         // Use the depositWithExpiry function with base unit for withdrawal
+        const decimals = parseInt(pool.nativeDecimal);
+        const minAmountByChain =
+          getMinAmountByChain(supportedChain) * 10 ** decimals;
         const txHash = await depositWithExpiry(
           routerAddress,
           vaultAddress,
           "0x0000000000000000000000000000000000000000", // Use zero address for withdrawals
-          BigInt(10), // Base unit for withdrawals
+          BigInt(minAmountByChain), // Base unit for withdrawals
           memo,
           expiry,
         );
@@ -383,6 +374,43 @@ export function useLiquidityPosition({
     },
     [wallet, getMemberDetails, depositWithExpiry],
   );
+
+  const getSupportedChainByAssetChain = (
+    assetChain: string,
+  ): SupportedChain | undefined => {
+    return Object.values(SupportedChain).find(
+      (chainValue) => chainValue.toLowerCase() === assetChain.toLowerCase(),
+    ) as SupportedChain | undefined;
+  };
+
+  const getMinAmountByChain = (chain: SupportedChain): number => {
+    switch (chain) {
+      case SupportedChain.Bitcoin:
+      case SupportedChain.Bitcoin:
+      case SupportedChain.Litecoin:
+      case SupportedChain.BitcoinCash:
+      case SupportedChain.Dash:
+        return 0.00010001;
+
+      case SupportedChain.Dogecoin:
+        return 1.00000001;
+
+      case SupportedChain.Avalanche:
+      case SupportedChain.Ethereum:
+      case SupportedChain.Arbitrum:
+      case SupportedChain.BinanceSmartChain:
+        return 0.00000001;
+
+      case SupportedChain.THORChain:
+      case SupportedChain.Maya:
+        return 0;
+
+      case SupportedChain.Cosmos:
+      case SupportedChain.Kujira:
+        return 0.000001;
+    }
+    return 0.00000001;
+  };
 
   return {
     loading,

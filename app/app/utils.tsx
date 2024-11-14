@@ -27,6 +27,29 @@ export interface Wallet {
   getBalance: () => Promise<number>;
 }
 
+export enum SupportedChain {
+  Arbitrum = "ARB",
+  Avalanche = "AVAX",
+  Base = "BASE",
+  BinanceSmartChain = "BSC",
+  Bitcoin = "BTC",
+  BitcoinCash = "BCH",
+  Cosmos = "GAIA",
+  Dash = "DASH",
+  Dogecoin = "DOGE",
+  Ethereum = "ETH",
+  Kujira = "KUJI",
+  Litecoin = "LTC",
+  Maya = "MAYA",
+  Optimism = "OP",
+  Polkadot = "DOT",
+  Chainflip = "FLIP",
+  Polygon = "MATIC",
+  Radix = "XRD",
+  THORChain = "THOR",
+  Solana = "SOL",
+}
+
 export type AtomWallet = {
   ethereum?: Wallet;
   bitcoin?: Wallet;
