@@ -385,7 +385,8 @@ export function useLiquidityPosition({
           });
         }
 
-        const routerAddress = normalizeAddress(inbound.router);
+        const routerAddress = inbound.router ? normalizeAddress(inbound.router) : undefined;
+        if (!routerAddress) throw new Error("Router address not found");
         const vaultAddress = normalizeAddress(inbound.address);
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300);
 

@@ -20,6 +20,11 @@ interface TransferParams {
   memo?: string;
 }
 
+interface TxResult {
+  hash: string;
+  txid: string;
+}
+
 export function useDoge({ wallet }: UseDogeProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +66,7 @@ export function useDoge({ wallet }: UseDogeProps) {
 
   // Transfer DOGE using XDEFI wallet
   const transfer = useCallback(
-    async ({ recipient, amount, memo = "" }: TransferParams) => {
+    async ({ recipient, amount, memo = "" }: TransferParams): Promise<TxResult> => {
       if (!wallet?.provider || !wallet.address) {
         throw new Error("Wallet not initialized");
       }
@@ -85,7 +90,7 @@ export function useDoge({ wallet }: UseDogeProps) {
           memo,
         };
 
-        return new Promise((resolve, reject) => {
+        return new Promise<TxResult>((resolve, reject) => {
           wallet.provider.request(
             {
               method: "transfer",
@@ -98,11 +103,15 @@ export function useDoge({ wallet }: UseDogeProps) {
                 reject(error);
               } else {
                 console.log("Transfer result:", result);
+                const txResult: TxResult = {
+                  hash: result.hash || result.txid,
+                  txid: result.txid || result.hash,
+                };
                 setMetadata((prev) => ({
                   ...prev,
-                  hash: result.hash || result.txid,
+                  hash: txResult.hash,
                 }));
-                resolve(result);
+                resolve(txResult);
               }
             },
           );
@@ -140,7 +149,7 @@ export function useDoge({ wallet }: UseDogeProps) {
           memo,
         });
 
-        return result.hash || result.txid;
+        return result.hash;
       } catch (err) {
         const errMsg =
           err instanceof Error ? err.message : "Failed to add liquidity";
@@ -167,14 +176,13 @@ export function useDoge({ wallet }: UseDogeProps) {
       }
 
       try {
-        // For removal, we send a minimal amount of DOGE
         const result = await transfer({
           recipient: vault,
           amount,
           memo,
         });
 
-        return result.hash || result.txid;
+        return result.hash;
       } catch (err) {
         const errMsg =
           err instanceof Error ? err.message : "Failed to remove liquidity";
