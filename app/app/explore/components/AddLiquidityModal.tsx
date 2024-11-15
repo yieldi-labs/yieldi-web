@@ -17,6 +17,8 @@ import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { useContracts } from "@/hooks/useContracts";
 import { useRuneBalance } from "@/hooks";
+import { useDoge } from "@/hooks/useDoge";
+import { formatUnits } from "viem";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -30,8 +32,13 @@ export default function AddLiquidityModal({
   onClose,
 }: AddLiquidityModalProps) {
   const { wallet } = useAppState();
-  const { loading, error, addLiquidity } = useLiquidityPosition({ pool });
+  const {
+    loading: liquidityLoading,
+    error: liquidityError,
+    addLiquidity,
+  } = useLiquidityPosition({ pool });
   const { toggleWalletModal } = useAppState();
+
   const {
     runeBalance,
     loading: runeLoading,
@@ -39,39 +46,76 @@ export default function AddLiquidityModal({
   } = useRuneBalance({
     wallet,
   });
+
   const [selectedTab] = useState("single");
   const [assetAmount, setAssetAmount] = useState(0);
   const [runeAmount, setRuneAmount] = useState(0);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [assetBalance, setAssetBalance] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  // Initialize contract hooks
-  const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
-  const tokenAddress = isERC20(pool.asset)
-    ? normalizeAddress(poolViemAddress)
-    : undefined; // Set to undefined for non-ERC20 assets
+  // Determine if this is a DOGE pool
+  const isDogePool = useMemo(() => {
+    return pool.asset.split(".")[0].toLowerCase() === "doge";
+  }, [pool.asset]);
 
-  // Use useContracts for ERC20 interaction
+  // Initialize DOGE hooks if needed
+  if (!wallet?.provider)
+    throw new Error("Wallet provider not found, please connect your wallet.");
+  const {
+    getBalance: getDogeBalance,
+    loading: dogeLoading,
+    error: dogeError,
+  } = useDoge({ wallet });
+
+  // Initialize contract hooks for EVM assets
+  const poolViemAddress = !isDogePool
+    ? pool.asset.split(".")[1].split("-")[1]
+    : undefined;
+  const tokenAddress =
+    !isDogePool && isERC20(pool.asset)
+      ? normalizeAddress(poolViemAddress!)
+      : undefined;
+
   const {
     balance: tokenBalance,
     error: tokenError,
     loadMetadata,
   } = useContracts({
     tokenAddress,
-    provider: wallet?.provider,
+    provider: !isDogePool ? wallet?.provider : undefined,
   });
 
-  // Load token metadata on mount
+  // Load token metadata for EVM assets
   useEffect(() => {
-    if (wallet?.provider) {
+    if (!isDogePool && wallet?.provider) {
       loadMetadata();
     }
-  }, [wallet?.provider, loadMetadata]);
+  }, [isDogePool, wallet?.provider, loadMetadata]);
 
-  // Get formatted asset balance from tokenBalance
-  const assetBalance = useMemo(() => {
-    if (!tokenBalance?.formatted) return 0;
-    return Number(tokenBalance.formatted);
-  }, [tokenBalance]);
+  // Get DOGE balance if needed
+  useEffect(() => {
+    if (isDogePool && wallet?.address) {
+      setLoading(true);
+      getDogeBalance(wallet.address)
+        .then((balance) => {
+          // Convert from base units to DOGE
+          const balanceAmount = balance.amount.amount();
+          const balanceBigInt = BigInt(balanceAmount.toString());
+          const formattedBalance = Number(formatUnits(balanceBigInt, 8));
+          setAssetBalance(formattedBalance);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    }
+  }, [isDogePool, wallet?.address, getDogeBalance]);
+
+  // Update asset balance for EVM tokens
+  useEffect(() => {
+    if (!isDogePool && tokenBalance?.formatted) {
+      setAssetBalance(Number(tokenBalance.formatted));
+    }
+  }, [isDogePool, tokenBalance]);
 
   const currentAssetPercentage = useMemo(() => {
     return getPercentage(assetAmount, assetBalance);
@@ -103,10 +147,17 @@ export default function AddLiquidityModal({
   };
 
   const handleAddLiquidity = async () => {
-    if (!wallet?.address) throw new Error("Wallet not connected");
-    if (assetAmount <= 0) throw new Error("Invalid asset amount");
+    if (!wallet?.address) {
+      toggleWalletModal();
+      return;
+    }
+
+    if (assetAmount <= 0) {
+      return;
+    }
 
     try {
+      setLoading(true);
       const hash = await addLiquidity({
         asset: pool.asset,
         amount: assetAmount,
@@ -120,8 +171,13 @@ export default function AddLiquidityModal({
       }
     } catch (err) {
       console.error("Failed to add liquidity:", err);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const isLoading = loading || liquidityLoading || runeLoading || dogeLoading;
+  const error = liquidityError || tokenError || runeError || dogeError;
 
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
@@ -135,9 +191,7 @@ export default function AddLiquidityModal({
       style={{ backgroundColor: "#F5F6F6", maxWidth: "36rem" }}
     >
       <div className="p-6">
-        {(error || tokenError || runeError) && (
-          <ErrorCard className="mb-4">{error || tokenError}</ErrorCard>
-        )}
+        {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
         {/* Asset Input Section */}
         <div>
@@ -151,8 +205,7 @@ export default function AddLiquidityModal({
                 className="mr-3"
               />
               <span className="font-gt-america-ext">
-                {getAssetShortSymbol(pool.asset)} Balance:{" "}
-                {isERC20(pool.asset) ? assetBalance.toFixed(6) : "N/A"}
+                {getAssetShortSymbol(pool.asset)}: {assetBalance.toFixed(6)}
               </span>
             </div>
             <div>
@@ -177,6 +230,7 @@ export default function AddLiquidityModal({
                   isCloseToPercentage(currentAssetPercentage, percent),
                 )}
                 onClick={() => handlePercentageClick(percent)}
+                disabled={isLoading}
               >
                 {percent === 100 ? "MAX" : `${percent}%`}
               </button>
@@ -184,7 +238,7 @@ export default function AddLiquidityModal({
           </div>
         </div>
 
-        {/* RUNE Input Section */}
+        {/* RUNE Input Section - only show for double-sided liquidity */}
         {selectedTab === "double" && (
           <div className="mt-6">
             <div className="flex items-center justify-between mb-4 text-neutral text-2xl font-medium">
@@ -197,7 +251,7 @@ export default function AddLiquidityModal({
                   className="mr-3"
                 />
                 <span className="font-gt-america-ext">
-                  RUNE Balance: {runeBalance.toFixed(6)}
+                  RUNE: {runeBalance.toFixed(6)}
                 </span>
               </div>
               <div>
@@ -232,16 +286,12 @@ export default function AddLiquidityModal({
 
         <Button
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
-          onClick={
-            wallet?.address ? handleAddLiquidity : () => toggleWalletModal()
-          }
-          disabled={
-            wallet?.address ? loading || runeLoading || assetAmount <= 0 : false
-          }
+          onClick={handleAddLiquidity}
+          disabled={!wallet?.address || isLoading || assetAmount <= 0}
         >
           {!wallet?.address
             ? "Connect Wallet"
-            : loading || runeLoading
+            : isLoading
               ? "Adding Liquidity..."
               : "Add Liquidity"}
         </Button>

@@ -5,7 +5,11 @@ import type { MemberPool, PoolDetail } from "@/midgard";
 import { hex } from "@scure/base";
 import { parseUnits, Address } from "viem";
 import { useContracts } from "./useContracts";
+import { useDoge } from "./useDoge";
 import { normalizeAddress, SupportedChain } from "@/app/utils";
+
+const affiliate = "yi";
+const feeBps = 0;
 
 interface InboundAddress {
   chain: string;
@@ -39,15 +43,12 @@ interface RemoveLiquidityParams {
   asset: string;
   percentage: number;
   address: string;
-  withdrawAsset?: string; // Optional: for single-sided withdrawals
+  withdrawAsset?: string;
 }
 
 interface UseLiquidityPositionProps {
   pool: PoolDetail;
 }
-
-const affiliate = "yi";
-const feeBps = 0;
 
 export function useLiquidityPosition({
   pool: poolProp,
@@ -61,10 +62,15 @@ export function useLiquidityPosition({
   // Parse asset details
   const [assetChain = "", assetIdentifier = ""] = pool.asset.split(".");
 
-  // Check if it's a native asset (e.g., ETH.ETH, AVAX.AVAX)
+  // Determine if this is a DOGE pool
+  const isDogePool = useMemo(() => {
+    return assetChain.toLowerCase() === "doge";
+  }, [assetChain]);
+
+  // Check if it's a native asset (e.g., ETH.ETH, AVAX.AVAX, DOGE.DOGE)
   const isNativeAsset = useMemo(() => {
     return assetIdentifier.indexOf("-") === -1;
-  }, [assetChain, assetIdentifier]);
+  }, [assetIdentifier]);
 
   // Get token address for non-native assets
   const tokenAddress = useMemo(() => {
@@ -81,12 +87,23 @@ export function useLiquidityPosition({
     }
   }, [assetIdentifier, isNativeAsset]);
 
-  // Initialize contract hooks
+  // Initialize EVM contract hooks (only if not DOGE)
   const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
     useContracts({
-      tokenAddress: tokenAddress as Address | undefined,
-      provider: wallet?.provider,
+      tokenAddress: !isDogePool
+        ? (tokenAddress as Address | undefined)
+        : undefined,
+      provider: !isDogePool ? wallet?.provider : undefined,
     });
+
+  if (!wallet?.provider) {
+    throw new Error("Wallet provider not available, please connect wallet.");
+  }
+  // Initialize DOGE hooks (only if DOGE pool)
+  const {
+    addLiquidity: addDogeLiquidity,
+    removeLiquidity: removeDogeLiquidity,
+  } = useDoge({ wallet });
 
   const getInboundAddresses = async (): Promise<InboundAddress[]> => {
     const response = await fetch(
@@ -189,15 +206,27 @@ export function useLiquidityPosition({
         }
 
         const memo = `+:${asset}::${affiliate}:${feeBps}`;
+
+        // Handle DOGE transactions
+        if (isDogePool) {
+          return await addDogeLiquidity({
+            vault: inbound.address,
+            amount: amount,
+            memo: memo,
+          });
+        }
+
+        // Handle EVM chain transactions
         const chainLower = assetChain.toLowerCase();
 
-        // Handle chain switching
+        // Chain ID mapping
         const chainIdMap: Record<string, number> = {
           ethereum: 1,
           avalanche: 43114,
           bsc: 56,
         };
 
+        // Handle chain switching
         const currentChainId = await wallet.provider.request({
           method: "eth_chainId",
         });
@@ -212,7 +241,7 @@ export function useLiquidityPosition({
 
         const routerAddress = normalizeAddress(inbound.router);
         const vaultAddress = normalizeAddress(inbound.address);
-        const expiry = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes expiry
+        const expiry = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes
 
         // Handle token or native asset deposit
         let txHash;
@@ -267,6 +296,8 @@ export function useLiquidityPosition({
       tokenAddress,
       getAllowance,
       isNativeAsset,
+      isDogePool,
+      addDogeLiquidity,
     ],
   );
 
@@ -323,6 +354,16 @@ export function useLiquidityPosition({
           ? `-:${asset}:${basisPoints}:${withdrawAsset}` // Single-sided
           : `-:${asset}:${basisPoints}`; // Dual-sided
 
+        // Handle DOGE withdrawals
+        if (isDogePool) {
+          return await removeDogeLiquidity({
+            vault: inbound.address,
+            amount: 0.00010001, // Minimum required DOGE amount
+            memo: memo,
+          });
+        }
+
+        // Handle EVM chain withdrawals
         const chainLower = assetChain.toLowerCase();
 
         // Handle chain switching
@@ -346,17 +387,17 @@ export function useLiquidityPosition({
 
         const routerAddress = normalizeAddress(inbound.router);
         const vaultAddress = normalizeAddress(inbound.address);
-        const expiry = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes expiry
+        const expiry = BigInt(Math.floor(Date.now() / 1000) + 300);
 
-        // Use the depositWithExpiry function with base unit for withdrawal
+        // Use base unit amount for withdrawal transaction
         const decimals = parseInt(pool.nativeDecimal);
         const minAmountByChain =
           getMinAmountByChain(supportedChain) * 10 ** decimals;
         const txHash = await depositWithExpiry(
           routerAddress,
           vaultAddress,
-          "0x0000000000000000000000000000000000000000", // Use zero address for withdrawals
-          BigInt(minAmountByChain), // Base unit for withdrawals
+          "0x0000000000000000000000000000000000000000",
+          BigInt(minAmountByChain),
           memo,
           expiry,
         );
@@ -372,7 +413,14 @@ export function useLiquidityPosition({
         setLoading(false);
       }
     },
-    [wallet, getMemberDetails, depositWithExpiry],
+    [
+      wallet,
+      getMemberDetails,
+      depositWithExpiry,
+      isDogePool,
+      removeDogeLiquidity,
+      pool.nativeDecimal,
+    ],
   );
 
   const getSupportedChainByAssetChain = (
@@ -386,30 +434,26 @@ export function useLiquidityPosition({
   const getMinAmountByChain = (chain: SupportedChain): number => {
     switch (chain) {
       case SupportedChain.Bitcoin:
-      case SupportedChain.Bitcoin:
       case SupportedChain.Litecoin:
       case SupportedChain.BitcoinCash:
       case SupportedChain.Dash:
         return 0.00010001;
-
       case SupportedChain.Dogecoin:
         return 1.00000001;
-
       case SupportedChain.Avalanche:
       case SupportedChain.Ethereum:
       case SupportedChain.Arbitrum:
       case SupportedChain.BinanceSmartChain:
         return 0.00000001;
-
       case SupportedChain.THORChain:
       case SupportedChain.Maya:
         return 0;
-
       case SupportedChain.Cosmos:
       case SupportedChain.Kujira:
         return 0.000001;
+      default:
+        return 0.00000001;
     }
-    return 0.00000001;
   };
 
   return {

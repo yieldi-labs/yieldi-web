@@ -59,15 +59,36 @@ importers:
       '@xchainjs/xchain-bitcoin':
         specifier: ^1.1.3
         version: 1.1.3
+      '@xchainjs/xchain-client':
+        specifier: ^1.0.7
+        version: 1.0.7
+      '@xchainjs/xchain-crypto':
+        specifier: ^0.3.6
+        version: 0.3.6
+      '@xchainjs/xchain-doge':
+        specifier: ^1.0.7
+        version: 1.0.7
       '@xchainjs/xchain-ethereum':
         specifier: ^1.0.11
         version: 1.0.11(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@xchainjs/xchain-thorchain':
         specifier: ^2.0.10
         version: 2.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-util':
+        specifier: ^1.0.6
+        version: 1.0.6
       '@xchainjs/xchain-wallet':
         specifier: ^1.1.2
         version: 1.1.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      axios:
+        specifier: ^1.7.7
+        version: 1.7.7
+      bitcoinjs-lib:
+        specifier: 7.0.0-rc.0
+        version: 7.0.0-rc.0(typescript@5.6.3)
+      coininfo:
+        specifier: ^5.2.1
+        version: 5.2.1
       ethers:
         specifier: ^5.6.9
         version: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -101,6 +122,9 @@ importers:
       wagmi:
         specifier: ^2.12.16
         version: 2.12.20(@tanstack/query-core@5.59.13)(@tanstack/react-query@5.59.15(react@18.3.1))(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.4(@babel/core@7.25.8)(@babel/preset-env@7.25.8(@babel/core@7.25.8))(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.30(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4))(zod@3.22.4)
+      wif:
+        specifier: ^5.0.0
+        version: 5.0.0
     devDependencies:
       '@hey-api/client-fetch':
         specifier: ^0.4.2
@@ -2940,6 +2964,9 @@ packages:
   '@xchainjs/xchain-crypto@0.3.6':
     resolution: {integrity: sha512-5GoY0/Ukd+4C3c1/Ljku4dDekBG4a8Kxk2rRg8Y+Cz4ulKILtS2Atd27mjR9QjdIKm0zXZ2Ddius/lWWFkJAnA==}
 
+  '@xchainjs/xchain-doge@1.0.7':
+    resolution: {integrity: sha512-AW4cbs8Izo8wAG3p/4Dhi/Chu8/mdSBWnbypOUtBElkBXh8i7qHr0i8Ql1Y5V7TZjlEqu87HaNcYaueg8dYEtA==}
+
   '@xchainjs/xchain-ethereum@1.0.11':
     resolution: {integrity: sha512-K4mAIVJNrb7DfzUAun69PK4kwLVbbZdzEATu3Y5lOhjBvRWIxH4kf5CBHzgA0cG0nMB0wnvI3SxuH3aDY5Gtzw==}
 
@@ -3377,6 +3404,10 @@ packages:
     resolution: {integrity: sha512-mdFV5+/v0XyNYXjBS6CQPLo9ekCx4gtKZFnJm5PMto7Fs9hTTDpkkzOB7/FtluRI6JbUUAu+snTYfJRgHLZbZQ==}
     engines: {node: '>=8.0.0'}
 
+  bip174@3.0.0-rc.1:
+    resolution: {integrity: sha512-+8P3BpSairVNF2Nee6Ksdc1etIjWjBOi/MH0MwKtq9YaYp+S2Hk2uvup0e8hCT4IKlS58nXJyyQVmW92zPoD4Q==}
+    engines: {node: '>=18.0.0'}
+
   bip32-path@0.4.2:
     resolution: {integrity: sha512-ZBMCELjJfcNMkz5bDuJ1WrYvjlhEF5k6mQ8vUr4N7MbVRsXei7ZOg8VhhwMfNiW68NWmLkgkc6WvTickrLGprQ==}
 
@@ -3410,6 +3441,10 @@ packages:
   bitcoinjs-lib@6.1.6:
     resolution: {integrity: sha512-Fk8+Vc+e2rMoDU5gXkW9tD+313rhkm5h6N9HfZxXvYU9LedttVvmXKTgd9k5rsQJjkSfsv6XRM8uhJv94SrvcA==}
     engines: {node: '>=8.0.0'}
+
+  bitcoinjs-lib@7.0.0-rc.0:
+    resolution: {integrity: sha512-7CQgOIbREemKR/NT2uc3uO/fkEy+6CM0sLxboVVY6bv6DbZmPt3gg5Y/hhWgQFeZu5lfTbtVAv32MIxf7lMh4g==}
+    engines: {node: '>=18.0.0'}
 
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
@@ -3714,6 +3749,9 @@ packages:
 
   coininfo@5.1.0:
     resolution: {integrity: sha512-q1Bv+yYSca68VpXGvaMwO0xzEJl9Zxxk0g2YWfX8EUHld8t7e3xEnaRa473IqNVWBq9CAwiXzkYR9UCCtUZVrA==}
+
+  coininfo@5.2.1:
+    resolution: {integrity: sha512-mqSQIhAMgeiySzS0Ei33qno0oN/JQt9X3I6J1zx4eIYUnObGPuoLOrpssoqU84ZQoIpJGt3mQdEd2dL3sZJADw==}
 
   coinselect@3.1.12:
     resolution: {integrity: sha512-XKnm9wwZzJRGuvR1BGNbFZEfa4SEr38do8Z5riq0797QwMT836EqhdPuhtbn8uAX8vCMqJ7+gS4CHa1G9M5xhw==}
@@ -7724,6 +7762,10 @@ packages:
     resolution: {integrity: sha512-xS6+s8e0Xbx++5/0L+yyexukU7pz//Yg6IHg3BKhXotg1JcYtgxVcUctQ0HxLByiJzpAkNFawz1Nz5Xadzo82g==}
     engines: {node: '>=14.0.0'}
 
+  uint8array-tools@0.0.9:
+    resolution: {integrity: sha512-9vqDWmoSXOoi+K14zNaf6LBV51Q8MayF0/IiQs3GlygIKUYtog603e6virExkjjFosfJUBI4LhbQK1iq8IG11A==}
+    engines: {node: '>=14.0.0'}
+
   uint8arrays@3.1.0:
     resolution: {integrity: sha512-ei5rfKtoRO8OyOIor2Rz5fhzjThwIHJZ3uyDPnDHTXbP0aMQ1RN/6AI5B5d9dBxJOU+BvOAk7ZQ1xphsX8Lrog==}
 
@@ -7923,6 +7965,14 @@ packages:
 
   valibot@0.33.2:
     resolution: {integrity: sha512-ZpFWuI+bs5+PP66q4zVFn4e4t/s5jmMw5iPBZmGUoi8iQqXyU9YY/BLCAyk62Z/bNS8qdUNBEyx52952qdqW3w==}
+
+  valibot@0.38.0:
+    resolution: {integrity: sha512-RCJa0fetnzp+h+KN9BdgYOgtsMAG9bfoJ9JSjIhFHobKWVWyzM3jjaeNTdpFK9tQtf3q1sguXeERJ/LcmdFE7w==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   valtio@1.11.2:
     resolution: {integrity: sha512-1XfIxnUXzyswPAPXo1P3Pdx2mq/pIqZICkWN60Hby0d9Iqb+MEIpqgYVlbflvHdrp2YR/q3jyKWRPJJ100yxaw==}
@@ -13150,6 +13200,20 @@ snapshots:
       hdkey: 2.1.0
       uuid: 9.0.1
 
+  '@xchainjs/xchain-doge@1.0.7':
+    dependencies:
+      '@ledgerhq/hw-app-btc': 10.1.0
+      '@xchainjs/xchain-client': 1.0.7
+      '@xchainjs/xchain-crypto': 0.3.6
+      '@xchainjs/xchain-util': 1.0.6
+      '@xchainjs/xchain-utxo': 1.0.7
+      '@xchainjs/xchain-utxo-providers': 1.0.7
+      bitcoinjs-lib: 5.2.0
+      coininfo: 5.1.0
+      coinselect: 3.1.12
+    transitivePeerDependencies:
+      - debug
+
   '@xchainjs/xchain-ethereum@1.0.11(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
       '@ledgerhq/hw-transport': 6.30.6
@@ -13739,6 +13803,11 @@ snapshots:
 
   bip174@2.1.1: {}
 
+  bip174@3.0.0-rc.1:
+    dependencies:
+      uint8array-tools: 0.0.9
+      varuint-bitcoin: 2.0.0
+
   bip32-path@0.4.2: {}
 
   bip32@2.0.6:
@@ -13802,6 +13871,18 @@ snapshots:
       bs58check: 3.0.1
       typeforce: 1.18.0
       varuint-bitcoin: 1.1.2
+
+  bitcoinjs-lib@7.0.0-rc.0(typescript@5.6.3):
+    dependencies:
+      '@noble/hashes': 1.5.0
+      bech32: 2.0.0
+      bip174: 3.0.0-rc.1
+      bs58check: 4.0.0
+      uint8array-tools: 0.0.9
+      valibot: 0.38.0(typescript@5.6.3)
+      varuint-bitcoin: 2.0.0
+    transitivePeerDependencies:
+      - typescript
 
   bl@4.1.0:
     dependencies:
@@ -14176,6 +14257,10 @@ snapshots:
   co@4.6.0: {}
 
   coininfo@5.1.0:
+    dependencies:
+      safe-buffer: 5.2.1
+
+  coininfo@5.2.1:
     dependencies:
       safe-buffer: 5.2.1
 
@@ -19119,6 +19204,8 @@ snapshots:
 
   uint8array-tools@0.0.8: {}
 
+  uint8array-tools@0.0.9: {}
+
   uint8arrays@3.1.0:
     dependencies:
       multiformats: 9.9.0
@@ -19285,6 +19372,10 @@ snapshots:
       convert-source-map: 2.0.0
 
   valibot@0.33.2: {}
+
+  valibot@0.38.0(typescript@5.6.3):
+    optionalDependencies:
+      typescript: 5.6.3
 
   valtio@1.11.2(@types/react@18.3.11)(react@18.3.1):
     dependencies:
