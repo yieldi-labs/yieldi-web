@@ -190,9 +190,7 @@ export function useLiquidityPosition({
           throw new Error(`No inbound address found for ${assetChain}`);
         }
 
-        console.log({ inbound });
-
-        if (!inbound.address) {
+        if (!inbound.router && !inbound.address) {
           throw new Error("Inbound address not found");
         }
 
@@ -334,7 +332,7 @@ export function useLiquidityPosition({
           throw new Error(`No inbound address found for ${assetChain}`);
         }
 
-        if (!inbound.router) {
+        if (!inbound.router && !inbound.address) {
           throw new Error("Router address not found");
         }
 
@@ -360,7 +358,7 @@ export function useLiquidityPosition({
         if (isDogePool) {
           return await removeDogeLiquidity({
             vault: inbound.address,
-            amount: 0.00010001, // Minimum required DOGE amount
+            amount: getMinAmountByChain(SupportedChain.Dogecoin),
             memo: memo,
           });
         }
@@ -466,5 +464,6 @@ export function useLiquidityPosition({
     getMemberDetails,
     addLiquidity,
     removeLiquidity,
+    getMinAmountByChain,
   };
 }

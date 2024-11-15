@@ -2,12 +2,10 @@ import { useMemo, useCallback, useState } from "react";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
 import { Network } from "@xchainjs/xchain-client";
 import { baseAmount } from "@xchainjs/xchain-util";
+import { WalletState } from "./useWalletConnection";
 
 interface UseDogeProps {
-  wallet?: {
-    address: string;
-    provider: any;
-  };
+  wallet?: WalletState | null;
 }
 
 interface DogeMetadata {
@@ -172,7 +170,7 @@ export function useDoge({ wallet }: UseDogeProps) {
         // For removal, we send a minimal amount of DOGE
         const result = await transfer({
           recipient: vault,
-          amount: 0.0001, // Minimal dust amount (10000 satoshis)
+          amount,
           memo,
         });
 
