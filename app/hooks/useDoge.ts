@@ -16,6 +16,12 @@ interface DogeMetadata {
   hash?: string;
 }
 
+interface TransferParams {
+  recipient: string;
+  amount: number;
+  memo?: string;
+}
+
 export function useDoge({ wallet }: UseDogeProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +61,66 @@ export function useDoge({ wallet }: UseDogeProps) {
     [client],
   );
 
-  // Add liquidity to a pool
+  // Transfer DOGE using XDEFI wallet
+  const transfer = useCallback(
+    async ({ recipient, amount, memo = "" }: TransferParams) => {
+      if (!wallet?.provider || !wallet.address) {
+        throw new Error("Wallet not initialized");
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const transferParams = {
+          asset: {
+            chain: "DOGE",
+            symbol: "DOGE",
+            ticker: "DOGE",
+          },
+          from: wallet.address,
+          recipient,
+          amount: {
+            amount: Math.floor(amount * 1e8), // Convert to smallest unit (satoshis)
+            decimals: 8,
+          },
+          memo,
+        };
+
+        return new Promise((resolve, reject) => {
+          wallet.provider.request(
+            {
+              method: "transfer",
+              params: [transferParams],
+            },
+            (error: any, result: any) => {
+              if (error) {
+                console.error("Transfer error:", error);
+                setError(error.message || "Transfer failed");
+                reject(error);
+              } else {
+                console.log("Transfer result:", result);
+                setMetadata((prev) => ({
+                  ...prev,
+                  hash: result.hash || result.txid,
+                }));
+                resolve(result);
+              }
+            },
+          );
+        });
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : "Transfer failed";
+        setError(errMsg);
+        throw new Error(errMsg);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [wallet],
+  );
+
+  // Add liquidity to a pool using transfer
   const addLiquidity = useCallback(
     async ({
       vault,
@@ -66,60 +131,29 @@ export function useDoge({ wallet }: UseDogeProps) {
       amount: number;
       memo: string;
     }) => {
-      if (!client || !wallet?.address) {
-        throw new Error("Doge client or wallet not initialized");
+      if (!wallet?.address) {
+        throw new Error("Wallet not initialized");
       }
 
-      setLoading(true);
-      setError(null);
-
       try {
-        // Convert amount to base amount (satoshis)
-        const baseAmountValue = baseAmount(amount * 1e8);
-
-        // Build unsigned transaction
-        const feeRate = await client.getFeeRates();
-        const unsignedTx = await client.prepareTx({
-          sender: wallet.address,
-          memo,
-          amount: baseAmountValue,
+        const result = await transfer({
           recipient: vault,
-          feeRate: feeRate.average,
+          amount,
+          memo,
         });
 
-        // Get unsigned raw transaction hex
-        const unsignedRawTx = unsignedTx.rawUnsignedTx.toString();
-
-        // Have wallet sign the raw transaction
-        const signedRawTx = await wallet.provider.request({
-          method: "signTransaction",
-          params: [
-            {
-              network: "doge",
-              rawTx: unsignedRawTx,
-            },
-          ],
-        });
-
-        console.log({ signedRawTx });
-        // Broadcast signed transaction
-        const txHash = await client.broadcastTx(signedRawTx);
-
-        setMetadata((prev) => ({ ...prev, hash: txHash }));
-        return txHash;
+        return result.hash || result.txid;
       } catch (err) {
         const errMsg =
           err instanceof Error ? err.message : "Failed to add liquidity";
         setError(errMsg);
         throw new Error(errMsg);
-      } finally {
-        setLoading(false);
       }
     },
-    [client, wallet],
+    [transfer, wallet],
   );
 
-  // Remove liquidity from a pool
+  // Remove liquidity from a pool using transfer
   const removeLiquidity = useCallback(
     async ({
       vault,
@@ -130,56 +164,27 @@ export function useDoge({ wallet }: UseDogeProps) {
       amount: number;
       memo: string;
     }) => {
-      if (!client || !wallet?.address) {
-        throw new Error("Doge client or wallet not initialized");
+      if (!wallet?.address) {
+        throw new Error("Wallet not initialized");
       }
 
-      setLoading(true);
-      setError(null);
-
       try {
-        // For withdrawal, we send a minimal amount of DOGE
-        const baseAmountValue = baseAmount(10000); // Minimal dust amount
-
-        // Build unsigned transaction
-        const feeRates = await client.getFeeRates();
-        const unsignedTx = await client.prepareTx({
-          sender: wallet.address,
-          memo,
-          amount: baseAmountValue,
+        // For removal, we send a minimal amount of DOGE
+        const result = await transfer({
           recipient: vault,
-          feeRate: feeRates.average,
+          amount: 0.0001, // Minimal dust amount (10000 satoshis)
+          memo,
         });
 
-        // Get unsigned raw transaction hex
-        const unsignedRawTx = unsignedTx.rawUnsignedTx.toString();
-        // Have wallet sign the raw transaction
-        const signedRawTx = await wallet.provider.request({
-          method: "signTransaction",
-          params: [
-            {
-              network: "doge",
-              rawTx: unsignedRawTx,
-            },
-          ],
-        });
-
-        // Broadcast signed transaction
-        console.log({ signedRawTx });
-        const txHash = await client.broadcastTx(signedRawTx);
-
-        setMetadata((prev) => ({ ...prev, hash: txHash }));
-        return txHash;
+        return result.hash || result.txid;
       } catch (err) {
         const errMsg =
           err instanceof Error ? err.message : "Failed to remove liquidity";
         setError(errMsg);
         throw new Error(errMsg);
-      } finally {
-        setLoading(false);
       }
     },
-    [client, wallet],
+    [transfer, wallet],
   );
 
   return {
@@ -187,6 +192,7 @@ export function useDoge({ wallet }: UseDogeProps) {
     error,
     metadata,
     getBalance,
+    transfer,
     addLiquidity,
     removeLiquidity,
   };

@@ -193,8 +193,10 @@ export function useLiquidityPosition({
           throw new Error(`No inbound address found for ${assetChain}`);
         }
 
-        if (!inbound.router) {
-          throw new Error("Router address not found");
+        console.log({ inbound });
+
+        if (!inbound.address) {
+          throw new Error("Inbound address not found");
         }
 
         if (inbound.halted) {
@@ -239,7 +241,10 @@ export function useLiquidityPosition({
           });
         }
 
-        const routerAddress = normalizeAddress(inbound.router);
+        const routerAddress = inbound.router
+          ? normalizeAddress(inbound.router)
+          : undefined;
+        if (!routerAddress) throw new Error("Router address not found");
         const vaultAddress = normalizeAddress(inbound.address);
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes
 
