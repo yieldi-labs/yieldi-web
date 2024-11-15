@@ -96,9 +96,6 @@ export function useLiquidityPosition({
       provider: !isDogePool ? wallet?.provider : undefined,
     });
 
-  if (!wallet?.provider) {
-    throw new Error("Wallet provider not available, please connect wallet.");
-  }
   // Initialize DOGE hooks (only if DOGE pool)
   const {
     addLiquidity: addDogeLiquidity,
