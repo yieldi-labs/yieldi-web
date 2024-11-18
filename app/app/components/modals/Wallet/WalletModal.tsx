@@ -18,21 +18,23 @@ export default function WalletModal() {
   const {
     selectedChain,
     detectedWallets,
-    handleSelectChain,
-    handleConnect,
     setSelectedChain,
+    handleConnect,
   } = useWalletConnection(setWalletState, toggleWalletModal);
   const { detected, undetected, isWalletValidForChain } = useWalletList(
     selectedChain,
-    detectedWallets
+    detectedWallets,
   );
 
   useEffect(() => {
-    const restrictedChains = ["solana", "kujira", "binance-smart-chain"];
-    if (selectedChain.some((chain) => restrictedChains.includes(chain))) {
-      setIsHWDisabled(true);
-    } else {
-      setIsHWDisabled(false);
+    switch (selectedChain) {
+      case "solana":
+      case "kujira":
+      case "binance-smart-chain":
+        setIsHWDisabled(true);
+        break;
+      default:
+        setIsHWDisabled(false);
     }
   }, [selectedChain]);
 
@@ -41,21 +43,6 @@ export default function WalletModal() {
 
   if (!isWalletModalOpen) return null;
 
-  const handleSelectDeSelect =
-    selectedChain.length !== 9
-      ? () =>
-          setSelectedChain([
-            "bitcoin",
-            "ethereum",
-            "binance-smart-chain",
-            "avalanche",
-            "dogecoin",
-            "bitcoincash",
-            "litecoin",
-            "thorchain",
-            "solana",
-          ])
-      : () => setSelectedChain([]);
 
   return (
     <Modal onClose={toggleWalletModal} title="Connect Wallet">
@@ -63,8 +50,7 @@ export default function WalletModal() {
         <ChainSelector
           chains={chainConfig}
           selectedChain={selectedChain}
-          onChainSelect={handleSelectChain}
-          handleDeselect={handleSelectDeSelect}
+          onChainSelect={setSelectedChain}
         />
         {!showHardwareWallets ? (
           <>
@@ -81,7 +67,7 @@ export default function WalletModal() {
                 "bg-white rounded-2xl p-4",
                 "border-2 border-transparent",
                 "hover:border-primary cursor-pointer",
-                "transition-all duration-75"
+                "transition-all duration-75",
               )}
             >
               <h3 className="text-sm text-neutral-900 font-medium font-gt-america">

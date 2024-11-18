@@ -9,8 +9,7 @@ export function useWalletConnection(
 ) {
   const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
-
-  const [selectedChain, setSelectedChain] = useState<string[]>(["bitcoin"]);
+  const [selectedChain, setSelectedChain] = useState<string | null>("bitcoin");
   const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export function useWalletConnection(
       };
 
       const detectedWalletForChain = detectedWallets.find((w) => {
-        const identifier = chainIdentifiers["solana"];
+        const identifier = chainIdentifiers[selectedChain];
 
         if (!identifier) {
           return w.id.split("-")[0] === wallet.id.split("-")[0];
@@ -71,8 +70,8 @@ export function useWalletConnection(
         return;
       }
 
-      const selectedChainConfig = chainConfig.find((chain) =>
-        selectedChain.includes(chain.id)
+      const selectedChainConfig = chainConfig.find(
+        (chain) => chain.id === selectedChain
       );
 
       const isNonEVM = detectedWalletForChain.id.includes("-");
@@ -120,19 +119,11 @@ export function useWalletConnection(
     }
   };
 
-  const handleSelectChain = (chainId: string) => {
-    if (selectedChain.length && selectedChain.includes(chainId)) {
-      setSelectedChain((prev) => prev.filter((item) => item !== chainId));
-    } else {
-      setSelectedChain((prev) => [...prev, chainId]);
-    }
-  };
 
   return {
     selectedChain,
     setSelectedChain,
     handleConnect,
-    handleSelectChain,
     detectedWallets,
   };
 }

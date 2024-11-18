@@ -22,7 +22,7 @@ export default function Modal({
       onClick={onClose}
     >
       <div
-        className="bg-neutral-100 backdrop-blur-md border-4 border-white h-[95vh] relative z-20 max-w-lg w-[95%] mx-auto rounded-xl p-7 overflow-y-auto"
+        className="bg-neutral-100 backdrop-blur-md border-4 border-white max-h-[95vh] no-scrollbar relative z-20 max-w-lg w-[95%] mx-auto rounded-xl p-7 overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         style={style}
       >

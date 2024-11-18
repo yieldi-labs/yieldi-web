@@ -8,8 +8,8 @@ interface UseWalletListReturn {
 }
 
 export function useWalletList(
-  selectedChain: string[],
-  detectedWallets: WalletOption[]
+  selectedChain: string | null,
+  detectedWallets: WalletOption[],
 ): UseWalletListReturn {
   const { detected, undetected } = useMemo(() => {
     const detected: WalletOption[] = [];
@@ -41,7 +41,7 @@ export function useWalletList(
 
     if (selectedChain) {
       const chainWallets =
-        chainConfig.find((chain) => selectedChain.includes(chain.id))
+        chainConfig.find((chain) => selectedChain === chain.id)
           ?.wallets || [];
       chainWallets.forEach(processWallet);
     } else {
@@ -57,11 +57,11 @@ export function useWalletList(
     (walletName: string): boolean => {
       if (!selectedChain) return true;
       const chainWallets =
-        chainConfig.find((chain) => selectedChain.includes(chain.id))
+        chainConfig.find((chain) => selectedChain === chain.id)
           ?.wallets || [];
       return chainWallets.some((w) => w.name === walletName);
     },
-    [selectedChain]
+    [selectedChain],
   );
 
   return {
