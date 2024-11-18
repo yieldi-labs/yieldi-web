@@ -5,7 +5,7 @@ import type { MemberPool, PoolDetail } from "@/midgard";
 import { normalizeAddress, SupportedChain } from "@/app/utils";
 import { Address, parseUnits } from "viem";
 import { useContracts } from "./useContracts";
-import { useDoge } from "./useDoge";
+import { useUTXO } from "./useUTXO";
 import {
   getInboundAddresses,
   validateInboundAddress,
@@ -57,11 +57,13 @@ export function useLiquidityPosition({
     [pool.asset],
   );
 
-  // Determine if this is a DOGE pool
-  const isDogePool = useMemo(
-    () => assetChain.toLowerCase() === "doge",
-    [assetChain],
-  );
+  // Determine if this is a UTXO chain and which one
+  const utxoChain = useMemo(() => {
+    const chain = assetChain.toLowerCase();
+    if (chain === "btc") return "BTC";
+    if (chain === "doge") return "DOGE";
+    return null;
+  }, [assetChain]);
 
   // Check if it's a native asset
   const isNativeAsset = useMemo(
@@ -84,20 +86,23 @@ export function useLiquidityPosition({
     }
   }, [assetIdentifier, isNativeAsset]);
 
-  // Initialize contract hooks
+  // Initialize UTXO hooks if needed
+  const {
+    addLiquidity: addUTXOLiquidity,
+    removeLiquidity: removeUTXOLiquidity,
+  } = useUTXO({
+    chain: utxoChain as "BTC" | "DOGE",
+    wallet: utxoChain ? wallet : null,
+  });
+
+  // Initialize contract hooks for EVM chains
   const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
     useContracts({
-      tokenAddress: !isDogePool
+      tokenAddress: !utxoChain
         ? (tokenAddress as Address | undefined)
         : undefined,
-      provider: !isDogePool ? wallet?.provider : undefined,
+      provider: !utxoChain ? wallet?.provider : undefined,
     });
-
-  // Initialize DOGE hooks
-  const {
-    addLiquidity: addDogeLiquidity,
-    removeLiquidity: removeDogeLiquidity,
-  } = useDoge({ wallet });
 
   const getMemberDetails = useCallback(
     async (address: string, asset: string) => {
@@ -178,9 +183,9 @@ export function useLiquidityPosition({
         validateInboundAddress(inbound);
         const memo = getLiquidityMemo("add", asset, affiliate, feeBps);
 
-        // Handle DOGE transactions
-        if (isDogePool) {
-          return await addDogeLiquidity({
+        // Handle UTXO chain transactions
+        if (utxoChain) {
+          return await addUTXOLiquidity({
             vault: inbound.address,
             amount: amount,
             memo: memo,
@@ -250,8 +255,8 @@ export function useLiquidityPosition({
       tokenAddress,
       getAllowance,
       isNativeAsset,
-      isDogePool,
-      addDogeLiquidity,
+      utxoChain,
+      addUTXOLiquidity,
     ],
   );
 
@@ -297,11 +302,11 @@ export function useLiquidityPosition({
           withdrawAsset,
         );
 
-        // Handle DOGE withdrawals
-        if (isDogePool) {
-          return await removeDogeLiquidity({
+        // Handle UTXO chain withdrawals
+        if (utxoChain) {
+          return await removeUTXOLiquidity({
             vault: inbound.address,
-            amount: getMinAmountByChain(SupportedChain.Dogecoin),
+            amount: getMinAmountByChain(supportedChain),
             memo: memo,
           });
         }
@@ -344,8 +349,8 @@ export function useLiquidityPosition({
       wallet,
       getMemberDetails,
       depositWithExpiry,
-      isDogePool,
-      removeDogeLiquidity,
+      utxoChain,
+      removeUTXOLiquidity,
       pool.nativeDecimal,
     ],
   );

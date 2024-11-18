@@ -1,13 +1,41 @@
 import { useMemo, useCallback, useState } from "react";
+import {
+  Client as BitcoinClient,
+  defaultBTCParams,
+} from "@xchainjs/xchain-bitcoin";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
 import { Network } from "@xchainjs/xchain-client";
+import {
+  assetToBase,
+  Asset,
+  assetAmount,
+  AssetType,
+} from "@xchainjs/xchain-util";
 import { WalletState } from "./useWalletConnection";
 
-interface UseDogeProps {
+// Define BTC and DOGE assets
+const AssetBTC: Asset = {
+  chain: "BTC",
+  symbol: "BTC",
+  ticker: "BTC",
+  type: AssetType.NATIVE,
+};
+
+const AssetDOGE: Asset = {
+  chain: "DOGE",
+  symbol: "DOGE",
+  ticker: "DOGE",
+  type: AssetType.NATIVE,
+};
+
+type UTXOChain = "BTC" | "DOGE";
+
+interface UseUTXOProps {
+  chain: UTXOChain;
   wallet?: WalletState | null;
 }
 
-interface DogeMetadata {
+interface UTXOMetadata {
   network: Network;
   explorerUrl: string;
   hash?: string;
@@ -17,6 +45,7 @@ interface TransferParams {
   recipient: string;
   amount: number;
   memo?: string;
+  feeRate?: number;
 }
 
 interface TxResult {
@@ -24,51 +53,82 @@ interface TxResult {
   txid: string;
 }
 
-export function useDoge({ wallet }: UseDogeProps) {
+export function useUTXO({ chain, wallet }: UseUTXOProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<DogeMetadata>({
+  const [metadata, setMetadata] = useState<UTXOMetadata>({
     network: Network.Mainnet,
-    explorerUrl: "https://blockchair.com/dogecoin",
+    explorerUrl:
+      chain === "BTC"
+        ? defaultBTCParams.explorerProviders[Network.Mainnet].getExplorerUrl()
+        : defaultDogeParams.explorerProviders[Network.Mainnet].getExplorerUrl(),
   });
 
-  // Initialize Doge client with provider
+  // Initialize UTXO client with proper configuration
   const client = useMemo(() => {
     if (!wallet?.provider) return null;
 
     try {
-      return new DogeClient({
-        ...defaultDogeParams,
+      const commonConfig = {
         network: Network.Mainnet,
-      });
+        phrase: "", // We don't need phrase since we're using wallet provider
+      };
+
+      switch (chain) {
+        case "BTC":
+          return new BitcoinClient({
+            ...defaultBTCParams,
+            ...commonConfig,
+          });
+        case "DOGE":
+          return new DogeClient({
+            ...defaultDogeParams,
+            ...commonConfig,
+          });
+        default:
+          throw new Error(`Unsupported UTXO chain: ${chain}`);
+      }
     } catch (err) {
-      console.error("Error initializing Doge client:", err);
+      console.error(`Error initializing ${chain} client:`, err);
       return null;
     }
-  }, [wallet?.provider]);
+  }, [wallet?.provider, chain]);
 
-  // Get balance of Doge address
+  // Get balance
   const getBalance = useCallback(
     async (address: string) => {
-      if (!client) throw new Error("Doge client not initialized");
+      if (!client) throw new Error(`${chain} client not initialized`);
 
       try {
         const balance = await client.getBalance(address);
-        return balance[0]; // Returns the DOGE balance
+        return balance[0];
       } catch (err) {
-        console.error("Error getting Doge balance:", err);
+        console.error(`Error getting ${chain} balance:`, err);
         throw err;
       }
     },
-    [client],
+    [client, chain],
   );
 
-  // Transfer DOGE using XDEFI wallet
+  // Get network fees
+  const getFees = useCallback(async () => {
+    if (!client) throw new Error(`${chain} client not initialized`);
+
+    try {
+      return await client.getFeeRates();
+    } catch (err) {
+      console.error(`Error getting ${chain} fees:`, err);
+      throw err;
+    }
+  }, [client, chain]);
+
+  // Transfer using wallet provider
   const transfer = useCallback(
     async ({
       recipient,
       amount,
       memo = "",
+      feeRate,
     }: TransferParams): Promise<TxResult> => {
       if (!wallet?.provider || !wallet.address) {
         throw new Error("Wallet not initialized");
@@ -78,19 +138,14 @@ export function useDoge({ wallet }: UseDogeProps) {
       setError(null);
 
       try {
+        const fees = feeRate || (await getFees()).fast;
+        const asset = chain === "BTC" ? AssetBTC : AssetDOGE;
         const transferParams = {
-          asset: {
-            chain: "DOGE",
-            symbol: "DOGE",
-            ticker: "DOGE",
-          },
-          from: wallet.address,
+          asset,
           recipient,
-          amount: {
-            amount: Math.floor(amount * 1e8), // Convert to smallest unit (satoshis)
-            decimals: 8,
-          },
+          amount: assetToBase(assetAmount(amount, 8)), // UTXO chains use 8 decimals
           memo,
+          feeRate: fees,
         };
 
         return new Promise<TxResult>((resolve, reject) => {
@@ -127,7 +182,7 @@ export function useDoge({ wallet }: UseDogeProps) {
         setLoading(false);
       }
     },
-    [wallet],
+    [wallet, getFees, chain],
   );
 
   // Add liquidity to a pool using transfer
@@ -146,10 +201,12 @@ export function useDoge({ wallet }: UseDogeProps) {
       }
 
       try {
+        const fees = await getFees();
         const result = await transfer({
           recipient: vault,
           amount,
           memo,
+          feeRate: fees.fast,
         });
 
         return result.hash;
@@ -160,7 +217,7 @@ export function useDoge({ wallet }: UseDogeProps) {
         throw new Error(errMsg);
       }
     },
-    [transfer, wallet],
+    [transfer, wallet, getFees],
   );
 
   // Remove liquidity from a pool using transfer
@@ -179,10 +236,12 @@ export function useDoge({ wallet }: UseDogeProps) {
       }
 
       try {
+        const fees = await getFees();
         const result = await transfer({
           recipient: vault,
           amount,
           memo,
+          feeRate: fees.fast,
         });
 
         return result.hash;
@@ -193,7 +252,7 @@ export function useDoge({ wallet }: UseDogeProps) {
         throw new Error(errMsg);
       }
     },
-    [transfer, wallet],
+    [transfer, wallet, getFees],
   );
 
   return {
@@ -201,6 +260,7 @@ export function useDoge({ wallet }: UseDogeProps) {
     error,
     metadata,
     getBalance,
+    getFees,
     transfer,
     addLiquidity,
     removeLiquidity,

@@ -17,7 +17,7 @@ import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { useContracts } from "@/hooks/useContracts";
 import { useRuneBalance } from "@/hooks";
-import { useDoge } from "@/hooks/useDoge";
+import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 
 interface AddLiquidityModalProps {
@@ -54,26 +54,33 @@ export default function AddLiquidityModal({
   const [assetBalance, setAssetBalance] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Determine if this is a DOGE pool
-  const isDogePool = useMemo(() => {
-    return pool.asset.split(".")[0].toLowerCase() === "doge";
+  // Determine if this is a UTXO chain and which one
+  const utxoChain = useMemo(() => {
+    const chain = pool.asset.split(".")[0].toLowerCase();
+    if (chain === "btc") return "BTC";
+    if (chain === "doge") return "DOGE";
+    return null;
   }, [pool.asset]);
 
-  // Initialize DOGE hooks if needed
+  // Initialize UTXO hooks if needed
   if (!wallet?.provider)
     throw new Error("Wallet provider not found, please connect your wallet.");
+
   const {
-    getBalance: getDogeBalance,
-    loading: dogeLoading,
-    error: dogeError,
-  } = useDoge({ wallet });
+    getBalance: getUTXOBalance,
+    loading: utxoLoading,
+    error: utxoError,
+  } = useUTXO({
+    chain: utxoChain as "BTC" | "DOGE",
+    wallet: utxoChain ? wallet : null,
+  });
 
   // Initialize contract hooks for EVM assets
-  const poolViemAddress = !isDogePool
+  const poolViemAddress = !utxoChain
     ? pool.asset.split(".")[1].split("-")[1]
     : undefined;
   const tokenAddress =
-    !isDogePool && isERC20(pool.asset)
+    !utxoChain && isERC20(pool.asset)
       ? normalizeAddress(poolViemAddress!)
       : undefined;
 
@@ -83,23 +90,23 @@ export default function AddLiquidityModal({
     loadMetadata,
   } = useContracts({
     tokenAddress,
-    provider: !isDogePool ? wallet?.provider : undefined,
+    provider: !utxoChain ? wallet?.provider : undefined,
   });
 
   // Load token metadata for EVM assets
   useEffect(() => {
-    if (!isDogePool && wallet?.provider) {
+    if (!utxoChain && wallet?.provider) {
       loadMetadata();
     }
-  }, [isDogePool, wallet?.provider, loadMetadata]);
+  }, [utxoChain, wallet?.provider, loadMetadata]);
 
-  // Get DOGE balance if needed
+  // Get UTXO balance if needed
   useEffect(() => {
-    if (isDogePool && wallet?.address) {
+    if (utxoChain && wallet?.address) {
       setLoading(true);
-      getDogeBalance(wallet.address)
+      getUTXOBalance(wallet.address)
         .then((balance) => {
-          // Convert from base units to DOGE
+          // Convert from base units
           const balanceAmount = balance.amount.amount();
           const balanceBigInt = BigInt(balanceAmount.toString());
           const formattedBalance = Number(formatUnits(balanceBigInt, 8));
@@ -108,14 +115,14 @@ export default function AddLiquidityModal({
         .catch(console.error)
         .finally(() => setLoading(false));
     }
-  }, [isDogePool, wallet?.address, getDogeBalance]);
+  }, [utxoChain, wallet?.address, getUTXOBalance]);
 
   // Update asset balance for EVM tokens
   useEffect(() => {
-    if (!isDogePool && tokenBalance?.formatted) {
+    if (!utxoChain && tokenBalance?.formatted) {
       setAssetBalance(Number(tokenBalance.formatted));
     }
-  }, [isDogePool, tokenBalance]);
+  }, [utxoChain, tokenBalance]);
 
   const currentAssetPercentage = useMemo(() => {
     return getPercentage(assetAmount, assetBalance);
@@ -176,8 +183,8 @@ export default function AddLiquidityModal({
     }
   };
 
-  const isLoading = loading || liquidityLoading || runeLoading || dogeLoading;
-  const error = liquidityError || tokenError || runeError || dogeError;
+  const isLoading = loading || liquidityLoading || runeLoading || utxoLoading;
+  const error = liquidityError || tokenError || runeError || utxoError;
 
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
