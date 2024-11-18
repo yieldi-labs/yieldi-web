@@ -1,7 +1,6 @@
 import { useMemo, useCallback, useState } from "react";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
 import { Network } from "@xchainjs/xchain-client";
-import { baseAmount } from "@xchainjs/xchain-util";
 import { WalletState } from "./useWalletConnection";
 
 interface UseDogeProps {
@@ -66,7 +65,11 @@ export function useDoge({ wallet }: UseDogeProps) {
 
   // Transfer DOGE using XDEFI wallet
   const transfer = useCallback(
-    async ({ recipient, amount, memo = "" }: TransferParams): Promise<TxResult> => {
+    async ({
+      recipient,
+      amount,
+      memo = "",
+    }: TransferParams): Promise<TxResult> => {
       if (!wallet?.provider || !wallet.address) {
         throw new Error("Wallet not initialized");
       }

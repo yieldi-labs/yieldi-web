@@ -2,35 +2,19 @@ import { useState, useCallback, useMemo } from "react";
 import { useAppState } from "@/utils/context";
 import { client, getMemberDetail, getPool } from "@/midgard";
 import type { MemberPool, PoolDetail } from "@/midgard";
-import { hex } from "@scure/base";
-import { parseUnits, Address } from "viem";
+import { normalizeAddress, SupportedChain } from "@/app/utils";
+import { Address, parseUnits } from "viem";
 import { useContracts } from "./useContracts";
 import { useDoge } from "./useDoge";
-import { normalizeAddress, SupportedChain } from "@/app/utils";
-
-const affiliate = "yi";
-const feeBps = 0;
-
-interface InboundAddress {
-  chain: string;
-  pub_key: string;
-  address: string;
-  router?: string;
-  halted: boolean;
-  global_trading_paused: boolean;
-  chain_trading_paused: boolean;
-  chain_lp_actions_paused: boolean;
-  gas_rate: string;
-  gas_rate_units: string;
-  outbound_tx_size: string;
-  outbound_fee: string;
-  dust_threshold: string;
-}
-
-interface MidgardResponse<T> {
-  data?: T;
-  error?: string;
-}
+import {
+  getInboundAddresses,
+  validateInboundAddress,
+  switchEvmChain,
+  getSupportedChainByAssetChain,
+  getMinAmountByChain,
+  getLiquidityMemo,
+  parseAssetString,
+} from "@/utils/chain";
 
 interface AddLiquidityParams {
   asset: string;
@@ -50,6 +34,14 @@ interface UseLiquidityPositionProps {
   pool: PoolDetail;
 }
 
+interface MidgardResponse<T> {
+  data?: T;
+  error?: string;
+}
+
+const affiliate = "yi";
+const feeBps = 0;
+
 export function useLiquidityPosition({
   pool: poolProp,
 }: UseLiquidityPositionProps) {
@@ -60,17 +52,22 @@ export function useLiquidityPosition({
   const [pool, setPool] = useState<PoolDetail>(poolProp);
 
   // Parse asset details
-  const [assetChain = "", assetIdentifier = ""] = pool.asset.split(".");
+  const [assetChain, assetIdentifier] = useMemo(
+    () => parseAssetString(pool.asset),
+    [pool.asset],
+  );
 
   // Determine if this is a DOGE pool
-  const isDogePool = useMemo(() => {
-    return assetChain.toLowerCase() === "doge";
-  }, [assetChain]);
+  const isDogePool = useMemo(
+    () => assetChain.toLowerCase() === "doge",
+    [assetChain],
+  );
 
-  // Check if it's a native asset (e.g., ETH.ETH, AVAX.AVAX, DOGE.DOGE)
-  const isNativeAsset = useMemo(() => {
-    return assetIdentifier.indexOf("-") === -1;
-  }, [assetIdentifier]);
+  // Check if it's a native asset
+  const isNativeAsset = useMemo(
+    () => assetIdentifier.indexOf("-") === -1,
+    [assetIdentifier],
+  );
 
   // Get token address for non-native assets
   const tokenAddress = useMemo(() => {
@@ -87,7 +84,7 @@ export function useLiquidityPosition({
     }
   }, [assetIdentifier, isNativeAsset]);
 
-  // Initialize EVM contract hooks (only if not DOGE)
+  // Initialize contract hooks
   const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
     useContracts({
       tokenAddress: !isDogePool
@@ -96,21 +93,11 @@ export function useLiquidityPosition({
       provider: !isDogePool ? wallet?.provider : undefined,
     });
 
-  // Initialize DOGE hooks (only if DOGE pool)
+  // Initialize DOGE hooks
   const {
     addLiquidity: addDogeLiquidity,
     removeLiquidity: removeDogeLiquidity,
   } = useDoge({ wallet });
-
-  const getInboundAddresses = async (): Promise<InboundAddress[]> => {
-    const response = await fetch(
-      "https://thornode.ninerealms.com/thorchain/inbound_addresses",
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  };
 
   const getMemberDetails = useCallback(
     async (address: string, asset: string) => {
@@ -126,9 +113,7 @@ export function useLiquidityPosition({
         const [memberResponse, poolResponse] = await Promise.all([
           getMemberDetail({
             client: client,
-            path: {
-              address: address,
-            },
+            path: { address },
           }) as Promise<MidgardResponse<{ pools: MemberPool[] }>>,
           getPool({
             client: client,
@@ -171,7 +156,7 @@ export function useLiquidityPosition({
   );
 
   const addLiquidity = useCallback(
-    async ({ asset, amount, runeAmount, address }: AddLiquidityParams) => {
+    async ({ asset, amount, address }: AddLiquidityParams) => {
       if (!wallet?.address) {
         throw new Error("Wallet not connected");
       }
@@ -181,7 +166,7 @@ export function useLiquidityPosition({
         setError(null);
 
         const inboundAddresses = await getInboundAddresses();
-        const [assetChain, assetIdentifier] = asset.split(".");
+        const [assetChain] = parseAssetString(asset);
         const inbound = inboundAddresses?.find(
           (i) => i.chain === assetChain.toUpperCase(),
         );
@@ -190,19 +175,8 @@ export function useLiquidityPosition({
           throw new Error(`No inbound address found for ${assetChain}`);
         }
 
-        if (!inbound.router && !inbound.address) {
-          throw new Error("Inbound address not found");
-        }
-
-        if (inbound.halted) {
-          throw new Error("Network is halted");
-        }
-
-        if (inbound.chain_lp_actions_paused) {
-          throw new Error("LP actions are paused for this chain");
-        }
-
-        const memo = `+:${asset}::${affiliate}:${feeBps}`;
+        validateInboundAddress(inbound);
+        const memo = getLiquidityMemo("add", asset, affiliate, feeBps);
 
         // Handle DOGE transactions
         if (isDogePool) {
@@ -214,27 +188,7 @@ export function useLiquidityPosition({
         }
 
         // Handle EVM chain transactions
-        const chainLower = assetChain.toLowerCase();
-
-        // Chain ID mapping
-        const chainIdMap: Record<string, number> = {
-          ethereum: 1,
-          avalanche: 43114,
-          bsc: 56,
-        };
-
-        // Handle chain switching
-        const currentChainId = await wallet.provider.request({
-          method: "eth_chainId",
-        });
-        const targetChainId = chainIdMap[chainLower];
-
-        if (parseInt(currentChainId, 16) !== targetChainId) {
-          await wallet.provider.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: `0x${targetChainId.toString(16)}` }],
-          });
-        }
+        await switchEvmChain(wallet.provider, assetChain);
 
         const routerAddress = inbound.router
           ? normalizeAddress(inbound.router)
@@ -317,7 +271,7 @@ export function useLiquidityPosition({
         setError(null);
 
         const inboundAddresses = await getInboundAddresses();
-        const [assetChain, assetIdentifier] = asset.split(".");
+        const [assetChain] = parseAssetString(asset);
 
         const supportedChain = getSupportedChainByAssetChain(assetChain);
         if (!supportedChain) {
@@ -332,27 +286,16 @@ export function useLiquidityPosition({
           throw new Error(`No inbound address found for ${assetChain}`);
         }
 
-        if (!inbound.router && !inbound.address) {
-          throw new Error("Router address not found");
-        }
+        validateInboundAddress(inbound);
 
-        if (inbound.halted) {
-          throw new Error("Network is halted");
-        }
-
-        if (inbound.chain_lp_actions_paused) {
-          throw new Error("LP actions are paused for this chain");
-        }
-
-        const basisPoints = Math.round(percentage * 100);
-        if (basisPoints < 0 || basisPoints > 10000) {
-          throw new Error("Percentage must be between 0 and 100");
-        }
-
-        // Construct memo based on withdrawal type
-        const memo = withdrawAsset
-          ? `-:${asset}:${basisPoints}:${withdrawAsset}` // Single-sided
-          : `-:${asset}:${basisPoints}`; // Dual-sided
+        const memo = getLiquidityMemo(
+          "remove",
+          asset,
+          undefined,
+          undefined,
+          percentage,
+          withdrawAsset,
+        );
 
         // Handle DOGE withdrawals
         if (isDogePool) {
@@ -364,28 +307,11 @@ export function useLiquidityPosition({
         }
 
         // Handle EVM chain withdrawals
-        const chainLower = assetChain.toLowerCase();
+        await switchEvmChain(wallet.provider, assetChain);
 
-        // Handle chain switching
-        const chainIdMap: Record<string, number> = {
-          ethereum: 1,
-          avalanche: 43114,
-          bsc: 56,
-        };
-
-        const currentChainId = await wallet.provider.request({
-          method: "eth_chainId",
-        });
-        const targetChainId = chainIdMap[chainLower];
-
-        if (parseInt(currentChainId, 16) !== targetChainId) {
-          await wallet.provider.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: `0x${targetChainId.toString(16)}` }],
-          });
-        }
-
-        const routerAddress = inbound.router ? normalizeAddress(inbound.router) : undefined;
+        const routerAddress = inbound.router
+          ? normalizeAddress(inbound.router)
+          : undefined;
         if (!routerAddress) throw new Error("Router address not found");
         const vaultAddress = normalizeAddress(inbound.address);
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300);
@@ -424,39 +350,6 @@ export function useLiquidityPosition({
     ],
   );
 
-  const getSupportedChainByAssetChain = (
-    assetChain: string,
-  ): SupportedChain | undefined => {
-    return Object.values(SupportedChain).find(
-      (chainValue) => chainValue.toLowerCase() === assetChain.toLowerCase(),
-    ) as SupportedChain | undefined;
-  };
-
-  const getMinAmountByChain = (chain: SupportedChain): number => {
-    switch (chain) {
-      case SupportedChain.Bitcoin:
-      case SupportedChain.Litecoin:
-      case SupportedChain.BitcoinCash:
-      case SupportedChain.Dash:
-        return 0.00010001;
-      case SupportedChain.Dogecoin:
-        return 1.00000001;
-      case SupportedChain.Avalanche:
-      case SupportedChain.Ethereum:
-      case SupportedChain.Arbitrum:
-      case SupportedChain.BinanceSmartChain:
-        return 0.00000001;
-      case SupportedChain.THORChain:
-      case SupportedChain.Maya:
-        return 0;
-      case SupportedChain.Cosmos:
-      case SupportedChain.Kujira:
-        return 0.000001;
-      default:
-        return 0.00000001;
-    }
-  };
-
   return {
     loading,
     error,
@@ -465,6 +358,5 @@ export function useLiquidityPosition({
     getMemberDetails,
     addLiquidity,
     removeLiquidity,
-    getMinAmountByChain,
   };
 }
