@@ -186,6 +186,7 @@ export function useLiquidityPosition({
         // Handle UTXO chain transactions
         if (utxoChain) {
           return await addUTXOLiquidity({
+            pool,
             vault: inbound.address,
             amount: amount,
             memo: memo,
@@ -305,6 +306,7 @@ export function useLiquidityPosition({
         // Handle UTXO chain withdrawals
         if (utxoChain) {
           return await removeUTXOLiquidity({
+            pool,
             vault: inbound.address,
             amount: getMinAmountByChain(supportedChain),
             memo: memo,
