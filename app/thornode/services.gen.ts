@@ -217,7 +217,11 @@ import type {
   TxResponse2,
 } from "./types.gen";
 
-export const client = createClient(createConfig());
+export const client = createClient(
+  createConfig({
+    baseUrl: "https://thornode.ninerealms.com/",
+  }),
+);
 
 /**
  * Returns the pool information for all assets.

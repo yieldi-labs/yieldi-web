@@ -75,6 +75,12 @@ $ pnpm openapi:pull
 $ pnpm openapi:gen
 ```
 
+### Important Note About Generating OpenAPI client
+
+The gen library that we're using does not have a good way to configure a `baseUrl` for nextjs applications where there is no root.
+
+When you pull and generate new clients, be sure to add the `baseUrl` to the `createClient` config in the `services.gen.ts` file.
+
 ## Contributing
 
 Contributions are welcome. Please open an issue or submit a pull request.

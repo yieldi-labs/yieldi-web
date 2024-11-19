@@ -87,7 +87,11 @@ import type {
   GetThorNamesByAddressResponse,
 } from "./types.gen";
 
-export const client = createClient(createConfig());
+export const client = createClient(
+  createConfig({
+    baseUrl: "https://midgard.ninerealms.com/",
+  }),
+);
 
 /**
  * Actions List
