@@ -15,12 +15,8 @@ export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
   const { toggleWalletModal, isWalletModalOpen, setWalletState } =
     useAppState();
-  const {
-    selectedChain,
-    detectedWallets,
-    setSelectedChain,
-    handleConnect,
-  } = useWalletConnection(setWalletState, toggleWalletModal);
+  const { selectedChain, detectedWallets, setSelectedChain, handleConnect } =
+    useWalletConnection(setWalletState, toggleWalletModal);
   const { detected, undetected, isWalletValidForChain } = useWalletList(
     selectedChain,
     detectedWallets,
@@ -42,7 +38,6 @@ export default function WalletModal() {
     setWalletState(wallet);
 
   if (!isWalletModalOpen) return null;
-
 
   return (
     <Modal onClose={toggleWalletModal} title="Connect Wallet">

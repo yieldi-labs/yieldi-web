@@ -5,7 +5,7 @@ import { useConnectors, useSwitchChain } from "wagmi";
 
 export function useWalletConnection(
   setWalletState: any,
-  toggleWalletModal: () => void
+  toggleWalletModal: () => void,
 ) {
   const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
@@ -18,7 +18,7 @@ export function useWalletConnection(
       .map((detectedWallet) => {
         for (const chain of chainConfig) {
           const matchingWallet = chain.wallets.find(
-            (w) => w.id === detectedWallet.id
+            (w) => w.id === detectedWallet.id,
           );
           if (matchingWallet) {
             return {
@@ -71,7 +71,7 @@ export function useWalletConnection(
       }
 
       const selectedChainConfig = chainConfig.find(
-        (chain) => chain.id === selectedChain
+        (chain) => chain.id === selectedChain,
       );
 
       const isNonEVM = detectedWalletForChain.id.includes("-");
@@ -92,8 +92,8 @@ export function useWalletConnection(
       const chainId = isVultisig
         ? vultiChainId
         : isNonEVM
-        ? undefined
-        : await connectedWallet.provider.getChainId();
+          ? undefined
+          : await connectedWallet.provider.getChainId();
 
       if (selectedChainConfig?.chainId) {
         if (chainId !== selectedChainConfig.chainId) {
@@ -118,7 +118,6 @@ export function useWalletConnection(
       console.error(`Error connecting to ${wallet.name}:`, error);
     }
   };
-
 
   return {
     selectedChain,

@@ -41,8 +41,7 @@ export function useWalletList(
 
     if (selectedChain) {
       const chainWallets =
-        chainConfig.find((chain) => selectedChain === chain.id)
-          ?.wallets || [];
+        chainConfig.find((chain) => selectedChain === chain.id)?.wallets || [];
       chainWallets.forEach(processWallet);
     } else {
       chainConfig.forEach((chain) => {
@@ -57,8 +56,7 @@ export function useWalletList(
     (walletName: string): boolean => {
       if (!selectedChain) return true;
       const chainWallets =
-        chainConfig.find((chain) => selectedChain === chain.id)
-          ?.wallets || [];
+        chainConfig.find((chain) => selectedChain === chain.id)?.wallets || [];
       return chainWallets.some((w) => w.name === walletName);
     },
     [selectedChain],

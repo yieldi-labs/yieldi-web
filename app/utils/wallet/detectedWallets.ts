@@ -77,13 +77,147 @@ export const detectWallets = (
   }
 
   // Add WalletConnect as fallback
-  const walletConnectConnector = ethConnectors.find((c) => c.id === "walletConnect");
+  const walletConnectConnector = ethConnectors.find(
+    (c) => c.id === "walletConnect",
+  );
+
   if (walletConnectConnector) {
     wallets.push({
       id: "walletconnect",
       name: "WalletConnect",
       connect: async () => connectWalletConnect() as any,
     });
+  }
+
+  if (window.vultisig) {
+    wallets.push({
+      id: "vultisig",
+      name: "Vultisig",
+      connect: async () => connectEVMWallet(window.vultisig),
+    });
+  }
+
+  if (window.okxwallet) {
+    if (window.okxwallet.bitcoin) {
+      wallets.push({
+        id: "okx-utxo",
+        name: "OKX",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "okx-utxo",
+            name: "OKX Wallet",
+            provider: window.okxwallet.bitcoin,
+          }),
+      });
+    }
+  }
+
+  if (window.phantom) {
+    if (window.phantom.bitcoin) {
+      wallets.push({
+        id: "phantom-utxo",
+        name: "Phantom Wallet",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "phantom-utxo",
+            name: "Phantom Wallet",
+            provider: window.phantom.bitcoin,
+          }),
+      });
+    }
+
+    if (window.phantom.solana) {
+      wallets.push({
+        id: "phantom-solana",
+        name: "Phantom Wallet",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "phantom-solana",
+            name: "Phantom Wallet",
+            provider: window.phantom.solana,
+          }),
+      });
+    }
+  }
+
+  if (window.xfi) {
+    if (window.xfi.bitcoincash) {
+      wallets.push({
+        id: "xdefi-bch",
+        name: "CTRL",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-bch",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.bitcoincash,
+          }),
+      });
+    }
+
+    if (window.xfi.bitcoin) {
+      wallets.push({
+        id: "xdefi-utxo",
+        name: "CTRL",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-utxo",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.bitcoin,
+          }),
+      });
+    }
+
+    if (window.xfi.dogecoin) {
+      wallets.push({
+        id: "xdefi-doge",
+        name: "CTRL",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-doge",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.dogecoin,
+          }),
+      });
+    }
+
+    if (window.xfi.litecoin) {
+      wallets.push({
+        id: "xdefi-ltc",
+        name: "CTRL",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-ltc",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.litecoin,
+          }),
+      });
+    }
+
+    if (window.xfi.thorchain) {
+      wallets.push({
+        id: "xdefi-thorchain",
+        name: "CTRL Wallet",
+        connect: async () =>
+          connectUTXOWallet({
+            id: "xdefi-thorchain",
+            name: "CTRL Wallet",
+            provider: window?.xfi?.thorchain,
+          }),
+      });
+    }
+
+    // if (window.xfi.solana) {
+    //   wallets.push({
+    //     id: "xdefi-solana",
+    //     name: "CTRL Wallet",
+    //     connect: async () =>
+    //       connectUTXOWallet({
+    //         id: "xdefi-solana",
+    //         name: "CTRL Wallet",
+    //         provider: window?.xfi?.solana,
+    //       }),
+    //   });
+    // }
   }
 
   const seen = new Set();
