@@ -43,7 +43,7 @@ NEXT_PUBLIC_WALLETCONNECT_PROJECTID=your_walletconnect_project_id
 
 ## OpenaAPI clients
 
-This application utilizes several openapi specifications from ninereals:
+This application utilizes several openapi specifications from ninerealms:
 
 - [Midgard](https://midgard.ninerealms.com/v2/doc)
 - [Thornode](https://thornode.ninerealms.com/thorchain/doc/)
@@ -80,6 +80,23 @@ $ pnpm openapi:gen
 The gen library that we're using does not have a good way to configure a `baseUrl` for nextjs applications where there is no root.
 
 When you pull and generate new clients, be sure to add the `baseUrl` to the `createClient` config in the `services.gen.ts` file.
+
+For example, in `midgard/services.gen.ts`, change this:
+
+```ts
+export const client = createClient(createConfig());
+```
+
+To this: 
+
+```ts
+export const client = createClient(
+  createConfig({
+    baseUrl: "https://midgard.ninerealms.com/", // REPLACE WITH VALID `baseUrl`
+  }),
+);
+```
+
 
 ## Contributing
 
