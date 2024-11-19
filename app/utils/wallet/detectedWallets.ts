@@ -12,11 +12,23 @@ export interface Wallet {
 }
 
 export const detectWallets = (
-  ethConnectors: GetConnectorsReturnType,
+  ethConnectors: GetConnectorsReturnType
 ): Wallet[] => {
   const wallets: Wallet[] = [];
 
-  // Check for MetaMask
+  if (window.thorchain || window.vultisig?.thorchain) {
+    wallets.push({
+      id: "vultisig-thorchain",
+      name: "Vultisig",
+      connect: async () =>
+        connectUTXOWallet({
+          id: "vultisig-thorchain",
+          name: "Vultisig",
+          provider: window.thorchain || window.vultisig?.thorchain,
+        }),
+    });
+  }
+
   if (window.ethereum?.isMetaMask) {
     const connector = ethConnectors.find((c) => c.id === "metaMask");
     if (connector) {
@@ -28,7 +40,6 @@ export const detectWallets = (
     }
   }
 
-  // Check for OKX
   if (window.okxwallet) {
     const connector = ethConnectors.find((c) => c.id === "okx");
     if (connector) {
@@ -40,7 +51,6 @@ export const detectWallets = (
     }
   }
 
-  // Check for Trust Wallet
   if (window.ethereum?.isTrust) {
     const connector = ethConnectors.find((c) => c.id === "trust");
     if (connector) {
@@ -52,7 +62,6 @@ export const detectWallets = (
     }
   }
 
-  // Check for XDEFI/CTRL
   if (window.xfi) {
     const connector = ethConnectors.find((c) => c.id === "xdefi");
     if (connector) {
@@ -62,31 +71,6 @@ export const detectWallets = (
         connect: async () => connectEVMWallet(connector),
       });
     }
-  }
-
-  // Check for Phantom
-  if (window.phantom?.ethereum) {
-    const connector = ethConnectors.find((c) => c.id === "phantom");
-    if (connector) {
-      wallets.push({
-        id: "phantom",
-        name: "Phantom Wallet",
-        connect: async () => connectEVMWallet(connector),
-      });
-    }
-  }
-
-  // Add WalletConnect as fallback
-  const walletConnectConnector = ethConnectors.find(
-    (c) => c.id === "walletConnect",
-  );
-
-  if (walletConnectConnector) {
-    wallets.push({
-      id: "walletconnect",
-      name: "WalletConnect",
-      connect: async () => connectWalletConnect() as any,
-    });
   }
 
   if (window.vultisig) {
@@ -124,6 +108,17 @@ export const detectWallets = (
             provider: window.phantom.bitcoin,
           }),
       });
+    }
+
+    if (window.phantom?.ethereum) {
+      const connector = ethConnectors.find((c) => c.id === "phantom");
+      if (connector) {
+        wallets.push({
+          id: "phantom",
+          name: "Phantom Wallet",
+          connect: async () => connectEVMWallet(connector),
+        });
+      }
     }
 
     if (window.phantom.solana) {
@@ -205,6 +200,12 @@ export const detectWallets = (
           }),
       });
     }
+
+    wallets.push({
+      id: "walletconnect",
+      name: "WalletConnect",
+      connect: async () => connectWalletConnect() as any,
+    });
 
     // if (window.xfi.solana) {
     //   wallets.push({

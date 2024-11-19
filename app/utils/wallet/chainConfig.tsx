@@ -54,8 +54,6 @@ const utxoWallets = [
 
 const disabledEvmWallets = [
   { id: "metamask", ...baseWalletConfig.MetaMask, disabled: true },
-  { id: "walletconnect", ...baseWalletConfig.WalletConnect, disabled: true },
-  { id: "vultisig", ...baseWalletConfig.Vultisig, disabled: true },
 ];
 
 const singleWalletChains = [
@@ -67,6 +65,12 @@ const singleWalletChains = [
       { id: "xdefi-doge", ...baseWalletConfig.CTRL },
       { id: "okx-doge", ...baseWalletConfig.OKX, disabled: true },
       { id: "phantom-doge", ...baseWalletConfig.Phantom, disabled: true },
+      {
+        id: "walletconnect",
+        ...baseWalletConfig.WalletConnect,
+        disabled: true,
+      },
+      { id: "vultisig", ...baseWalletConfig.Vultisig, disabled: true },
       ...disabledEvmWallets,
     ],
   },
@@ -78,6 +82,12 @@ const singleWalletChains = [
       { id: "xdefi-bch", ...baseWalletConfig.CTRL },
       { id: "okx-bch", ...baseWalletConfig.OKX, disabled: true },
       { id: "phantom-bch", ...baseWalletConfig.Phantom, disabled: true },
+      {
+        id: "walletconnect",
+        ...baseWalletConfig.WalletConnect,
+        disabled: true,
+      },
+      { id: "vultisig", ...baseWalletConfig.Vultisig, disabled: true },
       ...disabledEvmWallets,
     ],
   },
@@ -89,6 +99,12 @@ const singleWalletChains = [
       { id: "xdefi-ltc", ...baseWalletConfig.CTRL },
       { id: "okx-ltc", ...baseWalletConfig.OKX, disabled: true },
       { id: "phantom-ltc", ...baseWalletConfig.Phantom, disabled: true },
+      {
+        id: "walletconnect",
+        ...baseWalletConfig.WalletConnect,
+        disabled: true,
+      },
+      { id: "vultisig", ...baseWalletConfig.Vultisig, disabled: true },
       ...disabledEvmWallets,
     ],
   },
@@ -100,6 +116,12 @@ const singleWalletChains = [
       { id: "xdefi-thorchain", ...baseWalletConfig.CTRL },
       { id: "okx-thorchain", ...baseWalletConfig.OKX, disabled: true },
       { id: "phantom-thorchain", ...baseWalletConfig.Phantom, disabled: true },
+      {
+        id: "walletconnect",
+        ...baseWalletConfig.WalletConnect,
+        disabled: true,
+      },
+      { id: "vultisig-thorchain", ...baseWalletConfig.Vultisig },
       ...disabledEvmWallets,
     ],
   },
@@ -111,6 +133,12 @@ const singleWalletChains = [
       { id: "phantom-solana", ...baseWalletConfig.Phantom },
       { id: "xdefi-solana", ...baseWalletConfig.CTRL, disabled: true },
       { id: "okx-solana", ...baseWalletConfig.OKX, disabled: true },
+      {
+        id: "walletconnect",
+        ...baseWalletConfig.WalletConnect,
+        disabled: true,
+      },
+      { id: "vultisig", ...baseWalletConfig.Vultisig, disabled: true },
       ...disabledEvmWallets,
     ],
   },
@@ -130,7 +158,7 @@ const evmChains = [
     icon: <ChainSvg.BSC />,
     chainId: bsc.id,
     wallets: evmWallets.map((wallet) =>
-      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet,
+      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet
     ),
   },
   {
@@ -139,7 +167,7 @@ const evmChains = [
     icon: <ChainSvg.Avax />,
     chainId: avalanche.id,
     wallets: evmWallets.map((wallet) =>
-      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet,
+      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet
     ),
   },
 ];

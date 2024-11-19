@@ -14,7 +14,11 @@ declare global {
     };
     phantom?: any;
     okxwallet?: any;
-    vultisig?: any;
+    vultisig?: {
+      ethereum?: any;
+      thorchain?: any;
+    };
+    thorchain?: any;
   }
 }
 

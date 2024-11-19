@@ -5,7 +5,7 @@ import { useConnectors, useSwitchChain } from "wagmi";
 
 export function useWalletConnection(
   setWalletState: any,
-  toggleWalletModal: () => void,
+  toggleWalletModal: () => void
 ) {
   const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
@@ -18,7 +18,7 @@ export function useWalletConnection(
       .map((detectedWallet) => {
         for (const chain of chainConfig) {
           const matchingWallet = chain.wallets.find(
-            (w) => w.id === detectedWallet.id,
+            (w) => w.id === detectedWallet.id
           );
           if (matchingWallet) {
             return {
@@ -71,7 +71,7 @@ export function useWalletConnection(
       }
 
       const selectedChainConfig = chainConfig.find(
-        (chain) => chain.id === selectedChain,
+        (chain) => chain.id === selectedChain
       );
 
       const isNonEVM = detectedWalletForChain.id.includes("-");
