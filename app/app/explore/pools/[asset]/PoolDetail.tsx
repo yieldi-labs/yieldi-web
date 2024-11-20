@@ -7,8 +7,9 @@ import {
   calculateVolumeDepthRatio,
   formatNumber,
   getFormattedPoolTVL,
-  fetchJson,
   getAssetSimpleSymbol,
+  MemberStats,
+  calculateGain,
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
@@ -22,98 +23,37 @@ interface PoolDetailProps {
   runePriceUSD: number;
 }
 
-interface MemberStats {
-  deposit: {
-    asset: number;
-    usd: number;
-  };
-  gain: {
-    asset: number;
-    usd: number;
-  };
-}
-
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const { wallet } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const { position, loading, error, getMemberDetails, removeLiquidity } =
     useLiquidityPosition({ pool });
-  const [memberStats, setMemberStats] = useState({
-    deposit: {
-      asset: 0,
-      usd: 0,
-    },
-    gain: {
-      asset: 0,
-      usd: 0,
-    },
-  } as MemberStats);
+  const [memberStats, setMemberStats] = useState<MemberStats>({
+    deposit: { asset: 0, usd: 0 },
+    gain: { asset: 0, usd: 0 },
+  });
 
   useEffect(() => {
-    const loadThornodePool = async () => {
+    async function loadStats() {
       if (!pool?.asset || !wallet?.address) return;
 
-      try {
-        // Fetch pool and LP data
-        const [poolData, liquidityProvider] = await Promise.all([
-          fetchJson(
-            `https://thornode.ninerealms.com/thorchain/pool/${pool.asset}`,
-          ),
-          fetchJson(
-            `https://thornode.ninerealms.com/thorchain/pool/${pool.asset}/liquidity_provider/${wallet.address}`,
-          ),
-        ]);
-
-        // Initial Deposit Calculation (R0 + A0)
-        const assetRunePrice =
-          parseFloat(poolData.balance_asset) /
-          parseFloat(poolData.balance_rune);
-        const assetPriceUSD = runePriceUSD / assetRunePrice;
-
-        const initialRuneInAsset =
-          parseFloat(liquidityProvider.rune_deposit_value) * assetRunePrice;
-        const initialAsset = parseFloat(liquidityProvider.asset_deposit_value);
-        const totalInitialDeposit = initialRuneInAsset + initialAsset;
-        const totalInitialDepositFormatted = totalInitialDeposit / 1e8;
-
-        // Current Position Calculation (R1 + A1)
-        const memberShares =
-          parseFloat(liquidityProvider.units) / parseFloat(poolData.LP_units);
-        const currentRuneInAsset =
-          memberShares * parseFloat(poolData.balance_rune) * assetRunePrice;
-        const currentAsset = memberShares * parseFloat(poolData.balance_asset);
-        const totalCurrentDeposit = currentRuneInAsset + currentAsset;
-
-        // Gain Calculation
-        const gainValue = (totalCurrentDeposit - totalInitialDeposit) / 1e8;
-
-        // USD Conversions
-        const depositUsdValue = (totalInitialDeposit / 1e8) * assetPriceUSD;
-        const gainUsdValue = gainValue * assetPriceUSD;
-
-        setMemberStats({
-          deposit: {
-            asset: totalInitialDepositFormatted,
-            usd: depositUsdValue,
-          },
-          gain: {
-            asset: gainValue,
-            usd: gainUsdValue,
-          },
-        });
-      } catch (err) {
-        console.error("Failed to load thornode pool data:", err);
+      const stats = await calculateGain(
+        pool.asset,
+        wallet.address,
+        runePriceUSD,
+      );
+      if (stats) {
+        setMemberStats(stats);
       }
-    };
+    }
 
-    loadThornodePool();
+    loadStats();
   }, [pool?.asset, wallet?.address, position, runePriceUSD]);
 
   // Calculate pool metrics
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
   const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
 
-  // Fetch position when wallet connects
   useEffect(() => {
     if (wallet?.address) {
       getMemberDetails(wallet.address, pool.asset);
@@ -148,7 +88,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
       </Link>
 
       <div className="grid grid-cols-12 gap-20">
-        {/* Left Column */}
         <div className="col-span-6">
           <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">
             OVERVIEW
@@ -181,7 +120,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           </TopCard>
         </div>
 
-        {/* Right Column */}
         <div className="col-span-6">
           <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">
             YOUR POSITION
@@ -206,7 +144,8 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
               <div className="text-gray-700 font-medium text-lg mb-2">GAIN</div>
               <div className="flex justify-between">
                 <div className="text-2xl font-medium text-gray-900">
-                  ${formatNumber(memberStats.gain.usd, 2)}
+                  {memberStats.gain.usd >= 0 ? "$" : "-$"}
+                  {formatNumber(Math.abs(memberStats.gain.usd), 2)}
                 </div>
                 <div className="text-2xl font-medium text-gray-900">
                   {formatNumber(memberStats.gain.asset)} {assetSymbol}

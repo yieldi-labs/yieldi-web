@@ -7,7 +7,8 @@ import { mainnet } from "viem/chains";
 import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { Saver } from "@/app/explore/types";
-import { PoolDetail } from "@/midgard";
+import { getPool, PoolDetail } from "@/midgard";
+import { liquidityProvider } from "@/thornode";
 
 export const ONE = BigInt("1000000000000000000");
 export const ONE6 = BigInt("1000000");
@@ -450,4 +451,82 @@ export const getPercentage = (amount: number, max: number): number => {
  */
 export const getAssetSimpleSymbol = (asset: string): string => {
   return asset.split(".")[1]?.split("-")[0] || asset;
+};
+
+export interface MemberStats {
+  deposit: {
+    asset: number;
+    usd: number;
+  };
+  gain: {
+    asset: number;
+    usd: number;
+  };
+}
+
+/**
+ * Calculate the gains of a liquidity provider.
+ *
+ * @param poolAsset Pool asset identifier (e.g. "BTC.BTC" or "ETH.USDT-0x...")
+ * @param walletAddress Wallet address of the liquidity provider
+ * @param runePriceUSD Current price of RUNE in USD
+ * @returns MemberStats object with deposit and gain values.
+ */
+export const calculateGain = async (
+  poolAsset: string,
+  walletAddress: string,
+  runePriceUSD: number,
+) => {
+  const DECIMALS = 1e8;
+
+  try {
+    const [poolResponse, lpResponse] = await Promise.all([
+      getPool({ path: { asset: poolAsset } }),
+      liquidityProvider({ path: { asset: poolAsset, address: walletAddress } }),
+    ]);
+
+    const poolData = poolResponse.data;
+    const lpData = lpResponse.data;
+    if (!poolData || !lpData) return null;
+
+    // Get pool ratio
+    const poolRuneAmount = parseFloat(poolData.runeDepth);
+    const poolAssetAmount = parseFloat(poolData.assetDepth);
+    const runePerAsset = poolRuneAmount / poolAssetAmount;
+
+    // Initial deposit values
+    const initialAssetDeposit =
+      parseFloat(lpData.asset_deposit_value) / DECIMALS;
+    const initialRuneDeposit = parseFloat(lpData.rune_deposit_value) / DECIMALS;
+    const initialDepositInAsset =
+      initialAssetDeposit + initialRuneDeposit / runePerAsset;
+
+    // Current redemption values
+    const currentAssetValue = parseFloat(lpData.asset_redeem_value!) / DECIMALS;
+    const currentRuneValue = parseFloat(lpData.rune_redeem_value!) / DECIMALS;
+    const currentValueInAsset =
+      currentAssetValue + currentRuneValue / runePerAsset;
+
+    // Calculate USD values using assetPrice
+    const assetPrice = runePerAsset * runePriceUSD;
+    const initialDepositUSD = initialDepositInAsset * assetPrice;
+
+    // Calculate gains
+    const gainInAsset = currentValueInAsset - initialDepositInAsset;
+    const gainUSD = gainInAsset * assetPrice;
+
+    return {
+      deposit: {
+        asset: initialDepositInAsset,
+        usd: initialDepositUSD,
+      },
+      gain: {
+        asset: gainInAsset,
+        usd: gainUSD,
+      },
+    } as MemberStats;
+  } catch (err) {
+    console.error("Failed to calculate gains:", err);
+    return null;
+  }
 };
