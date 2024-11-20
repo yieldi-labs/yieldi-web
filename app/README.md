@@ -87,7 +87,7 @@ For example, in `midgard/services.gen.ts`, change this:
 export const client = createClient(createConfig());
 ```
 
-To this: 
+To this:
 
 ```ts
 export const client = createClient(
@@ -96,7 +96,6 @@ export const client = createClient(
   }),
 );
 ```
-
 
 ## Contributing
 
