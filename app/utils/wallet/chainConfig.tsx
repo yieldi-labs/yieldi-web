@@ -185,3 +185,4 @@ export const chainConfig: ChainConfig[] = [
   ...evmChains,
   ...singleWalletChains,
 ];
+

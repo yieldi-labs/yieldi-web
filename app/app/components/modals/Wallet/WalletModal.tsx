@@ -6,7 +6,7 @@ import { useAppState } from "@/utils/context";
 import { chainConfig } from "@/utils/wallet/chainConfig";
 import { ChainSelector } from "./ChainSelector";
 import HardwareWallets from "./HardwareWallets";
-import { useWalletList, useWalletConnection } from "@/hooks";
+import { useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
 
@@ -17,10 +17,8 @@ export default function WalletModal() {
     useAppState();
   const { selectedChain, detectedWallets, setSelectedChain, handleConnect } =
     useWalletConnection(setWalletState, toggleWalletModal);
-  const { detected, undetected, isWalletValidForChain } = useWalletList(
-    selectedChain,
-    detectedWallets,
-  );
+
+  // TODO: detectedWallets needs enhancement
 
   useEffect(() => {
     switch (selectedChain) {
@@ -50,9 +48,7 @@ export default function WalletModal() {
         {!showHardwareWallets ? (
           <>
             <WalletList
-              detected={detected}
-              undetected={undetected}
-              isWalletValidForChain={isWalletValidForChain}
+              wallets={detectedWallets}
               onWalletSelect={handleConnect}
             />
             <div

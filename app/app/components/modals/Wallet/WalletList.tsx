@@ -1,23 +1,18 @@
 import Wallet from "./Wallet";
 
 interface WalletListProps {
-  detected: WalletOption[];
-  undetected: WalletOption[];
-  isWalletValidForChain: (name: string) => boolean;
+  wallets: WalletOption[];
   onWalletSelect: (wallet: WalletOption) => void;
 }
 
 interface WalletSectionProps {
   title: string;
   wallets: WalletOption[];
-  isWalletValidForChain: (name: string) => boolean;
   onWalletSelect: (wallet: WalletOption) => void;
 }
 
 const WalletList = ({
-  detected,
-  undetected,
-  isWalletValidForChain,
+  wallets,
   onWalletSelect,
 }: WalletListProps) => (
   <div className="flex flex-col gap-4">
@@ -25,30 +20,17 @@ const WalletList = ({
       Select Wallet
     </h3>
 
-    {detected.length > 0 && (
-      <WalletSection
-        title="Detected"
-        wallets={detected.sort((a, b) => a.name.localeCompare(b.name))}
-        isWalletValidForChain={isWalletValidForChain}
-        onWalletSelect={onWalletSelect}
-      />
-    )}
-
-    {undetected.length > 0 && (
-      <WalletSection
-        title="Other"
-        wallets={undetected.sort((a, b) => a.name.localeCompare(b.name))}
-        isWalletValidForChain={isWalletValidForChain}
-        onWalletSelect={onWalletSelect}
-      />
-    )}
+    <WalletSection
+      title="Wallets"
+      wallets={wallets}
+      onWalletSelect={onWalletSelect}
+    />
   </div>
 );
 
 function WalletSection({
   title,
   wallets,
-  isWalletValidForChain,
   onWalletSelect,
 }: WalletSectionProps) {
   return (
@@ -59,7 +41,6 @@ function WalletSection({
           <Wallet
             key={wallet.id}
             wallet={wallet}
-            isSupported={isWalletValidForChain(wallet.name)}
             onSelect={() => onWalletSelect(wallet)}
           />
         ))}
