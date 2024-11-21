@@ -2,15 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail } from "@/midgard";
-import { Slider } from "@shared/components/ui";
-import { twMerge } from "tailwind-merge";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
   getAssetShortSymbol,
   getLogoPath,
-  getPercentage,
   isERC20,
   normalizeAddress,
+  formatNumber,
 } from "@/app/utils";
 import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
@@ -19,6 +17,7 @@ import { useContracts } from "@/hooks/useContracts";
 import { useRuneBalance } from "@/hooks";
 import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
+import { twMerge } from "tailwind-merge";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -37,24 +36,13 @@ export default function AddLiquidityModal({
   });
   const { toggleWalletModal } = useAppState();
 
-  const {
-    runeBalance,
-    loading: runeLoading,
-    error: runeError,
-  } = useRuneBalance({
-    wallet,
-  });
-
-  const [selectedTab] = useState("single");
-  const [assetAmount, setAssetAmount] = useState(0);
-  const [runeAmount, setRuneAmount] = useState(0);
+  const [assetAmount, setAssetAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
   const [assetBalance, setAssetBalance] = useState(0);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Determine if this is a UTXO chain and which one
   const utxoChain = useMemo(() => {
     const chain = pool.asset.split(".")[0].toLowerCase();
     if (chain === "btc") return "BTC";
@@ -62,9 +50,9 @@ export default function AddLiquidityModal({
     return null;
   }, [pool.asset]);
 
-  // Initialize UTXO hooks if needed
-  if (!wallet?.provider)
+  if (!wallet?.provider) {
     throw new Error("Wallet provider not found, please connect your wallet.");
+  }
 
   const {
     getBalance: getUTXOBalance,
@@ -75,7 +63,6 @@ export default function AddLiquidityModal({
     wallet: utxoChain ? wallet : null,
   });
 
-  // Initialize contract hooks for EVM assets
   const poolViemAddress = !utxoChain
     ? pool.asset.split(".")[1].split("-")[1]
     : undefined;
@@ -93,20 +80,17 @@ export default function AddLiquidityModal({
     provider: !utxoChain ? wallet?.provider : undefined,
   });
 
-  // Load token metadata for EVM assets
   useEffect(() => {
     if (!utxoChain && wallet?.provider) {
       loadMetadata();
     }
   }, [utxoChain, wallet?.provider, loadMetadata]);
 
-  // Get UTXO balance if needed
   useEffect(() => {
     if (utxoChain && wallet?.address) {
       setBalanceLoading(true);
       getUTXOBalance(wallet.address)
         .then((balance) => {
-          // Convert from base units
           const balanceAmount = balance.amount.amount();
           const balanceBigInt = BigInt(balanceAmount.toString());
           const formattedBalance = Number(formatUnits(balanceBigInt, 8));
@@ -117,20 +101,77 @@ export default function AddLiquidityModal({
     }
   }, [utxoChain, wallet?.address, getUTXOBalance]);
 
-  // Update asset balance for EVM tokens
   useEffect(() => {
     if (!utxoChain && tokenBalance?.formatted) {
       setAssetBalance(Number(tokenBalance.formatted));
     }
   }, [utxoChain, tokenBalance]);
 
-  const currentAssetPercentage = useMemo(() => {
-    return getPercentage(assetAmount, assetBalance);
-  }, [assetAmount, assetBalance]);
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9.]/g, "");
+    if (
+      value === "" ||
+      (!isNaN(parseFloat(value)) && parseFloat(value) <= assetBalance)
+    ) {
+      setAssetAmount(value);
+    }
+  };
 
-  const currentRunePercentage = useMemo(() => {
-    return getPercentage(runeAmount, runeBalance);
-  }, [runeAmount, runeBalance]);
+  const handlePercentageClick = (percentage: number) => {
+    const newAmount = (assetBalance * percentage).toFixed(8);
+    setAssetAmount(newAmount);
+  };
+
+  const handleAddLiquidity = async () => {
+    if (!wallet?.address) {
+      toggleWalletModal();
+      return;
+    }
+
+    const parsedAmount = parseFloat(assetAmount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const hash = await addLiquidity({
+        asset: pool.asset,
+        amount: parsedAmount,
+        address: wallet.address,
+      });
+
+      if (hash) {
+        setTimeout(() => {
+          setTxHash(hash);
+          setShowConfirmation(true);
+        }, 0);
+      }
+    } catch (err) {
+      console.error("Failed to add liquidity:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const isBalanceLoading = balanceLoading || utxoLoading;
+  const error = liquidityError || tokenError || utxoError;
+  const assetSymbol = getAssetShortSymbol(pool.asset);
+  const usdValue = assetAmount
+    ? parseFloat(pool.assetPriceUSD) * parseFloat(assetAmount)
+    : 0;
+  const assetUsdBalance = parseFloat(pool.assetPriceUSD) * assetBalance;
+
+  const percentageButtonClasses = (isActive: boolean) =>
+    twMerge(
+      "px-6 py-2 rounded-full font-medium transition-colors",
+      isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
+    );
+
+  const currentAssetPercentage = useMemo(() => {
+    if (!assetAmount || !assetBalance) return 0;
+    return (parseFloat(assetAmount) / assetBalance) * 100;
+  }, [assetAmount, assetBalance]);
 
   const isCloseToPercentage = (
     currentPercentage: number,
@@ -140,192 +181,85 @@ export default function AddLiquidityModal({
     return Math.abs(currentPercentage - targetPercentage) <= tolerance;
   };
 
-  const handlePercentageClick = (
-    percentage: number,
-    isRune: boolean = false,
-  ) => {
-    if (isRune) {
-      const newRuneAmount = runeBalance * (percentage / 100);
-      setRuneAmount(newRuneAmount);
-    } else {
-      const newAssetAmount = assetBalance * (percentage / 100);
-      setAssetAmount(newAssetAmount);
-    }
-  };
-
-  const handleAddLiquidity = async () => {
-    if (!wallet?.address) {
-      toggleWalletModal();
-      return;
-    }
-
-    if (assetAmount <= 0) {
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const hash = await addLiquidity({
-        asset: pool.asset,
-        amount: assetAmount,
-        runeAmount: selectedTab === "double" ? runeAmount : undefined,
-        address: wallet.address,
-      });
-
-      if (hash) {
-        setTxHash(hash);
-      }
-      setShowConfirmation(true);
-    } catch (err) {
-      console.error("Failed to add liquidity:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleConfirmationClose = () => {
-    setShowConfirmation(false);
-    onClose(false);
-  };
-
-  const isBalanceLoading = balanceLoading || utxoLoading || runeLoading;
-  const error = liquidityError || tokenError || runeError || utxoError;
-
-  const getButtonText = () => {
-    if (!wallet?.address) return "Connect Wallet";
-    if (isBalanceLoading) return "Loading...";
-    if (isSubmitting) return "Submitting Transaction...";
-    return "Add Liquidity";
-  };
-
-  const percentageButtonClasses = (isActive: boolean) =>
-    twMerge(
-      "px-6 py-2 rounded-full font-medium transition-colors",
-      isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
-    );
-
   if (showConfirmation && txHash) {
     return (
       <TransactionConfirmationModal
         txHash={txHash}
-        onClose={handleConfirmationClose}
+        onClose={() => {
+          setShowConfirmation(false);
+          setTxHash(null);
+          onClose(true);
+        }}
       />
     );
   }
 
   return (
-    <Modal
-      onClose={() => {
-        onClose(true);
-      }}
-      style={{ backgroundColor: "#F5F6F6", maxWidth: "36rem" }}
-    >
-      <div className="p-6">
+    <Modal onClose={() => onClose(false)}>
+      <div className="p-2 w-m">
         {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
-        {/* Asset Input Section */}
-        <div>
-          <div className="flex items-center justify-between mb-4 text-neutral text-2xl font-medium">
-            <div className="flex items-center">
+        <div className="bg-white rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <input
+              type="text"
+              value={assetAmount}
+              onChange={handleAmountChange}
+              placeholder="0"
+              className="flex-1 text-xl font-medium outline-none"
+            />
+            <div className="flex items-center gap-2">
               <Image
                 src={getLogoPath(pool.asset)}
-                alt={getAssetShortSymbol(pool.asset)}
-                width={42}
-                height={42}
-                className="mr-3"
+                alt={assetSymbol}
+                width={32}
+                height={32}
+                className="rounded-full"
               />
-              <span className="font-gt-america-ext">
-                {getAssetShortSymbol(pool.asset)}: {assetBalance.toFixed(6)}
-              </span>
+              <span className="text-neutral">{assetSymbol}</span>
             </div>
+          </div>
+          <div className="flex justify-between text-base font-medium text-neutral-800">
+            <div>≈ ${formatNumber(usdValue, 2)}</div>
             <div>
-              {assetAmount.toPrecision(6)} ($
-              {(parseFloat(pool.assetPriceUSD) * assetAmount).toFixed(2)})
+              {formatNumber(assetBalance, 6)} ($
+              {formatNumber(assetUsdBalance, 2)})
             </div>
-          </div>
-
-          <div className="relative mb-6">
-            <Slider
-              value={assetAmount}
-              max={assetBalance}
-              onChange={setAssetAmount}
-            />
-          </div>
-
-          <div className="flex justify-end gap-2">
-            {[25, 50, 100].map((percent) => (
-              <button
-                key={percent}
-                className={percentageButtonClasses(
-                  isCloseToPercentage(currentAssetPercentage, percent),
-                )}
-                onClick={() => handlePercentageClick(percent)}
-                disabled={isBalanceLoading || isSubmitting}
-              >
-                {percent === 100 ? "MAX" : `${percent}%`}
-              </button>
-            ))}
           </div>
         </div>
 
-        {/* RUNE Input Section - only show for double-sided liquidity */}
-        {selectedTab === "double" && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-4 text-neutral text-2xl font-medium">
-              <div className="flex items-center">
-                <Image
-                  src={getLogoPath("thor.rune")}
-                  alt="RUNE"
-                  width={42}
-                  height={42}
-                  className="mr-3"
-                />
-                <span className="font-gt-america-ext">
-                  RUNE: {runeBalance.toFixed(6)}
-                </span>
-              </div>
-              <div>
-                {runeAmount.toFixed(6)} ($
-                {(runeAmount * runePriceUSD).toFixed(2)})
-              </div>
-            </div>
-
-            <div className="relative mb-4">
-              <Slider
-                value={runeAmount}
-                max={runeBalance}
-                onChange={setRuneAmount}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2">
-              {[25, 50, 100].map((percent) => (
-                <button
-                  key={percent}
-                  className={percentageButtonClasses(
-                    isCloseToPercentage(currentRunePercentage, percent),
-                  )}
-                  onClick={() => handlePercentageClick(percent, true)}
-                  disabled={isBalanceLoading || isSubmitting}
-                >
-                  {percent === 100 ? "MAX" : `${percent}%`}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <div className="flex justify-end gap-2 mb-6">
+          {[25, 50, 100].map((percent) => (
+            <button
+              key={percent}
+              onClick={() => handlePercentageClick(percent / 100)}
+              className={percentageButtonClasses(
+                isCloseToPercentage(currentAssetPercentage, percent),
+              )}
+              disabled={isBalanceLoading || isSubmitting}
+            >
+              {percent === 100 ? "MAX" : `${percent}%`}
+            </button>
+          ))}
+        </div>
 
         <button
-          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleAddLiquidity}
           disabled={
-            !wallet?.address ||
+            !assetAmount ||
+            parseFloat(assetAmount) <= 0 ||
             isBalanceLoading ||
-            isSubmitting ||
-            assetAmount <= 0
+            isSubmitting
           }
+          className="w-full bg-primary text-black font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {getButtonText()}
+          {!wallet?.address
+            ? "Connect Wallet"
+            : isBalanceLoading
+              ? "Loading..."
+              : isSubmitting
+                ? "Submitting Transaction..."
+                : "Add"}
         </button>
       </div>
     </Modal>

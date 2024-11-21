@@ -73,6 +73,10 @@ module.exports = {
         m: "512px",
         l: "1024px",
       },
+      width: {
+        m: "512px",
+        l: "1024px",
+      },
     },
   },
 };

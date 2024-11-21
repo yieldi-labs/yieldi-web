@@ -10,15 +10,23 @@ export default function TransactionConfirmationModal({
   txHash,
   onClose,
 }: TransactionConfirmationModalProps) {
-  // Auto-close after 10 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, 10000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
+  const thorchainUrl = `https://thorchain.net/tx/${txHash}`;
+  const runescanUrl = `https://runescan.io/tx/${txHash}`;
 
-  const explorerUrl = `https://thorchain.net/tx/${txHash}`;
+  const ExternalLinkIcon = () => (
+    <svg
+      className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 17L17 7" />
+      <path d="M7 7h10v10" />
+    </svg>
+  );
 
   return (
     <Modal
@@ -46,27 +54,28 @@ export default function TransactionConfirmationModal({
           Your transaction has been submitted to the network
         </p>
 
-        {/* Runescan Link */}
-        <a
-          href={explorerUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center w-full p-4 mb-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
-        >
-          <span className="mr-2">View on explorer</span>
-          <svg
-            className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        {/* Explorer Links */}
+        <div className="w-full space-y-3">
+          <a
+            href={thorchainUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
           >
-            <path d="M7 17L17 7" />
-            <path d="M7 7h10v10" />
-          </svg>
-        </a>
+            <span className="mr-2">View on THORChain.net</span>
+            <ExternalLinkIcon />
+          </a>
+
+          <a
+            href={runescanUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
+          >
+            <span className="mr-2">View on Runescan</span>
+            <ExternalLinkIcon />
+          </a>
+        </div>
 
         {/* Hash Preview */}
         <div className="mt-4 text-sm text-gray-500 truncate max-w-full">

@@ -126,7 +126,10 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         }
 
         attempts++;
-        const updatedPosition = await getMemberDetails(wallet.address, pool.asset);
+        const updatedPosition = await getMemberDetails(
+          wallet.address,
+          pool.asset,
+        );
 
         if (
           hasPositionChanged(currentPosition, updatedPosition) ||
