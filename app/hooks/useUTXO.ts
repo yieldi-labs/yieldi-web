@@ -50,7 +50,7 @@ interface TransferParams {
   feeRate?: number;
 }
 
-interface TxResult {
+export interface TxResult {
   hash: string;
   txid: string;
 }
@@ -132,7 +132,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       amount,
       memo = "",
       feeRate,
-    }: TransferParams): Promise<TxResult> => {
+    }: TransferParams): Promise<string> => {
       if (!wallet?.provider || !wallet.address) {
         throw new Error("Wallet not initialized");
       }
@@ -159,7 +159,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         };
         console.log("Transfer params:", transferParams);
 
-        return new Promise<TxResult>((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
           wallet.provider.request(
             {
               method: "transfer",
@@ -171,16 +171,13 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
                 setError(error.message || "Transfer failed");
                 reject(error);
               } else {
-                console.log("Transfer result:", result);
-                const txResult: TxResult = {
-                  hash: result.hash || result.txid,
-                  txid: result.txid || result.hash,
-                };
+                // Just return the txid/hash directly
                 setMetadata((prev) => ({
                   ...prev,
-                  hash: txResult.hash,
+                  hash: result,
                 }));
-                resolve(txResult);
+                resolve(result);
+                console.log("Transfer result:", result);
               }
             },
           );
@@ -197,6 +194,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   );
 
   // Add liquidity to a pool using transfer
+  // Add liquidity to a pool using transfer
   const addLiquidity = useCallback(
     async ({
       pool,
@@ -208,22 +206,24 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       vault: string;
       amount: number;
       memo: string;
-    }) => {
+    }): Promise<string> => {
       if (!wallet?.address) {
         throw new Error("Wallet not initialized");
       }
 
       try {
         const fees = await getFees();
-        const result = await transfer({
-          pool,
-          recipient: vault,
-          amount,
-          memo,
-          feeRate: fees.fast,
+        return new Promise<string>(async (resolve) => {
+          const txHash = await transfer({
+            pool,
+            recipient: vault,
+            amount,
+            memo,
+            feeRate: fees.fast,
+          });
+          console.log("Add liquidity tx hash:", txHash);
+          resolve(txHash);
         });
-
-        return result.hash;
       } catch (err) {
         const errMsg =
           err instanceof Error ? err.message : "Failed to add liquidity";
@@ -231,7 +231,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         throw new Error(errMsg);
       }
     },
-    [transfer, wallet, getFees],
+    [wallet],
   );
 
   // Remove liquidity from a pool using transfer
@@ -261,7 +261,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           feeRate: fees.fast,
         });
 
-        return result.hash;
+        return result;
       } catch (err) {
         const errMsg =
           err instanceof Error ? err.message : "Failed to remove liquidity";

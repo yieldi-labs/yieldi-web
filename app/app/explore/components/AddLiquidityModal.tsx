@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import Button from "@/app/button";
 import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { Slider } from "@shared/components/ui";
 import { twMerge } from "tailwind-merge";
+import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
   getAssetShortSymbol,
   getLogoPath,
@@ -23,7 +23,7 @@ import { formatUnits } from "viem";
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
   runePriceUSD: number;
-  onClose: () => void;
+  onClose: (transactionSubmitted: boolean) => void;
 }
 
 export default function AddLiquidityModal({
@@ -32,11 +32,9 @@ export default function AddLiquidityModal({
   onClose,
 }: AddLiquidityModalProps) {
   const { wallet } = useAppState();
-  const {
-    loading: liquidityLoading,
-    error: liquidityError,
-    addLiquidity,
-  } = useLiquidityPosition({ pool });
+  const { error: liquidityError, addLiquidity } = useLiquidityPosition({
+    pool,
+  });
   const { toggleWalletModal } = useAppState();
 
   const {
@@ -52,7 +50,9 @@ export default function AddLiquidityModal({
   const [runeAmount, setRuneAmount] = useState(0);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [assetBalance, setAssetBalance] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Determine if this is a UTXO chain and which one
   const utxoChain = useMemo(() => {
@@ -103,7 +103,7 @@ export default function AddLiquidityModal({
   // Get UTXO balance if needed
   useEffect(() => {
     if (utxoChain && wallet?.address) {
-      setLoading(true);
+      setBalanceLoading(true);
       getUTXOBalance(wallet.address)
         .then((balance) => {
           // Convert from base units
@@ -113,7 +113,7 @@ export default function AddLiquidityModal({
           setAssetBalance(formattedBalance);
         })
         .catch(console.error)
-        .finally(() => setLoading(false));
+        .finally(() => setBalanceLoading(false));
     }
   }, [utxoChain, wallet?.address, getUTXOBalance]);
 
@@ -164,7 +164,7 @@ export default function AddLiquidityModal({
     }
 
     try {
-      setLoading(true);
+      setIsSubmitting(true);
       const hash = await addLiquidity({
         asset: pool.asset,
         amount: assetAmount,
@@ -172,19 +172,31 @@ export default function AddLiquidityModal({
         address: wallet.address,
       });
 
-      setTxHash(hash);
       if (hash) {
-        onClose();
+        setTxHash(hash);
       }
+      setShowConfirmation(true);
     } catch (err) {
       console.error("Failed to add liquidity:", err);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const isLoading = loading || liquidityLoading || runeLoading || utxoLoading;
+  const handleConfirmationClose = () => {
+    setShowConfirmation(false);
+    onClose(false);
+  };
+
+  const isBalanceLoading = balanceLoading || utxoLoading || runeLoading;
   const error = liquidityError || tokenError || runeError || utxoError;
+
+  const getButtonText = () => {
+    if (!wallet?.address) return "Connect Wallet";
+    if (isBalanceLoading) return "Loading...";
+    if (isSubmitting) return "Submitting Transaction...";
+    return "Add Liquidity";
+  };
 
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
@@ -192,9 +204,20 @@ export default function AddLiquidityModal({
       isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
     );
 
+  if (showConfirmation && txHash) {
+    return (
+      <TransactionConfirmationModal
+        txHash={txHash}
+        onClose={handleConfirmationClose}
+      />
+    );
+  }
+
   return (
     <Modal
-      onClose={onClose}
+      onClose={() => {
+        onClose(true);
+      }}
       style={{ backgroundColor: "#F5F6F6", maxWidth: "36rem" }}
     >
       <div className="p-6">
@@ -237,7 +260,7 @@ export default function AddLiquidityModal({
                   isCloseToPercentage(currentAssetPercentage, percent),
                 )}
                 onClick={() => handlePercentageClick(percent)}
-                disabled={isLoading}
+                disabled={isBalanceLoading || isSubmitting}
               >
                 {percent === 100 ? "MAX" : `${percent}%`}
               </button>
@@ -283,6 +306,7 @@ export default function AddLiquidityModal({
                     isCloseToPercentage(currentRunePercentage, percent),
                   )}
                   onClick={() => handlePercentageClick(percent, true)}
+                  disabled={isBalanceLoading || isSubmitting}
                 >
                   {percent === 100 ? "MAX" : `${percent}%`}
                 </button>
@@ -291,23 +315,18 @@ export default function AddLiquidityModal({
           </div>
         )}
 
-        <Button
-          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8"
+        <button
+          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleAddLiquidity}
-          disabled={!wallet?.address || isLoading || assetAmount <= 0}
+          disabled={
+            !wallet?.address ||
+            isBalanceLoading ||
+            isSubmitting ||
+            assetAmount <= 0
+          }
         >
-          {!wallet?.address
-            ? "Connect Wallet"
-            : isLoading
-              ? "Adding Liquidity..."
-              : "Add Liquidity"}
-        </Button>
-
-        {txHash && (
-          <div className="mt-4 text-sm text-center text-gray-600">
-            Transaction submitted: {txHash}
-          </div>
-        )}
+          {getButtonText()}
+        </button>
       </div>
     </Modal>
   );
