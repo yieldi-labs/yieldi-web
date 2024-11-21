@@ -157,7 +157,6 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           memo,
           feeRate: fees,
         };
-        console.log("Transfer params:", transferParams);
 
         return new Promise<string>((resolve, reject) => {
           wallet.provider.request(

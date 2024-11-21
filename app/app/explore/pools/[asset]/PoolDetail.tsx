@@ -38,7 +38,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [isTransactionPolling, setIsTransactionPolling] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  const [pollAttempts, setPollAttempts] = useState(0);
   const {
     position,
     loading: positionLoading,
@@ -86,7 +85,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           setMemberStats(stats);
         }
 
-        // Mark initial load as complete after first successful update
         if (!initialLoadComplete) {
           setInitialLoadComplete(true);
         }
@@ -118,7 +116,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
       if (!currentPosition) return;
 
       setIsTransactionPolling(true);
-      setPollAttempts(0);
+      let attempts = 0;
 
       const pollInterval = setInterval(async () => {
         if (!wallet?.address) {
@@ -127,23 +125,16 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           return;
         }
 
-        const updatedPosition = await getMemberDetails(
-          wallet.address,
-          pool.asset,
-        );
-        setPollAttempts((prev) => {
-          const newAttempts = prev + 1;
+        attempts++;
+        const updatedPosition = await getMemberDetails(wallet.address, pool.asset);
 
-          if (
-            hasPositionChanged(currentPosition, updatedPosition) ||
-            newAttempts >= MAX_TX_POLL_ATTEMPTS
-          ) {
-            clearInterval(pollInterval);
-            setIsTransactionPolling(false);
-          }
-
-          return newAttempts;
-        });
+        if (
+          hasPositionChanged(currentPosition, updatedPosition) ||
+          attempts >= MAX_TX_POLL_ATTEMPTS
+        ) {
+          clearInterval(pollInterval);
+          setIsTransactionPolling(false);
+        }
       }, TX_POLL_INTERVAL);
 
       return () => {
@@ -158,7 +149,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
   const assetSymbol = getAssetSimpleSymbol(pool.asset);
 
-  // Only show loading state during initial load
   const showLoadingState = !initialLoadComplete && positionLoading;
 
   const handleRemove = async () => {
@@ -226,7 +216,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   );
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="md:mx-16">
       <Link
         href="/explore/pools"
         className="inline-flex items-center mb-8 text-foreground text-2xl font-bold font-gt-america-ext hover:opacity-50 transition-opacity"
