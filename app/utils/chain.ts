@@ -94,28 +94,38 @@ export const getSupportedChainByAssetChain = (
 };
 
 /**
+ * Given the assetChain string, checks whether it's a supported chain.
+ *
+ * @param assetChain string, the chain to check if it's supported e.g: "ETH, "BNB", "BTC"
+ * @returns boolean, true if it's a supported chain, false otherwise
+ */
+export const isSupportedChain = (assetChain: string): boolean => {
+  return !!getSupportedChainByAssetChain(assetChain);
+};
+
+/**
  * Get minimum amount by chain
  */
 export const getMinAmountByChain = (chain: SupportedChain): number => {
   switch (chain) {
     case SupportedChain.Bitcoin:
-    case SupportedChain.Litecoin:
-    case SupportedChain.BitcoinCash:
-    case SupportedChain.Dash:
+      // case SupportedChain.Litecoin:
+      // case SupportedChain.BitcoinCash:
+      // case SupportedChain.Dash:
       return 0.00010001;
     case SupportedChain.Dogecoin:
       return 1.00000001;
     case SupportedChain.Avalanche:
     case SupportedChain.Ethereum:
-    case SupportedChain.Arbitrum:
+    // case SupportedChain.Arbitrum:
     case SupportedChain.BinanceSmartChain:
       return 0.00000001;
-    case SupportedChain.THORChain:
-    case SupportedChain.Maya:
-      return 0;
-    case SupportedChain.Cosmos:
-    case SupportedChain.Kujira:
-      return 0.000001;
+    // case SupportedChain.THORChain:
+    // case SupportedChain.Maya:
+    //   return 0;
+    // case SupportedChain.Cosmos:
+    // case SupportedChain.Kujira:
+    //   return 0.000001;
     default:
       return 0.00000001;
   }

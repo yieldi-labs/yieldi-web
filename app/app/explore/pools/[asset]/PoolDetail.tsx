@@ -16,6 +16,7 @@ import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
 import { TopCard } from "@/app/components/TopCard";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import { useAppState } from "@/utils/context";
+import { isSupportedChain, parseAssetString } from "@/utils/chain";
 
 interface MemberStats {
   deposit: {
@@ -34,7 +35,7 @@ interface PoolDetailProps {
 }
 
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
-  const { wallet } = useAppState();
+  const { wallet, toggleWalletModal } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [isTransactionPolling, setIsTransactionPolling] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
@@ -54,6 +55,10 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const REGULAR_POLL_INTERVAL = 5000;
   const TX_POLL_INTERVAL = 1000;
   const MAX_TX_POLL_ATTEMPTS = 20;
+
+  // Get chain from pool asset
+  const [assetChain] = parseAssetString(pool.asset);
+  const isChainSupported = isSupportedChain(assetChain);
 
   const hasPositionChanged = useCallback(
     (currentPosition: any, newPosition: any) => {
@@ -109,6 +114,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     runePriceUSD,
     isTransactionPolling,
     initialLoadComplete,
+    getMemberDetails,
   ]);
 
   const pollForPositionUpdate = useCallback(
@@ -175,6 +181,44 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     if (transactionSubmitted && position) {
       pollForPositionUpdate(position);
     }
+  };
+
+  // Button rendering logic
+  const renderActionButton = () => {
+    if (!wallet?.address) {
+      return (
+        <button
+          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
+                   hover:opacity-50 transition-opacity"
+          onClick={toggleWalletModal}
+        >
+          Connect Wallet
+        </button>
+      );
+    }
+
+    if (!isChainSupported) {
+      return (
+        <button
+          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
+                   opacity-50 cursor-not-allowed"
+          disabled
+        >
+          Coming Soon...
+        </button>
+      );
+    }
+
+    return (
+      <button
+        className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
+                 hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        onClick={() => setShowAddLiquidityModal(true)}
+        disabled={showLoadingState}
+      >
+        {showLoadingState ? "Loading..." : "Add"}
+      </button>
+    );
   };
 
   const renderPositionContent = () => (
@@ -251,14 +295,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                 <span className="font-medium">3.6%</span>
               </div>
             </div>
-            <button
-              className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
-                       hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={() => setShowAddLiquidityModal(true)}
-              disabled={showLoadingState}
-            >
-              {showLoadingState ? "Loading..." : "Add"}
-            </button>
+            {renderActionButton()}
           </TopCard>
         </div>
 

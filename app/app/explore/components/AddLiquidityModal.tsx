@@ -14,7 +14,6 @@ import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { useContracts } from "@/hooks/useContracts";
-import { useRuneBalance } from "@/hooks";
 import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
@@ -27,7 +26,6 @@ interface AddLiquidityModalProps {
 
 export default function AddLiquidityModal({
   pool,
-  runePriceUSD,
   onClose,
 }: AddLiquidityModalProps) {
   const { wallet } = useAppState();

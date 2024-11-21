@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import Modal from "@/app/modal";
 
 interface TransactionConfirmationModalProps {
