@@ -158,7 +158,7 @@ const evmChains = [
     icon: <ChainSvg.BSC />,
     chainId: bsc.id,
     wallets: evmWallets.map((wallet) =>
-      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet
+      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet,
     ),
   },
   {
@@ -167,7 +167,7 @@ const evmChains = [
     icon: <ChainSvg.Avax />,
     chainId: avalanche.id,
     wallets: evmWallets.map((wallet) =>
-      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet
+      wallet.id === "phantom" ? { ...wallet, disabled: true } : wallet,
     ),
   },
 ];
