@@ -2,6 +2,16 @@
 
 This is a 1 hour technical pairing interview. You'll have approx 1 hr to complete the challenge.
 
+## Setup
+
+1. Disable AI code generation tool if you have one enabled in your editor.
+1. `git clone git@github.com:yieldi-labs/yieldi-web.git`
+1. `git checkout xyz`
+1. `npm i -g pnpm`
+1. `cd shared && pnpm i && cd ..`
+1. `cd app && pnpm i`
+1. `pnpm dev`
+
 ## Yieldi Wallet Interface
 
 Currently, the wallet interface is partially complete. 
