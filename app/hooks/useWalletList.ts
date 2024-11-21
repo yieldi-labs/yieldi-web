@@ -9,7 +9,7 @@ interface UseWalletListReturn {
 
 export function useWalletList(
   selectedChain: string | null,
-  detectedWallets: WalletOption[],
+  detectedWallets: WalletOption[]
 ): UseWalletListReturn {
   const { detected, undetected } = useMemo(() => {
     const detected: WalletOption[] = [];
@@ -20,7 +20,7 @@ export function useWalletList(
       const baseId = wallet.id.split("-")[0];
       if (processedWallets.has(baseId)) return;
 
-      if (wallet.id === "walletconnect") {
+      if (wallet.id === "walletConnect") {
         undetected.push(wallet);
         processedWallets.add(baseId);
         return;
@@ -59,7 +59,7 @@ export function useWalletList(
         chainConfig.find((chain) => selectedChain === chain.id)?.wallets || [];
       return chainWallets.some((w) => w.name === walletName);
     },
-    [selectedChain],
+    [selectedChain]
   );
 
   return {

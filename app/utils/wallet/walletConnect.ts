@@ -7,15 +7,15 @@ export const connectUTXOWallet = async (wallet: any): Promise<any> => {
     let address = "";
 
     switch (wallet.id) {
-      case "vultisig-thorchain":
-        accounts = await wallet.provider.request({
-          method: "request_accounts",
-        });
+      // case "vultisig-thorchain":
+      //   accounts = await wallet.provider.request({
+      //     method: "request_accounts",
+      //   });
 
-        return {
-          provider: wallet.provider,
-          address: accounts,
-        };
+      //   return {
+      //     provider: wallet.provider,
+      //     address: accounts,
+      //   };
       case "xdefi-kujira":
       case "xdefi-cosmos":
         await wallet.provider.enable(wallet.subchain);

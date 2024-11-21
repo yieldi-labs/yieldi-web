@@ -16,18 +16,18 @@ export const detectWallets = (
 ): Wallet[] => {
   const wallets: Wallet[] = [];
 
-  if (window.thorchain || window.vultisig?.thorchain) {
-    wallets.push({
-      id: "vultisig-thorchain",
-      name: "Vultisig",
-      connect: async () =>
-        connectUTXOWallet({
-          id: "vultisig-thorchain",
-          name: "Vultisig",
-          provider: window.thorchain || window.vultisig?.thorchain,
-        }),
-    });
-  }
+  // if (window.thorchain || window.vultisig?.thorchain) {
+  //   wallets.push({
+  //     id: "vultisig-thorchain",
+  //     name: "Vultisig",
+  //     connect: async () =>
+  //       connectUTXOWallet({
+  //         id: "vultisig-thorchain",
+  //         name: "Vultisig",
+  //         provider: window.thorchain || window.vultisig?.thorchain,
+  //       }),
+  //   });
+  // }
 
   if (window.ethereum?.isMetaMask) {
     const connector = ethConnectors.find((c) => c.id === "metaMask");
@@ -200,28 +200,16 @@ export const detectWallets = (
           }),
       });
     }
-
-    wallets.push({
-      id: "walletconnect",
-      name: "WalletConnect",
-      connect: async () => connectWalletConnect() as any,
-    });
-
-    // if (window.xfi.solana) {
-    //   wallets.push({
-    //     id: "xdefi-solana",
-    //     name: "CTRL Wallet",
-    //     connect: async () =>
-    //       connectUTXOWallet({
-    //         id: "xdefi-solana",
-    //         name: "CTRL Wallet",
-    //         provider: window?.xfi?.solana,
-    //       }),
-    //   });
-    // }
   }
 
+  wallets.push({
+    id: "walletConnect",
+    name: "WalletConnect",
+    connect: async () => connectWalletConnect() as any,
+  });
+
   const seen = new Set();
+
   const walletsFiltered = wallets.filter((wallet) => {
     const duplicate = seen.has(wallet.id);
     seen.add(wallet.id);

@@ -37,11 +37,11 @@ const baseWalletConfig = {
 // Wallet groups
 const evmWallets = [
   { id: "metamask", ...baseWalletConfig.MetaMask },
-  { id: "walletconnect", ...baseWalletConfig.WalletConnect },
   { id: "xdefi", ...baseWalletConfig.CTRL },
   { id: "okx", ...baseWalletConfig.OKX },
   { id: "vultisig", ...baseWalletConfig.Vultisig },
   { id: "phantom", ...baseWalletConfig.Phantom },
+  { id: "walletConnect", ...baseWalletConfig.WalletConnect },
 ];
 
 const utxoWallets = [
@@ -49,7 +49,7 @@ const utxoWallets = [
   { id: "okx-utxo", ...baseWalletConfig.OKX },
   { id: "metamask", ...baseWalletConfig.MetaMask, disabled: true },
   { id: "vultisig", ...baseWalletConfig.Vultisig, disabled: true },
-  { id: "walletconnect", ...baseWalletConfig.WalletConnect, disabled: true },
+  { id: "walletConnect", ...baseWalletConfig.WalletConnect, disabled: true },
 ];
 
 const disabledEvmWallets = [
