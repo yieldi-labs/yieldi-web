@@ -121,7 +121,7 @@ const singleWalletChains = [
         ...baseWalletConfig.WalletConnect,
         disabled: true,
       },
-      { id: "vultisig-thorchain", ...baseWalletConfig.Vultisig },
+      // { id: "vultisig-thorchain", ...baseWalletConfig.Vultisig },
       ...disabledEvmWallets,
     ],
   },

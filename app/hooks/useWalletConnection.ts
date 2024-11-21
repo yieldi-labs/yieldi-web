@@ -74,9 +74,21 @@ export function useWalletConnection(
         (chain) => chain.id === selectedChain,
       );
 
+      const isWalletConnect =
+        detectedWalletForChain.id.includes("walletConnect");
       const isNonEVM = detectedWalletForChain.id.includes("-");
       const isVultisig = detectedWalletForChain.id.includes("vultisig");
       const connectedWallet = await detectedWalletForChain.connect();
+
+      if (isWalletConnect) {
+        setWalletState({
+          provider: connectedWallet.provider,
+          address: connectedWallet.address,
+          network: selectedChain,
+        });
+        toggleWalletModal();
+        return;
+      }
 
       const provider =
         isVultisig || isNonEVM
