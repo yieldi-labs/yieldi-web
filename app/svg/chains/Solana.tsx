@@ -20,7 +20,7 @@ const Solana = (props: SVGProps<SVGSVGElement>) => (
     />
     <defs>
       <linearGradient
-        id="a"
+        id="c"
         x1={7.073}
         x2={20.352}
         y1={21.534}

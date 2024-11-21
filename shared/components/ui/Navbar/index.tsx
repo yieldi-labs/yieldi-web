@@ -1,5 +1,7 @@
 "use client";
+
 import Link from "next/link";
+import React from "react";
 import { useState, useEffect, cloneElement } from "react";
 import { twMerge } from "tailwind-merge";
 import Button from "../Button";
@@ -58,14 +60,27 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
             <Yieldi className="tablet:w-[108px] w-[96px]" />
           </Link>
 
-          <div className="tablet:hidden block flex items-center">
-            <button onClick={toggleMenu} aria-label="Toggle Menu">
-              <Burger />
-            </button>
-          </div>
+
 
           <div className="tablet:flex hidden w-full items-center justify-center">
             <LinkWithHoverEffect links={links} />
+          </div>
+
+          <div className="flex items-center gap-x-2">
+            {buttons && (
+              <div className="flex flex-col items-center gap-5 md:hidden">
+                {buttons.map((button, index) =>
+                  button.component && (
+                    React.cloneElement(button.component, { ...button, key: index })
+                  )
+                )}
+              </div>
+            )}
+            <div className="tablet:hidden block flex items-center">
+              <button onClick={toggleMenu} aria-label="Toggle Menu">
+                <Burger />
+              </button>
+            </div>
           </div>
 
           {buttons && (
@@ -84,7 +99,6 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
           )}
         </div>
       </nav>
-
       <SlidingMenu
         links={links}
         buttons={buttons}

@@ -8,12 +8,14 @@ interface ButtonProps {
   className?: string;
   onClick?: () => void;
   link?: string;
+  disabled?: boolean
 }
 
-const Button = ({ label, className = "", onClick, link }: ButtonProps) => {
+const Button = ({ label, className = "", onClick, link, disabled = false }: ButtonProps) => {
   const baseClass = twMerge(
     `bg-primary hover:bg-primary/50 rounded-full px-9 py-3 font-semibold text-gray-900 transition duration-300 ease-in-out`,
     className,
+    disabled && 'cursor-disabled bg-primary/50'
   );
 
   return link ? (

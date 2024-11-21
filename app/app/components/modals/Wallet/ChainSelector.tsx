@@ -1,5 +1,6 @@
-import { UIComponents } from "@shared/components";
 import { cloneElement } from "react";
+
+import { UIComponents } from "@shared/components";
 
 interface ChainSelectorProps {
   chains: ChainConfig[];
@@ -14,9 +15,11 @@ export function ChainSelector({
 }: ChainSelectorProps) {
   return (
     <div className="flex flex-col gap-4">
-      <h3 className="text-base text-neutral-900 font-medium font-gt-america">
-        Select Chain
-      </h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-base text-neutral-900 font-medium font-gt-america">
+          Select Chain
+        </h3>
+      </div>
       <div className="flex flex-wrap gap-4 w-full bg-white rounded-2xl p-3">
         {chains.map((chain) => (
           <button

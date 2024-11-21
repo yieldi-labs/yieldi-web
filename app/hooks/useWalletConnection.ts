@@ -9,7 +9,6 @@ export function useWalletConnection(
 ) {
   const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
-
   const [selectedChain, setSelectedChain] = useState<string | null>("bitcoin");
   const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
 
@@ -75,21 +74,33 @@ export function useWalletConnection(
         (chain) => chain.id === selectedChain,
       );
 
+      const isWalletConnect =
+        detectedWalletForChain.id.includes("walletConnect");
       const isNonEVM = detectedWalletForChain.id.includes("-");
       const isVultisig = detectedWalletForChain.id.includes("vultisig");
       const connectedWallet = await detectedWalletForChain.connect();
 
-      console.log(connectedWallet);
+      if (isWalletConnect) {
+        setWalletState({
+          provider: connectedWallet.provider,
+          address: connectedWallet.address,
+          network: selectedChain,
+        });
+        toggleWalletModal();
+        return;
+      }
 
       const provider =
         isVultisig || isNonEVM
           ? connectedWallet.provider
           : await connectedWallet.provider.getProvider();
+
       const vultiChainId = isVultisig
         ? await connectedWallet.provider.request({
             method: "eth_chainId",
           })
         : undefined;
+
       const chainId = isVultisig
         ? vultiChainId
         : isNonEVM

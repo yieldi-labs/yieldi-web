@@ -31,9 +31,8 @@ const SlidingMenu = ({
     )}
 
     <div
-      className={`fixed right-0 top-0 z-[300] flex h-screen w-[70vw] flex-col gap-14 ${
-        menuOpen ? "translate-x-0" : "translate-x-full"
-      } tablet:hidden bg-white/50 backdrop-blur-md transition-transform duration-300 ease-in-out`}
+      className={`fixed right-0 top-0 z-[300] flex h-screen w-[70vw] flex-col gap-14 ${menuOpen ? "translate-x-0" : "translate-x-full"
+        } tablet:hidden bg-white/50 backdrop-blur-md transition-transform duration-300 ease-in-out`}
     >
       <div className="flex cursor-pointer justify-end p-10">
         <Close onClick={toggleMenu} aria-label="Close Menu" />
@@ -44,11 +43,7 @@ const SlidingMenu = ({
       {buttons && (
         <div className="flex flex-col items-center gap-5">
           {buttons.map((button, index) =>
-            button.component ? (
-              React.cloneElement(button.component, { ...button, key: index })
-            ) : (
-              <Button key={index} {...button} />
-            ),
+            !button.component && <Button key={index} {...button} />
           )}
         </div>
       )}

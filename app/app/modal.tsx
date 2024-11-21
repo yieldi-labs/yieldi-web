@@ -18,11 +18,11 @@ export default function Modal({
 
   return (
     <div
-      className="fixed z-[1000] inset-0 w-full h-full overflow-y-auto bg-[rgb(0,0,0,0.5)] flex items-center justify-center"
+      className="fixed z-[1000] inset-0 w-full h-full bg-[rgb(0,0,0,0.5)] flex items-center justify-center"
       onClick={onClose}
     >
       <div
-        className="bg-white-radial backdrop-blur-md border-4 border-white relative z-20 max-w-lg w-[95%] mx-auto rounded-xl p-7"
+        className="bg-neutral-100 backdrop-blur-md border-4 border-white max-h-[95vh] no-scrollbar relative z-20 max-w-lg w-[95%] mx-auto rounded-xl p-7 overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
         style={style}
       >

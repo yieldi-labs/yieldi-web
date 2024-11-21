@@ -20,7 +20,7 @@ export function useWalletList(
       const baseId = wallet.id.split("-")[0];
       if (processedWallets.has(baseId)) return;
 
-      if (wallet.id === "walletconnect") {
+      if (wallet.id === "walletConnect") {
         undetected.push(wallet);
         processedWallets.add(baseId);
         return;
@@ -41,7 +41,7 @@ export function useWalletList(
 
     if (selectedChain) {
       const chainWallets =
-        chainConfig.find((chain) => chain.id === selectedChain)?.wallets || [];
+        chainConfig.find((chain) => selectedChain === chain.id)?.wallets || [];
       chainWallets.forEach(processWallet);
     } else {
       chainConfig.forEach((chain) => {
@@ -56,7 +56,7 @@ export function useWalletList(
     (walletName: string): boolean => {
       if (!selectedChain) return true;
       const chainWallets =
-        chainConfig.find((chain) => chain.id === selectedChain)?.wallets || [];
+        chainConfig.find((chain) => selectedChain === chain.id)?.wallets || [];
       return chainWallets.some((w) => w.name === walletName);
     },
     [selectedChain],

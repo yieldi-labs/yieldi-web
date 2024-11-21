@@ -16,57 +16,62 @@ export const detectWallets = (
 ): Wallet[] => {
   const wallets: Wallet[] = [];
 
-  ethConnectors.forEach((wallet) => {
-    const id = wallet.id;
-    if (id) {
-      switch (id) {
-        case "metaMask":
-          wallets.push({
-            id: "metamask",
-            name: "MetaMask",
-            connect: async () => connectEVMWallet(wallet),
-          });
-          break;
-        case "walletConnect":
-          wallets.push({
-            id: "walletconnect",
-            name: "WalletConnect",
-            connect: async () => connectWalletConnect() as any,
-          });
-          break;
-        case "okx":
-          wallets.push({
-            id: "okx",
-            name: "OKX Wallet",
-            connect: async () => connectEVMWallet(wallet),
-          });
-          break;
-        case "trust":
-          wallets.push({
-            id: "trust",
-            name: "Trust Wallet",
-            connect: async () => connectEVMWallet(wallet),
-          });
-          break;
-        case "xdefi":
-          wallets.push({
-            id: "xdefi",
-            name: "CTRL Wallet",
-            connect: async () => connectEVMWallet(wallet),
-          });
-          break;
-        case "phantom":
-          wallets.push({
-            id: "phantom",
-            name: "Phantom Wallet",
-            connect: async () => connectEVMWallet(wallet),
-          });
-          break;
-        default:
-          break;
-      }
+  // if (window.thorchain || window.vultisig?.thorchain) {
+  //   wallets.push({
+  //     id: "vultisig-thorchain",
+  //     name: "Vultisig",
+  //     connect: async () =>
+  //       connectUTXOWallet({
+  //         id: "vultisig-thorchain",
+  //         name: "Vultisig",
+  //         provider: window.thorchain || window.vultisig?.thorchain,
+  //       }),
+  //   });
+  // }
+
+  if (window.ethereum?.isMetaMask) {
+    const connector = ethConnectors.find((c) => c.id === "metaMask");
+    if (connector) {
+      wallets.push({
+        id: "metamask",
+        name: "MetaMask",
+        connect: async () => connectEVMWallet(connector),
+      });
     }
-  });
+  }
+
+  if (window.okxwallet) {
+    const connector = ethConnectors.find((c) => c.id === "okx");
+    if (connector) {
+      wallets.push({
+        id: "okx",
+        name: "OKX Wallet",
+        connect: async () => connectEVMWallet(connector),
+      });
+    }
+  }
+
+  if (window.ethereum?.isTrust) {
+    const connector = ethConnectors.find((c) => c.id === "trust");
+    if (connector) {
+      wallets.push({
+        id: "trust",
+        name: "Trust Wallet",
+        connect: async () => connectEVMWallet(connector),
+      });
+    }
+  }
+
+  if (window.xfi) {
+    const connector = ethConnectors.find((c) => c.id === "xdefi");
+    if (connector) {
+      wallets.push({
+        id: "xdefi",
+        name: "CTRL Wallet",
+        connect: async () => connectEVMWallet(connector),
+      });
+    }
+  }
 
   if (window.vultisig) {
     wallets.push({
@@ -103,6 +108,17 @@ export const detectWallets = (
             provider: window.phantom.bitcoin,
           }),
       });
+    }
+
+    if (window.phantom?.ethereum) {
+      const connector = ethConnectors.find((c) => c.id === "phantom");
+      if (connector) {
+        wallets.push({
+          id: "phantom",
+          name: "Phantom Wallet",
+          connect: async () => connectEVMWallet(connector),
+        });
+      }
     }
 
     if (window.phantom.solana) {
@@ -184,22 +200,16 @@ export const detectWallets = (
           }),
       });
     }
-
-    // if (window.xfi.solana) {
-    //   wallets.push({
-    //     id: "xdefi-solana",
-    //     name: "CTRL Wallet",
-    //     connect: async () =>
-    //       connectUTXOWallet({
-    //         id: "xdefi-solana",
-    //         name: "CTRL Wallet",
-    //         provider: window?.xfi?.solana,
-    //       }),
-    //   });
-    // }
   }
 
+  wallets.push({
+    id: "walletConnect",
+    name: "WalletConnect",
+    connect: async () => connectWalletConnect() as any,
+  });
+
   const seen = new Set();
+
   const walletsFiltered = wallets.filter((wallet) => {
     const duplicate = seen.has(wallet.id);
     seen.add(wallet.id);
