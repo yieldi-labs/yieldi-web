@@ -7,10 +7,8 @@ import { mainnet } from "viem/chains";
 import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { Saver } from "@/app/explore/types";
-import { PoolDetail } from "@/midgard";
-
-export const parseUnits = viem.parseUnits;
-export const formatUnits = viem.formatUnits;
+import { getPool, PoolDetail } from "@/midgard";
+import { liquidityProvider } from "@/thornode";
 
 export const ONE = BigInt("1000000000000000000");
 export const ONE6 = BigInt("1000000");
@@ -28,6 +26,29 @@ export interface Wallet {
   address: string;
   signPsbt: (tx: btc.Transaction) => void;
   getBalance: () => Promise<number>;
+}
+
+export enum SupportedChain {
+  // Arbitrum = "ARB",
+  Avalanche = "AVAX",
+  // Base = "BASE",
+  BinanceSmartChain = "BSC",
+  Bitcoin = "BTC",
+  // BitcoinCash = "BCH",
+  // Cosmos = "GAIA",
+  // Dash = "DASH",
+  Dogecoin = "DOGE",
+  Ethereum = "ETH",
+  // Kujira = "KUJI",
+  // Litecoin = "LTC",
+  // Maya = "MAYA",
+  // Optimism = "OP",
+  // Polkadot = "DOT",
+  // Chainflip = "FLIP",
+  // Polygon = "MATIC",
+  // Radix = "XRD",
+  // THORChain = "THOR",
+  // Solana = "SOL",
 }
 
 export type AtomWallet = {
@@ -51,7 +72,7 @@ export async function ethereumGetWalletClient() {
     getBalance: async () => {
       if (!account.address) throw new Error("Account address is undefined");
       const b = await publicClient.getBalance({ address: account.address });
-      return parseFloat(formatUnits(b, 18));
+      return parseFloat(viem.formatUnits(b, 18));
     },
   };
 }
@@ -166,87 +187,6 @@ export const walletClient = viem.createWalletClient({
   ),
 });
 
-interface ABI {
-  name: string;
-  stateMutability: string;
-}
-
-export async function call(
-  address: string,
-  fn: string | ABI,
-  ...args: Array<string | number | bigint>
-): Promise<any> {
-  let abi;
-  let fnName;
-  let isView;
-  let isPayable;
-  if (typeof fn === "object") {
-    abi = [fn];
-    fnName = fn.name;
-    isView = fn.stateMutability === "view";
-  } else {
-    const [name, params, returns] = fn.split("-");
-    let rname = name[0] === "+" ? name.slice(1) : name;
-    if (rname[0] === "$") rname = rname.slice(1);
-    let efn = `function ${rname}(${params}) external`;
-    if (name[0] !== "+") efn += " view";
-    if (returns) efn += ` returns (${returns})`;
-    abi = viem.parseAbi([efn]);
-    fnName = rname;
-    isView = name[0] !== "+";
-    isPayable = name[1] === "$";
-  }
-  if (isView) {
-    return publicClient.readContract({
-      address: address as viem.Address,
-      abi,
-      args,
-      functionName: fnName,
-    });
-  } else {
-    const account = getAtom(atomWallet)?.ethereum?.address;
-    if (!account) throw new Error("Wallet not connected");
-    const { request } = await publicClient.simulateContract({
-      address: address as viem.Address,
-      abi,
-      value: BigInt(isPayable ? args[0] : 0),
-      args: isPayable ? args.slice(1) : args,
-      functionName: fnName,
-      account: account as viem.Address,
-    });
-    const hash = await walletClient.writeContract(request);
-    await publicClient.waitForTransactionReceipt({ hash });
-    console.log("tx hash", hash);
-    return hash;
-  }
-}
-
-export async function checkAllowance(
-  owner: string,
-  asset: string,
-  target: string,
-  amount: bigint,
-) {
-  const allowance: bigint = await call(
-    asset,
-    "allowance-address,address-uint256",
-    owner,
-    target,
-  );
-  if ((amount = UINT_MAX)) {
-    amount = UINT128_MAX;
-  }
-  if (allowance < amount) {
-    await call(
-      owner,
-      "+approve-address,address,uint256",
-      asset,
-      target,
-      amount,
-    );
-  }
-}
-
 export async function ethereumConnectInjected() {
   try {
     if (!window.ethereum) throw new Error("No web wallet installed");
@@ -267,7 +207,7 @@ export async function ethereumConnectInjected() {
       address: address,
       getBalance: async () => {
         const b = await publicClient.getBalance({ address });
-        return parseFloat(formatUnits(b, 18));
+        return parseFloat(viem.formatUnits(b, 18));
       },
     };
   } catch (e: Error | any) {
@@ -481,4 +421,112 @@ export const getAssetSymbol = (asset: string): string => {
 export const getLogoPath = (asset: string): string => {
   const assetLower = asset.toLowerCase();
   return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
+};
+
+export const getAssetCanonicalSymbol = (asset: string) => {
+  return asset.split("-")[0] || asset;
+};
+
+export const getAssetShortSymbol = (asset: string) => {
+  return getAssetCanonicalSymbol(asset).split(".")[1] || asset;
+};
+
+export const normalizeAddress = (address: string) => {
+  const cleanAddr = address.toLowerCase().replace("0x", "");
+  return `0x${cleanAddr}` as `0x${string}`;
+};
+
+export const isERC20 = (asset: string) => {
+  return asset.includes("-");
+};
+
+export const getPercentage = (amount: number, max: number): number => {
+  return max > 0 ? (amount / max) * 100 : 0;
+};
+
+/**
+ * Extracts the symbol from a pool asset identifier
+ * @param asset Pool asset identifier (e.g. "BTC.BTC" or "ETH.USDT-0x...")
+ * @returns The asset symbol (e.g. "BTC" or "USDT")
+ */
+export const getAssetSimpleSymbol = (asset: string): string => {
+  return asset.split(".")[1]?.split("-")[0] || asset;
+};
+
+export interface MemberStats {
+  deposit: {
+    asset: number;
+    usd: number;
+  };
+  gain: {
+    asset: number;
+    usd: number;
+  };
+}
+
+/**
+ * Calculate the gains of a liquidity provider.
+ *
+ * @param poolAsset Pool asset identifier (e.g. "BTC.BTC" or "ETH.USDT-0x...")
+ * @param walletAddress Wallet address of the liquidity provider
+ * @param runePriceUSD Current price of RUNE in USD
+ * @returns MemberStats object with deposit and gain values.
+ */
+export const calculateGain = async (
+  poolAsset: string,
+  walletAddress: string,
+  runePriceUSD: number,
+) => {
+  const DECIMALS = 1e8;
+
+  try {
+    const [poolResponse, lpResponse] = await Promise.all([
+      getPool({ path: { asset: poolAsset } }),
+      liquidityProvider({ path: { asset: poolAsset, address: walletAddress } }),
+    ]);
+
+    const poolData = poolResponse.data;
+    const lpData = lpResponse.data;
+    if (!poolData || !lpData) return null;
+
+    // Get pool ratio
+    const poolRuneAmount = parseFloat(poolData.runeDepth);
+    const poolAssetAmount = parseFloat(poolData.assetDepth);
+    const runePerAsset = poolRuneAmount / poolAssetAmount;
+
+    // Initial deposit values
+    const initialAssetDeposit =
+      parseFloat(lpData.asset_deposit_value) / DECIMALS;
+    const initialRuneDeposit = parseFloat(lpData.rune_deposit_value) / DECIMALS;
+    const initialDepositInAsset =
+      initialAssetDeposit + initialRuneDeposit / runePerAsset;
+
+    // Current redemption values
+    const currentAssetValue = parseFloat(lpData.asset_redeem_value!) / DECIMALS;
+    const currentRuneValue = parseFloat(lpData.rune_redeem_value!) / DECIMALS;
+    const currentValueInAsset =
+      currentAssetValue + currentRuneValue / runePerAsset;
+
+    // Calculate USD values using assetPrice
+    const assetPrice = runePerAsset * runePriceUSD;
+    const initialDepositUSD = initialDepositInAsset * assetPrice;
+
+    // Calculate gains
+    const gainInAsset = currentValueInAsset - initialDepositInAsset;
+    const gainUSD = gainInAsset * assetPrice;
+
+    return {
+      deposit: {
+        asset: initialDepositInAsset,
+        usd: initialDepositUSD,
+      },
+      gain: {
+        asset: gainInAsset,
+        usd: gainUSD,
+      },
+    } as MemberStats;
+  } catch (err) {
+    console.error("Failed to calculate gains:", err);
+    return null;
+  }
 };

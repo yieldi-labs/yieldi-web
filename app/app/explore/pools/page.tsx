@@ -3,7 +3,12 @@ import PoolsView from "./PoolsView";
 
 export default async function PoolsPage() {
   const [poolsData, statsData] = await Promise.all([
-    getPools({ query: { status: "available" } }),
+    getPools({
+      query: {
+        period: "30d",
+        status: "available",
+      },
+    }),
     getStats(),
   ]);
 

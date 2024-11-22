@@ -35,6 +35,7 @@ module.exports = {
           light: "#6D655D",
         },
         gray: {
+          300: "#CED2D3",
           400: "#818A8F",
           700: "#424648",
           900: "#3A3D3F",
@@ -69,6 +70,10 @@ module.exports = {
         desktop: "1200px",
       },
       height: {
+        m: "512px",
+        l: "1024px",
+      },
+      width: {
         m: "512px",
         l: "1024px",
       },
