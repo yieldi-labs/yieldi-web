@@ -12,6 +12,8 @@ This is a 1 hour technical pairing interview. You'll have approx 1 hr to complet
 1. `cd app && pnpm i`
 1. `pnpm dev`
 
+You'll need to add the wallet connect project ID in `.env.development`. I'll give you this.
+
 ## Yieldi Wallet Interface
 
 Currently, the wallet interface is partially complete. 
