@@ -3,6 +3,12 @@ import { detectWallets } from "@/utils/wallet/detectedWallets";
 import { chainConfig } from "@/utils/wallet/chainConfig";
 import { useConnectors, useSwitchChain } from "wagmi";
 
+export interface WalletState {
+  provider: any;
+  address: string;
+  network: string;
+}
+
 export function useWalletConnection(
   setWalletState: any,
   toggleWalletModal: () => void,

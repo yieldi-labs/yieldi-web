@@ -11,8 +11,8 @@ import {
   assetAmount,
   AssetType,
 } from "@xchainjs/xchain-util";
-import { WalletState } from "./useWalletConnection";
 import { PoolDetail } from "@/midgard";
+import { WalletState } from "./useWalletConnection";
 
 // Define BTC and DOGE assets
 const AssetBTC: Asset = {

@@ -23,12 +23,12 @@ export default function Button({
   const linkClassName = twMerge(
     "py-2 px-2 font-semibold text-sm border",
     disabled ? "opacity-75" : "",
-    className
+    className,
   );
-  
+
   const buttonClassName = twMerge(
     "py-2 px-2 font-semibold text-sm border",
-    disabled ? "opacity-75" : ""
+    disabled ? "opacity-75" : "",
   );
 
   if (href) {
