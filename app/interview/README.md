@@ -23,6 +23,8 @@ The product requirements are:
 1. [DONE] If the app detects a wallet via an injected provider API, segregate the detected wallets from the undetected wallets.
 1. [TODO] When a user clicks on a chain, only the supported wallets are enabled. The rest are disabled.
 
+![Wallet Modal](img.png "WalletModal")
+
 This wallet UX is a simplified version of [Thorswap's interface](https://app.thorswap.finance/swap).
 
 ## Relevant Files
