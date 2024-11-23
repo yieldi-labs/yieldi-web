@@ -127,7 +127,7 @@ export function useLiquidityPosition({
         ]);
 
         if (!memberResponse.data) {
-          throw new Error("No member data returned from Midgard");
+          return null;
         }
 
         const poolPosition = memberResponse.data.pools.find(

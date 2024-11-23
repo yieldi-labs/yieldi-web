@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { NumericFormat } from "react-number-format";
 import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
@@ -23,6 +24,8 @@ interface AddLiquidityModalProps {
   runePriceUSD: number;
   onClose: (transactionSubmitted: boolean) => void;
 }
+
+const MAX_BALANCE_PERCENTAGE = 0.9995; // 99.95%
 
 export default function AddLiquidityModal({
   pool,
@@ -105,18 +108,15 @@ export default function AddLiquidityModal({
     }
   }, [utxoChain, tokenBalance]);
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9.]/g, "");
-    if (
-      value === "" ||
-      (!isNaN(parseFloat(value)) && parseFloat(value) <= assetBalance)
-    ) {
-      setAssetAmount(value);
-    }
+  const handleValueChange = (values: any) => {
+    setAssetAmount(values.value);
   };
 
   const handlePercentageClick = (percentage: number) => {
-    const newAmount = (assetBalance * percentage).toFixed(8);
+    // If it's MAX (100%), use MAX_BALANCE_PERCENTAGE directly
+    const finalPercentage = percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
+    const maxAmount = assetBalance * finalPercentage;
+    const newAmount = maxAmount.toFixed(8);
     setAssetAmount(newAmount);
   };
 
@@ -160,6 +160,13 @@ export default function AddLiquidityModal({
     : 0;
   const assetUsdBalance = parseFloat(pool.assetPriceUSD) * assetBalance;
 
+  const isValidAmount = useMemo(() => {
+    if (!assetAmount || isNaN(parseFloat(assetAmount)) || parseFloat(assetAmount) <= 0) {
+      return false;
+    }
+    return parseFloat(assetAmount) <= assetBalance * MAX_BALANCE_PERCENTAGE;
+  }, [assetAmount, assetBalance]);
+
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
       "px-6 py-2 rounded-full font-medium transition-colors",
@@ -199,12 +206,14 @@ export default function AddLiquidityModal({
 
         <div className="bg-white rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <input
-              type="text"
+            <NumericFormat
               value={assetAmount}
-              onChange={handleAmountChange}
+              onValueChange={handleValueChange}
               placeholder="0"
               className="flex-1 text-xl font-medium outline-none"
+              thousandSeparator=","
+              decimalScale={8}
+              allowNegative={false}
             />
             <div className="flex items-center gap-2">
               <Image
@@ -220,7 +229,7 @@ export default function AddLiquidityModal({
           <div className="flex justify-between text-base font-medium text-neutral-800">
             <div>≈ ${formatNumber(usdValue, 2)}</div>
             <div>
-              {formatNumber(assetBalance, 6)} ($
+              Balance: {formatNumber(assetBalance, 6)} ($
               {formatNumber(assetUsdBalance, 2)})
             </div>
           </div>
@@ -244,8 +253,7 @@ export default function AddLiquidityModal({
         <button
           onClick={handleAddLiquidity}
           disabled={
-            !assetAmount ||
-            parseFloat(assetAmount) <= 0 ||
+            !isValidAmount ||
             isBalanceLoading ||
             isSubmitting
           }
@@ -257,7 +265,9 @@ export default function AddLiquidityModal({
               ? "Loading..."
               : isSubmitting
                 ? "Submitting Transaction..."
-                : "Add"}
+                : !isValidAmount && assetAmount
+                  ? "Amount exceeds balance"
+                  : "Add"}
         </button>
       </div>
     </Modal>

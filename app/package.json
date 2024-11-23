@@ -57,6 +57,7 @@
     "pino-pretty": "^11.3.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-number-format": "^5.4.2",
     "react-virtualized-auto-sizer": "^1.0.24",
     "react-window": "^1.8.10",
     "sats-connect": "^2.8.0",
