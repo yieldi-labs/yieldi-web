@@ -4,15 +4,21 @@ interface WalletProps {
   wallet: WalletOption;
   isSupported: boolean;
   onSelect?: () => void;
+  className: string;
 }
 
-const Wallet = ({ wallet, isSupported, onSelect }: WalletProps) => (
+const Wallet = ({ wallet, isSupported, onSelect, className }: WalletProps) => (
   <button
     className={`
         bg-white p-[12px] flex gap-4 items-center border-[2px] rounded-2xl 
         transition-all duration-75 min-h-[58px]
-        border-transparent hover:border-primary
-        ${!wallet.disabled ? "opacity-100 cursor-pointer" : "opacity-50 cursor-not-allowed hover:border-transparent"}
+         hover:border-primary 
+        ${
+          !wallet.disabled
+            ? "opacity-100 cursor-pointer"
+            : "opacity-50 cursor-not-allowed hover:border-transparent"
+        }
+         ${className}
       `}
     onClick={onSelect}
     disabled={!isSupported || wallet.disabled}

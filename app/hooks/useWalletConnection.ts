@@ -6,16 +6,16 @@ import { useConnectors, useSwitchChain } from "wagmi";
 export interface WalletState {
   provider: any;
   address: string;
-  network: string;
+  network: string[];
 }
 
 export function useWalletConnection(
   setWalletState: any,
-  toggleWalletModal: () => void,
+  toggleWalletModal: () => void
 ) {
   const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
-  const [selectedChain, setSelectedChain] = useState<string | null>("bitcoin");
+  const [selectedChains, setSelectedChains] = useState<string[]>(["bitcoin"]);
   const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export function useWalletConnection(
       .map((detectedWallet) => {
         for (const chain of chainConfig) {
           const matchingWallet = chain.wallets.find(
-            (w) => w.id === detectedWallet.id,
+            (w) => w.id === detectedWallet.id
           );
           if (matchingWallet) {
             return {
@@ -43,8 +43,8 @@ export function useWalletConnection(
   }, []);
 
   const handleConnect = async (wallet: WalletOption) => {
-    if (!selectedChain) {
-      console.error("No chain selected.");
+    if (!selectedChains.length) {
+      console.error("No chains selected.");
       return;
     }
 
@@ -57,64 +57,50 @@ export function useWalletConnection(
         bitcoincash: "bch",
         bitcoin: "utxo",
       };
-
-      const detectedWalletForChain = detectedWallets.find((w) => {
-        const identifier = chainIdentifiers[selectedChain];
-
-        if (!identifier) {
-          return w.id.split("-")[0] === wallet.id.split("-")[0];
-        }
-
-        return (
-          (w.id.includes(identifier) || wallet.id.includes(identifier)) &&
-          w.id === wallet.id
-        );
+      const detectedWalletForChains = selectedChains.every((chainId) => {
+        const identifier = chainIdentifiers[chainId];
+        return detectedWallets.some((w) => {
+          if (!identifier) {
+            return w.id.split("-")[0] === wallet.id.split("-")[0];
+          }
+          return (
+            (w.id.includes(identifier) || wallet.id.includes(identifier)) &&
+            w.id === wallet.id
+          );
+        });
       });
 
-      if (!detectedWalletForChain) {
+      if (!detectedWalletForChains) {
         window.open(wallet.downloadUrl, "_blank");
         return;
       }
 
-      const selectedChainConfig = chainConfig.find(
-        (chain) => chain.id === selectedChain,
+      const selectedChainConfigs = selectedChains.map((chainId) =>
+        chainConfig.find((chain) => chain.id === chainId)
       );
 
-      const isWalletConnect =
-        detectedWalletForChain.id.includes("walletConnect");
-      const isNonEVM = detectedWalletForChain.id.includes("-");
-      const isVultisig = detectedWalletForChain.id.includes("vultisig");
-      const connectedWallet = await detectedWalletForChain.connect();
+      for (const selectedChainConfig of selectedChainConfigs) {
+        if (!selectedChainConfig) continue;
 
-      if (isWalletConnect) {
-        setWalletState({
-          provider: connectedWallet.provider,
-          address: connectedWallet.address,
-          network: selectedChain,
-        });
-        toggleWalletModal();
-        return;
-      }
+        const connectedWallet = await wallet.connect();
 
-      const provider =
-        isVultisig || isNonEVM
-          ? connectedWallet.provider
-          : await connectedWallet.provider.getProvider();
+        const provider =
+          wallet.id.includes("vultisig") || wallet.id.includes("-")
+            ? connectedWallet.provider
+            : await connectedWallet.provider.getProvider();
 
-      const vultiChainId = isVultisig
-        ? await connectedWallet.provider.request({
-            method: "eth_chainId",
-          })
-        : undefined;
-
-      const chainId = isVultisig
-        ? vultiChainId
-        : isNonEVM
+        const chainId = wallet.id.includes("vultisig")
+          ? await connectedWallet.provider.request({
+              method: "eth_chainId",
+            })
+          : wallet.id.includes("-")
           ? undefined
           : await connectedWallet.provider.getChainId();
 
-      if (selectedChainConfig?.chainId) {
-        if (chainId !== selectedChainConfig.chainId) {
+        if (
+          selectedChainConfig.chainId &&
+          chainId !== selectedChainConfig.chainId
+        ) {
           if (connectedWallet.provider.id === "xdefi") {
             await provider.request({
               method: "wallet_switchEthereumChain",
@@ -124,13 +110,15 @@ export function useWalletConnection(
 
           switchChain({ chainId: selectedChainConfig.chainId });
         }
+
+        setWalletState((prevState: WalletState) => ({
+          ...prevState,
+          provider,
+          address: connectedWallet.address,
+          network: [...(prevState.network || []), selectedChainConfig.id],
+        }));
       }
 
-      setWalletState({
-        provider: provider,
-        address: connectedWallet.address,
-        network: selectedChain,
-      });
       toggleWalletModal();
     } catch (error) {
       console.error(`Error connecting to ${wallet.name}:`, error);
@@ -138,8 +126,8 @@ export function useWalletConnection(
   };
 
   return {
-    selectedChain,
-    setSelectedChain,
+    selectedChains,
+    setSelectedChains,
     handleConnect,
     detectedWallets,
   };

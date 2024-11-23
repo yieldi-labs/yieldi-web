@@ -9,30 +9,43 @@ import HardwareWallets from "./HardwareWallets";
 import { useWalletList, useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
+import { Button } from "@shared/components/ui";
 
 export default function WalletModal() {
-  const [isHWDisabled, setIsHWDisabled] = useState(false);
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
   const { toggleWalletModal, isWalletModalOpen, setWalletState } =
     useAppState();
-  const { selectedChain, detectedWallets, setSelectedChain, handleConnect } =
+  const { selectedChains, detectedWallets, setSelectedChains, handleConnect } =
     useWalletConnection(setWalletState, toggleWalletModal);
   const { detected, undetected, isWalletValidForChain } = useWalletList(
-    selectedChain,
-    detectedWallets,
+    selectedChains,
+    detectedWallets
+  );
+  const [selectedWallet, setSelectedWallet] = useState<WalletOption>();
+
+  const isHWDisabled = selectedChains.some((chain) =>
+    ["solana", "kujira", "binance-smart-chain"].includes(chain)
   );
 
-  useEffect(() => {
-    switch (selectedChain) {
-      case "solana":
-      case "kujira":
-      case "binance-smart-chain":
-        setIsHWDisabled(true);
-        break;
-      default:
-        setIsHWDisabled(false);
-    }
-  }, [selectedChain]);
+  const handleWalletSelect = (wallet: WalletOption): void => {
+    const [walletId] = wallet.id.split("-");
+    setSelectedWallet(wallet);
+    const validChains = chainConfig
+      .filter(
+        ({ wallets }) =>
+          wallets.findIndex(({ id }) => {
+            const [itemId] = id.split("-");
+            return walletId === itemId;
+          }) >= 0
+      )
+      .map(({ id }) => id);
+
+    setSelectedChains(validChains);
+  };
+
+  const handleConnectWallet = () => {
+    if (selectedWallet) handleConnect(selectedWallet);
+  };
 
   const handleHardwareWalletSelect = async (wallet: any) =>
     setWalletState(wallet);
@@ -44,8 +57,8 @@ export default function WalletModal() {
       <div className="flex flex-col gap-4">
         <ChainSelector
           chains={chainConfig}
-          selectedChain={selectedChain}
-          onChainSelect={setSelectedChain}
+          selectedChains={selectedChains}
+          onChainSelect={setSelectedChains}
         />
         {!showHardwareWallets ? (
           <>
@@ -53,7 +66,7 @@ export default function WalletModal() {
               detected={detected}
               undetected={undetected}
               isWalletValidForChain={isWalletValidForChain}
-              onWalletSelect={handleConnect}
+              onWalletSelect={handleWalletSelect}
             />
             <div
               onClick={() => setShowHardwareWallets(true)}
@@ -62,7 +75,7 @@ export default function WalletModal() {
                 "bg-white rounded-2xl p-4",
                 "border-2 border-transparent",
                 "hover:border-primary cursor-pointer",
-                "transition-all duration-75",
+                "transition-all duration-75"
               )}
             >
               <h3 className="text-sm text-neutral-900 font-medium font-gt-america">
@@ -75,11 +88,18 @@ export default function WalletModal() {
           <HardwareWallets
             onBack={() => setShowHardwareWallets(false)}
             onWalletSelect={handleHardwareWalletSelect}
-            selectedChain={selectedChain}
+            selectedChains={selectedChains}
             isDisabled={isHWDisabled}
           />
         )}
-
+        <button
+          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
+                   disabled:opacity-50 transition-opacity"
+          disabled={!selectedWallet}
+          onClick={handleConnectWallet}
+        >
+          Connect
+        </button>
         <p className="text-sm text-neutral-600 mt-2 max-w-[390px]">
           By connecting a wallet, you agree to Yieldi&apos;s Terms of Use and
           Privacy Policy

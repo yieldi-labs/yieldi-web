@@ -12,7 +12,7 @@ export interface Wallet {
 }
 
 export const detectWallets = (
-  ethConnectors: GetConnectorsReturnType,
+  ethConnectors: GetConnectorsReturnType
 ): Wallet[] => {
   const wallets: Wallet[] = [];
 

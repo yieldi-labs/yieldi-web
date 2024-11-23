@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Wallet from "./Wallet";
 
 interface WalletListProps {
@@ -51,6 +52,11 @@ function WalletSection({
   isWalletValidForChain,
   onWalletSelect,
 }: WalletSectionProps) {
+  const [selectedWalletId, setSelectedWalletId] = useState("");
+  const handleWalletSelect = (wallet: WalletOption) => {
+    setSelectedWalletId(wallet.id);
+    onWalletSelect(wallet);
+  };
   return (
     <div className="flex flex-col gap-4">
       <h4 className="text-sm text-neutral-600 font-gt-america">{title}</h4>
@@ -60,7 +66,12 @@ function WalletSection({
             key={wallet.id}
             wallet={wallet}
             isSupported={isWalletValidForChain(wallet.name)}
-            onSelect={() => onWalletSelect(wallet)}
+            onSelect={() => handleWalletSelect(wallet)}
+            className={`${
+              wallet.id === selectedWalletId
+                ? "border-primary"
+                : "border-transparent"
+            } `}
           />
         ))}
       </div>

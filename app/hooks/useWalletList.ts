@@ -8,8 +8,8 @@ interface UseWalletListReturn {
 }
 
 export function useWalletList(
-  selectedChain: string | null,
-  detectedWallets: WalletOption[],
+  selectedChains: string[] | [],
+  detectedWallets: WalletOption[]
 ): UseWalletListReturn {
   const { detected, undetected } = useMemo(() => {
     const detected: WalletOption[] = [];
@@ -39,10 +39,26 @@ export function useWalletList(
       processedWallets.add(baseId);
     };
 
-    if (selectedChain) {
-      const chainWallets =
-        chainConfig.find((chain) => selectedChain === chain.id)?.wallets || [];
-      chainWallets.forEach(processWallet);
+    if (selectedChains.length) {
+      const test = chainConfig.filter(
+        ({ id }) => selectedChains.findIndex((item) => item === id) >= 0
+      );
+      const chainWalletLists = selectedChains.map((chainId) => {
+        return chainConfig.find((chain) => chain.id === chainId)?.wallets || [];
+      });
+
+      const commonWallets = chainWalletLists.reduce<WalletOption[]>(
+        (common, wallets) => {
+          return common.filter((w) => {
+            return wallets.some(
+              (wallet) => wallet.id.split("-")[0] === w.id.split("-")[0]
+            );
+          });
+        },
+        chainWalletLists[0] || []
+      );
+
+      commonWallets.forEach(processWallet);
     } else {
       chainConfig.forEach((chain) => {
         chain.wallets.forEach(processWallet);
@@ -50,18 +66,21 @@ export function useWalletList(
     }
 
     return { detected, undetected };
-  }, [selectedChain, detectedWallets]);
+  }, [selectedChains, detectedWallets]);
 
   const isWalletValidForChain = useCallback(
     (walletName: string): boolean => {
-      if (!selectedChain) return true;
-      const chainWallets =
-        chainConfig.find((chain) => selectedChain === chain.id)?.wallets || [];
-      return chainWallets.some((w) => w.name === walletName);
-    },
-    [selectedChain],
-  );
+      if (!selectedChains.length) return true;
+      const chainWalletLists = selectedChains.map((chainId) => {
+        return chainConfig.find((chain) => chain.id === chainId)?.wallets || [];
+      });
 
+      return chainWalletLists.every((wallets) =>
+        wallets.some((wallet) => wallet.name === walletName)
+      );
+    },
+    [selectedChains]
+  );
   return {
     detected,
     undetected,
