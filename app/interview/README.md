@@ -4,15 +4,13 @@ This is a 1 hour technical pairing interview. You'll have approx 1 hr to complet
 
 ## Setup
 
-1. Disable AI code generation tool if you have one enabled in your editor.
+1. Disable LLM code generation plugins if you have one enabled in your editor.
 1. `git clone git@github.com:yieldi-labs/yieldi-web.git`
 1. `git checkout xyz`
 1. `npm i -g pnpm`
 1. `cd shared && pnpm i && cd ..`
 1. `cd app && pnpm i`
 1. `pnpm dev`
-
-You'll need to add the wallet connect project ID in `.env.development`. I'll give you this.
 
 ## Yieldi Wallet Interface
 
@@ -22,10 +20,21 @@ The product requirements are:
 
 1. [DONE] All chains are displayed in a list
 1. [DONE] A chain can be selected one at a time.
-1. [DONE] If the app detects a wallet via an injected provider API, segregate the detected wallets from the undetected wallets.
+1. [DONE] Detect whether the user has supported wallet chrome extensions installed
+1. [TODO] Create two lists for the user's detected wallets and undetected wallets. The wallet modal should always display all supported wallets.
 1. [TODO] When a user clicks on a chain, only the supported wallets are enabled. The rest are disabled.
 
-![Wallet Modal](img.png "WalletModal")
+### Current state:
+
+![Wallet Modal](current-state.png "WalletModal - Current")
+
+Notice that the same wallet appears multiple times. We should only display each wallet once.
+
+### Future state:
+
+This is what the modal should look like:
+
+![Wallet Modal](future-state.png "WalletModal - Future")
 
 This wallet UX is a simplified version of [Thorswap's interface](https://app.thorswap.finance/swap).
 
