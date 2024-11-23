@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Modal from "@/app/modal";
 import WalletList from "./WalletList";
 import { useAppState } from "@/utils/context";
@@ -9,7 +9,6 @@ import HardwareWallets from "./HardwareWallets";
 import { useWalletList, useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
-import { Button } from "@shared/components/ui";
 
 export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
