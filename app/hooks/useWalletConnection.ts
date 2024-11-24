@@ -70,7 +70,10 @@ export function useWalletConnection(
           );
         });
       });
-
+      const walletToConnect = detectedWallets.find((w) =>
+        w.id.includes(wallet.id)
+      );
+      if (!walletToConnect) return;
       if (!detectedWalletForChains) {
         window.open(wallet.downloadUrl, "_blank");
         return;
@@ -83,8 +86,7 @@ export function useWalletConnection(
       for (const selectedChainConfig of selectedChainConfigs) {
         if (!selectedChainConfig) continue;
 
-        const connectedWallet = await wallet.connect();
-
+        const connectedWallet = await walletToConnect.connect();
         const provider =
           wallet.id.includes("vultisig") || wallet.id.includes("-")
             ? connectedWallet.provider

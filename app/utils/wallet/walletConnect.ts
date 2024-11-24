@@ -37,7 +37,7 @@ export const connectUTXOWallet = async (wallet: any): Promise<any> => {
             (error: any, accounts: string[]) => {
               if (error) reject(error);
               else resolve(accounts[0]);
-            },
+            }
           );
         });
 
