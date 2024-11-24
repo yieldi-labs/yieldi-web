@@ -16,6 +16,7 @@ export function useWalletConnection(
   const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
   const [selectedChains, setSelectedChains] = useState<string[]>(["bitcoin"]);
+  const [selectedWallet, setSelectedWallet] = useState<WalletOption>();
   const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
 
   useEffect(() => {
@@ -130,5 +131,7 @@ export function useWalletConnection(
     setSelectedChains,
     handleConnect,
     detectedWallets,
+    selectedWallet,
+    setSelectedWallet,
   };
 }

@@ -14,13 +14,18 @@ export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
   const { toggleWalletModal, isWalletModalOpen, setWalletState } =
     useAppState();
-  const { selectedChains, detectedWallets, setSelectedChains, handleConnect } =
-    useWalletConnection(setWalletState, toggleWalletModal);
+  const {
+    selectedChains,
+    detectedWallets,
+    setSelectedChains,
+    handleConnect,
+    selectedWallet,
+    setSelectedWallet,
+  } = useWalletConnection(setWalletState, toggleWalletModal);
   const { detected, undetected, isWalletValidForChain } = useWalletList(
     selectedChains,
     detectedWallets
   );
-  const [selectedWallet, setSelectedWallet] = useState<WalletOption>();
 
   const isHWDisabled = selectedChains.some((chain) =>
     ["solana", "kujira", "binance-smart-chain"].includes(chain)
