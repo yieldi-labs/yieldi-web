@@ -54,7 +54,10 @@ function WalletSection({
 }: WalletSectionProps) {
   const [selectedWalletId, setSelectedWalletId] = useState("");
   const handleWalletSelect = (wallet: WalletOption) => {
-    if (title != "Other") {
+    if (
+      title != "Other" ||
+      wallet.id.toLocaleLowerCase().includes("walletconnect")
+    ) {
       setSelectedWalletId(wallet.id);
       onWalletSelect(wallet);
     } else {

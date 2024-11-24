@@ -30,9 +30,16 @@ export const detectWallets = (
   // }
 
   if (window.ethereum?.isMetaMask) {
+    console.log("found meta");
+
     const connector = ethConnectors.find((c) => c.id === "metaMask");
     if (connector) {
       wallets.push({
+        id: "metamask",
+        name: "MetaMask",
+        connect: async () => connectEVMWallet(connector),
+      });
+      console.log({
         id: "metamask",
         name: "MetaMask",
         connect: async () => connectEVMWallet(connector),
