@@ -54,8 +54,12 @@ function WalletSection({
 }: WalletSectionProps) {
   const [selectedWalletId, setSelectedWalletId] = useState("");
   const handleWalletSelect = (wallet: WalletOption) => {
-    setSelectedWalletId(wallet.id);
-    onWalletSelect(wallet);
+    if (title != "Other") {
+      setSelectedWalletId(wallet.id);
+      onWalletSelect(wallet);
+    } else {
+      window.open(wallet.downloadUrl, "_blank");
+    }
   };
   return (
     <div className="flex flex-col gap-4">

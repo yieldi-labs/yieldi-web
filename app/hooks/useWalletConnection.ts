@@ -65,7 +65,7 @@ export function useWalletConnection(
           }
           return (
             (w.id.includes(identifier) || wallet.id.includes(identifier)) &&
-            w.id === wallet.id
+            w.id.split("-")[0] === wallet.id.split("-")[0]
           );
         });
       });
