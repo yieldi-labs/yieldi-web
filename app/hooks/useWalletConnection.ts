@@ -118,7 +118,7 @@ export function useWalletConnection(
           ...prevState,
           provider,
           address: connectedWallet.address,
-          network: [...(prevState.network || []), selectedChainConfig.id],
+          network: [...(prevState?.network || []), selectedChainConfig.id],
         }));
       }
 
