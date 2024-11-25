@@ -45,7 +45,7 @@ const feeBps = 0;
 export function useLiquidityPosition({
   pool: poolProp,
 }: UseLiquidityPositionProps) {
-  const { wallet } = useAppState();
+  const { walletsState, getWallet } = useAppState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = useState<MemberPool | null>(null);
@@ -54,9 +54,10 @@ export function useLiquidityPosition({
   // Parse asset details
   const [assetChain, assetIdentifier] = useMemo(
     () => parseAssetString(pool.asset),
-    [pool.asset],
+    [pool.asset]
   );
 
+  const wallet = getWallet(assetChain);
   // Determine if this is a UTXO chain and which one
   const utxoChain = useMemo(() => {
     const chain = assetChain.toLowerCase();
@@ -68,7 +69,7 @@ export function useLiquidityPosition({
   // Check if it's a native asset
   const isNativeAsset = useMemo(
     () => assetIdentifier.indexOf("-") === -1,
-    [assetIdentifier],
+    [assetIdentifier]
   );
 
   // Get token address for non-native assets
@@ -131,7 +132,7 @@ export function useLiquidityPosition({
         }
 
         const poolPosition = memberResponse.data.pools.find(
-          (p) => p.pool === asset,
+          (p) => p.pool === asset
         );
 
         if (poolPosition) {
@@ -150,14 +151,14 @@ export function useLiquidityPosition({
         setError(
           err instanceof Error
             ? err.message
-            : "Failed to fetch position details",
+            : "Failed to fetch position details"
         );
         return null;
       } finally {
         setLoading(false);
       }
     },
-    [],
+    []
   );
 
   const addLiquidity = useCallback(
@@ -173,7 +174,7 @@ export function useLiquidityPosition({
         const inboundAddresses = await getInboundAddresses();
         const [assetChain] = parseAssetString(asset);
         const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase(),
+          (i) => i.chain === assetChain.toUpperCase()
         );
 
         if (!inbound) {
@@ -221,7 +222,7 @@ export function useLiquidityPosition({
             tokenAddress,
             parsedAmount,
             memo,
-            expiry,
+            expiry
           );
         } else {
           // Handle native asset deposit
@@ -232,7 +233,7 @@ export function useLiquidityPosition({
             "0x0000000000000000000000000000000000000000",
             parsedAmount,
             memo,
-            expiry,
+            expiry
           );
         }
 
@@ -258,7 +259,7 @@ export function useLiquidityPosition({
       isNativeAsset,
       utxoChain,
       addUTXOLiquidity,
-    ],
+    ]
   );
 
   const removeLiquidity = useCallback(
@@ -285,7 +286,7 @@ export function useLiquidityPosition({
         }
 
         const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase(),
+          (i) => i.chain === assetChain.toUpperCase()
         );
 
         if (!inbound) {
@@ -300,7 +301,7 @@ export function useLiquidityPosition({
           undefined,
           undefined,
           percentage,
-          withdrawAsset,
+          withdrawAsset
         );
 
         // Handle UTXO chain withdrawals
@@ -333,7 +334,7 @@ export function useLiquidityPosition({
           "0x0000000000000000000000000000000000000000",
           BigInt(minAmountByChain),
           memo,
-          expiry,
+          expiry
         );
 
         await getMemberDetails(address, asset);
@@ -354,7 +355,7 @@ export function useLiquidityPosition({
       utxoChain,
       removeUTXOLiquidity,
       pool.nativeDecimal,
-    ],
+    ]
   );
 
   return {

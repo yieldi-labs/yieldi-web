@@ -12,8 +12,12 @@ import { twMerge } from "tailwind-merge";
 
 export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
-  const { toggleWalletModal, isWalletModalOpen, setWalletState } =
-    useAppState();
+  const {
+    toggleWalletModal,
+    isWalletModalOpen,
+    setWalletsState,
+    walletsState,
+  } = useAppState();
   const {
     selectedChains,
     detectedWallets,
@@ -21,7 +25,7 @@ export default function WalletModal() {
     handleConnect,
     selectedWallet,
     setSelectedWallet,
-  } = useWalletConnection(setWalletState, toggleWalletModal);
+  } = useWalletConnection(setWalletsState, walletsState, toggleWalletModal);
   const { detected, undetected, isWalletValidForChain } = useWalletList(
     selectedChains,
     detectedWallets
@@ -43,16 +47,15 @@ export default function WalletModal() {
           }) >= 0
       )
       .map(({ id }) => id);
-
-    setSelectedChains(validChains);
+    if (!selectedChains.length) setSelectedChains(validChains);
   };
 
   const handleConnectWallet = () => {
     if (selectedWallet) handleConnect(selectedWallet);
   };
 
-  const handleHardwareWalletSelect = async (wallet: any) =>
-    setWalletState(wallet);
+  // const handleHardwareWalletSelect = async (wallet: any) =>
+  //   setWalletsState(wallet);
 
   if (!isWalletModalOpen) return null;
 
@@ -89,12 +92,13 @@ export default function WalletModal() {
             </div>
           </>
         ) : (
-          <HardwareWallets
-            onBack={() => setShowHardwareWallets(false)}
-            onWalletSelect={handleHardwareWalletSelect}
-            selectedChains={selectedChains}
-            isDisabled={isHWDisabled}
-          />
+          // <HardwareWallets
+          //   onBack={() => setShowHardwareWallets(false)}
+          //   onWalletSelect={handleHardwareWalletSelect}
+          //   selectedChains={selectedChains}
+          //   isDisabled={isHWDisabled}
+          // />
+          <></>
         )}
         <button
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 

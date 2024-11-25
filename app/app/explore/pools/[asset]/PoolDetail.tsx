@@ -35,7 +35,7 @@ interface PoolDetailProps {
 }
 
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
-  const { wallet, toggleWalletModal } = useAppState();
+  const { walletsState, toggleWalletModal } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [isTransactionPolling, setIsTransactionPolling] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
@@ -70,24 +70,37 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         currentPosition.liquidityUnits !== newPosition.position.liquidityUnits
       );
     },
-    [],
+    []
   );
 
   useEffect(() => {
-    if (!wallet?.address) return;
+    if (!walletsState || Object.keys(walletsState).length === 0) return;
 
     const updateMemberDetails = async () => {
       try {
         if (isTransactionPolling) return;
 
-        await getMemberDetails(wallet.address, pool.asset);
-        const stats = await calculateGain(
-          pool.asset,
-          wallet.address,
-          runePriceUSD,
-        );
-        if (stats) {
-          setMemberStats(stats);
+        for (const walletKey of Object.keys(walletsState)) {
+          const walletAddress = walletsState[walletKey].address;
+          await getMemberDetails(walletAddress, pool.asset);
+          const stats = await calculateGain(
+            pool.asset,
+            walletAddress,
+            runePriceUSD
+          );
+
+          if (stats) {
+            setMemberStats((prevStats) => ({
+              deposit: {
+                asset: prevStats.deposit.asset + stats.deposit.asset,
+                usd: prevStats.deposit.usd + stats.deposit.usd,
+              },
+              gain: {
+                asset: prevStats.gain.asset + stats.gain.asset,
+                usd: prevStats.gain.usd + stats.gain.usd,
+              },
+            }));
+          }
         }
 
         if (!initialLoadComplete) {
@@ -104,12 +117,12 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     updateMemberDetails();
     const regularPollInterval = setInterval(
       updateMemberDetails,
-      REGULAR_POLL_INTERVAL,
+      REGULAR_POLL_INTERVAL
     );
 
     return () => clearInterval(regularPollInterval);
   }, [
-    wallet?.address,
+    walletsState,
     pool.asset,
     runePriceUSD,
     isTransactionPolling,
@@ -125,24 +138,26 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
       let attempts = 0;
 
       const pollInterval = setInterval(async () => {
-        if (!wallet?.address) {
+        if (!walletsState || Object.keys(walletsState).length === 0) {
           clearInterval(pollInterval);
           setIsTransactionPolling(false);
           return;
         }
 
         attempts++;
-        const updatedPosition = await getMemberDetails(
-          wallet.address,
-          pool.asset,
-        );
+        for (const walletAddress of Object.keys(walletsState)) {
+          const updatedPosition = await getMemberDetails(
+            walletAddress,
+            pool.asset
+          );
 
-        if (
-          hasPositionChanged(currentPosition, updatedPosition) ||
-          attempts >= MAX_TX_POLL_ATTEMPTS
-        ) {
-          clearInterval(pollInterval);
-          setIsTransactionPolling(false);
+          if (
+            hasPositionChanged(currentPosition, updatedPosition) ||
+            attempts >= MAX_TX_POLL_ATTEMPTS
+          ) {
+            clearInterval(pollInterval);
+            setIsTransactionPolling(false);
+          }
         }
       }, TX_POLL_INTERVAL);
 
@@ -151,7 +166,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         setIsTransactionPolling(false);
       };
     },
-    [wallet?.address, getMemberDetails, pool.asset, hasPositionChanged],
+    [walletsState, getMemberDetails, pool.asset, hasPositionChanged]
   );
 
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
@@ -161,15 +176,17 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const showLoadingState = !initialLoadComplete && positionLoading;
 
   const handleRemove = async () => {
-    if (!wallet?.address) return;
+    if (!walletsState || Object.keys(walletsState).length === 0) return;
 
     try {
-      await removeLiquidity({
-        asset: pool.asset,
-        percentage: 100,
-        address: wallet.address,
-        withdrawAsset: pool.asset,
-      });
+      for (const walletAddress of Object.keys(walletsState)) {
+        await removeLiquidity({
+          asset: pool.asset,
+          percentage: 100,
+          address: walletAddress,
+          withdrawAsset: pool.asset,
+        });
+      }
       pollForPositionUpdate(position);
     } catch (err) {
       console.error("Failed to remove liquidity:", err);
@@ -185,7 +202,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
   // Button rendering logic
   const renderActionButton = () => {
-    if (!wallet?.address) {
+    if (!walletsState || Object.keys(walletsState).length === 0) {
       return (
         <button
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 

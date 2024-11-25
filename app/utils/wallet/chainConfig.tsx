@@ -121,7 +121,7 @@ const singleWalletChains = [
       //   ...baseWalletConfig.WalletConnect,
       //   disabled: true,
       // },
-      // { id: "vultisig-thorchain", ...baseWalletConfig.Vultisig },
+      { id: "vultisig-thorchain", ...baseWalletConfig.Vultisig },
       // ...disabledEvmWallets,
     ],
   },
@@ -144,7 +144,7 @@ const singleWalletChains = [
   },
 ];
 
-const evmChains = [
+export const evmChains = [
   {
     id: "ethereum",
     name: "Ethereum",

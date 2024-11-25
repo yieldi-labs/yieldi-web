@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Modal from "@/app/modal";
-import { PoolDetail as IPoolDetail } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
   getAssetShortSymbol,
@@ -10,6 +9,7 @@ import {
   normalizeAddress,
   formatNumber,
 } from "@/app/utils";
+import { PoolDetail as IPoolDetail } from "@/midgard";
 import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
@@ -17,6 +17,8 @@ import { useContracts } from "@/hooks/useContracts";
 import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
+import { WalletState } from "@/hooks/useWalletConnection";
+import { parseAssetString } from "@/utils/chain";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -28,12 +30,18 @@ export default function AddLiquidityModal({
   pool,
   onClose,
 }: AddLiquidityModalProps) {
-  const { wallet } = useAppState();
+  const { walletsState, toggleWalletModal, getWallet } = useAppState();
+  const connectedWallets = Object.values(walletsState || {});
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal } = useAppState();
 
+  // Parse asset details
+  const [assetChain, assetIdentifier] = useMemo(
+    () => parseAssetString(pool.asset),
+    [pool.asset]
+  );
+  const selectedWallet = getWallet(assetChain);
   const [assetAmount, setAssetAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
   const [assetBalance, setAssetBalance] = useState(0);
@@ -48,17 +56,13 @@ export default function AddLiquidityModal({
     return null;
   }, [pool.asset]);
 
-  if (!wallet?.provider) {
-    throw new Error("Wallet provider not found, please connect your wallet.");
-  }
-
   const {
     getBalance: getUTXOBalance,
     loading: utxoLoading,
     error: utxoError,
   } = useUTXO({
     chain: utxoChain as "BTC" | "DOGE",
-    wallet: utxoChain ? wallet : null,
+    wallet: utxoChain ? selectedWallet : null,
   });
 
   const poolViemAddress = !utxoChain
@@ -75,19 +79,19 @@ export default function AddLiquidityModal({
     loadMetadata,
   } = useContracts({
     tokenAddress,
-    provider: !utxoChain ? wallet?.provider : undefined,
+    provider: !utxoChain ? selectedWallet?.provider : undefined,
   });
 
   useEffect(() => {
-    if (!utxoChain && wallet?.provider) {
+    if (!utxoChain && selectedWallet?.provider) {
       loadMetadata();
     }
-  }, [utxoChain, wallet?.provider, loadMetadata]);
+  }, [utxoChain, selectedWallet?.provider, loadMetadata]);
 
   useEffect(() => {
-    if (utxoChain && wallet?.address) {
+    if (utxoChain && selectedWallet?.address) {
       setBalanceLoading(true);
-      getUTXOBalance(wallet.address)
+      getUTXOBalance(selectedWallet.address)
         .then((balance) => {
           const balanceAmount = balance.amount.amount();
           const balanceBigInt = BigInt(balanceAmount.toString());
@@ -97,7 +101,7 @@ export default function AddLiquidityModal({
         .catch(console.error)
         .finally(() => setBalanceLoading(false));
     }
-  }, [utxoChain, wallet?.address, getUTXOBalance]);
+  }, [utxoChain, selectedWallet?.address, getUTXOBalance]);
 
   useEffect(() => {
     if (!utxoChain && tokenBalance?.formatted) {
@@ -115,13 +119,8 @@ export default function AddLiquidityModal({
     }
   };
 
-  const handlePercentageClick = (percentage: number) => {
-    const newAmount = (assetBalance * percentage).toFixed(8);
-    setAssetAmount(newAmount);
-  };
-
   const handleAddLiquidity = async () => {
-    if (!wallet?.address) {
+    if (!selectedWallet?.address) {
       toggleWalletModal();
       return;
     }
@@ -136,7 +135,7 @@ export default function AddLiquidityModal({
       const hash = await addLiquidity({
         asset: pool.asset,
         amount: parsedAmount,
-        address: wallet.address,
+        address: selectedWallet.address,
       });
 
       if (hash) {
@@ -151,7 +150,6 @@ export default function AddLiquidityModal({
       setIsSubmitting(false);
     }
   };
-
   const isBalanceLoading = balanceLoading || utxoLoading;
   const error = liquidityError || tokenError || utxoError;
   const assetSymbol = getAssetShortSymbol(pool.asset);
@@ -163,7 +161,7 @@ export default function AddLiquidityModal({
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
       "px-6 py-2 rounded-full font-medium transition-colors",
-      isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
+      isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn"
     );
 
   const currentAssetPercentage = useMemo(() => {
@@ -173,7 +171,7 @@ export default function AddLiquidityModal({
 
   const isCloseToPercentage = (
     currentPercentage: number,
-    targetPercentage: number,
+    targetPercentage: number
   ) => {
     const tolerance = 0.01;
     return Math.abs(currentPercentage - targetPercentage) <= tolerance;
@@ -191,7 +189,10 @@ export default function AddLiquidityModal({
       />
     );
   }
-
+  const handlePercentageClick = (percentage: number) => {
+    const newAmount = (assetBalance * percentage).toFixed(8);
+    setAssetAmount(newAmount);
+  };
   return (
     <Modal onClose={() => onClose(false)}>
       <div className="p-2 w-m">
@@ -232,7 +233,7 @@ export default function AddLiquidityModal({
               key={percent}
               onClick={() => handlePercentageClick(percent / 100)}
               className={percentageButtonClasses(
-                isCloseToPercentage(currentAssetPercentage, percent),
+                isCloseToPercentage(currentAssetPercentage, percent)
               )}
               disabled={isBalanceLoading || isSubmitting}
             >
@@ -251,13 +252,13 @@ export default function AddLiquidityModal({
           }
           className="w-full bg-primary text-black font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {!wallet?.address
+          {!selectedWallet?.address
             ? "Connect Wallet"
             : isBalanceLoading
-              ? "Loading..."
-              : isSubmitting
-                ? "Submitting Transaction..."
-                : "Add"}
+            ? "Loading..."
+            : isSubmitting
+            ? "Submitting Transaction..."
+            : "Add"}
         </button>
       </div>
     </Modal>

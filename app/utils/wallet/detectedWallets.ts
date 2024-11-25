@@ -16,30 +16,23 @@ export const detectWallets = (
 ): Wallet[] => {
   const wallets: Wallet[] = [];
 
-  // if (window.thorchain || window.vultisig?.thorchain) {
-  //   wallets.push({
-  //     id: "vultisig-thorchain",
-  //     name: "Vultisig",
-  //     connect: async () =>
-  //       connectUTXOWallet({
-  //         id: "vultisig-thorchain",
-  //         name: "Vultisig",
-  //         provider: window.thorchain || window.vultisig?.thorchain,
-  //       }),
-  //   });
-  // }
+  if (window.thorchain || window.vultisig?.thorchain) {
+    wallets.push({
+      id: "vultisig-thorchain",
+      name: "Vultisig",
+      connect: async () =>
+        connectUTXOWallet({
+          id: "vultisig-thorchain",
+          name: "Vultisig",
+          provider: window.thorchain || window.vultisig?.thorchain,
+        }),
+    });
+  }
 
   if (window.ethereum?.isMetaMask) {
-    console.log("found meta");
-
     const connector = ethConnectors.find((c) => c.id === "metaMask");
     if (connector) {
       wallets.push({
-        id: "metamask",
-        name: "MetaMask",
-        connect: async () => connectEVMWallet(connector),
-      });
-      console.log({
         id: "metamask",
         name: "MetaMask",
         connect: async () => connectEVMWallet(connector),
@@ -84,7 +77,7 @@ export const detectWallets = (
     wallets.push({
       id: "vultisig",
       name: "Vultisig",
-      connect: async () => connectEVMWallet(window.vultisig),
+      connect: async () => connectEVMWallet(window.vultisig?.ethereum),
     });
   }
 
