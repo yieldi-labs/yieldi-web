@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { NumericFormat } from "react-number-format";
 import Modal from "@/app/modal";
@@ -34,6 +34,7 @@ export default function AddLiquidityModal({
   pool,
   onClose,
 }: AddLiquidityModalProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const { wallet } = useAppState();
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
@@ -83,6 +84,10 @@ export default function AddLiquidityModal({
     tokenAddress,
     provider: !utxoChain ? wallet?.provider : undefined,
   });
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     if (!utxoChain && wallet?.provider) {
@@ -221,6 +226,7 @@ export default function AddLiquidityModal({
         <div className="bg-white rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <NumericFormat
+              getInputRef={inputRef}
               value={assetAmount}
               onValueChange={handleValueChange}
               placeholder="0"
