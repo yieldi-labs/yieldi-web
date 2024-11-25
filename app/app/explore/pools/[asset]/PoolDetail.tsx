@@ -9,6 +9,7 @@ import {
   getFormattedPoolTVL,
   getAssetSimpleSymbol,
   calculateGain,
+  getFormattedPoolEarnings,
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
@@ -155,7 +156,8 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   );
 
   const formattedTVL = getFormattedPoolTVL(pool, runePriceUSD);
-  const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD);
+  const formattedEarnings = getFormattedPoolEarnings(pool, runePriceUSD);
+  const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD) * 100;
   const assetSymbol = getAssetSimpleSymbol(pool.asset);
 
   const showLoadingState = !initialLoadComplete && positionLoading;
@@ -287,12 +289,12 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">Volume/Depth</span>
                 <span className="font-medium">
-                  {formatNumber(volumeDepthRatio, 2)}
+                  {formatNumber(volumeDepthRatio, 2, 2)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">Total Fees</span>
-                <span className="font-medium">3.6%</span>
+                <span className="font-medium">{formattedEarnings}</span>
               </div>
             </div>
             {renderActionButton()}

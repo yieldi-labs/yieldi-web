@@ -291,7 +291,8 @@ export async function bitcoinFees() {
 export async function bitcoinBalance(address: string) {
   const data = await fetchJson(mempoolUrl + "/address/" + address);
   return (
-    (data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum) / 1e8
+    (data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum) /
+    DECIMALS
   );
 }
 
@@ -381,7 +382,7 @@ export const addDollarSignAndSuffix = (value: number) => {
 
 export const calculateSaverTVL = (saver: Saver) => {
   return (
-    (parseFloat(saver.saversDepth) * parseFloat(saver.assetPriceUSD)) / 1e8
+    (parseFloat(saver.saversDepth) * parseFloat(saver.assetPriceUSD)) / DECIMALS
   );
 };
 
@@ -391,8 +392,8 @@ export const getFormattedSaverTVL = (saver: Saver) => {
 
 export const calculatePoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
   const assetValueInUSD =
-    (parseFloat(pool.assetDepth) * parseFloat(pool.assetPriceUSD)) / 1e8;
-  const runeValueInUSD = (parseFloat(pool.runeDepth) * runePriceUSD) / 1e8;
+    (parseFloat(pool.assetDepth) * parseFloat(pool.assetPriceUSD)) / DECIMALS;
+  const runeValueInUSD = (parseFloat(pool.runeDepth) * runePriceUSD) / DECIMALS;
   return assetValueInUSD + runeValueInUSD;
 };
 
@@ -400,15 +401,24 @@ export const getFormattedPoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
   return addDollarSignAndSuffix(calculatePoolTVL(pool, runePriceUSD));
 };
 
+export const getFormattedPoolEarnings = (
+  pool: PoolDetail,
+  runePriceUSD: number,
+) => {
+  return addDollarSignAndSuffix(
+    (parseInt(pool.earnings) * runePriceUSD) / DECIMALS,
+  );
+};
+
 export const calculateVolumeUSD = (pool: PoolDetail, runePriceUSD: number) => {
-  const volumeInRune = parseFloat(pool.volume24h) / 1e8;
+  const volumeInRune = parseFloat(pool.volume24h) / DECIMALS;
   return volumeInRune * runePriceUSD;
 };
 
 export const calculateVolumeDepthRatio = (
   pool: PoolDetail,
   runePriceUSD: number,
-) => {
+): number => {
   const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
   const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
   return volumeUSD / tvlUSD;
@@ -464,6 +474,8 @@ export interface MemberStats {
   };
 }
 
+export const DECIMALS = 1e8;
+
 /**
  * Calculate the gains of a liquidity provider.
  *
@@ -477,8 +489,6 @@ export const calculateGain = async (
   walletAddress: string,
   runePriceUSD: number,
 ) => {
-  const DECIMALS = 1e8;
-
   try {
     const [poolResponse, lpResponse] = await Promise.all([
       getPool({ path: { asset: poolAsset } }),
