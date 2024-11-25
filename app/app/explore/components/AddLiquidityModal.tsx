@@ -97,7 +97,9 @@ export default function AddLiquidityModal({
         .then((balance) => {
           const balanceAmount = balance.amount.amount();
           const balanceBigInt = BigInt(balanceAmount.toString());
-          const formattedBalance = Number(formatUnits(balanceBigInt, DECIMAL_PLACES));
+          const formattedBalance = Number(
+            formatUnits(balanceBigInt, DECIMAL_PLACES),
+          );
           setAssetBalance(formattedBalance);
         })
         .catch(console.error)
@@ -118,18 +120,22 @@ export default function AddLiquidityModal({
   const handlePercentageClick = (percentage: number) => {
     if (assetBalance <= 0) return;
 
-    const finalPercentage = percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
+    const finalPercentage =
+      percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
     const partialAmount = assetBalance * finalPercentage;
-    const finalAmount = percentage === 1 ? partialAmount - MAX_BALANCE_DISCOUNT : partialAmount;
+    const finalAmount =
+      percentage === 1 ? partialAmount - MAX_BALANCE_DISCOUNT : partialAmount;
 
     // Format to decimal places, avoiding scientific notation
-    const formattedAmount = Number(finalAmount.toFixed(DECIMAL_PLACES)).toString();
+    const formattedAmount = Number(
+      finalAmount.toFixed(DECIMAL_PLACES),
+    ).toString();
     setAssetAmount(formattedAmount);
   };
 
   const isValidAmount = useMemo(() => {
     if (!assetAmount || parseFloat(assetAmount) <= 0) return false;
-    
+
     const amount = parseFloat(assetAmount);
     const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE;
     return amount <= maxAllowed * (1 + 1e-10); // Small buffer for floating point
