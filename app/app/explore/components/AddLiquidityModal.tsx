@@ -10,6 +10,8 @@ import {
   isERC20,
   normalizeAddress,
   formatNumber,
+  DECIMAL_PLACES,
+  DECIMALS,
 } from "@/app/utils";
 import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
@@ -26,11 +28,13 @@ interface AddLiquidityModalProps {
 }
 
 const MAX_BALANCE_PERCENTAGE = 0.9995; // 99.95%
+const MAX_BALANCE_DISCOUNT = 1 / DECIMALS;
 
 export default function AddLiquidityModal({
   pool,
   onClose,
 }: AddLiquidityModalProps) {
+  console.log(pool);
   const { wallet } = useAppState();
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
@@ -94,7 +98,7 @@ export default function AddLiquidityModal({
         .then((balance) => {
           const balanceAmount = balance.amount.amount();
           const balanceBigInt = BigInt(balanceAmount.toString());
-          const formattedBalance = Number(formatUnits(balanceBigInt, 8));
+          const formattedBalance = Number(formatUnits(balanceBigInt, DECIMAL_PLACES));
           setAssetBalance(formattedBalance);
         })
         .catch(console.error)
@@ -113,12 +117,24 @@ export default function AddLiquidityModal({
   };
 
   const handlePercentageClick = (percentage: number) => {
-    // If it's MAX (100%), use MAX_BALANCE_PERCENTAGE directly
+    if (assetBalance <= 0) return;
+
     const finalPercentage = percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
-    const maxAmount = assetBalance * finalPercentage;
-    const newAmount = maxAmount.toFixed(8);
-    setAssetAmount(newAmount);
+    const partialAmount = assetBalance * finalPercentage;
+    const finalAmount = percentage === 1 ? partialAmount - MAX_BALANCE_DISCOUNT : partialAmount;
+
+    // Format to decimal places, avoiding scientific notation
+    const formattedAmount = Number(finalAmount.toFixed(DECIMAL_PLACES)).toString();
+    setAssetAmount(formattedAmount);
   };
+
+  const isValidAmount = useMemo(() => {
+    if (!assetAmount || parseFloat(assetAmount) <= 0) return false;
+    
+    const amount = parseFloat(assetAmount);
+    const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE;
+    return amount <= maxAllowed * (1 + 1e-10); // Small buffer for floating point
+  }, [assetAmount, assetBalance]);
 
   const handleAddLiquidity = async () => {
     if (!wallet?.address) {
@@ -159,13 +175,6 @@ export default function AddLiquidityModal({
     ? parseFloat(pool.assetPriceUSD) * parseFloat(assetAmount)
     : 0;
   const assetUsdBalance = parseFloat(pool.assetPriceUSD) * assetBalance;
-
-  const isValidAmount = useMemo(() => {
-    if (!assetAmount || isNaN(parseFloat(assetAmount)) || parseFloat(assetAmount) <= 0) {
-      return false;
-    }
-    return parseFloat(assetAmount) <= assetBalance * MAX_BALANCE_PERCENTAGE;
-  }, [assetAmount, assetBalance]);
 
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
@@ -212,7 +221,7 @@ export default function AddLiquidityModal({
               placeholder="0"
               className="flex-1 text-xl font-medium outline-none"
               thousandSeparator=","
-              decimalScale={8}
+              decimalScale={DECIMAL_PLACES}
               allowNegative={false}
             />
             <div className="flex items-center gap-2">
@@ -252,11 +261,7 @@ export default function AddLiquidityModal({
 
         <button
           onClick={handleAddLiquidity}
-          disabled={
-            !isValidAmount ||
-            isBalanceLoading ||
-            isSubmitting
-          }
+          disabled={!isValidAmount || isBalanceLoading || isSubmitting}
           className="w-full bg-primary text-black font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {!wallet?.address
