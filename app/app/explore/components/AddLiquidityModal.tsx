@@ -34,7 +34,6 @@ export default function AddLiquidityModal({
   pool,
   onClose,
 }: AddLiquidityModalProps) {
-  console.log(pool);
   const { wallet } = useAppState();
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
