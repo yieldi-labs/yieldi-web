@@ -5,10 +5,15 @@ import WalletList from "./WalletList";
 import { useAppState } from "@/utils/context";
 import { chainConfig } from "@/utils/wallet/chainConfig";
 import { ChainSelector } from "./ChainSelector";
-import HardwareWallets from "./HardwareWallets";
-import { useWalletList, useWalletConnection } from "@/hooks";
+import {
+  useWalletList,
+  useWalletConnection,
+  WalletState,
+  ConnectedWalletsState,
+} from "@/hooks";
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
+import HardwareWallets from "./HardwareWallets";
 
 export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
@@ -53,9 +58,14 @@ export default function WalletModal() {
   const handleConnectWallet = () => {
     if (selectedWallet) handleConnect(selectedWallet);
   };
-
-  // const handleHardwareWalletSelect = async (wallet: any) =>
-  //   setWalletsState(wallet);
+  const handleHardwareWalletSelect = async (wallet: any) => {
+    setWalletsState(((prevState: ConnectedWalletsState) => ({
+      ...prevState,
+      [`ledger-${wallet.chain}`]: {
+        ...(wallet as WalletState),
+      },
+    })) as unknown as ConnectedWalletsState);
+  };
 
   if (!isWalletModalOpen) return null;
 
@@ -92,13 +102,12 @@ export default function WalletModal() {
             </div>
           </>
         ) : (
-          // <HardwareWallets
-          //   onBack={() => setShowHardwareWallets(false)}
-          //   onWalletSelect={handleHardwareWalletSelect}
-          //   selectedChains={selectedChains}
-          //   isDisabled={isHWDisabled}
-          // />
-          <></>
+          <HardwareWallets
+            onBack={() => setShowHardwareWallets(false)}
+            onWalletSelect={handleHardwareWalletSelect}
+            selectedChains={selectedChains}
+            isDisabled={isHWDisabled}
+          />
         )}
         <button
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 

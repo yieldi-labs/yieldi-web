@@ -8,6 +8,7 @@ export interface WalletState {
   address: string;
   network: string[];
   walletId: string;
+  chain?: string;
 }
 export interface ConnectedWalletsState {
   [key: string]: WalletState;

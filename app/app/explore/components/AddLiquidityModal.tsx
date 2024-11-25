@@ -17,7 +17,7 @@ import { useContracts } from "@/hooks/useContracts";
 import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
-import { WalletState } from "@/hooks/useWalletConnection";
+
 import { parseAssetString } from "@/utils/chain";
 
 interface AddLiquidityModalProps {
@@ -30,14 +30,13 @@ export default function AddLiquidityModal({
   pool,
   onClose,
 }: AddLiquidityModalProps) {
-  const { walletsState, toggleWalletModal, getWallet } = useAppState();
-  const connectedWallets = Object.values(walletsState || {});
+  const { toggleWalletModal, getWallet } = useAppState();
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
   });
 
   // Parse asset details
-  const [assetChain, assetIdentifier] = useMemo(
+  const [assetChain] = useMemo(
     () => parseAssetString(pool.asset),
     [pool.asset]
   );
