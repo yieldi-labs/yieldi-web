@@ -145,7 +145,6 @@ export default function AddLiquidityModal({
 
   const isValidAmount = useMemo(() => {
     if (!assetAmount || parseFloat(assetAmount) <= 0) return false;
-
     const amount = parseFloat(assetAmount);
     const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE;
     return amount <= maxAllowed * (1 + 1e-10); // Small buffer for floating point
