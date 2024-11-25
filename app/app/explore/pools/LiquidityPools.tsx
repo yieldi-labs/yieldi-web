@@ -8,6 +8,10 @@ import {
   addDollarSignAndSuffix,
   getAssetSymbol,
   getLogoPath,
+  calculateVolumeUSD,
+  calculateVolumeDepthRatio,
+  calculatePoolTVL,
+  getFormattedPoolTVL,
 } from "@/app/utils";
 import TranslucentCard from "@/app/TranslucentCard";
 import {
@@ -37,31 +41,6 @@ interface SortConfig {
   key: PoolSortKey;
   direction: SortDirection;
 }
-
-const calculatePoolTVL = (pool: PoolDetail): number => {
-  const assetDepth = parseFloat(pool.assetDepth) / 1e8;
-  const assetPriceUSD = parseFloat(pool.assetPriceUSD);
-  return assetDepth * assetPriceUSD;
-};
-
-const calculateVolumeUSD = (pool: PoolDetail, runePriceUSD: number): number => {
-  const volumeInRune = parseFloat(pool.volume24h) / 1e8;
-  return volumeInRune * runePriceUSD;
-};
-
-const calculateVolumeDepthRatio = (
-  pool: PoolDetail,
-  runePriceUSD: number,
-): number => {
-  const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
-  const tvlUSD = calculatePoolTVL(pool);
-  return volumeUSD / tvlUSD;
-};
-
-const getFormattedPoolTVL = (pool: PoolDetail): string => {
-  const tvlUSD = calculatePoolTVL(pool);
-  return addDollarSignAndSuffix(tvlUSD);
-};
 
 const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
   pools,
@@ -101,8 +80,8 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
           bValue = calculateVolumeDepthRatio(b, runePriceUSD);
           break;
         case PoolSortKey.TVL:
-          aValue = calculatePoolTVL(a);
-          bValue = calculatePoolTVL(b);
+          aValue = calculatePoolTVL(a, runePriceUSD);
+          bValue = calculatePoolTVL(b, runePriceUSD);
           break;
         case PoolSortKey.APR:
           aValue = parseFloat(a.poolAPY);
@@ -135,7 +114,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
 
   const topPoolsData = sortedPools.slice(0, 3).map((pool) => ({
     asset: pool.asset,
-    formattedTVL: getFormattedPoolTVL(pool),
+    formattedTVL: getFormattedPoolTVL(pool, runePriceUSD),
     apr: parseFloat(pool.poolAPY),
   }));
 
@@ -174,7 +153,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
           </div>
           <div className="flex-1 p-2 rounded-xl bg-white">
             <p className="text-sm text-neutral mb-1">
-              {getFormattedPoolTVL(pool)}
+              {getFormattedPoolTVL(pool, runePriceUSD)}
             </p>
             <p className="text-xs text-neutral-800">TVL</p>
           </div>
@@ -328,7 +307,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                       %
                     </div>
                     <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
-                      {getFormattedPoolTVL(pool)}
+                      {getFormattedPoolTVL(pool, runePriceUSD)}
                     </div>
                     <div className="px-6 py-3 whitespace-nowrap flex-1 w-1/4">
                       {formatNumber(parseFloat(pool.poolAPY) * 100, 2, 2)}%
