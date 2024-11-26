@@ -28,7 +28,6 @@ interface AddLiquidityModalProps {
 }
 
 const MAX_BALANCE_PERCENTAGE = 0.99;
-const MAX_BALANCE_DISCOUNT = 1 / DECIMALS;
 
 export default function AddLiquidityModal({
   pool,
@@ -59,6 +58,14 @@ export default function AddLiquidityModal({
     if (chain === "doge") return "DOGE";
     return null;
   }, [pool.asset]);
+
+  const assetBalanceDiscount = useMemo(() => {
+    return 1 / poolNativeDecimal;
+  }, [poolNativeDecimal]);
+
+  const runeBalanceDiscount = useMemo(() => {
+    return 1 / DECIMALS;
+  }, []);
 
   if (!wallet?.provider) {
     throw new Error("Wallet provider not found, please connect your wallet.");
@@ -143,7 +150,7 @@ export default function AddLiquidityModal({
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
     const partialAmount = assetBalance * finalPercentage;
     const finalAmount =
-      percentage === 1 ? partialAmount - MAX_BALANCE_DISCOUNT : partialAmount;
+      percentage === 1 ? partialAmount - assetBalanceDiscount : partialAmount;
 
     const formattedAmount = Number(
       finalAmount.toFixed(poolNativeDecimal),
@@ -233,6 +240,11 @@ export default function AddLiquidityModal({
     return (parseFloat(assetAmount) / assetBalance) * 100;
   }, [assetAmount, assetBalance]);
 
+  const currentRunePercentage = useMemo(() => {
+    if (!runeAmount || !runeBalance) return 0;
+    return (parseFloat(runeAmount) / runeBalance) * 100;
+  }, [runeAmount, runeBalance]);
+
   const isCloseToPercentage = (
     currentPercentage: number,
     targetPercentage: number,
@@ -312,41 +324,6 @@ export default function AddLiquidityModal({
             </div>
           </div>
         </div>
-
-        {/* RUNE Amount Input (Only if Dual-sided) */}
-        {isDualSided && (
-          <div className="bg-white rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <NumericFormat
-                value={runeAmount}
-                onValueChange={handleRuneValueChange}
-                placeholder="0"
-                className="flex-1 text-xl font-medium outline-none"
-                thousandSeparator=","
-                decimalScale={8}
-                allowNegative={false}
-              />
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/path/to/rune/logo.png"
-                  alt="RUNE"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-                <span className="text-neutral">RUNE</span>
-              </div>
-            </div>
-            <div className="flex justify-between text-base font-medium text-neutral-800">
-              <div>≈ ${formatNumber(runeUsdValue, 2)}</div>
-              <div>
-                Balance: {formatNumber(runeBalance, 6)} ($
-                {formatNumber(runeUsdBalance, 2)})
-              </div>
-            </div>
-          </div>
-        )}
-
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
             <button
@@ -361,6 +338,56 @@ export default function AddLiquidityModal({
             </button>
           ))}
         </div>
+
+        {/* RUNE Amount Input (Only if Dual-sided) */}
+        {isDualSided && (
+          <>
+            <div className="bg-white rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <NumericFormat
+                  value={runeAmount}
+                  onValueChange={handleRuneValueChange}
+                  placeholder="0"
+                  className="flex-1 text-xl font-medium outline-none"
+                  thousandSeparator=","
+                  decimalScale={8}
+                  allowNegative={false}
+                />
+                <div className="flex items-center gap-2">
+                  <Image
+                    src={getLogoPath("thor.rune")}
+                    alt="RUNE"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                  <span className="text-neutral">RUNE</span>
+                </div>
+              </div>
+              <div className="flex justify-between text-base font-medium text-neutral-800">
+                <div>≈ ${formatNumber(runeUsdValue, 2)}</div>
+                <div>
+                  Balance: {formatNumber(runeBalance, 6)} ($
+                  {formatNumber(runeUsdBalance, 2)})
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mb-6">
+              {[25, 50, 100].map((percent) => (
+                <button
+                  key={percent}
+                  onClick={() => handlePercentageClick(percent / 100)}
+                  className={percentageButtonClasses(
+                    isCloseToPercentage(currentRunePercentage, percent),
+                  )}
+                  disabled={isBalanceLoading || isSubmitting}
+                >
+                  {percent === 100 ? "MAX" : `${percent}%`}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
         <button
           onClick={handleAddLiquidity}
