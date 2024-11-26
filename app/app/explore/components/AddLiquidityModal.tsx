@@ -19,6 +19,7 @@ import { useContracts } from "@/hooks/useContracts";
 import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
+import { useRuneBalance } from "@/hooks";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -26,11 +27,12 @@ interface AddLiquidityModalProps {
   onClose: (transactionSubmitted: boolean) => void;
 }
 
-const MAX_BALANCE_PERCENTAGE = 0.9995; // 99.95%
+const MAX_BALANCE_PERCENTAGE = 0.99;
 const MAX_BALANCE_DISCOUNT = 1 / DECIMALS;
 
 export default function AddLiquidityModal({
   pool,
+  runePriceUSD,
   onClose,
 }: AddLiquidityModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -40,13 +42,16 @@ export default function AddLiquidityModal({
   });
   const { toggleWalletModal } = useAppState();
 
+  const { runeBalance } = useRuneBalance({ wallet });
   const [assetAmount, setAssetAmount] = useState("");
+  const [runeAmount, setRuneAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
   const [assetBalance, setAssetBalance] = useState(0);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [poolNativeDecimal, setPoolNativeDecimal] = useState(0);
+  const [isDualSided, setIsDualSided] = useState(false);
 
   const utxoChain = useMemo(() => {
     const chain = pool.asset.split(".")[0].toLowerCase();
@@ -127,6 +132,10 @@ export default function AddLiquidityModal({
     setAssetAmount(values.value);
   };
 
+  const handleRuneValueChange = (values: NumberFormatValues) => {
+    setRuneAmount(values.value);
+  };
+
   const handlePercentageClick = (percentage: number) => {
     if (assetBalance <= 0) return;
 
@@ -136,20 +145,37 @@ export default function AddLiquidityModal({
     const finalAmount =
       percentage === 1 ? partialAmount - MAX_BALANCE_DISCOUNT : partialAmount;
 
-    // Format to decimal places, avoiding scientific notation
     const formattedAmount = Number(
       finalAmount.toFixed(poolNativeDecimal),
     ).toString();
     setAssetAmount(formattedAmount);
+
+    if (isDualSided) {
+      const assetRuneRatio =
+        parseFloat(pool.assetDepth) / parseFloat(pool.runeDepth);
+      const runeAmount = finalAmount / assetRuneRatio;
+      setRuneAmount(runeAmount.toFixed());
+    }
   };
 
   const isValidAmount = useMemo(() => {
     if (!assetAmount || parseFloat(assetAmount) <= 0) return false;
+    if (isDualSided && (!runeAmount || parseFloat(runeAmount) <= 0))
+      return false;
 
     const amount = parseFloat(assetAmount);
     const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE;
-    return amount <= maxAllowed * (1 + 1e-10); // Small buffer for floating point
-  }, [assetAmount, assetBalance]);
+    const isAssetAmountValid = amount <= maxAllowed * (1 + 1e-10);
+
+    if (isDualSided) {
+      const runeAmt = parseFloat(runeAmount);
+      const runeMaxAllowed = runeBalance * MAX_BALANCE_PERCENTAGE;
+      const isRuneAmountValid = runeAmt <= runeMaxAllowed * (1 + 1e-10);
+      return isAssetAmountValid && isRuneAmountValid;
+    }
+
+    return isAssetAmountValid;
+  }, [assetAmount, assetBalance, runeAmount, runeBalance, isDualSided]);
 
   const handleAddLiquidity = async () => {
     if (!wallet?.address) {
@@ -162,12 +188,15 @@ export default function AddLiquidityModal({
       return;
     }
 
+    const parsedRuneAmount = isDualSided ? parseFloat(runeAmount) : undefined;
+
     try {
       setIsSubmitting(true);
       const hash = await addLiquidity({
         asset: pool.asset,
         amount: parsedAmount,
-        address: wallet.address,
+        runeAmount: parsedRuneAmount,
+        pairedAddress: isDualSided ? wallet.address : undefined,
       });
 
       if (hash) {
@@ -190,6 +219,8 @@ export default function AddLiquidityModal({
     ? parseFloat(pool.assetPriceUSD) * parseFloat(assetAmount)
     : 0;
   const assetUsdBalance = parseFloat(pool.assetPriceUSD) * assetBalance;
+  const runeUsdValue = runeAmount ? parseFloat(runeAmount) * runePriceUSD : 0;
+  const runeUsdBalance = runeBalance * runePriceUSD;
 
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
@@ -228,6 +259,28 @@ export default function AddLiquidityModal({
       <div className="p-2 w-m">
         {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
+        {/* Toggle between Single-sided and Dual-sided */}
+        <div className="flex gap-4 mb-4">
+          <button
+            className={twMerge(
+              "px-4 py-2 rounded",
+              !isDualSided ? "bg-primary text-white" : "bg-gray-200",
+            )}
+            onClick={() => setIsDualSided(false)}
+          >
+            Single-sided
+          </button>
+          <button
+            className={twMerge(
+              "px-4 py-2 rounded",
+              isDualSided ? "bg-primary text-white" : "bg-gray-200",
+            )}
+            onClick={() => setIsDualSided(true)}
+          >
+            Dual-sided
+          </button>
+        </div>
+
         <div className="bg-white rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
             <NumericFormat
@@ -259,6 +312,40 @@ export default function AddLiquidityModal({
             </div>
           </div>
         </div>
+
+        {/* RUNE Amount Input (Only if Dual-sided) */}
+        {isDualSided && (
+          <div className="bg-white rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <NumericFormat
+                value={runeAmount}
+                onValueChange={handleRuneValueChange}
+                placeholder="0"
+                className="flex-1 text-xl font-medium outline-none"
+                thousandSeparator=","
+                decimalScale={8}
+                allowNegative={false}
+              />
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/path/to/rune/logo.png"
+                  alt="RUNE"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
+                <span className="text-neutral">RUNE</span>
+              </div>
+            </div>
+            <div className="flex justify-between text-base font-medium text-neutral-800">
+              <div>≈ ${formatNumber(runeUsdValue, 2)}</div>
+              <div>
+                Balance: {formatNumber(runeBalance, 6)} ($
+                {formatNumber(runeUsdBalance, 2)})
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (

@@ -137,23 +137,33 @@ export const getMinAmountByChain = (chain: SupportedChain): number => {
 export const getLiquidityMemo = (
   type: "add" | "remove",
   asset: string,
+  pairedAddr: string = "",
   affiliate: string = "",
   feeBps: number = 0,
   percentage?: number,
   withdrawAsset?: string,
 ): string => {
   if (type === "add") {
-    return `+:${asset}::${affiliate}:${feeBps}`;
+    if (pairedAddr) {
+      // Dual-sided add liquidity with optional affiliate and fee
+      return `+:${asset}:${pairedAddr}:${affiliate}:${feeBps}`;
+    }
+    // Single-sided add liquidity
+    return `+:${asset}`;
   }
 
-  const basisPoints = percentage ? Math.round(percentage * 100) : 0;
-  if (basisPoints < 0 || basisPoints > 10000) {
-    throw new Error("Percentage must be between 0 and 100");
+  if (type === "remove") {
+    const basisPoints = percentage ? Math.round(percentage * 100) : 0;
+    if (basisPoints < 0 || basisPoints > 10000) {
+      throw new Error("Percentage must be between 0 and 100");
+    }
+    // Single-sided or dual-sided remove liquidity
+    return withdrawAsset
+      ? `-:${asset}:${basisPoints}:${withdrawAsset}` // Single-sided
+      : `-:${asset}:${basisPoints}`; // Dual-sided
   }
 
-  return withdrawAsset
-    ? `-:${asset}:${basisPoints}:${withdrawAsset}` // Single-sided
-    : `-:${asset}:${basisPoints}`; // Dual-sided
+  throw new Error("Invalid liquidity operation type");
 };
 
 /**
