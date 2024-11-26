@@ -20,7 +20,9 @@ interface AddLiquidityParams {
   asset: string;
   amount: number;
   runeAmount?: number;
-  address: string;
+  pairedAddress?: string;
+  affiliate?: string;
+  feeBps?: number;
 }
 
 interface RemoveLiquidityParams {
@@ -161,7 +163,12 @@ export function useLiquidityPosition({
   );
 
   const addLiquidity = useCallback(
-    async ({ asset, amount, address }: AddLiquidityParams) => {
+    async ({
+      asset,
+      amount,
+      pairedAddress,
+      runeAmount,
+    }: AddLiquidityParams) => {
       if (!wallet?.address) {
         throw new Error("Wallet not connected");
       }
@@ -181,7 +188,13 @@ export function useLiquidityPosition({
         }
 
         validateInboundAddress(inbound);
-        const memo = getLiquidityMemo("add", asset, affiliate, feeBps);
+        const memo = getLiquidityMemo(
+          "add",
+          asset,
+          pairedAddress,
+          affiliate,
+          feeBps,
+        );
 
         // Handle UTXO chain transactions
         if (utxoChain) {
@@ -236,7 +249,7 @@ export function useLiquidityPosition({
           );
         }
 
-        await getMemberDetails(address, asset);
+        await getMemberDetails(wallet.address, asset);
         return txHash;
       } catch (err) {
         const errorMessage =
@@ -297,6 +310,7 @@ export function useLiquidityPosition({
         const memo = getLiquidityMemo(
           "remove",
           asset,
+          undefined,
           undefined,
           undefined,
           percentage,
