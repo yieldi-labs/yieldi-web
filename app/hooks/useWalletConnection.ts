@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { detectWallets } from "@/utils/wallet/detectedWallets";
 import { chainConfig } from "@/utils/wallet/chainConfig";
 import { useConnectors, useSwitchChain } from "wagmi";
+import { useAppState } from "@/utils/context";
 
 export interface WalletState {
   provider: any;
@@ -9,14 +10,12 @@ export interface WalletState {
   network: string;
 }
 
-export function useWalletConnection(
-  setWalletState: any,
-  toggleWalletModal: () => void,
-) {
+export function useWalletConnection() {
   const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
   const [selectedChain, setSelectedChain] = useState<string | null>("bitcoin");
   const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
+  const { toggleWalletModal, setWalletState } = useAppState();
 
   useEffect(() => {
     const wallets = detectWallets(ethConnectors);
@@ -41,6 +40,20 @@ export function useWalletConnection(
 
     setDetectedWallets(walletsWithIcons);
   }, []);
+
+  const saveNetworkAddressToLocalStorage = (network: string, address: string) => {
+    let thorchainIdentifier = "";
+    chainConfig.forEach((chain) => {
+      if (chain.thorchainIdentifier === network) {
+        thorchainIdentifier = chain.thorchainIdentifier
+      }
+    });
+    localStorage.setItem(`wallet-${thorchainIdentifier}-address`, address);
+  }
+
+  const getNetworkAddressFromLocalStorage = (thorchainIdentifier: string) => {
+    return localStorage.getItem(`wallet-${thorchainIdentifier}-address`);
+  }
 
   const handleConnect = async (wallet: WalletOption) => {
     if (!selectedChain) {
@@ -87,6 +100,7 @@ export function useWalletConnection(
       const connectedWallet = await detectedWalletForChain.connect();
 
       if (isWalletConnect) {
+        saveNetworkAddressToLocalStorage(selectedChainConfig?.thorchainIdentifier!, connectedWallet.address);
         setWalletState({
           provider: connectedWallet.provider,
           address: connectedWallet.address,
@@ -126,6 +140,7 @@ export function useWalletConnection(
         }
       }
 
+      saveNetworkAddressToLocalStorage(selectedChainConfig?.thorchainIdentifier!, connectedWallet.address);
       setWalletState({
         provider: provider,
         address: connectedWallet.address,
@@ -142,5 +157,6 @@ export function useWalletConnection(
     setSelectedChain,
     handleConnect,
     detectedWallets,
+    getNetworkAddressFromLocalStorage,
   };
 }

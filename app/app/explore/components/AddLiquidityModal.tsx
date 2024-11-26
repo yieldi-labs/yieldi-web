@@ -19,7 +19,7 @@ import { useContracts } from "@/hooks/useContracts";
 import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
-import { useRuneBalance } from "@/hooks";
+import { useRuneBalance, useWalletConnection } from "@/hooks";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -40,6 +40,7 @@ export default function AddLiquidityModal({
     pool,
   });
   const { toggleWalletModal } = useAppState();
+  const { getNetworkAddressFromLocalStorage } = useWalletConnection();
 
   const { runeBalance } = useRuneBalance({ wallet });
   const [assetAmount, setAssetAmount] = useState("");
@@ -59,12 +60,12 @@ export default function AddLiquidityModal({
     return null;
   }, [pool.asset]);
 
-  const assetBalanceDiscount = useMemo(() => {
-    return 1 / poolNativeDecimal;
+  const assetMinimalUnit = useMemo(() => {
+    return 1 / 10 ** poolNativeDecimal;
   }, [poolNativeDecimal]);
 
-  const runeBalanceDiscount = useMemo(() => {
-    return 1 / DECIMALS;
+  const runeMinimalUnit = useMemo(() => {
+    return 1 / 10 ** DECIMALS;
   }, []);
 
   if (!wallet?.provider) {
@@ -131,7 +132,9 @@ export default function AddLiquidityModal({
 
   useEffect(() => {
     if (!utxoChain && tokenBalance?.value) {
-      setAssetBalance(Number(tokenBalance.value));
+      setAssetBalance(Number(
+        formatUnits(tokenBalance.value, tokenBalance.decimals)
+      ));
     }
   }, [utxoChain, tokenBalance]);
 
@@ -143,42 +146,52 @@ export default function AddLiquidityModal({
     setRuneAmount(values.value);
   };
 
-  const handlePercentageClick = (percentage: number) => {
+  const handleAssetPercentageClick = (percentage: number) => {
     if (assetBalance <= 0) return;
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
     const partialAmount = assetBalance * finalPercentage;
     const finalAmount =
-      percentage === 1 ? partialAmount - assetBalanceDiscount : partialAmount;
+      percentage === 1 ? partialAmount - assetMinimalUnit : partialAmount;
 
     const formattedAmount = Number(
       finalAmount.toFixed(poolNativeDecimal),
     ).toString();
     setAssetAmount(formattedAmount);
+  };
 
-    if (isDualSided) {
-      const assetRuneRatio =
-        parseFloat(pool.assetDepth) / parseFloat(pool.runeDepth);
-      const runeAmount = finalAmount / assetRuneRatio;
-      setRuneAmount(runeAmount.toFixed());
-    }
+  const handleRunePercentageClick = (percentage: number) => {
+    if (runeBalance <= 0) return;
+
+    const finalPercentage =
+      percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
+    const partialAmount = runeBalance * finalPercentage;
+    const finalAmount =
+      percentage === 1 ? partialAmount - runeMinimalUnit : partialAmount;
+
+    const formattedAmount = Number(
+      finalAmount.toFixed(8),
+    ).toString();
+    setRuneAmount(formattedAmount);
   };
 
   const isValidAmount = useMemo(() => {
-    if (!assetAmount || parseFloat(assetAmount) <= 0) return false;
-    if (isDualSided && (!runeAmount || parseFloat(runeAmount) <= 0))
-      return false;
+    // if (!assetAmount || parseFloat(assetAmount) <= 0) return false;
+    // if (isDualSided && (!runeAmount || parseFloat(runeAmount) <= 0))
+    //   return false;
 
     const amount = parseFloat(assetAmount);
-    const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE;
-    const isAssetAmountValid = amount <= maxAllowed * (1 + 1e-10);
+    const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE - assetMinimalUnit;
+    const isAssetAmountValid = amount > 0 && amount <= maxAllowed;
 
     if (isDualSided) {
       const runeAmt = parseFloat(runeAmount);
-      const runeMaxAllowed = runeBalance * MAX_BALANCE_PERCENTAGE;
-      const isRuneAmountValid = runeAmt <= runeMaxAllowed * (1 + 1e-10);
-      return isAssetAmountValid && isRuneAmountValid;
+      const runeMaxAllowed = runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
+      const isRuneAmountValid = runeAmt > 0 && runeAmt <= runeMaxAllowed;
+      // return isAssetAmountValid && isRuneAmountValid;
+      // TODO: remove temp condition atfer Mutichain Wallet connection.
+      return isAssetAmountValid || isRuneAmountValid;
     }
 
     return isAssetAmountValid;
@@ -199,11 +212,23 @@ export default function AddLiquidityModal({
 
     try {
       setIsSubmitting(true);
+
+      let pairedAddress;
+      if (parsedRuneAmount === 0) {
+        pairedAddress = getNetworkAddressFromLocalStorage("thor");
+      } else if (parsedAmount === 0) {
+        pairedAddress = getNetworkAddressFromLocalStorage(pool.asset.split(".")[0].toLowerCase());
+      }
+
+      if (isDualSided && !pairedAddress) {
+        throw new Error("Paired address not found.");
+      }
+
       const hash = await addLiquidity({
         asset: pool.asset,
         amount: parsedAmount,
         runeAmount: parsedRuneAmount,
-        pairedAddress: isDualSided ? wallet.address : undefined,
+        pairedAddress: pairedAddress || (isDualSided ? wallet.address : undefined),
       });
 
       if (hash) {
@@ -250,6 +275,9 @@ export default function AddLiquidityModal({
     targetPercentage: number,
   ) => {
     const tolerance = 0.01;
+    if (targetPercentage === 100) {
+      return Math.abs(currentPercentage - (MAX_BALANCE_PERCENTAGE * 100)) <= tolerance;
+    }
     return Math.abs(currentPercentage - targetPercentage) <= tolerance;
   };
 
@@ -328,7 +356,7 @@ export default function AddLiquidityModal({
           {[25, 50, 100].map((percent) => (
             <button
               key={percent}
-              onClick={() => handlePercentageClick(percent / 100)}
+              onClick={() => handleAssetPercentageClick(percent / 100)}
               className={percentageButtonClasses(
                 isCloseToPercentage(currentAssetPercentage, percent),
               )}
@@ -376,7 +404,7 @@ export default function AddLiquidityModal({
               {[25, 50, 100].map((percent) => (
                 <button
                   key={percent}
-                  onClick={() => handlePercentageClick(percent / 100)}
+                  onClick={() => handleRunePercentageClick(percent / 100)}
                   className={percentageButtonClasses(
                     isCloseToPercentage(currentRunePercentage, percent),
                   )}
@@ -401,7 +429,7 @@ export default function AddLiquidityModal({
               : isSubmitting
                 ? "Submitting Transaction..."
                 : !isValidAmount && assetAmount
-                  ? "Amount exceeds balance"
+                  ? "Invalid Amount"
                   : "Add"}
         </button>
       </div>
