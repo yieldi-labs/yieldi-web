@@ -149,7 +149,7 @@ export const getLiquidityMemo = (
       return `+:${asset}:${pairedAddr}:${affiliate}:${feeBps}`;
     }
     // Single-sided add liquidity
-    return `+:${asset}`;
+    return `+:${asset}::${affiliate}:${feeBps}`;
   }
 
   if (type === "remove") {
