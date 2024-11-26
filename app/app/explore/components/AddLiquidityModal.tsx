@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import { NumberFormatValues, NumericFormat } from "react-number-format";
 import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
@@ -9,6 +10,7 @@ import {
   isERC20,
   normalizeAddress,
   formatNumber,
+  DECIMALS,
 } from "@/app/utils";
 import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
@@ -24,10 +26,14 @@ interface AddLiquidityModalProps {
   onClose: (transactionSubmitted: boolean) => void;
 }
 
+const MAX_BALANCE_PERCENTAGE = 0.9995; // 99.95%
+const MAX_BALANCE_DISCOUNT = 1 / DECIMALS;
+
 export default function AddLiquidityModal({
   pool,
   onClose,
 }: AddLiquidityModalProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const { wallet } = useAppState();
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
@@ -40,6 +46,7 @@ export default function AddLiquidityModal({
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [poolNativeDecimal, setPoolNativeDecimal] = useState(0);
 
   const utxoChain = useMemo(() => {
     const chain = pool.asset.split(".")[0].toLowerCase();
@@ -79,6 +86,15 @@ export default function AddLiquidityModal({
   });
 
   useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  // Update pool native decimal
+  useEffect(() => {
+    setPoolNativeDecimal(parseInt(pool.nativeDecimal));
+  }, [pool.nativeDecimal]);
+
+  useEffect(() => {
     if (!utxoChain && wallet?.provider) {
       loadMetadata();
     }
@@ -91,34 +107,49 @@ export default function AddLiquidityModal({
         .then((balance) => {
           const balanceAmount = balance.amount.amount();
           const balanceBigInt = BigInt(balanceAmount.toString());
-          const formattedBalance = Number(formatUnits(balanceBigInt, 8));
+          const formattedBalance = Number(
+            formatUnits(balanceBigInt, poolNativeDecimal),
+          );
           setAssetBalance(formattedBalance);
         })
         .catch(console.error)
         .finally(() => setBalanceLoading(false));
     }
-  }, [utxoChain, wallet?.address, getUTXOBalance]);
+  }, [utxoChain, wallet?.address, getUTXOBalance, poolNativeDecimal]);
 
   useEffect(() => {
-    if (!utxoChain && tokenBalance?.formatted) {
-      setAssetBalance(Number(tokenBalance.formatted));
+    if (!utxoChain && tokenBalance?.value) {
+      setAssetBalance(Number(tokenBalance.value));
     }
   }, [utxoChain, tokenBalance]);
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9.]/g, "");
-    if (
-      value === "" ||
-      (!isNaN(parseFloat(value)) && parseFloat(value) <= assetBalance)
-    ) {
-      setAssetAmount(value);
-    }
+  const handleValueChange = (values: NumberFormatValues) => {
+    setAssetAmount(values.value);
   };
 
   const handlePercentageClick = (percentage: number) => {
-    const newAmount = (assetBalance * percentage).toFixed(8);
-    setAssetAmount(newAmount);
+    if (assetBalance <= 0) return;
+
+    const finalPercentage =
+      percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
+    const partialAmount = assetBalance * finalPercentage;
+    const finalAmount =
+      percentage === 1 ? partialAmount - MAX_BALANCE_DISCOUNT : partialAmount;
+
+    // Format to decimal places, avoiding scientific notation
+    const formattedAmount = Number(
+      finalAmount.toFixed(poolNativeDecimal),
+    ).toString();
+    setAssetAmount(formattedAmount);
   };
+
+  const isValidAmount = useMemo(() => {
+    if (!assetAmount || parseFloat(assetAmount) <= 0) return false;
+
+    const amount = parseFloat(assetAmount);
+    const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE;
+    return amount <= maxAllowed * (1 + 1e-10); // Small buffer for floating point
+  }, [assetAmount, assetBalance]);
 
   const handleAddLiquidity = async () => {
     if (!wallet?.address) {
@@ -199,12 +230,15 @@ export default function AddLiquidityModal({
 
         <div className="bg-white rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <input
-              type="text"
+            <NumericFormat
+              getInputRef={inputRef}
               value={assetAmount}
-              onChange={handleAmountChange}
+              onValueChange={handleValueChange}
               placeholder="0"
               className="flex-1 text-xl font-medium outline-none"
+              thousandSeparator=","
+              decimalScale={poolNativeDecimal}
+              allowNegative={false}
             />
             <div className="flex items-center gap-2">
               <Image
@@ -220,7 +254,7 @@ export default function AddLiquidityModal({
           <div className="flex justify-between text-base font-medium text-neutral-800">
             <div>≈ ${formatNumber(usdValue, 2)}</div>
             <div>
-              {formatNumber(assetBalance, 6)} ($
+              Balance: {formatNumber(assetBalance, 6)} ($
               {formatNumber(assetUsdBalance, 2)})
             </div>
           </div>
@@ -243,12 +277,7 @@ export default function AddLiquidityModal({
 
         <button
           onClick={handleAddLiquidity}
-          disabled={
-            !assetAmount ||
-            parseFloat(assetAmount) <= 0 ||
-            isBalanceLoading ||
-            isSubmitting
-          }
+          disabled={!isValidAmount || isBalanceLoading || isSubmitting}
           className="w-full bg-primary text-black font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {!wallet?.address
@@ -257,7 +286,9 @@ export default function AddLiquidityModal({
               ? "Loading..."
               : isSubmitting
                 ? "Submitting Transaction..."
-                : "Add"}
+                : !isValidAmount && assetAmount
+                  ? "Amount exceeds balance"
+                  : "Add"}
         </button>
       </div>
     </Modal>
