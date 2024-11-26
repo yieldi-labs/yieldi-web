@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { NumericFormat } from "react-number-format";
+import { NumberFormatValues, NumericFormat } from "react-number-format";
 import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
@@ -10,7 +10,6 @@ import {
   isERC20,
   normalizeAddress,
   formatNumber,
-  DECIMAL_PLACES,
   DECIMALS,
 } from "@/app/utils";
 import { useAppState } from "@/utils/context";
@@ -47,6 +46,7 @@ export default function AddLiquidityModal({
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [poolNativeDecimal, setPoolNativeDecimal] = useState(0);
 
   const utxoChain = useMemo(() => {
     const chain = pool.asset.split(".")[0].toLowerCase();
@@ -89,6 +89,11 @@ export default function AddLiquidityModal({
     inputRef.current?.focus();
   }, []);
 
+  // Update pool native decimal
+  useEffect(() => {
+    setPoolNativeDecimal(parseInt(pool.nativeDecimal));
+  }, [pool.nativeDecimal]);
+
   useEffect(() => {
     if (!utxoChain && wallet?.provider) {
       loadMetadata();
@@ -103,22 +108,22 @@ export default function AddLiquidityModal({
           const balanceAmount = balance.amount.amount();
           const balanceBigInt = BigInt(balanceAmount.toString());
           const formattedBalance = Number(
-            formatUnits(balanceBigInt, DECIMAL_PLACES),
+            formatUnits(balanceBigInt, poolNativeDecimal),
           );
           setAssetBalance(formattedBalance);
         })
         .catch(console.error)
         .finally(() => setBalanceLoading(false));
     }
-  }, [utxoChain, wallet?.address, getUTXOBalance]);
+  }, [utxoChain, wallet?.address, getUTXOBalance, poolNativeDecimal]);
 
   useEffect(() => {
-    if (!utxoChain && tokenBalance?.formatted) {
-      setAssetBalance(Number(tokenBalance.formatted));
+    if (!utxoChain && tokenBalance?.value) {
+      setAssetBalance(Number(tokenBalance.value));
     }
   }, [utxoChain, tokenBalance]);
 
-  const handleValueChange = (values: any) => {
+  const handleValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
   };
 
@@ -133,7 +138,7 @@ export default function AddLiquidityModal({
 
     // Format to decimal places, avoiding scientific notation
     const formattedAmount = Number(
-      finalAmount.toFixed(DECIMAL_PLACES),
+      finalAmount.toFixed(poolNativeDecimal),
     ).toString();
     setAssetAmount(formattedAmount);
   };
@@ -232,7 +237,7 @@ export default function AddLiquidityModal({
               placeholder="0"
               className="flex-1 text-xl font-medium outline-none"
               thousandSeparator=","
-              decimalScale={DECIMAL_PLACES}
+              decimalScale={poolNativeDecimal}
               allowNegative={false}
             />
             <div className="flex items-center gap-2">

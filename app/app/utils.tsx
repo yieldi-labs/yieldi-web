@@ -475,7 +475,6 @@ export interface MemberStats {
 }
 
 export const DECIMALS = 1e8;
-export const DECIMAL_PLACES = 8;
 
 /**
  * Calculate the gains of a liquidity provider.
