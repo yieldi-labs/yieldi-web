@@ -11,16 +11,23 @@ import {
   QRCode,
   Synchronize,
 } from "@/svg/icons";
-import { Metamask } from "@/svg/wallets";
 import MiddleTruncate from "@/app/components/middle-truncate";
 import { useAppState } from "@/utils/context";
-import { useWalletConnection } from "@/hooks";
+
 import { SUPPORTED_WALLETS } from "@/utils/wallet/constants";
 
 const Component: FC = () => {
-  const { walletsState, isWalletDrawerOpen, toggleWalletDrawer } =
-    useAppState();
+  const {
+    walletsState,
+    isWalletDrawerOpen,
+    toggleWalletDrawer,
+    toggleWalletModal,
+  } = useAppState();
 
+  const handleAddWallet = () => {
+    toggleWalletModal();
+    toggleWalletDrawer();
+  };
   return (
     isWalletDrawerOpen && (
       <>
@@ -39,7 +46,10 @@ const Component: FC = () => {
             <span className="border-r cursor-pointer px-2">
               <Synchronize strokeColor="#627eea" strokeWidth={1.5} />
             </span>
-            <span className="border-r cursor-pointer px-2">
+            <span
+              className="border-r cursor-pointer px-2"
+              onClick={handleAddWallet}
+            >
               <Plus strokeColor="#627eea" strokeWidth={1.5} />
             </span>
             <span className="cursor-pointer px-2">
@@ -47,7 +57,7 @@ const Component: FC = () => {
             </span>
           </div>
           {Object.values(walletsState!).map((wallet) => (
-            <div className="p-4">
+            <div key={wallet.walletId} className="p-4">
               <div className="bg-white flex gap-2 rounded-lg p-4">
                 <span className="leading-6">
                   {cloneElement(SUPPORTED_WALLETS[wallet.walletId].icon)}

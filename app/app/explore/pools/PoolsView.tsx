@@ -3,7 +3,6 @@
 import { PoolDetails, StatsData } from "@/midgard";
 import ExploreNav from "../components/ExploreNav";
 import LiquidityPools from "./LiquidityPools";
-import WalletDrawer from "@/app/components/wallet-drawer";
 
 interface PoolsViewProps {
   pools: PoolDetails;
