@@ -1,7 +1,6 @@
 "use client";
-import { cloneElement, FC } from "react";
-
-import { Bitcoin } from "@/svg/chains";
+import { cloneElement, FC, useEffect, useState } from "react";
+import Image from "next/image";
 import {
   Copy,
   Exit,
@@ -13,8 +12,16 @@ import {
 } from "@/svg/icons";
 import MiddleTruncate from "@/app/components/middle-truncate";
 import { useAppState } from "@/utils/context";
-
-import { SUPPORTED_WALLETS } from "@/utils/wallet/constants";
+import ERC20_ABI from "@/hooks/erc20.json";
+import { ProviderKey, SUPPORTED_WALLETS } from "@/utils/wallet/constants";
+import {
+  getAssetSymbol,
+  getLogoPath,
+  isERC20,
+  normalizeAddress,
+} from "@/app/utils";
+import { decodeFunctionResult, encodeFunctionData, formatUnits } from "viem";
+import { getPools } from "@/midgard";
 
 const Component: FC = () => {
   const {
@@ -23,11 +30,125 @@ const Component: FC = () => {
     toggleWalletDrawer,
     toggleWalletModal,
   } = useAppState();
-
+  const [ercTokensData, setErcTokensData] = useState<any[]>();
   const handleAddWallet = () => {
     toggleWalletModal();
     toggleWalletDrawer();
   };
+
+  useEffect(() => {
+    if (walletsState) {
+      getPools({
+        query: {
+          period: "30d",
+          status: "available",
+        },
+      }).then(({ data }) => {
+        const addresses: any[] = [];
+        if (!data) return;
+        for (const pool of data) {
+          if (isERC20(pool.asset)) {
+            if (walletsState[ProviderKey.EVM]) {
+              const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
+              const tokenAddress = normalizeAddress(poolViemAddress!);
+              if (tokenAddress) {
+                getERC20TokenInfo(
+                  walletsState[ProviderKey.EVM].address,
+                  walletsState[ProviderKey.EVM].provider,
+                  tokenAddress
+                )
+                  .then((info) => {
+                    if (info) addresses.push({ ...info, asset: pool.asset });
+                  })
+                  .catch();
+              }
+            }
+          }
+        }
+        setErcTokensData(addresses);
+      });
+    }
+  }, [walletsState]);
+
+  const getERC20TokenInfo = async (
+    walletAddress: string,
+    provider: any,
+    tokenAddress: `0x${string}`
+  ) => {
+    try {
+      // Encode function calls
+      const nameData = encodeFunctionData({
+        abi: ERC20_ABI,
+        functionName: "name",
+      });
+
+      const symbolData = encodeFunctionData({
+        abi: ERC20_ABI,
+        functionName: "symbol",
+      });
+
+      const decimalsData = encodeFunctionData({
+        abi: ERC20_ABI,
+        functionName: "decimals",
+      });
+
+      const balanceData = encodeFunctionData({
+        abi: ERC20_ABI,
+        functionName: "balanceOf",
+        args: [walletAddress],
+      });
+
+      // Make parallel RPC calls
+      const [nameHex, symbolHex, decimalsHex, balanceHex] = await Promise.all([
+        provider.request({
+          method: "eth_call",
+          params: [{ to: tokenAddress, data: nameData }, "latest"],
+        }),
+        provider.request({
+          method: "eth_call",
+          params: [{ to: tokenAddress, data: symbolData }, "latest"],
+        }),
+        provider.request({
+          method: "eth_call",
+          params: [{ to: tokenAddress, data: decimalsData }, "latest"],
+        }),
+        provider.request({
+          method: "eth_call",
+          params: [{ to: tokenAddress, data: balanceData }, "latest"],
+        }),
+      ]);
+      // Decode results
+      const name = decodeFunctionResult({
+        abi: ERC20_ABI,
+        functionName: "name",
+        data: nameHex,
+      }) as string;
+
+      const symbol = decodeFunctionResult({
+        abi: ERC20_ABI,
+        functionName: "symbol",
+        data: symbolHex,
+      }) as string;
+
+      const decimals = decodeFunctionResult({
+        abi: ERC20_ABI,
+        functionName: "decimals",
+        data: decimalsHex,
+      }) as number;
+
+      const balanceBigInt = decodeFunctionResult({
+        abi: ERC20_ABI,
+        functionName: "balanceOf",
+        data: balanceHex,
+      }) as bigint;
+
+      // Format balance
+      const balance = Number(formatUnits(balanceBigInt, Number(decimals)));
+      return { name, symbol, decimals, balance };
+    } catch {}
+    return null;
+  };
+
   return (
     isWalletDrawerOpen && (
       <>
@@ -79,16 +200,28 @@ const Component: FC = () => {
                   <Exit strokeColor="#ff6656" />
                 </span>
               </div>
-              <div className="px-2 py-4">
-                <div className="flex gap-2 items-center">
-                  <Bitcoin />
-                  <div className="flex flex-1 flex-col">
-                    <span className="font-bold leading-5">BTC</span>
-                    <span className="leading-4 text-gray-500">Native</span>
+              {ercTokensData
+                ?.filter((token) => token.balance > 0)
+                .map((token) => (
+                  <div key={token.asset} className="px-2 py-4">
+                    <div className="flex gap-2 items-center">
+                      <Image
+                        src={getLogoPath(token.asset)}
+                        alt={`${getAssetSymbol(token.asset)} logo`}
+                        width={26}
+                        height={26}
+                        className="rounded-full"
+                      />
+                      <div className="flex flex-1 flex-col">
+                        <span className="font-bold leading-5">
+                          {token.name}
+                        </span>
+                        <span className="leading-4 text-gray-500">ETH</span>
+                      </div>
+                      <span className="font-bold">{token.balance}</span>
+                    </div>
                   </div>
-                  <span className="font-bold">0.019245</span>
-                </div>
-              </div>
+                ))}
             </div>
           ))}
         </div>
