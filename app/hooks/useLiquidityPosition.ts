@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import { useAppState } from "@/utils/context";
 import { client, getMemberDetail, getPool } from "@/midgard";
 import type { MemberPool, PoolDetail } from "@/midgard";
-import { normalizeAddress, SupportedChain } from "@/app/utils";
+import { normalizeAddress } from "@/app/utils";
 import { Address, parseUnits } from "viem";
 import { useContracts } from "./useContracts";
 import { useUTXO } from "./useUTXO";
@@ -311,7 +311,6 @@ export function useLiquidityPosition({
         const inbound = inboundAddresses?.find(
           (i) => i.chain === assetChain.toUpperCase(),
         );
-        const runeInbound = inboundAddresses?.find((i) => i.chain === "THOR");
 
         if (!inbound) {
           throw new Error(`No inbound address found for ${assetChain}`);

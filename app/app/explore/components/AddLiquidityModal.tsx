@@ -163,7 +163,7 @@ export default function AddLiquidityModal({
         .catch(console.error)
         .finally(() => setBalanceLoading(false));
     }
-  }, [wallet?.address, getThorchainBalance, poolNativeDecimal]);
+  }, [wallet?.address, getThorchainBalance, poolNativeDecimal, pool.asset]);
 
   const handleValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
@@ -213,7 +213,15 @@ export default function AddLiquidityModal({
     }
 
     return isAssetAmountValid;
-  }, [assetAmount, assetBalance, runeAmount, runeBalance, isDualSided]);
+  }, [
+    assetAmount,
+    assetBalance,
+    runeAmount,
+    runeBalance,
+    isDualSided,
+    assetMinimalUnit,
+    runeMinimalUnit,
+  ]);
 
   const handleAddLiquidity = async () => {
     if (!wallet?.address) {
