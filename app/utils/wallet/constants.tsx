@@ -140,46 +140,6 @@ export let SUPPORTED_WALLETS = {
     icon: <WalletSvg.Ctrl />,
     isAvailable: false,
     chainConnect: {},
-    // chainConnect: {
-    //   [ProviderKey.EVM]: async (ethConnectors: GetConnectorsReturnType) =>
-    //     await connectEVMWallet(window.xfi?.ethereum),
-
-    //   // TODO - thorchain is not utxo
-    //   [ProviderKey.THORCHAIN]: async () =>
-    //     await connectUTXOWallet({
-    //       id: "xdefi-thorchain",
-    //       name: "CTRL Wallet",
-    //       provider: window?.xfi?.thorchain,
-    //     }),
-
-    //   [ProviderKey.LITECOIN]: async () =>
-    //     await connectUTXOWallet({
-    //       id: "xdefi-ltc",
-    //       name: "CTRL Wallet",
-    //       provider: window?.xfi?.litecoin,
-    //     }),
-
-    //   [ProviderKey.DOGECOIN]: async () =>
-    //     await connectUTXOWallet({
-    //       id: "xdefi-doge",
-    //       name: "CTRL Wallet",
-    //       provider: window?.xfi?.dogecoin,
-    //     }),
-
-    //   [ProviderKey.BITCOIN]: async () =>
-    //     await connectUTXOWallet({
-    //       id: "xdefi-utxo",
-    //       name: "CTRL Wallet",
-    //       provider: window?.xfi?.bitcoin,
-    //     }),
-
-    //   [ProviderKey.BITCOINCASH]: async () =>
-    //     await connectUTXOWallet({
-    //       id: "xdefi-bch",
-    //       name: "CTRL Wallet",
-    //       provider: window?.xfi?.bitcoincash,
-    //     }),
-    // },
   },
   [WalletKey.METAMASK]: {
     id: WalletKey.METAMASK,
@@ -187,19 +147,8 @@ export let SUPPORTED_WALLETS = {
     chains: [ChainKey.AVALANCHE, ChainKey.BSCCHAIN, ChainKey.ETHEREUM],
     downloadUrl: "https://metamask.io/",
     icon: <WalletSvg.Metamask />,
-    // isDetected: (window: any) => window.ethereum?.isMetaMask,
     isAvailable: false,
     chainConnect: {},
-    // chainConnect: {
-    //   [ProviderKey.EVM]: async (ethConnectors: GetConnectorsReturnType) => {
-    //     if (!ethConnectors) return;
-    //     const connector = ethConnectors.find(
-    //       (c) => c.id === WalletKey.METAMASK
-    //     );
-    //     if (!connector) return;
-    //     return await connectEVMWallet(window.ethereum);
-    //   },
-    // },
   },
   [WalletKey.OKX]: {
     id: WalletKey.OKX,
@@ -212,23 +161,8 @@ export let SUPPORTED_WALLETS = {
     ],
     downloadUrl: "https://www.okx.com/web3",
     icon: <WalletSvg.OKX />,
-    // isDetected: (window: any) => window.okxwallet,
     isAvailable: false,
     chainConnect: {},
-    // chainConnect: {
-    //   [ProviderKey.EVM]: async (ethConnectors: GetConnectorsReturnType) => {
-    //     if (!ethConnectors) return;
-    //     const connector = ethConnectors.find((c) => c.id === WalletKey.OKX);
-    //     if (!connector) return;
-    //     return await connectEVMWallet(window.ethereum);
-    //   },
-    //   [ProviderKey.BITCOIN]: async () =>
-    //     await connectUTXOWallet({
-    //       id: "okx-utxo",
-    //       name: "OKX Wallet",
-    //       provider: window.okxwallet.bitcoin,
-    //     }),
-    // },
   },
   [WalletKey.PHANTOM]: {
     id: WalletKey.PHANTOM,
@@ -236,29 +170,8 @@ export let SUPPORTED_WALLETS = {
     chains: [ChainKey.BITCOIN, ChainKey.ETHEREUM, ChainKey.SOLANA],
     downloadUrl: "https://phantom.app/",
     icon: <WalletSvg.Phantom />,
-    // isDetected: (window: any) => window.phantom,
     isAvailable: false,
     chainConnect: {},
-    // chainConnect: {
-    //   [ProviderKey.EVM]: async (ethConnectors: GetConnectorsReturnType) => {
-    //     if (!ethConnectors) return;
-    //     const connector = ethConnectors.find((c) => c.id === WalletKey.PHANTOM);
-    //     if (!connector) return;
-    //     return await connectEVMWallet(window.phantom?.ethereum);
-    //   },
-    //   [ProviderKey.BITCOIN]: async () =>
-    //     await connectUTXOWallet({
-    //       id: "phantom-utxo",
-    //       name: "Phantom Wallet",
-    //       provider: window.phantom.bitcoin,
-    //     }),
-    //   [ProviderKey.SOLANA]: async () =>
-    //     await connectUTXOWallet({
-    //       id: "phantom-solana",
-    //       name: "Phantom Wallet",
-    //       provider: window.phantom.solana,
-    //     }),
-    // },
   },
   [WalletKey.VULTISIG]: {
     id: WalletKey.VULTISIG,
@@ -271,19 +184,8 @@ export let SUPPORTED_WALLETS = {
     ],
     downloadUrl: "https://vultisig.com/",
     icon: <WalletSvg.Vultisig />,
-    // isDetected: (window: any) => window.vultisig,
     isAvailable: false,
     chainConnect: {},
-    // chainConnect: {
-    //   [ProviderKey.EVM]: async (ethConnectors: GetConnectorsReturnType) =>
-    //     await connectEVMWallet(window.vultisig?.ethereum),
-    //   [ProviderKey.THORCHAIN]: async () =>
-    //     await connectUTXOWallet({
-    //       id: "vultisig-thorchain",
-    //       name: "Vultisig",
-    //       provider: window.thorchain || window.vultisig?.thorchain,
-    //     }),
-    // },
   },
   [WalletKey.WALLETCONNECT]: {
     id: WalletKey.WALLETCONNECT,
