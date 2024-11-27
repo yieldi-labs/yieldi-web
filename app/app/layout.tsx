@@ -7,6 +7,7 @@ import { AppStateProvider } from "@/utils/context";
 import WalletModal from "./components/modals/Wallet/WalletModal";
 
 import "./styles/globals.css";
+import WalletDrawer from "./components/wallet-drawer";
 
 export default function RootLayout({
   children,
@@ -22,6 +23,7 @@ export default function RootLayout({
             />
             <div className="p-4 mt-[130px]">{children}</div>
             <WalletModal />
+            <WalletDrawer />
           </AppStateProvider>
         </Providers>
         <CommonComponents.GradientCircles circles={lpGradientCircles} fixed />

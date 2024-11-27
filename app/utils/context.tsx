@@ -17,6 +17,8 @@ interface AppStateContextType {
   walletsState: ConnectedWalletsState | null;
   setWalletsState: React.Dispatch<React.SetStateAction<ConnectedWalletsState>>;
   getProviderTypeFromChain: (chain: string) => ProviderKey;
+  toggleWalletDrawer: () => void;
+  isWalletDrawerOpen: boolean;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -25,10 +27,14 @@ const AppStateContext = createContext<AppStateContextType | undefined>(
 
 export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false);
   const [walletsState, setWalletsState] = useState<ConnectedWalletsState>({});
 
   const toggleWalletModal = () => {
     setIsWalletModalOpen((prevState) => !prevState);
+  };
+  const toggleWalletDrawer = () => {
+    setIsWalletDrawerOpen((prevState) => !prevState);
   };
 
   const getProviderTypeFromChain = (chain: string): ProviderKey => {
@@ -207,7 +213,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     checkAvailableWallets(window);
   }, []);
-  
+
   return (
     <AppStateContext.Provider
       value={{
@@ -216,6 +222,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         walletsState,
         setWalletsState,
         getProviderTypeFromChain,
+        isWalletDrawerOpen,
+        toggleWalletDrawer,
       }}
     >
       {children}

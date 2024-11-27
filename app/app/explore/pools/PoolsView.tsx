@@ -18,7 +18,6 @@ export default function PoolsView({ pools, stats }: PoolsViewProps) {
         pools={pools}
         runePriceUSD={parseFloat(stats.runePriceUSD)}
       />
-      <WalletDrawer isOpen />
     </main>
   );
 }
