@@ -20,7 +20,6 @@ import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
 import { useRuneBalance, useWalletConnection } from "@/hooks";
-import { useThorchain } from "@/hooks/useThorchain";
 import { isEVMAddress } from "@/utils/chain";
 
 interface AddLiquidityModalProps {
@@ -43,8 +42,8 @@ export default function AddLiquidityModal({
   });
   const { toggleWalletModal } = useAppState();
   const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } = useWalletConnection();
+  const { runeBalance, loading: runeBalanceLoading, error: runeBalanceError } = useRuneBalance({ wallet });
 
-  const { runeBalance } = useRuneBalance({ wallet });
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -100,14 +99,6 @@ export default function AddLiquidityModal({
     provider: !utxoChain ? wallet?.provider : undefined,
   });
 
-  const {
-    getBalance: getThorchainBalance,
-    loading: thorchainLoading,
-    error: thorchainError,
-  } = useThorchain({
-    wallet: utxoChain ? null : wallet,
-  });
-
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -147,23 +138,6 @@ export default function AddLiquidityModal({
       );
     }
   }, [utxoChain, tokenBalance]);
-
-  useEffect(() => {
-    if (pool.asset.split(".")[0].toLowerCase() === "thor" && wallet?.address) {
-      setBalanceLoading(true);
-      getThorchainBalance(wallet.address)
-        .then((balance) => {
-          const balanceAmount = balance.amount.amount();
-          const balanceBigInt = BigInt(balanceAmount.toString());
-          const formattedBalance = Number(
-            formatUnits(balanceBigInt, poolNativeDecimal),
-          );
-          setAssetBalance(formattedBalance);
-        })
-        .catch(console.error)
-        .finally(() => setBalanceLoading(false));
-    }
-  }, [wallet?.address, getThorchainBalance, poolNativeDecimal, pool.asset]);
 
   const handleValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
@@ -279,8 +253,8 @@ export default function AddLiquidityModal({
     }
   };
 
-  const isBalanceLoading = balanceLoading || utxoLoading || thorchainLoading;
-  const error = liquidityError || tokenError || utxoError || thorchainError;
+  const isBalanceLoading = balanceLoading || utxoLoading || runeBalanceLoading;
+  const error = liquidityError || tokenError || utxoError || runeBalanceError;
   const assetSymbol = getAssetShortSymbol(pool.asset);
   const usdValue = assetAmount
     ? parseFloat(pool.assetPriceUSD) * parseFloat(assetAmount)

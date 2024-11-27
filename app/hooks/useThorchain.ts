@@ -55,22 +55,6 @@ export function useThorchain({ wallet }: UseThorchainProps) {
     }
   }, [wallet?.provider]);
 
-  // Get balance
-  const getBalance = useCallback(
-    async (address: string) => {
-      if (!client) throw new Error(`Thorchain client not initialized`);
-
-      try {
-        const balance = await client.getBalance(address);
-        return balance[0];
-      } catch (err) {
-        console.error(`Error getting Thorchain balance:`, err);
-        throw err;
-      }
-    },
-    [client],
-  );
-
   // Get network fees
   const getFees = useCallback(async () => {
     if (!client) throw new Error(`Thorchain client not initialized`);
@@ -143,7 +127,6 @@ export function useThorchain({ wallet }: UseThorchainProps) {
   return {
     loading,
     error,
-    getBalance,
     getFees,
     deposit,
   };
