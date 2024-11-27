@@ -20,6 +20,8 @@ import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
 import { useRuneBalance, useWalletConnection } from "@/hooks";
+import { useThorchain } from "@/hooks/useThorchain";
+import { isEVMAddress } from "@/utils/chain";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -98,6 +100,14 @@ export default function AddLiquidityModal({
     provider: !utxoChain ? wallet?.provider : undefined,
   });
 
+  const {
+    getBalance: getThorchainBalance,
+    loading: thorchainLoading,
+    error: thorchainError,
+  } = useThorchain({
+    wallet: utxoChain ? null : wallet,
+  });
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -108,10 +118,10 @@ export default function AddLiquidityModal({
   }, [pool.nativeDecimal]);
 
   useEffect(() => {
-    if (!utxoChain && wallet?.provider) {
+    if (!utxoChain && wallet?.provider && isEVMAddress(wallet.address)) {
       loadMetadata();
     }
-  }, [utxoChain, wallet?.provider, loadMetadata]);
+  }, [utxoChain, wallet?.provider, wallet?.address, loadMetadata, pool.asset]);
 
   useEffect(() => {
     if (utxoChain && wallet?.address) {
@@ -132,11 +142,28 @@ export default function AddLiquidityModal({
 
   useEffect(() => {
     if (!utxoChain && tokenBalance?.value) {
-      setAssetBalance(Number(
-        formatUnits(tokenBalance.value, tokenBalance.decimals)
-      ));
+      setAssetBalance(
+        Number(formatUnits(tokenBalance.value, tokenBalance.decimals)),
+      );
     }
   }, [utxoChain, tokenBalance]);
+
+  useEffect(() => {
+    if (pool.asset.split(".")[0].toLowerCase() === "thor" && wallet?.address) {
+      setBalanceLoading(true);
+      getThorchainBalance(wallet.address)
+        .then((balance) => {
+          const balanceAmount = balance.amount.amount();
+          const balanceBigInt = BigInt(balanceAmount.toString());
+          const formattedBalance = Number(
+            formatUnits(balanceBigInt, poolNativeDecimal),
+          );
+          setAssetBalance(formattedBalance);
+        })
+        .catch(console.error)
+        .finally(() => setBalanceLoading(false));
+    }
+  }, [wallet?.address, getThorchainBalance, poolNativeDecimal]);
 
   const handleValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
@@ -152,11 +179,8 @@ export default function AddLiquidityModal({
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
     const partialAmount = assetBalance * finalPercentage;
-    const finalAmount =
-      percentage === 1 ? partialAmount - assetMinimalUnit : partialAmount;
-
-    const formattedAmount = Number(
-      finalAmount.toFixed(poolNativeDecimal),
+    const formattedAmount = (
+      Number(partialAmount.toFixed(poolNativeDecimal)) - assetMinimalUnit
     ).toString();
     setAssetAmount(formattedAmount);
   };
@@ -167,27 +191,21 @@ export default function AddLiquidityModal({
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
     const partialAmount = runeBalance * finalPercentage;
-    const finalAmount =
-      percentage === 1 ? partialAmount - runeMinimalUnit : partialAmount;
-
-    const formattedAmount = Number(
-      finalAmount.toFixed(8),
+    const formattedAmount = (
+      Number(partialAmount.toFixed(8)) - runeMinimalUnit
     ).toString();
     setRuneAmount(formattedAmount);
   };
 
   const isValidAmount = useMemo(() => {
-    // if (!assetAmount || parseFloat(assetAmount) <= 0) return false;
-    // if (isDualSided && (!runeAmount || parseFloat(runeAmount) <= 0))
-    //   return false;
-
     const amount = parseFloat(assetAmount);
     const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE - assetMinimalUnit;
     const isAssetAmountValid = amount > 0 && amount <= maxAllowed;
 
     if (isDualSided) {
       const runeAmt = parseFloat(runeAmount);
-      const runeMaxAllowed = runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
+      const runeMaxAllowed =
+        runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
       const isRuneAmountValid = runeAmt > 0 && runeAmt <= runeMaxAllowed;
       // return isAssetAmountValid && isRuneAmountValid;
       // TODO: remove temp condition atfer Mutichain Wallet connection.
@@ -203,21 +221,30 @@ export default function AddLiquidityModal({
       return;
     }
 
-    const parsedAmount = parseFloat(assetAmount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      return;
-    }
-
+    const parsedAssetAmount = parseFloat(assetAmount);
     const parsedRuneAmount = isDualSided ? parseFloat(runeAmount) : undefined;
+
+    if (
+      isDualSided &&
+      (!parsedRuneAmount || parsedRuneAmount <= 0) &&
+      (!parsedAssetAmount || parsedAssetAmount <= 0)
+    ) {
+      throw new Error("Invalid RUNE amount.");
+    }
+    if (!isDualSided && (!parsedAssetAmount || parsedAssetAmount <= 0)) {
+      throw new Error("Invalid asset amount.");
+    }
 
     try {
       setIsSubmitting(true);
 
-      let pairedAddress;
-      if (parsedRuneAmount === 0) {
-        pairedAddress = getNetworkAddressFromLocalStorage("thor");
-      } else if (parsedAmount === 0) {
-        pairedAddress = getNetworkAddressFromLocalStorage(pool.asset.split(".")[0].toLowerCase());
+      let pairedAddress = undefined;
+      if (parsedRuneAmount === 0 || Number.isNaN(parsedRuneAmount)) {
+        pairedAddress = getNetworkAddressFromLocalStorage("thor") || undefined;
+      } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
+        const identifier = pool.asset.split(".")[0].toLowerCase();
+        pairedAddress =
+          getNetworkAddressFromLocalStorage(identifier) || undefined;
       }
 
       if (isDualSided && !pairedAddress) {
@@ -226,9 +253,9 @@ export default function AddLiquidityModal({
 
       const hash = await addLiquidity({
         asset: pool.asset,
-        amount: parsedAmount,
+        amount: parsedAssetAmount,
         runeAmount: parsedRuneAmount,
-        pairedAddress: pairedAddress || (isDualSided ? wallet.address : undefined),
+        pairedAddress,
       });
 
       if (hash) {
@@ -244,8 +271,8 @@ export default function AddLiquidityModal({
     }
   };
 
-  const isBalanceLoading = balanceLoading || utxoLoading;
-  const error = liquidityError || tokenError || utxoError;
+  const isBalanceLoading = balanceLoading || utxoLoading || thorchainLoading;
+  const error = liquidityError || tokenError || utxoError || thorchainError;
   const assetSymbol = getAssetShortSymbol(pool.asset);
   const usdValue = assetAmount
     ? parseFloat(pool.assetPriceUSD) * parseFloat(assetAmount)
@@ -276,7 +303,9 @@ export default function AddLiquidityModal({
   ) => {
     const tolerance = 0.01;
     if (targetPercentage === 100) {
-      return Math.abs(currentPercentage - (MAX_BALANCE_PERCENTAGE * 100)) <= tolerance;
+      return (
+        Math.abs(currentPercentage - MAX_BALANCE_PERCENTAGE * 100) <= tolerance
+      );
     }
     return Math.abs(currentPercentage - targetPercentage) <= tolerance;
   };

@@ -6,6 +6,7 @@ import { normalizeAddress, SupportedChain } from "@/app/utils";
 import { Address, parseUnits } from "viem";
 import { useContracts } from "./useContracts";
 import { useUTXO } from "./useUTXO";
+import { useThorchain } from "./useThorchain";
 import {
   getInboundAddresses,
   validateInboundAddress,
@@ -52,6 +53,7 @@ export function useLiquidityPosition({
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = useState<MemberPool | null>(null);
   const [pool, setPool] = useState<PoolDetail>(poolProp);
+  const thorChainClient = useThorchain({ wallet });
 
   // Parse asset details
   const [assetChain, assetIdentifier] = useMemo(
@@ -182,7 +184,6 @@ export function useLiquidityPosition({
         const inbound = inboundAddresses?.find(
           (i) => i.chain === assetChain.toUpperCase(),
         );
-
         if (!inbound) {
           throw new Error(`No inbound address found for ${assetChain}`);
         }
@@ -195,6 +196,15 @@ export function useLiquidityPosition({
           affiliate,
           feeBps,
         );
+
+        if (wallet.network === "thorchain") {
+          return await thorChainClient.deposit({
+            pool,
+            recipient: "",
+            amount: runeAmount || amount,
+            memo: memo,
+          });
+        }
 
         // Handle UTXO chain transactions
         if (utxoChain) {
@@ -271,6 +281,7 @@ export function useLiquidityPosition({
       isNativeAsset,
       utxoChain,
       addUTXOLiquidity,
+      thorChainClient,
     ],
   );
 
@@ -300,6 +311,7 @@ export function useLiquidityPosition({
         const inbound = inboundAddresses?.find(
           (i) => i.chain === assetChain.toUpperCase(),
         );
+        const runeInbound = inboundAddresses?.find((i) => i.chain === "THOR");
 
         if (!inbound) {
           throw new Error(`No inbound address found for ${assetChain}`);
@@ -316,6 +328,16 @@ export function useLiquidityPosition({
           percentage,
           withdrawAsset,
         );
+
+        // Handle Thorchain withdrawals
+        if (wallet.network === "thorchain") {
+          return await thorChainClient.deposit({
+            pool,
+            recipient: "",
+            amount: getMinAmountByChain(supportedChain),
+            memo: memo,
+          });
+        }
 
         // Handle UTXO chain withdrawals
         if (utxoChain) {
@@ -368,6 +390,7 @@ export function useLiquidityPosition({
       utxoChain,
       removeUTXOLiquidity,
       pool.nativeDecimal,
+      thorChainClient,
     ],
   );
 

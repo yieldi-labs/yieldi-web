@@ -41,19 +41,22 @@ export function useWalletConnection() {
     setDetectedWallets(walletsWithIcons);
   }, []);
 
-  const saveNetworkAddressToLocalStorage = (network: string, address: string) => {
+  const saveNetworkAddressToLocalStorage = (
+    network: string,
+    address: string,
+  ) => {
     let thorchainIdentifier = "";
     chainConfig.forEach((chain) => {
       if (chain.thorchainIdentifier === network) {
-        thorchainIdentifier = chain.thorchainIdentifier
+        thorchainIdentifier = chain.thorchainIdentifier;
       }
     });
     localStorage.setItem(`wallet-${thorchainIdentifier}-address`, address);
-  }
+  };
 
   const getNetworkAddressFromLocalStorage = (thorchainIdentifier: string) => {
     return localStorage.getItem(`wallet-${thorchainIdentifier}-address`);
-  }
+  };
 
   const handleConnect = async (wallet: WalletOption) => {
     if (!selectedChain) {
@@ -99,8 +102,13 @@ export function useWalletConnection() {
       const isVultisig = detectedWalletForChain.id.includes("vultisig");
       const connectedWallet = await detectedWalletForChain.connect();
 
+      console.log("Connected Wallet:", connectedWallet);
+
       if (isWalletConnect) {
-        saveNetworkAddressToLocalStorage(selectedChainConfig?.thorchainIdentifier!, connectedWallet.address);
+        saveNetworkAddressToLocalStorage(
+          selectedChainConfig?.thorchainIdentifier!,
+          connectedWallet.address,
+        );
         setWalletState({
           provider: connectedWallet.provider,
           address: connectedWallet.address,
@@ -140,7 +148,10 @@ export function useWalletConnection() {
         }
       }
 
-      saveNetworkAddressToLocalStorage(selectedChainConfig?.thorchainIdentifier!, connectedWallet.address);
+      saveNetworkAddressToLocalStorage(
+        selectedChainConfig?.thorchainIdentifier!,
+        connectedWallet.address,
+      );
       setWalletState({
         provider: provider,
         address: connectedWallet.address,

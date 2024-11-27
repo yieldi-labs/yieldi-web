@@ -173,3 +173,7 @@ export const parseAssetString = (asset: string): [string, string] => {
   const [chain = "", identifier = ""] = asset.split(".");
   return [chain, identifier];
 };
+
+export const isEVMAddress = (address: string): boolean => {
+  return address.startsWith("0x") && address.length === 42;
+};
