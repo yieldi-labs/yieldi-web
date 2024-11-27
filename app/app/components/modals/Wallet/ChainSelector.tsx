@@ -1,7 +1,6 @@
 import { cloneElement } from "react";
 import { UIComponents } from "@shared/components";
 import { ChainType } from "@/types/global";
-import { ChainKey } from "@/utils/wallet/constants";
 
 interface ChainSelectorProps {
   chains: ChainType[];
