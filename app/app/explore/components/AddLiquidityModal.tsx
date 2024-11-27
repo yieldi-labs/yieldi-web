@@ -338,24 +338,30 @@ export default function AddLiquidityModal({
 
         {/* Toggle between Single-sided and Dual-sided */}
         <div className="flex gap-4 mb-4">
-          <button
-            className={twMerge(
-              "px-4 py-2 rounded",
-              !isDualSided ? "bg-primary text-white" : "bg-gray-200",
-            )}
-            onClick={() => setIsDualSided(false)}
-          >
-            Single-sided
-          </button>
-          <button
-            className={twMerge(
-              "px-4 py-2 rounded",
-              isDualSided ? "bg-primary text-white" : "bg-gray-200",
-            )}
-            onClick={() => setIsDualSided(true)}
-          >
-            Dual-sided
-          </button>
+          <div className="flex justify-between items-center flex-1 rounded-3xl border-2 border-neutral-50">
+            <button
+              className={twMerge(
+                "flex justify-center items-center gap-2 flex-1 py-2 rounded-3xl text-lg",
+                !isDualSided
+                  ? "bg-neutral-50 text-neutral-800 shadow-toggle"
+                  : "bg-transparent text-neutral-800 border border-transparent shadow-none",
+              )}
+              onClick={() => setIsDualSided(false)}
+            >
+              {assetSymbol}
+            </button>
+            <button
+              className={twMerge(
+                "flex justify-center items-center gap-2 flex-1 py-2 rounded-3xl text-lg",
+                isDualSided
+                  ? "bg-neutral-50 text-neutral-800 shadow-toggle"
+                  : "bg-transparent text-neutral-800 border border-transparent shadow-none",
+              )}
+              onClick={() => setIsDualSided(true)}
+            >
+              {assetSymbol} + RUNE
+            </button>
+          </div>
         </div>
 
         <div className="bg-white rounded-xl p-4 mb-6">
