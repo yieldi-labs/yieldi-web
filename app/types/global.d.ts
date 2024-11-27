@@ -1,3 +1,5 @@
+import { ChainKey, WalletKey } from "@/utils/wallet/constants";
+
 interface WalletOption {
   id: string;
   name: string;
@@ -25,4 +27,26 @@ interface LiquidityProvider {
   pending_asset: string;
   rune_deposit_value: string;
   asset_deposit_value: string;
+}
+
+interface WalletType {
+  id: WalletKey;
+  name: string;
+  chains: ChainKey[];
+  icon: JSX.Element;
+  // isDetected?: any;
+  isAvailable: boolean;
+  downloadUrl?: string;
+  chainConnect: {
+    [key in ProviderKey]?: (
+      ethConnectors?: GetConnectorsReturnType
+    ) => Promise<any>;
+  };
+}
+
+interface ChainType {
+  icon: SVGProps<SVGSVGElement>;
+  name: ChainKey;
+  providerType: ProviderKey;
+  chainId?: number;
 }

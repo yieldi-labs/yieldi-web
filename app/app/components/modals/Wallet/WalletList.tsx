@@ -1,23 +1,23 @@
 import { useState } from "react";
 import Wallet from "./Wallet";
+import { WalletType } from "@/types/global";
+import { SUPPORTED_WALLETS } from "@/utils/wallet/constants";
 
 interface WalletListProps {
-  detected: WalletOption[];
-  undetected: WalletOption[];
-  isWalletValidForChain: (name: string) => boolean;
-  onWalletSelect: (wallet: WalletOption) => void;
+  detected: WalletType[];
+  undetected: WalletType[];
+  isWalletValidForChain: (wallet: WalletType) => boolean;
+  onWalletSelect: (wallet: WalletType) => void;
 }
 
 interface WalletSectionProps {
   title: string;
-  wallets: WalletOption[];
-  isWalletValidForChain: (name: string) => boolean;
-  onWalletSelect: (wallet: WalletOption) => void;
+  wallets: WalletType[];
+  isWalletValidForChain: (wallet: WalletType) => boolean;
+  onWalletSelect: (wallet: WalletType) => void;
 }
 
 const WalletList = ({
-  detected,
-  undetected,
   isWalletValidForChain,
   onWalletSelect,
 }: WalletListProps) => (
@@ -25,24 +25,23 @@ const WalletList = ({
     <h3 className="text-base text-neutral-900 font-medium font-gt-america">
       Select Wallet
     </h3>
+    <WalletSection
+      title="Detected"
+      wallets={Object.values(SUPPORTED_WALLETS)
+        .filter((wallet) => wallet.isAvailable)
+        .sort((a, b) => a.id.localeCompare(b.id))}
+      isWalletValidForChain={isWalletValidForChain}
+      onWalletSelect={onWalletSelect}
+    />
 
-    {detected.length > 0 && (
-      <WalletSection
-        title="Detected"
-        wallets={detected.sort((a, b) => a.name.localeCompare(b.name))}
-        isWalletValidForChain={isWalletValidForChain}
-        onWalletSelect={onWalletSelect}
-      />
-    )}
-
-    {undetected.length > 0 && (
-      <WalletSection
-        title="Other"
-        wallets={undetected.sort((a, b) => a.name.localeCompare(b.name))}
-        isWalletValidForChain={isWalletValidForChain}
-        onWalletSelect={onWalletSelect}
-      />
-    )}
+    <WalletSection
+      title="Other"
+      wallets={Object.values(SUPPORTED_WALLETS)
+        .filter((wallet) => !wallet.isAvailable)
+        .sort((a, b) => a.id.localeCompare(b.id))}
+      isWalletValidForChain={isWalletValidForChain}
+      onWalletSelect={onWalletSelect}
+    />
   </div>
 );
 
@@ -53,11 +52,8 @@ function WalletSection({
   onWalletSelect,
 }: WalletSectionProps) {
   const [selectedWalletId, setSelectedWalletId] = useState("");
-  const handleWalletSelect = (wallet: WalletOption) => {
-    if (
-      title != "Other" ||
-      wallet.id.toLocaleLowerCase().includes("walletconnect")
-    ) {
+  const handleWalletSelect = (wallet: WalletType) => {
+    if (wallet.isAvailable) {
       setSelectedWalletId(wallet.id);
       onWalletSelect(wallet);
     } else {
@@ -72,7 +68,7 @@ function WalletSection({
           <Wallet
             key={wallet.id}
             wallet={wallet}
-            isSupported={isWalletValidForChain(wallet.name)}
+            isSupported={isWalletValidForChain(wallet)}
             onSelect={() => handleWalletSelect(wallet)}
             className={`${
               wallet.id === selectedWalletId

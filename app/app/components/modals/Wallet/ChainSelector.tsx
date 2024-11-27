@@ -1,10 +1,12 @@
 import { cloneElement } from "react";
 import { UIComponents } from "@shared/components";
+import { ChainType } from "@/types/global";
+import { ChainKey } from "@/utils/wallet/constants";
 
 interface ChainSelectorProps {
-  chains: ChainConfig[];
-  selectedChains: string[]; 
-  onChainSelect: (chainIds: string[]) => void; 
+  chains: ChainType[];
+  selectedChains: ChainType[];
+  onChainSelect: (chains: ChainType[]) => void;
 }
 
 export function ChainSelector({
@@ -12,11 +14,12 @@ export function ChainSelector({
   selectedChains,
   onChainSelect,
 }: ChainSelectorProps) {
-  const handleSelect = (chainId: string) => {
-    if (selectedChains.includes(chainId)) {
-      onChainSelect(selectedChains.filter((id) => id !== chainId));
+  
+  const handleSelect = (chainKey: ChainType) => {
+    if (selectedChains.includes(chainKey)) {
+      onChainSelect(selectedChains.filter((chain) => chain !== chainKey));
     } else {
-      onChainSelect([...selectedChains, chainId]);
+      onChainSelect([...selectedChains, chainKey]);
     }
   };
 
@@ -31,12 +34,12 @@ export function ChainSelector({
         {chains.map((chain) => (
           <button
             className={`flex items-center justify-center border-[3px] rounded-2xl p-[1px] transition-all duration-75 ${
-              selectedChains.includes(chain.id)
+              selectedChains.includes(chain)
                 ? "border-primary"
                 : "border-transparent"
             }`}
-            key={chain.id}
-            onClick={() => handleSelect(chain.id)}
+            key={chain.name}
+            onClick={() => handleSelect(chain)}
           >
             <UIComponents.Tooltip text={chain.name}>
               {cloneElement(chain.icon)}

@@ -17,11 +17,11 @@ export default function Modal({
   );
   return (
     <div
-      className="fixed z-10 inset-0 w-auto h-full overflow-y-auto bg-[rgb(0,0,0,0.5)] flex justify-center text-left"
+      className="fixed z-30 inset-0 w-auto h-full overflow-y-auto bg-[rgb(0,0,0,0.5)] flex justify-center text-left"
       onClick={onClose}
     >
       <div
-        className="relative z-20 max-w-2xl mx-auto mb-auto mt-[5vh] rounded-large border-4 border-white bg-secondary"
+        className="relative max-w-2xl mx-auto mb-auto mt-[5vh] rounded-large border-4 border-white bg-secondary"
         onClick={(e) => e.stopPropagation()}
         style={style}
       >

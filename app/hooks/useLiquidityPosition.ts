@@ -45,7 +45,7 @@ const feeBps = 0;
 export function useLiquidityPosition({
   pool: poolProp,
 }: UseLiquidityPositionProps) {
-  const { walletsState, getWallet } = useAppState();
+  const { walletsState, getProviderTypeFromChain } = useAppState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [position, setPosition] = useState<MemberPool | null>(null);
@@ -57,7 +57,7 @@ export function useLiquidityPosition({
     [pool.asset]
   );
 
-  const wallet = getWallet(assetChain);
+  const wallet = walletsState![getProviderTypeFromChain(assetChain)];
   // Determine if this is a UTXO chain and which one
   const utxoChain = useMemo(() => {
     const chain = assetChain.toLowerCase();

@@ -3,7 +3,6 @@ import { useState } from "react";
 import Modal from "@/app/modal";
 import WalletList from "./WalletList";
 import { useAppState } from "@/utils/context";
-import { chainConfig } from "@/utils/wallet/chainConfig";
 import { ChainSelector } from "./ChainSelector";
 import {
   useWalletList,
@@ -14,50 +13,40 @@ import {
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
 import HardwareWallets from "./HardwareWallets";
+import { WalletType } from "@/types/global";
+import { ChainKey, CHAINS } from "@/utils/wallet/constants";
 
 export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
-  const {
-    toggleWalletModal,
-    isWalletModalOpen,
-    setWalletsState,
-    walletsState,
-  } = useAppState();
+  const { toggleWalletModal, isWalletModalOpen, setWalletsState } =
+    useAppState();
   const {
     selectedChains,
-    detectedWallets,
     setSelectedChains,
     handleConnect,
     selectedWallet,
     setSelectedWallet,
-  } = useWalletConnection(setWalletsState, walletsState, toggleWalletModal);
-  const { detected, undetected, isWalletValidForChain } = useWalletList(
-    selectedChains,
-    detectedWallets
-  );
+  } = useWalletConnection(setWalletsState, toggleWalletModal);
+  const { detected, undetected, isWalletValidForChain } =
+    useWalletList(selectedChains);
 
   const isHWDisabled = selectedChains.some((chain) =>
-    ["solana", "kujira", "binance-smart-chain"].includes(chain)
+    [ChainKey.SOLANA, ChainKey.KUJIRA, ChainKey.BSCCHAIN].includes(chain.name)
   );
 
-  const handleWalletSelect = (wallet: WalletOption): void => {
-    const [walletId] = wallet.id.split("-");
+  const handleWalletSelect = (wallet: WalletType): void => {
     setSelectedWallet(wallet);
-    const validChains = chainConfig
-      .filter(
-        ({ wallets }) =>
-          wallets.findIndex(({ id }) => {
-            const [itemId] = id.split("-");
-            return walletId === itemId;
-          }) >= 0
-      )
-      .map(({ id }) => id);
-    if (!selectedChains.length) setSelectedChains(validChains);
+    const validChains = wallet.chains;
+    if (!selectedChains.length)
+      setSelectedChains(
+        CHAINS.filter(({ name }) => validChains.includes(name))
+      );
   };
 
   const handleConnectWallet = () => {
     if (selectedWallet) handleConnect(selectedWallet);
   };
+
   const handleHardwareWalletSelect = async (wallet: any) => {
     setWalletsState(((prevState: ConnectedWalletsState) => ({
       ...prevState,
@@ -73,7 +62,7 @@ export default function WalletModal() {
     <Modal onClose={toggleWalletModal} title="Connect Wallet">
       <div className="flex flex-col gap-4">
         <ChainSelector
-          chains={chainConfig}
+          chains={CHAINS}
           selectedChains={selectedChains}
           onChainSelect={setSelectedChains}
         />

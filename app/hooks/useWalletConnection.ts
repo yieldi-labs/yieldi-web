@@ -1,150 +1,110 @@
-import { useState, useEffect } from "react";
-import { detectWallets } from "@/utils/wallet/detectedWallets";
-import { chainConfig, evmChains } from "@/utils/wallet/chainConfig";
+import { useState } from "react";
 import { useConnectors, useSwitchChain } from "wagmi";
+import { ProviderKey, WalletKey } from "@/utils/wallet/constants";
+import { ChainType, WalletType } from "@/types/global";
 
 export interface WalletState {
   provider: any;
   address: string;
-  network: string[];
-  walletId: string;
+  network: Set<string>;
+  walletId: WalletKey;
   chain?: string;
 }
+
 export interface ConnectedWalletsState {
   [key: string]: WalletState;
 }
 
 export function useWalletConnection(
-  setWalletsState: any,
-  walletsState: any,
+  setWalletsState: React.Dispatch<React.SetStateAction<ConnectedWalletsState>>,
   toggleWalletModal: () => void
 ) {
-  const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
-  const [selectedChains, setSelectedChains] = useState<string[]>([]);
-  const [selectedWallet, setSelectedWallet] = useState<WalletOption>();
-  const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
+  const [selectedChains, setSelectedChains] = useState<ChainType[]>([]);
+  const [selectedWallet, setSelectedWallet] = useState<WalletType>();
 
-  useEffect(() => {
-    const wallets = detectWallets(ethConnectors);
-    const walletsWithIcons = wallets
-      .map((detectedWallet) => {
-        for (const chain of chainConfig) {
-          const matchingWallet = chain.wallets.find(
-            (w) => w.id === detectedWallet.id
-          );
-          if (matchingWallet) {
-            return {
-              ...detectedWallet,
-              icon: matchingWallet.icon,
-              name: matchingWallet.name,
-              downloadUrl: matchingWallet.downloadUrl,
-            };
-          }
-        }
-        return null;
-      })
-      .filter((w): w is NonNullable<typeof w> => w !== null);
+  const handleProviderConnection = async (
+    wallet: WalletType,
+    providerType: ProviderKey,
+    ethConnectors: any
+  ) => {
+    if (!wallet.chainConnect[providerType]) return null;
 
-    setDetectedWallets(walletsWithIcons);
-  }, []);
+    const connectedWallet =
+      providerType === ProviderKey.EVM
+        ? await wallet.chainConnect[providerType]!(ethConnectors)
+        : await wallet.chainConnect[providerType]!();
+    if (!connectedWallet) return;
 
-  const handleConnect = async (wallet: WalletOption) => {
+    const provider = connectedWallet.provider;
+
+    return {
+      provider,
+      address: connectedWallet.address,
+    };
+  };
+  const updateWalletState = (
+    prevState: ConnectedWalletsState,
+    walletId: WalletKey,
+    providerType: ProviderKey,
+    provider: any,
+    address: string,
+    network: string
+  ): ConnectedWalletsState => {
+    return {
+      ...prevState,
+      [providerType]: {
+        provider,
+        walletId,
+        address,
+        network: new Set([
+          ...(prevState[providerType]?.network || []),
+          network,
+        ]),
+      },
+    };
+  };
+  const handleConnect = async (wallet: WalletType) => {
     if (!selectedChains.length) {
       console.error("No chains selected.");
       return;
     }
 
     try {
-      const chainIdentifiers: Record<string, string> = {
-        solana: "solana",
-        thorchain: "thorchain",
-        litecoin: "ltc",
-        dogecoin: "doge",
-        bitcoincash: "bch",
-        bitcoin: "utxo",
-      };
-      const detectedWalletForChains = selectedChains.every((chainId) => {
-        const identifier = chainIdentifiers[chainId];
-        return detectedWallets.some((w) => {
-          if (!identifier) {
-            return w.id.split("-")[0] === wallet.id.split("-")[0];
-          }
-          return (
-            (w.id.includes(identifier) || wallet.id.includes(identifier)) &&
-            w.id.split("-")[0] === wallet.id.split("-")[0]
-          );
-        });
-      });
-      if (!detectedWalletForChains) {
+      if (!wallet.isAvailable) {
         window.open(wallet.downloadUrl, "_blank");
         return;
       }
 
-      const selectedChainConfigs = selectedChains.map((chainId) =>
-        chainConfig.find((chain) => chain.id === chainId)
+      if (!selectedWallet) return;
+
+      const providerTypesSet = new Set(
+        selectedChains.map((chain) => chain.providerType)
       );
-      let i = 0;
-      for (const selectedChainConfig of selectedChainConfigs) {
-        let walletToConnect = null;
-        if (evmChains.some((chain) => chain.id === selectedChainConfig?.id)) {
-          walletToConnect = detectedWallets.find(
-            (w) => w.id === wallet.name.toLocaleLowerCase()
-          );
-        } else {
-          walletToConnect = detectedWallets.find(
-            (w) =>
-              w.id ===
-                `${wallet.id}-${selectedChainConfig?.id.toLowerCase()}` ||
-              w.id === `${wallet.id}`
-          );
-        }
-        if (!walletToConnect) return;
-        if (!selectedChainConfig) continue;
 
-        const connectedWallet = await walletToConnect.connect();
-        const provider =
-          wallet.id.includes("vultisig") || wallet.id.includes("-")
-            ? connectedWallet.provider
-            : await connectedWallet.provider.getProvider();
+      for (const providerType of providerTypesSet) {
+        const connection = await handleProviderConnection(
+          wallet,
+          providerType,
+          ethConnectors
+        );
+        if (!connection) continue;
 
-        const chainId =
-          walletToConnect.id === "vultisig"
-            ? await connectedWallet.provider.request({
-                method: "eth_chainId",
-              })
-            : walletToConnect.id.includes("-")
-            ? undefined
-            : await connectedWallet.provider.getChainId();
-
-        if (
-          selectedChainConfig.chainId &&
-          chainId !== selectedChainConfig.chainId
-        ) {
-          if (connectedWallet.provider.id === "xdefi") {
-            await provider.request({
-              method: "wallet_switchEthereumChain",
-              params: [{ chainId: selectedChainConfig.chainId }],
-            });
-          }
-
-          switchChain({ chainId: selectedChainConfig.chainId });
-        }
-
-        setWalletsState((prevState: ConnectedWalletsState) => ({
-          ...prevState,
-          [walletToConnect.id]: {
-            provider,
-            walletId: walletToConnect.id,
-            address: connectedWallet.address,
-            network: [selectedChainConfig.id],
-          },
-        }));
+        setWalletsState((prevState) =>
+          updateWalletState(
+            prevState,
+            selectedWallet.id,
+            providerType,
+            connection.provider,
+            connection.address,
+            providerType
+          )
+        );
       }
 
       toggleWalletModal();
     } catch (error) {
-      console.error(`Error connecting to ${wallet.name}:`, error);
+      console.error(`Error connecting to ${wallet.id}:`, error);
     }
   };
 
@@ -152,8 +112,8 @@ export function useWalletConnection(
     selectedChains,
     setSelectedChains,
     handleConnect,
-    detectedWallets,
     selectedWallet,
     setSelectedWallet,
+    updateWalletState,
   };
 }

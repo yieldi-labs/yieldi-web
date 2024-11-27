@@ -4,11 +4,12 @@ import Btc from "@ledgerhq/hw-app-btc";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { IconSvg, WalletSvg } from "@/svg";
 import { useAppState } from "@/utils/context";
+import { ChainType } from "@/types/global";
 
 interface HardwareWalletsProps {
   onBack: () => void;
   onWalletSelect: (wallet: any) => void;
-  selectedChains: string[];
+  selectedChains: ChainType[];
   isDisabled: boolean;
 }
 
@@ -76,8 +77,8 @@ export default function HardwareWallets({
       <div className="grid grid-cols-2 gap-4">
         {selectedChains.map((chain) => (
           <button
-            key={chain}
-            onClick={() => connectLedger(chain)}
+            key={chain.name}
+            onClick={() => connectLedger(chain.name)}
             disabled={isConnecting || isDisabled}
             className={` 
               bg-white p-[12px] flex gap-4 border-[2px] rounded-2xl 

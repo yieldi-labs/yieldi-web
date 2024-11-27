@@ -30,7 +30,8 @@ export default function AddLiquidityModal({
   pool,
   onClose,
 }: AddLiquidityModalProps) {
-  const { toggleWalletModal, getWallet } = useAppState();
+  const { toggleWalletModal, getProviderTypeFromChain, walletsState } =
+    useAppState();
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
   });
@@ -40,7 +41,8 @@ export default function AddLiquidityModal({
     () => parseAssetString(pool.asset),
     [pool.asset]
   );
-  const selectedWallet = getWallet(assetChain);
+  const providerKey = getProviderTypeFromChain(assetChain);
+  const selectedWallet = walletsState![providerKey];
   const [assetAmount, setAssetAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
   const [assetBalance, setAssetBalance] = useState(0);
