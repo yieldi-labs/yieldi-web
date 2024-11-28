@@ -31,8 +31,8 @@ export const TopCard: React.FC<TopCardProps> = ({
   const isMobile = useMobileDetection();
 
   return (
-    <TranslucentCard className="md:p-4 p-1 rounded-2xl flex flex-col items-start">
-      <div className="flex items-center md:mb-7 p-1 md:p-0 mb-2">
+    <TranslucentCard className="md:p-4 p-2 rounded-2xl flex flex-col items-start">
+      <div className="flex items-center md:mb-7 md:p-0 mb-2">
         <Image
           src={getLogoPath(asset)}
           alt={`${getAssetSymbol(asset)} logo`}
