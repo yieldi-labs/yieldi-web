@@ -225,7 +225,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
   const renderPositionContent = () => (
     <>
-      <div className="mb-8 bg-white rounded-xl w-full p-3">
+      <div className="mb-2 md:mb-8 bg-white rounded-xl w-full p-3">
         <div className="text-gray-700 font-medium text-lg mb-2">DEPOSIT</div>
         <div className="flex justify-between">
           <div className="text-2xl font-medium text-gray-900">
@@ -237,7 +237,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         </div>
       </div>
 
-      <div className="mb-8 bg-white rounded-xl w-full p-3">
+      <div className="md:mb-8 bg-white rounded-xl w-full p-3">
         <div className="text-gray-700 font-medium text-lg mb-2">GAIN</div>
         <div className="flex justify-between">
           <div className="text-2xl font-medium text-gray-900">
@@ -268,15 +268,15 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     <div className="md:mx-16">
       <Link
         href="/explore/pools"
-        className="inline-flex items-center mb-8 text-foreground text-2xl font-bold font-gt-america-ext hover:opacity-50 transition-opacity"
+        className="inline-flex items-center md:mb-8 text-foreground md:text-2xl font-bold font-gt-america-ext hover:opacity-50 transition-opacity"
       >
         <BackArrow className="mr-2" />
         ALL POOLS
       </Link>
 
-      <div className="grid grid-cols-12 gap-20">
-        <div className="col-span-6">
-          <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">
+      <div className="grid grid-cols-12 md:gap-20">
+        <div className="col-span-12 md:col-span-6">
+          <h2 className="my-2 md:mt-0 md:text-2xl font-medium md:mb-6 text-foreground font-gt-america-ext">
             OVERVIEW
           </h2>
 
@@ -285,7 +285,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             formattedTVL={formattedTVL}
             apr={parseFloat(pool.poolAPY)}
           >
-            <div className="space-y-4 w-full mt-8">
+            <div className="space-y-4 w-full mt-8 px-3 md:px-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-500">Volume/Depth</span>
                 <span className="font-medium">
@@ -301,12 +301,12 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           </TopCard>
         </div>
 
-        <div className="col-span-6">
-          <h2 className="text-2xl font-medium mb-6 text-foreground font-gt-america-ext">
+        <div className="col-span-12 md:col-span-6">
+          <h2 className="my-2 md:mt-0 md:text-2xl font-medium md:mb-6 text-foreground font-gt-america-ext">
             YOUR POSITION
           </h2>
 
-          <TranslucentCard className="p-6 rounded-2xl flex flex-col shadow-md relative">
+          <TranslucentCard className="p-2 md:p-6 rounded-2xl flex flex-col shadow-md relative">
             {showLoadingState && (
               <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

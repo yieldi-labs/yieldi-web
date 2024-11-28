@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
-import { PoolDetail, PoolDetails } from "@/midgard";
+import { PoolDetails } from "@/midgard";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
@@ -24,6 +24,7 @@ import TopCards from "@/app/components/TopCards";
 import { SortDirection } from "@shared/components/ui/types";
 import { SortableHeader } from "@shared/components/ui";
 import Link from "next/link";
+import LiquidityPoolCardMobile from "../components/LiquidityPoolCardMobile";
 
 interface LiquidityPoolsProps {
   pools: PoolDetails;
@@ -118,56 +119,6 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     apr: parseFloat(pool.poolAPY),
   }));
 
-  const MobileCard = ({ pool }: { pool: PoolDetail }) => (
-    <TranslucentCard className="rounded-xl mb-1.5">
-      <div className="flex items-center w-full flex-col p-1">
-        <div className="w-full flex items-center mb-2">
-          <Image
-            src={getLogoPath(pool.asset)}
-            alt={`${getAssetSymbol(pool.asset)} logo`}
-            width={26}
-            height={26}
-            className="rounded-full"
-          />
-          <span className="ml-3 font-medium text-sm md:text-base">
-            {getAssetSymbol(pool.asset)}
-          </span>
-        </div>
-        <div className="flex flex-row w-full gap-1">
-          <div className="flex-1 p-2 rounded-xl bg-white">
-            <p className="text-sm text-neutral mb-1">
-              {addDollarSignAndSuffix(calculateVolumeUSD(pool, runePriceUSD))}
-            </p>
-            <p className="text-xs text-neutral-800">Volume (24h)</p>
-          </div>
-          <div className="flex-1 p-2 rounded-xl bg-white">
-            <p className="text-sm text-neutral mb-1">
-              {formatNumber(
-                calculateVolumeDepthRatio(pool, runePriceUSD) * 100,
-                2,
-                2,
-              )}
-              %
-            </p>
-            <p className="text-xs text-neutral-800">Volume/Depth</p>
-          </div>
-          <div className="flex-1 p-2 rounded-xl bg-white">
-            <p className="text-sm text-neutral mb-1">
-              {getFormattedPoolTVL(pool, runePriceUSD)}
-            </p>
-            <p className="text-xs text-neutral-800">TVL</p>
-          </div>
-          <div className="flex-1 p-2 rounded-xl bg-white">
-            <p className="text-sm text-neutral mb-1">
-              {formatNumber(parseFloat(pool.poolAPY) * 100, 2, 2)}%
-            </p>
-            <p className="text-xs text-neutral-800">APR</p>
-          </div>
-        </div>
-      </div>
-    </TranslucentCard>
-  );
-
   const MobileRow = ({
     index,
     style,
@@ -178,7 +129,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     const pool = sortedPools[index];
     return (
       <div style={style}>
-        <MobileCard pool={pool} />
+        <LiquidityPoolCardMobile pool={pool} runePriceUSD={runePriceUSD} />
       </div>
     );
   };
@@ -188,7 +139,7 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
       <div className="w-full">
         {/* Hidden measurement div */}
         <div ref={measureRef}>
-          <MobileCard pool={sortedPools[0]} />
+          <LiquidityPoolCardMobile pool={sortedPools[0]} runePriceUSD={runePriceUSD} />
         </div>
 
         {/* Sort header */}
