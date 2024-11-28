@@ -98,7 +98,7 @@ export function useThorchain({ wallet }: UseThorchainProps) {
         };
 
         return new Promise<string>((resolve, reject) => {
-          window.xfi?.thorchain.request(
+          wallet.provider.request(
             {
               method: "deposit",
               params: [depositParams],
