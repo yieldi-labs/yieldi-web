@@ -41,6 +41,8 @@ export function useWalletConnection() {
     setDetectedWallets(walletsWithIcons);
   }, []);
 
+  // TODO: this is a temporary solution to save the thorchain address to local storage
+  // when multi-chain wallet connection is implemented, this should be replaced
   const saveNetworkAddressToLocalStorage = (
     network: string,
     address: string,
@@ -108,8 +110,6 @@ export function useWalletConnection() {
       const isNonEVM = detectedWalletForChain.id.includes("-");
       const isVultisig = detectedWalletForChain.id.includes("vultisig");
       const connectedWallet = await detectedWalletForChain.connect();
-
-      console.log("Connected Wallet:", connectedWallet);
 
       if (isWalletConnect) {
         saveNetworkAddressToLocalStorage(

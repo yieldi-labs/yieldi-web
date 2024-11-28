@@ -220,13 +220,17 @@ export default function AddLiquidityModal({
     try {
       setIsSubmitting(true);
 
+      // If dual-sided, check if paired address is available on local storage
+      // in the future this will be replaced by multi-chain wallet connection.
       let pairedAddress = undefined;
-      if (parsedRuneAmount === 0 || Number.isNaN(parsedRuneAmount)) {
-        pairedAddress = getNetworkAddressFromLocalStorage("thor") || undefined;
-      } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
-        const identifier = pool.asset.split(".")[0].toLowerCase();
-        pairedAddress =
-          getNetworkAddressFromLocalStorage(identifier) || undefined;
+      if (isDualSided) {
+        if (parsedRuneAmount === 0 || Number.isNaN(parsedRuneAmount)) {
+          pairedAddress = getNetworkAddressFromLocalStorage("thor") || undefined;
+        } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
+          const identifier = pool.asset.split(".")[0].toLowerCase();
+          pairedAddress =
+            getNetworkAddressFromLocalStorage(identifier) || undefined;
+        }
       }
 
       if (isDualSided && !pairedAddress) {
