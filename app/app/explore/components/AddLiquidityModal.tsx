@@ -19,6 +19,8 @@ import { useContracts } from "@/hooks/useContracts";
 import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
+import { useRuneBalance, useWalletConnection } from "@/hooks";
+import { isEVMAddress } from "@/utils/chain";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -26,11 +28,11 @@ interface AddLiquidityModalProps {
   onClose: (transactionSubmitted: boolean) => void;
 }
 
-const MAX_BALANCE_PERCENTAGE = 0.9995; // 99.95%
-const MAX_BALANCE_DISCOUNT = 1 / DECIMALS;
+const MAX_BALANCE_PERCENTAGE = 0.99;
 
 export default function AddLiquidityModal({
   pool,
+  runePriceUSD,
   onClose,
 }: AddLiquidityModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -39,14 +41,22 @@ export default function AddLiquidityModal({
     pool,
   });
   const { toggleWalletModal } = useAppState();
+  const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } =
+    useWalletConnection();
+  const {
+    runeBalance,
+    loading: runeBalanceLoading,
+    error: runeBalanceError,
+  } = useRuneBalance({ wallet });
 
   const [assetAmount, setAssetAmount] = useState("");
+  const [runeAmount, setRuneAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
   const [assetBalance, setAssetBalance] = useState(0);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [poolNativeDecimal, setPoolNativeDecimal] = useState(0);
+  const [isDualSided, setIsDualSided] = useState(false);
 
   const utxoChain = useMemo(() => {
     const chain = pool.asset.split(".")[0].toLowerCase();
@@ -54,6 +64,10 @@ export default function AddLiquidityModal({
     if (chain === "doge") return "DOGE";
     return null;
   }, [pool.asset]);
+
+  const poolNativeDecimal = parseInt(pool.nativeDecimal);
+  const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
+  const runeMinimalUnit = 1 / 10 ** DECIMALS;
 
   if (!wallet?.provider) {
     throw new Error("Wallet provider not found, please connect your wallet.");
@@ -89,16 +103,11 @@ export default function AddLiquidityModal({
     inputRef.current?.focus();
   }, []);
 
-  // Update pool native decimal
   useEffect(() => {
-    setPoolNativeDecimal(parseInt(pool.nativeDecimal));
-  }, [pool.nativeDecimal]);
-
-  useEffect(() => {
-    if (!utxoChain && wallet?.provider) {
+    if (!utxoChain && wallet?.provider && isEVMAddress(wallet.address)) {
       loadMetadata();
     }
-  }, [utxoChain, wallet?.provider, loadMetadata]);
+  }, [utxoChain, wallet?.provider, wallet?.address, loadMetadata, pool.asset]);
 
   useEffect(() => {
     if (utxoChain && wallet?.address) {
@@ -119,7 +128,9 @@ export default function AddLiquidityModal({
 
   useEffect(() => {
     if (!utxoChain && tokenBalance?.value) {
-      setAssetBalance(Number(tokenBalance.value));
+      setAssetBalance(
+        Number(formatUnits(tokenBalance.value, tokenBalance.decimals)),
+      );
     }
   }, [utxoChain, tokenBalance]);
 
@@ -127,29 +138,59 @@ export default function AddLiquidityModal({
     setAssetAmount(values.value);
   };
 
-  const handlePercentageClick = (percentage: number) => {
+  const handleRuneValueChange = (values: NumberFormatValues) => {
+    setRuneAmount(values.value);
+  };
+
+  const handleAssetPercentageClick = (percentage: number) => {
     if (assetBalance <= 0) return;
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
     const partialAmount = assetBalance * finalPercentage;
-    const finalAmount =
-      percentage === 1 ? partialAmount - MAX_BALANCE_DISCOUNT : partialAmount;
-
-    // Format to decimal places, avoiding scientific notation
-    const formattedAmount = Number(
-      finalAmount.toFixed(poolNativeDecimal),
+    const formattedAmount = (
+      Number(partialAmount.toFixed(poolNativeDecimal)) - assetMinimalUnit
     ).toString();
     setAssetAmount(formattedAmount);
   };
 
-  const isValidAmount = useMemo(() => {
-    if (!assetAmount || parseFloat(assetAmount) <= 0) return false;
+  const handleRunePercentageClick = (percentage: number) => {
+    if (runeBalance <= 0) return;
 
+    const finalPercentage =
+      percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
+    const partialAmount = runeBalance * finalPercentage;
+    const formattedAmount = (
+      Number(partialAmount.toFixed(8)) - runeMinimalUnit
+    ).toString();
+    setRuneAmount(formattedAmount);
+  };
+
+  const isValidAmount = useMemo(() => {
     const amount = parseFloat(assetAmount);
-    const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE;
-    return amount <= maxAllowed * (1 + 1e-10); // Small buffer for floating point
-  }, [assetAmount, assetBalance]);
+    const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE - assetMinimalUnit;
+    const isAssetAmountValid = amount > 0 && amount <= maxAllowed;
+
+    if (isDualSided) {
+      const runeAmt = parseFloat(runeAmount);
+      const runeMaxAllowed =
+        runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
+      const isRuneAmountValid = runeAmt > 0 && runeAmt <= runeMaxAllowed;
+      // return isAssetAmountValid && isRuneAmountValid;
+      // TODO: remove temp condition atfer Mutichain Wallet connection.
+      return isAssetAmountValid || isRuneAmountValid;
+    }
+
+    return isAssetAmountValid;
+  }, [
+    assetAmount,
+    assetBalance,
+    runeAmount,
+    runeBalance,
+    isDualSided,
+    assetMinimalUnit,
+    runeMinimalUnit,
+  ]);
 
   const handleAddLiquidity = async () => {
     if (!wallet?.address) {
@@ -157,17 +198,46 @@ export default function AddLiquidityModal({
       return;
     }
 
-    const parsedAmount = parseFloat(assetAmount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      return;
+    const parsedAssetAmount = parseFloat(assetAmount);
+    const parsedRuneAmount = isDualSided ? parseFloat(runeAmount) : undefined;
+
+    if (
+      isDualSided &&
+      (!parsedRuneAmount || parsedRuneAmount <= 0) &&
+      (!parsedAssetAmount || parsedAssetAmount <= 0)
+    ) {
+      throw new Error("Invalid RUNE amount.");
+    }
+    if (!isDualSided && (!parsedAssetAmount || parsedAssetAmount <= 0)) {
+      throw new Error("Invalid asset amount.");
     }
 
     try {
       setIsSubmitting(true);
+
+      // If dual-sided, check if paired address is available on local storage
+      // in the future this will be replaced by multi-chain wallet connection.
+      let pairedAddress = undefined;
+      if (isDualSided) {
+        if (parsedRuneAmount === 0 || Number.isNaN(parsedRuneAmount)) {
+          pairedAddress =
+            getNetworkAddressFromLocalStorage("thor") || undefined;
+        } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
+          const identifier = pool.asset.split(".")[0].toLowerCase();
+          pairedAddress =
+            getNetworkAddressFromLocalStorage(identifier) || undefined;
+        }
+      }
+
+      if (isDualSided && !pairedAddress) {
+        throw new Error("Paired address not found.");
+      }
+
       const hash = await addLiquidity({
         asset: pool.asset,
-        amount: parsedAmount,
-        address: wallet.address,
+        amount: parsedAssetAmount,
+        runeAmount: parsedRuneAmount,
+        pairedAddress,
       });
 
       if (hash) {
@@ -183,13 +253,15 @@ export default function AddLiquidityModal({
     }
   };
 
-  const isBalanceLoading = balanceLoading || utxoLoading;
-  const error = liquidityError || tokenError || utxoError;
+  const isBalanceLoading = balanceLoading || utxoLoading || runeBalanceLoading;
+  const error = liquidityError || tokenError || utxoError || runeBalanceError;
   const assetSymbol = getAssetShortSymbol(pool.asset);
   const usdValue = assetAmount
     ? parseFloat(pool.assetPriceUSD) * parseFloat(assetAmount)
     : 0;
   const assetUsdBalance = parseFloat(pool.assetPriceUSD) * assetBalance;
+  const runeUsdValue = runeAmount ? parseFloat(runeAmount) * runePriceUSD : 0;
+  const runeUsdBalance = runeBalance * runePriceUSD;
 
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
@@ -202,11 +274,21 @@ export default function AddLiquidityModal({
     return (parseFloat(assetAmount) / assetBalance) * 100;
   }, [assetAmount, assetBalance]);
 
+  const currentRunePercentage = useMemo(() => {
+    if (!runeAmount || !runeBalance) return 0;
+    return (parseFloat(runeAmount) / runeBalance) * 100;
+  }, [runeAmount, runeBalance]);
+
   const isCloseToPercentage = (
     currentPercentage: number,
     targetPercentage: number,
   ) => {
     const tolerance = 0.01;
+    if (targetPercentage === 100) {
+      return (
+        Math.abs(currentPercentage - MAX_BALANCE_PERCENTAGE * 100) <= tolerance
+      );
+    }
     return Math.abs(currentPercentage - targetPercentage) <= tolerance;
   };
 
@@ -227,6 +309,36 @@ export default function AddLiquidityModal({
     <Modal onClose={() => onClose(false)}>
       <div className="p-2 w-m">
         {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
+
+        {/* Toggle between Single-sided and Dual-sided */}
+        {hasThorAddressInLocalStorage() && (
+          <div className="flex gap-4 mb-4">
+            <div className="flex justify-between items-center flex-1 rounded-3xl border-2 border-neutral-50">
+              <button
+                className={twMerge(
+                  "flex justify-center items-center gap-2 flex-1 py-2 rounded-3xl text-lg",
+                  !isDualSided
+                    ? "bg-neutral-50 text-neutral-800 shadow-toggle"
+                    : "bg-transparent text-neutral-800 border border-transparent shadow-none",
+                )}
+                onClick={() => setIsDualSided(false)}
+              >
+                {assetSymbol}
+              </button>
+              <button
+                className={twMerge(
+                  "flex justify-center items-center gap-2 flex-1 py-2 rounded-3xl text-lg",
+                  isDualSided
+                    ? "bg-neutral-50 text-neutral-800 shadow-toggle"
+                    : "bg-transparent text-neutral-800 border border-transparent shadow-none",
+                )}
+                onClick={() => setIsDualSided(true)}
+              >
+                {assetSymbol} + RUNE
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
@@ -259,12 +371,11 @@ export default function AddLiquidityModal({
             </div>
           </div>
         </div>
-
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
             <button
               key={percent}
-              onClick={() => handlePercentageClick(percent / 100)}
+              onClick={() => handleAssetPercentageClick(percent / 100)}
               className={percentageButtonClasses(
                 isCloseToPercentage(currentAssetPercentage, percent),
               )}
@@ -274,6 +385,56 @@ export default function AddLiquidityModal({
             </button>
           ))}
         </div>
+
+        {/* RUNE Amount Input (Only if Dual-sided) */}
+        {isDualSided && (
+          <>
+            <div className="bg-white rounded-xl p-4 mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <NumericFormat
+                  value={runeAmount}
+                  onValueChange={handleRuneValueChange}
+                  placeholder="0"
+                  className="flex-1 text-xl font-medium outline-none"
+                  thousandSeparator=","
+                  decimalScale={8}
+                  allowNegative={false}
+                />
+                <div className="flex items-center gap-2">
+                  <Image
+                    src={getLogoPath("thor.rune")}
+                    alt="RUNE"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                  <span className="text-neutral">RUNE</span>
+                </div>
+              </div>
+              <div className="flex justify-between text-base font-medium text-neutral-800">
+                <div>≈ ${formatNumber(runeUsdValue, 2)}</div>
+                <div>
+                  Balance: {formatNumber(runeBalance, 6)} ($
+                  {formatNumber(runeUsdBalance, 2)})
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mb-6">
+              {[25, 50, 100].map((percent) => (
+                <button
+                  key={percent}
+                  onClick={() => handleRunePercentageClick(percent / 100)}
+                  className={percentageButtonClasses(
+                    isCloseToPercentage(currentRunePercentage, percent),
+                  )}
+                  disabled={isBalanceLoading || isSubmitting}
+                >
+                  {percent === 100 ? "MAX" : `${percent}%`}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
         <button
           onClick={handleAddLiquidity}
@@ -287,7 +448,7 @@ export default function AddLiquidityModal({
               : isSubmitting
                 ? "Submitting Transaction..."
                 : !isValidAmount && assetAmount
-                  ? "Amount exceeds balance"
+                  ? "Invalid Amount"
                   : "Add"}
         </button>
       </div>

@@ -10,6 +10,7 @@ module.exports = {
       },
       boxShadow: {
         dropdown: "0px 2px 9.4px 0px rgba(98, 126, 234, 0.19)",
+        toggle: "0px 0px 18.1px 0px rgba(98, 126, 234, 0.22)",
       },
       backdropBlur: { m: "5px", l: "10px", xl: "20px" },
       borderColor: { DEFAULT: "var(--border)" },

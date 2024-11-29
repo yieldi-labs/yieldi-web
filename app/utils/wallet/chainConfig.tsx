@@ -60,6 +60,7 @@ const singleWalletChains = [
   {
     id: "dogecoin",
     name: "Dogecoin",
+    thorchainIdentifier: "doge",
     icon: <ChainSvg.Dogechain />,
     wallets: [
       { id: "xdefi-doge", ...baseWalletConfig.CTRL },
@@ -77,6 +78,7 @@ const singleWalletChains = [
   {
     id: "bitcoincash",
     name: "Bitcoin Cash",
+    thorchainIdentifier: "bch",
     icon: <ChainSvg.BitcoinCash />,
     wallets: [
       { id: "xdefi-bch", ...baseWalletConfig.CTRL },
@@ -94,6 +96,7 @@ const singleWalletChains = [
   {
     id: "litecoin",
     name: "Litecoin",
+    thorchainIdentifier: "ltc",
     icon: <ChainSvg.Litecoin />,
     wallets: [
       { id: "xdefi-ltc", ...baseWalletConfig.CTRL },
@@ -111,6 +114,7 @@ const singleWalletChains = [
   {
     id: "thorchain",
     name: "THORChain",
+    thorchainIdentifier: "thor",
     icon: <ChainSvg.Thorchain />,
     wallets: [
       { id: "xdefi-thorchain", ...baseWalletConfig.CTRL },
@@ -128,6 +132,7 @@ const singleWalletChains = [
   {
     id: "solana",
     name: "Solana",
+    thorchainIdentifier: "sol",
     icon: <ChainSvg.Solana />,
     wallets: [
       { id: "phantom-solana", ...baseWalletConfig.Phantom },
@@ -149,12 +154,14 @@ const evmChains = [
     id: "ethereum",
     name: "Ethereum",
     icon: <ChainSvg.Ethereum />,
+    thorchainIdentifier: "eth",
     chainId: mainnet.id,
     wallets: evmWallets,
   },
   {
     id: "binance-smart-chain",
     name: "BSC",
+    thorchainIdentifier: "bsc",
     icon: <ChainSvg.BSC />,
     chainId: bsc.id,
     wallets: evmWallets.map((wallet) =>
@@ -164,6 +171,7 @@ const evmChains = [
   {
     id: "avalanche",
     name: "Avalanche",
+    thorchainIdentifier: "avax",
     icon: <ChainSvg.Avax />,
     chainId: avalanche.id,
     wallets: evmWallets.map((wallet) =>
@@ -176,6 +184,7 @@ export const chainConfig: ChainConfig[] = [
   {
     id: "bitcoin",
     name: "Bitcoin",
+    thorchainIdentifier: "btc",
     icon: <ChainSvg.Bitcoin />,
     wallets: [
       ...utxoWallets,
