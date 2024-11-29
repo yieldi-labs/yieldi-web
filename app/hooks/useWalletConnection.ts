@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { useConnectors, useSwitchChain } from "wagmi";
-import { ProviderKey, WalletKey } from "@/utils/wallet/constants";
-import { ChainType, WalletType } from "@/types/global";
+import { useConnectors } from "wagmi";
+import { ChainKey, ProviderKey, WalletKey } from "@/utils/wallet/constants";
+import { ChainType, WalletType } from "@/utils/interfaces";
+import { GetConnectorsReturnType } from "wagmi/actions";
 
 export interface WalletState {
   provider: any;
   address: string;
-  network: Set<string>;
+  providerType: ProviderKey;
+  chainType: ChainKey;
   walletId: WalletKey;
-  chain?: string;
+  chainId?: string;
 }
 
 export interface ConnectedWalletsState {
@@ -25,42 +27,47 @@ export function useWalletConnection(
 
   const handleProviderConnection = async (
     wallet: WalletType,
-    providerType: ProviderKey,
-    ethConnectors: any
+    chain: ChainType,
+    ethConnectors: GetConnectorsReturnType
   ) => {
-    if (!wallet.chainConnect[providerType]) return null;
-
+    if (!wallet.chainConnect[chain.providerType])
+      throw new Error("Chain Not Supported!");
     const connectedWallet =
-      providerType === ProviderKey.EVM
-        ? await wallet.chainConnect[providerType]!(ethConnectors)
-        : await wallet.chainConnect[providerType]!();
+      chain.providerType === ProviderKey.EVM
+        ? await wallet.chainConnect[chain.providerType]!(ethConnectors)
+        : await wallet.chainConnect[chain.providerType]!();
     if (!connectedWallet) return;
-
     const provider = connectedWallet.provider;
-
+    let chainId = null;
+    if (chain.providerType === ProviderKey.EVM) {
+      chainId = await connectedWallet.provider.request({
+        method: "eth_chainId",
+      });
+    }
     return {
       provider,
       address: connectedWallet.address,
+      chainId,
     };
   };
   const updateWalletState = (
     prevState: ConnectedWalletsState,
     walletId: WalletKey,
     providerType: ProviderKey,
+    chainType: ChainKey,
     provider: any,
     address: string,
-    network: string
+    chainId?: string
   ): ConnectedWalletsState => {
     return {
       ...prevState,
-      [providerType]: {
+      [chainType]: {
         provider,
         walletId,
         address,
-        network: new Set([
-          ...(prevState[providerType]?.network || []),
-          network,
-        ]),
+        chainType,
+        providerType,
+        chainId,
       },
     };
   };
@@ -77,15 +84,10 @@ export function useWalletConnection(
       }
 
       if (!selectedWallet) return;
-
-      const providerTypesSet = new Set(
-        selectedChains.map((chain) => chain.providerType)
-      );
-
-      for (const providerType of providerTypesSet) {
+      for (const chain of selectedChains) {
         const connection = await handleProviderConnection(
           wallet,
-          providerType,
+          chain,
           ethConnectors
         );
         if (!connection) continue;
@@ -94,10 +96,11 @@ export function useWalletConnection(
           updateWalletState(
             prevState,
             selectedWallet.id,
-            providerType,
+            chain.providerType,
+            chain.name,
             connection.provider,
             connection.address,
-            providerType
+            connection.chainId
           )
         );
       }

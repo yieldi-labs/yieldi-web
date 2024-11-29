@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Wallet from "./Wallet";
-import { WalletType } from "@/types/global";
+import { WalletType } from "@/utils/interfaces";
 import { SUPPORTED_WALLETS } from "@/utils/wallet/constants";
 
 interface WalletListProps {
@@ -27,18 +27,22 @@ const WalletList = ({
     </h3>
     <WalletSection
       title="Detected"
-      wallets={Object.values(SUPPORTED_WALLETS)
-        .filter((wallet) => wallet.isAvailable)
-        .sort((a, b) => a.id.localeCompare(b.id))}
+      wallets={
+        Object.values(SUPPORTED_WALLETS)
+          .filter((wallet) => wallet.isAvailable)
+          .sort((a, b) => a.id.localeCompare(b.id)) as WalletType[]
+      }
       isWalletValidForChain={isWalletValidForChain}
       onWalletSelect={onWalletSelect}
     />
 
     <WalletSection
       title="Other"
-      wallets={Object.values(SUPPORTED_WALLETS)
-        .filter((wallet) => !wallet.isAvailable)
-        .sort((a, b) => a.id.localeCompare(b.id))}
+      wallets={
+        Object.values(SUPPORTED_WALLETS)
+          .filter((wallet) => !wallet.isAvailable)
+          .sort((a, b) => a.id.localeCompare(b.id)) as WalletType[]
+      }
       isWalletValidForChain={isWalletValidForChain}
       onWalletSelect={onWalletSelect}
     />

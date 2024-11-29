@@ -1,7 +1,6 @@
 import { cloneElement } from "react";
 import { UIComponents } from "@shared/components";
-import { ChainType } from "@/types/global";
-
+import { ChainType } from "@/utils/interfaces";
 
 interface ChainSelectorProps {
   chains: ChainType[];
@@ -14,7 +13,6 @@ export function ChainSelector({
   selectedChains,
   onChainSelect,
 }: ChainSelectorProps) {
-  
   const handleSelect = (chainKey: ChainType) => {
     if (selectedChains.includes(chainKey)) {
       onChainSelect(selectedChains.filter((chain) => chain !== chainKey));
@@ -42,7 +40,7 @@ export function ChainSelector({
             onClick={() => handleSelect(chain)}
           >
             <UIComponents.Tooltip text={chain.name}>
-              {cloneElement(chain.icon)}
+              {cloneElement(<svg {...chain.icon} />)}
             </UIComponents.Tooltip>
           </button>
         ))}

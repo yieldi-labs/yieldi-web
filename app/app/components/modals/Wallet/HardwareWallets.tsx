@@ -4,7 +4,8 @@ import Btc from "@ledgerhq/hw-app-btc";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { IconSvg, WalletSvg } from "@/svg";
 import { useAppState } from "@/utils/context";
-import { ChainType } from "@/types/global";
+import { ChainType } from "@/utils/interfaces";
+import { ChainKey } from "@/utils/wallet/constants";
 
 interface HardwareWalletsProps {
   onBack: () => void;
@@ -23,7 +24,7 @@ export default function HardwareWallets({
   const [error, setError] = useState<string | null>(null);
   const { toggleWalletModal } = useAppState();
 
-  const connectLedger = async (chain: string) => {
+  const connectLedger = async (chain: ChainKey) => {
     try {
       setIsConnecting(true);
       setError(null);
@@ -31,11 +32,11 @@ export default function HardwareWallets({
       const transport = await TransportWebUSB.create();
       let address: string;
 
-      if (chain === "ethereum") {
+      if (chain === ChainKey.ETHEREUM) {
         const eth = new Eth(transport);
         const result = await eth.getAddress("44'/60'/0'/0/0");
         address = result.address;
-      } else if (chain === "bitcoin") {
+      } else if (chain === ChainKey.BITCOIN) {
         const btc = new Btc({ transport });
         const { bitcoinAddress } = await btc.getWalletPublicKey(
           "44'/0'/0'/0/0"

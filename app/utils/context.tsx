@@ -7,7 +7,12 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { ProviderKey, SUPPORTED_WALLETS, WalletKey } from "./wallet/constants";
+import {
+  ChainKey,
+  ProviderKey,
+  SUPPORTED_WALLETS,
+  WalletKey,
+} from "./wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { connectEVMWallet, connectUTXOWallet } from "./wallet/walletConnect";
 
@@ -17,6 +22,7 @@ interface AppStateContextType {
   walletsState: ConnectedWalletsState | null;
   setWalletsState: React.Dispatch<React.SetStateAction<ConnectedWalletsState>>;
   getProviderTypeFromChain: (chain: string) => ProviderKey;
+  getChainKeyFromChain: (chain: string) => ChainKey;
   toggleWalletDrawer: () => void;
   isWalletDrawerOpen: boolean;
 }
@@ -50,8 +56,43 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       case "DOGE": {
         return ProviderKey.DOGECOIN;
       }
+      default: {
+        return ProviderKey.EVM;
+      }
     }
-    return ProviderKey.EVM;
+  };
+
+  const getChainKeyFromChain = (chain: string): ChainKey => {
+    chain = chain.toLocaleUpperCase();
+    switch (chain) {
+      case "AVAX": {
+        return ChainKey.AVALANCHE;
+      }
+      case "BSC": {
+        return ChainKey.BSCCHAIN;
+      }
+      case "ETH": {
+        return ChainKey.ETHEREUM;
+      }
+      case "BTC": {
+        return ChainKey.BITCOIN;
+      }
+      case "DOGE": {
+        return ChainKey.DOGECOIN;
+      }
+      case "LTC": {
+        return ChainKey.LITECOIN;
+      }
+      case "GAIA": {
+        return ChainKey.GAIACHAIN;
+      }
+      case "BCH": {
+        return ChainKey.BITCOINCASH;
+      }
+      default: {
+        return ChainKey.ETHEREUM;
+      }
+    }
   };
 
   const checkAvailableWallets = (window: any) => {
@@ -66,7 +107,6 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 ethConnectors: GetConnectorsReturnType
               ) => await connectEVMWallet(window.xfi?.ethereum),
 
-              // TODO - thorchain is not utxo
               [ProviderKey.THORCHAIN]: async () =>
                 await connectUTXOWallet({
                   id: "xdefi-thorchain",
@@ -222,6 +262,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         walletsState,
         setWalletsState,
         getProviderTypeFromChain,
+        getChainKeyFromChain,
         isWalletDrawerOpen,
         toggleWalletDrawer,
       }}

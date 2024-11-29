@@ -1,9 +1,7 @@
 import { ChainSvg, WalletSvg } from "@/svg";
-import {
-  connectWalletConnect,
-} from "./walletConnect";
+import { connectWalletConnect } from "./walletConnect";
 import { GetConnectorsReturnType } from "wagmi/actions";
-import { ChainType } from "@/types/global";
+import { ChainType } from "@/utils/interfaces";
 
 export enum ChainKey {
   ARBITRUM = "Arbitrum",
@@ -31,6 +29,7 @@ export enum ChainKey {
   TON = "TON",
   ZKSYNC = "Zksync",
 }
+
 export enum ProviderKey {
   EVM = "evm",
   BITCOIN = "bitcoin",
@@ -54,7 +53,7 @@ export const CHAINS: ChainType[] = [
     icon: <ChainSvg.Avax />,
     name: ChainKey.AVALANCHE,
     providerType: ProviderKey.EVM,
-    chainId: 43_114,
+    chainId: "0xa86a",
   },
   {
     icon: <ChainSvg.Bitcoin />,
@@ -70,7 +69,7 @@ export const CHAINS: ChainType[] = [
     icon: <ChainSvg.BSC />,
     name: ChainKey.BSCCHAIN,
     providerType: ProviderKey.EVM,
-    chainId: 56,
+    chainId: "0x38",
   },
   {
     icon: <ChainSvg.Dogechain />,
@@ -81,7 +80,7 @@ export const CHAINS: ChainType[] = [
     icon: <ChainSvg.Ethereum />,
     name: ChainKey.ETHEREUM,
     providerType: ProviderKey.EVM,
-    chainId: 1,
+    chainId: "0x1",
   },
   {
     icon: <ChainSvg.Litecoin />,
@@ -105,19 +104,19 @@ export const EVM_CHAINS: ChainType[] = [
     icon: <ChainSvg.Avax />,
     name: ChainKey.AVALANCHE,
     providerType: ProviderKey.EVM,
-    chainId: 43_114,
+    chainId: "0xa86a",
   },
   {
     icon: <ChainSvg.BSC />,
     name: ChainKey.BSCCHAIN,
     providerType: ProviderKey.EVM,
-    chainId: 56,
+    chainId: "0x38",
   },
   {
     icon: <ChainSvg.Ethereum />,
     name: ChainKey.ETHEREUM,
     providerType: ProviderKey.EVM,
-    chainId: 1,
+    chainId: "0x1",
   },
 ];
 

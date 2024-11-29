@@ -13,7 +13,7 @@ import {
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
 import HardwareWallets from "./HardwareWallets";
-import { WalletType } from "@/types/global";
+import { WalletType } from "@/utils/interfaces";
 import { ChainKey, CHAINS } from "@/utils/wallet/constants";
 
 export default function WalletModal() {

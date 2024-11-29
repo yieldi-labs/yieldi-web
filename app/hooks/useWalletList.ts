@@ -1,6 +1,10 @@
 import { useCallback, useMemo } from "react";
-import { ChainType, WalletType } from "@/types/global";
-import { SUPPORTED_WALLETS, WalletKey } from "@/utils/wallet/constants";
+import {
+  ChainKey,
+  SUPPORTED_WALLETS,
+  WalletKey,
+} from "@/utils/wallet/constants";
+import { ChainType, WalletType } from "@/utils/interfaces";
 
 interface UseWalletListReturn {
   detected: WalletType[];
@@ -20,47 +24,42 @@ export function useWalletList(
       if (processedWallets.has(wallet.id)) return;
       if (wallet.id === WalletKey.WALLETCONNECT) {
         undetected.push(wallet);
-        processedWallets.add(wallet.id);
-        return;
-      }
-      if (wallet.isAvailable) {
+      } else if (wallet.isAvailable) {
         detected.push(wallet);
       } else {
         undetected.push(wallet);
       }
       processedWallets.add(wallet.id);
     };
-    if (selectedChains.length > 0) {
-      const selectedChainKeys = selectedChains.map((chain) => chain.name);
-      const commonWallets = Object.values(SUPPORTED_WALLETS).filter((wallet) =>
-        selectedChainKeys.every((chainKey) => wallet.chains.includes(chainKey))
-      );
-      (commonWallets as unknown as WalletType[]).forEach(processWallet);
-    } else {
-      Object.values(SUPPORTED_WALLETS).forEach((wallet) =>
-        processWallet(wallet)
-      );
-    }
+    const walletList: WalletType[] = Object.values(
+      SUPPORTED_WALLETS
+    ) as WalletType[];
+    const selectedChainKeys = new Set(
+      selectedChains.map((chain) => chain.name)
+    );
+    const commonWallets = selectedChains.length
+      ? walletList.filter((wallet) =>
+          wallet.chains.some((chainKey) => selectedChainKeys.has(chainKey))
+        )
+      : walletList;
+
+    commonWallets.forEach(processWallet);
 
     return { detected, undetected };
-  }, [selectedChains, SUPPORTED_WALLETS]);
+  }, [selectedChains]);
 
   const isWalletValidForChain = useCallback(
     (wallet: WalletType): boolean => {
-      return selectedChains.every((chain) =>
-        wallet.chains.includes(chain.name)
+      const selectedChainKeys = new Set(
+        selectedChains.map((chain) => chain.name)
       );
-      // if (!selectedChains.length) return true;
-      // const chainWalletLists = selectedChains.map((chainId) => {
-      //   return chainConfig.find((chain) => chain.id === chainId)?.wallets || [];
-      // });
-
-      // return chainWalletLists.every((wallets) =>
-      //   wallets.some((wallet) => wallet.name === walletName)
-      // );
+      return wallet.chains.some((chainKey: ChainKey) =>
+        selectedChainKeys.has(chainKey)
+      );
     },
     [selectedChains]
   );
+
   return {
     detected,
     undetected,

@@ -17,9 +17,9 @@ const Component: FC<ComponentProps> = ({
     <path
       d="M12 20.4852V12M12 12V3.51465M12 12H20.4853M12 12H3.51469"
       stroke={strokeColor}
-      stroke-width={strokeWidth}
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
