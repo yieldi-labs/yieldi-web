@@ -1,6 +1,8 @@
-import { ChainKey, WalletKey } from "@/utils/wallet/constants";
+import { ChainKey, ProviderKey, WalletKey } from "@/utils/wallet/constants";
+import { GetConnectorsReturnType } from "@wagmi/core";
+import { SVGProps } from "react";
 
-interface WalletOption {
+export interface WalletOption {
   id: string;
   name: string;
   icon: JSX.Element;
@@ -9,7 +11,7 @@ interface WalletOption {
   disabled?: boolean;
 }
 
-interface ChainConfig {
+export interface ChainConfig {
   id: string;
   chainId?: number;
   name: string;
@@ -17,7 +19,7 @@ interface ChainConfig {
   wallets: WalletOption[];
 }
 
-interface LiquidityProvider {
+export interface LiquidityProvider {
   rune_address?: string;
   asset_address?: string;
   last_add_height: number;
@@ -29,22 +31,21 @@ interface LiquidityProvider {
   asset_deposit_value: string;
 }
 
-interface WalletType {
+export interface WalletType {
   id: WalletKey;
   name: string;
   chains: ChainKey[];
   icon: JSX.Element;
-  // isDetected?: any;
   isAvailable: boolean;
   downloadUrl?: string;
   chainConnect: {
     [key in ProviderKey]?: (
       ethConnectors?: GetConnectorsReturnType
-    ) => Promise<any>;
+    ) => Promise<{ provider: any; address: string }>;
   };
 }
 
-interface ChainType {
+export interface ChainType {
   icon: SVGProps<SVGSVGElement>;
   name: ChainKey;
   providerType: ProviderKey;

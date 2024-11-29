@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useConnectors, useSwitchChain } from "wagmi";
 import { ProviderKey, WalletKey } from "@/utils/wallet/constants";
-import { ChainType, WalletType } from "@/types/global";
+import { GetConnectorsReturnType } from "wagmi/actions";
+import { ChainType, WalletType } from "@/utils/interfaces";
 
 export interface WalletState {
   provider: any;
@@ -26,7 +27,7 @@ export function useWalletConnection(
   const handleProviderConnection = async (
     wallet: WalletType,
     providerType: ProviderKey,
-    ethConnectors: any
+    ethConnectors: GetConnectorsReturnType
   ) => {
     if (!wallet.chainConnect[providerType]) return null;
 

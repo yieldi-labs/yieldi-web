@@ -1,4 +1,5 @@
-import { WalletType } from "@/types/global";
+
+import { WalletType } from "@/utils/interfaces";
 import { cloneElement } from "react";
 
 interface WalletProps {

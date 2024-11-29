@@ -1,7 +1,8 @@
 import { ChainSvg, WalletSvg } from "@/svg";
 import { connectWalletConnect } from "./walletConnect";
 import { GetConnectorsReturnType } from "wagmi/actions";
-import { ChainType } from "@/types/global";
+import { ChainType } from "../interfaces";
+
 
 export enum ChainKey {
   ARBITRUM = "Arbitrum",

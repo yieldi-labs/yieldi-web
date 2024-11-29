@@ -44,8 +44,10 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       case "DOGE": {
         return ProviderKey.DOGECOIN;
       }
+      default: {
+        return ProviderKey.EVM;
+      }
     }
-    return ProviderKey.EVM;
   };
 
   const checkAvailableWallets = (window: any) => {
@@ -207,7 +209,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     checkAvailableWallets(window);
   }, []);
-  
+
   return (
     <AppStateContext.Provider
       value={{

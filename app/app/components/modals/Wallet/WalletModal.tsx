@@ -13,8 +13,9 @@ import {
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
 import HardwareWallets from "./HardwareWallets";
-import { WalletType } from "@/types/global";
+
 import { ChainKey, CHAINS } from "@/utils/wallet/constants";
+import { WalletType } from "@/utils/interfaces";
 
 export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
@@ -50,7 +51,7 @@ export default function WalletModal() {
   const handleHardwareWalletSelect = async (wallet: any) => {
     setWalletsState(((prevState: ConnectedWalletsState) => ({
       ...prevState,
-      [`ledger-${wallet.chain}`]: {
+      [wallet.chain]: {
         ...(wallet as WalletState),
       },
     })) as unknown as ConnectedWalletsState);
