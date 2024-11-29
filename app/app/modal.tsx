@@ -21,7 +21,7 @@ export default function Modal({
       onClick={onClose}
     >
       <div
-        className="relative z-20 max-w-2xl mx-auto mb-auto mt-[5vh] rounded-large border-4 border-white bg-secondary"
+        className="relative z-20 max-w-2xl mx-auto mb-auto mt-[5vh] rounded-large border-4 border-white bg-neutral-100"
         onClick={(e) => e.stopPropagation()}
         style={style}
       >
