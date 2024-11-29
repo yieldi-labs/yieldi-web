@@ -7,7 +7,7 @@ import { mainnet } from "viem/chains";
 import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { Saver } from "@/app/explore/types";
-import { getPool, PoolDetail } from "@/midgard";
+import { getPool, MemberPool, PoolDetail } from "@/midgard";
 import { liquidityProvider } from "@/thornode";
 
 export const ONE = BigInt("1000000000000000000");
@@ -472,13 +472,6 @@ export interface MemberStats {
     asset: number;
     usd: number;
   };
-  current: {
-    asset: number;
-    rune: number;
-    totalAsAsset: number;
-    totalAsRune: number;
-    totalAssetUsdValue: number;
-  };
 }
 
 export const DECIMALS = 1e8;
@@ -523,10 +516,6 @@ export const calculateGain = async (
     const currentRuneValue = parseFloat(lpData.rune_redeem_value!) / DECIMALS;
     const currentValueInAsset =
       currentAssetValue + currentRuneValue / runePerAsset;
-    const currentValueInrune =
-      currentAssetValue * runePerAsset + currentRuneValue;
-    const currentUsdValue =
-      currentValueInAsset * parseFloat(poolData.assetPriceUSD);
 
     // Calculate USD values using assetPrice
     const assetPrice = runePerAsset * runePriceUSD;
@@ -545,16 +534,26 @@ export const calculateGain = async (
         asset: gainInAsset,
         usd: gainUSD,
       },
-      current: {
-        asset: currentValueInAsset,
-        rune: currentValueInrune,
-        totalAsAsset: currentAssetValue,
-        totalAsRune: currentRuneValue,
-        totalAssetUsdValue: currentUsdValue,
-      },
     } as MemberStats;
   } catch (err) {
     console.error("Failed to calculate gains:", err);
     return null;
   }
+};
+
+export interface PositionDetails {
+  assetAdded: number;
+  runeAdded: number;
+}
+
+export const getPositionDetails = (
+  pool: PoolDetail,
+  position: MemberPool,
+): PositionDetails => {
+  const assetAdded = parseFloat(position.assetAdded) / DECIMALS;
+  const runeAdded = parseFloat(position.runeAdded) / DECIMALS;
+  return {
+    assetAdded,
+    runeAdded,
+  } as PositionDetails;
 };

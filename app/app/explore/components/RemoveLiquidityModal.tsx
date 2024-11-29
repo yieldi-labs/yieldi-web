@@ -2,13 +2,13 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { NumberFormatValues, NumericFormat } from "react-number-format";
 import Modal from "@/app/modal";
-import { PoolDetail as IPoolDetail } from "@/midgard";
+import { PoolDetail as IPoolDetail, MemberPool } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
   getAssetShortSymbol,
   getLogoPath,
   formatNumber,
-  MemberStats,
+  getPositionDetails,
 } from "@/app/utils";
 import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
@@ -17,13 +17,13 @@ import { twMerge } from "tailwind-merge";
 
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;
-  memberStats: MemberStats;
+  position: MemberPool;
   onClose: (transactionSubmitted: boolean) => void;
 }
 
 export default function RemoveLiquidityModal({
   pool,
-  memberStats,
+  position,
   onClose,
 }: RemoveLiquidityModalProps) {
   const { wallet } = useAppState();
@@ -38,16 +38,23 @@ export default function RemoveLiquidityModal({
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { assetAdded: positionAssetAmount } = getPositionDetails(
+    pool,
+    position,
+  );
+  const positionAssetUsdValue =
+    parseFloat(pool.assetPriceUSD) * positionAssetAmount;
+
   const handlePercentageClick = (percent: number) => {
     setPercentage(percent);
-    const amount = (memberStats.current.totalAsAsset * percent) / 100;
+    const amount = (positionAssetAmount * percent) / 100;
     setAssetAmount(amount.toString());
   };
 
   const handleValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
     const amount = parseFloat(values.value);
-    const percentage = (amount / memberStats.current.totalAsAsset) * 100;
+    const percentage = (amount / positionAssetAmount) * 100;
     setPercentage(percentage);
   };
 
@@ -128,11 +135,11 @@ export default function RemoveLiquidityModal({
             <div>
               Balance:{" "}
               {formatNumber(
-                memberStats.current.totalAsAsset,
+                positionAssetAmount,
                 parseFloat(pool.nativeDecimal),
               )}{" "}
               ($
-              {formatNumber(memberStats.current.totalAssetUsdValue, 2)})
+              {formatNumber(positionAssetUsdValue, 2)})
             </div>
           </div>
         </div>
