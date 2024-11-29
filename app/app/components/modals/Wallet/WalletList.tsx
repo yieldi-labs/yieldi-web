@@ -18,37 +18,61 @@ interface WalletSectionProps {
   onWalletSelect: (wallet: WalletType) => void;
 }
 
+interface WalletListProps {
+  detected: WalletType[];
+  undetected: WalletType[];
+  isWalletValidForChain: (wallet: WalletType) => boolean;
+  onWalletSelect: (wallet: WalletType) => void;
+}
+
+interface WalletSectionProps {
+  title: string;
+  wallets: WalletType[];
+  isWalletValidForChain: (wallet: WalletType) => boolean;
+  onWalletSelect: (wallet: WalletType) => void;
+}
+
 const WalletList = ({
   isWalletValidForChain,
   onWalletSelect,
-}: WalletListProps) => (
-  <div className="flex flex-col gap-4">
-    <h3 className="text-base text-neutral-900 font-medium font-gt-america">
-      Select Wallet
-    </h3>
-    <WalletSection
-      title="Detected"
-      wallets={
-        Object.values(SUPPORTED_WALLETS)
-          .filter((wallet) => wallet.isAvailable)
-          .sort((a, b) => a.id.localeCompare(b.id)) as WalletType[]
-      }
-      isWalletValidForChain={isWalletValidForChain}
-      onWalletSelect={onWalletSelect}
-    />
+}: WalletListProps) => {
+  const sortedWallets = Object.values(SUPPORTED_WALLETS).sort((a, b) =>
+    a.id.localeCompare(b.id)
+  );
 
-    <WalletSection
-      title="Other"
-      wallets={
-        Object.values(SUPPORTED_WALLETS)
-          .filter((wallet) => !wallet.isAvailable)
-          .sort((a, b) => a.id.localeCompare(b.id)) as WalletType[]
+  const { detectedWallets, otherWallets } = sortedWallets.reduce(
+    (groups, wallet) => {
+      if (wallet.isAvailable) {
+        groups.detectedWallets.push(wallet as WalletType);
+      } else {
+        groups.otherWallets.push(wallet as WalletType);
       }
-      isWalletValidForChain={isWalletValidForChain}
-      onWalletSelect={onWalletSelect}
-    />
-  </div>
-);
+      return groups;
+    },
+    { detectedWallets: [] as WalletType[], otherWallets: [] as WalletType[] }
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      <h3 className="text-base text-neutral-900 font-medium font-gt-america">
+        Select Wallet
+      </h3>
+      <WalletSection
+        title="Detected"
+        wallets={detectedWallets}
+        isWalletValidForChain={isWalletValidForChain}
+        onWalletSelect={onWalletSelect}
+      />
+      <WalletSection
+        title="Other"
+        wallets={otherWallets}
+        isWalletValidForChain={isWalletValidForChain}
+        onWalletSelect={onWalletSelect}
+      />
+    </div>
+  );
+};
+
 
 function WalletSection({
   title,
