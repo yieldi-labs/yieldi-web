@@ -103,7 +103,7 @@ export default function RemoveLiquidityModal({
   }
 
   return (
-    <Modal onClose={() => onClose(false)}>
+    <Modal onClose={() => onClose(false)} title="Remove">
       <div className="p-2 w-m">
         {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
