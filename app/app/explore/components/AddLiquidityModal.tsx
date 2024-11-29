@@ -41,8 +41,13 @@ export default function AddLiquidityModal({
     pool,
   });
   const { toggleWalletModal } = useAppState();
-  const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } = useWalletConnection();
-  const { runeBalance, loading: runeBalanceLoading, error: runeBalanceError } = useRuneBalance({ wallet });
+  const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } =
+    useWalletConnection();
+  const {
+    runeBalance,
+    loading: runeBalanceLoading,
+    error: runeBalanceError,
+  } = useRuneBalance({ wallet });
 
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
@@ -51,7 +56,6 @@ export default function AddLiquidityModal({
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [poolNativeDecimal, setPoolNativeDecimal] = useState(0);
   const [isDualSided, setIsDualSided] = useState(false);
 
   const utxoChain = useMemo(() => {
@@ -61,13 +65,9 @@ export default function AddLiquidityModal({
     return null;
   }, [pool.asset]);
 
-  const assetMinimalUnit = useMemo(() => {
-    return 1 / 10 ** poolNativeDecimal;
-  }, [poolNativeDecimal]);
-
-  const runeMinimalUnit = useMemo(() => {
-    return 1 / 10 ** DECIMALS;
-  }, []);
+  const poolNativeDecimal = parseInt(pool.nativeDecimal);
+  const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
+  const runeMinimalUnit = 1 / 10 ** DECIMALS;
 
   if (!wallet?.provider) {
     throw new Error("Wallet provider not found, please connect your wallet.");
@@ -102,11 +102,6 @@ export default function AddLiquidityModal({
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-
-  // Update pool native decimal
-  useEffect(() => {
-    setPoolNativeDecimal(parseInt(pool.nativeDecimal));
-  }, [pool.nativeDecimal]);
 
   useEffect(() => {
     if (!utxoChain && wallet?.provider && isEVMAddress(wallet.address)) {
@@ -225,7 +220,8 @@ export default function AddLiquidityModal({
       let pairedAddress = undefined;
       if (isDualSided) {
         if (parsedRuneAmount === 0 || Number.isNaN(parsedRuneAmount)) {
-          pairedAddress = getNetworkAddressFromLocalStorage("thor") || undefined;
+          pairedAddress =
+            getNetworkAddressFromLocalStorage("thor") || undefined;
         } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
           const identifier = pool.asset.split(".")[0].toLowerCase();
           pairedAddress =
