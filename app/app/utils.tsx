@@ -472,6 +472,13 @@ export interface MemberStats {
     asset: number;
     usd: number;
   };
+  current: {
+    asset: number;
+    rune: number;
+    totalAsAsset: number;
+    totalAsRune: number;
+    totalAssetUsdValue: number;
+  };
 }
 
 export const DECIMALS = 1e8;
@@ -516,6 +523,10 @@ export const calculateGain = async (
     const currentRuneValue = parseFloat(lpData.rune_redeem_value!) / DECIMALS;
     const currentValueInAsset =
       currentAssetValue + currentRuneValue / runePerAsset;
+    const currentValueInrune =
+      currentAssetValue * runePerAsset + currentRuneValue;
+    const currentUsdValue =
+      currentValueInAsset * parseFloat(poolData.assetPriceUSD);
 
     // Calculate USD values using assetPrice
     const assetPrice = runePerAsset * runePriceUSD;
@@ -533,6 +544,13 @@ export const calculateGain = async (
       gain: {
         asset: gainInAsset,
         usd: gainUSD,
+      },
+      current: {
+        asset: currentValueInAsset,
+        rune: currentValueInrune,
+        totalAsAsset: currentAssetValue,
+        totalAsRune: currentRuneValue,
+        totalAssetUsdValue: currentUsdValue,
       },
     } as MemberStats;
   } catch (err) {

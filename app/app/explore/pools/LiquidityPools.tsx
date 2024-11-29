@@ -139,7 +139,10 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
       <div className="w-full">
         {/* Hidden measurement div */}
         <div ref={measureRef}>
-          <LiquidityPoolCardMobile pool={sortedPools[0]} runePriceUSD={runePriceUSD} />
+          <LiquidityPoolCardMobile
+            pool={sortedPools[0]}
+            runePriceUSD={runePriceUSD}
+          />
         </div>
 
         {/* Sort header */}

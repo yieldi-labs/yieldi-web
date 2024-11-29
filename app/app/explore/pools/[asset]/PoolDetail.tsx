@@ -10,25 +10,17 @@ import {
   getAssetSimpleSymbol,
   calculateGain,
   getFormattedPoolEarnings,
+  DECIMALS,
+  MemberStats,
 } from "@/app/utils";
-import { PoolDetail as IPoolDetail } from "@/midgard";
+import { PoolDetail as IPoolDetail, MemberPool } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
 import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
+import RemoveLiquidityModal from "@/app/explore/components/RemoveLiquidityModal";
 import { TopCard } from "@/app/components/TopCard";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import { useAppState } from "@/utils/context";
 import { isSupportedChain, parseAssetString } from "@/utils/chain";
-
-interface MemberStats {
-  deposit: {
-    asset: number;
-    usd: number;
-  };
-  gain: {
-    asset: number;
-    usd: number;
-  };
-}
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -38,11 +30,16 @@ interface PoolDetailProps {
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const { wallet, toggleWalletModal } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
+  const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
+    useState(false);
+  const [selectedPosition, setSelectedPosition] = useState<MemberPool | null>(
+    null,
+  );
   const [isTransactionPolling, setIsTransactionPolling] = useState(false);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const {
-    position,
-    loading: positionLoading,
+    positions,
+    loading: positionsLoading,
     error,
     getMemberDetails,
     removeLiquidity,
@@ -50,6 +47,13 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const [memberStats, setMemberStats] = useState<MemberStats>({
     deposit: { asset: 0, usd: 0 },
     gain: { asset: 0, usd: 0 },
+    current: {
+      asset: 0,
+      rune: 0,
+      totalAsAsset: 0,
+      totalAsRune: 0,
+      totalAssetUsdValue: 0,
+    },
   });
 
   // Constants for polling
@@ -160,28 +164,25 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const volumeDepthRatio = calculateVolumeDepthRatio(pool, runePriceUSD) * 100;
   const assetSymbol = getAssetSimpleSymbol(pool.asset);
 
-  const showLoadingState = !initialLoadComplete && positionLoading;
+  const showLoadingState = !initialLoadComplete && positionsLoading;
 
-  const handleRemove = async () => {
-    if (!wallet?.address) return;
+  const handleRemove = (position: MemberPool) => {
+    setSelectedPosition(position);
+    setShowRemoveLiquidityModal(true);
+  };
 
-    try {
-      await removeLiquidity({
-        asset: pool.asset,
-        percentage: 100,
-        address: wallet.address,
-        withdrawAsset: pool.asset,
-      });
-      pollForPositionUpdate(position);
-    } catch (err) {
-      console.error("Failed to remove liquidity:", err);
+  const handleRemoveLiquidityClose = (transactionSubmitted: boolean) => {
+    setShowRemoveLiquidityModal(false);
+    if (transactionSubmitted && wallet?.address) {
+      getMemberDetails(wallet.address, pool.asset);
     }
   };
 
   const handleAddLiquidityClose = (transactionSubmitted: boolean) => {
     setShowAddLiquidityModal(false);
-    if (transactionSubmitted && position) {
-      pollForPositionUpdate(position);
+
+    if (transactionSubmitted && positions && wallet?.address) {
+      getMemberDetails(wallet.address, pool.asset);
     }
   };
 
@@ -223,7 +224,55 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     );
   };
 
-  const renderPositionContent = () => (
+  const getPositionDetails = (position: MemberPool) => {
+    const assetAmount = parseFloat(position.assetAdded) / DECIMALS;
+    const runeAmount = parseFloat(position.runeAdded) / DECIMALS;
+    const assetValue = assetAmount * parseFloat(pool.assetPriceUSD);
+    const runeValue = runeAmount * runePriceUSD;
+    const totalValue = assetValue + runeValue;
+
+    return {
+      assetAmount: formatNumber(assetAmount, parseInt(pool.nativeDecimal)),
+      runeAmount: formatNumber(runeAmount, DECIMALS),
+      assetValue: formatNumber(assetValue, 2),
+      runeValue: formatNumber(runeValue, 2),
+      totalValue: formatNumber(totalValue, 2),
+    };
+  };
+
+  const renderPositionsDetails = () => {
+    return positions?.map((position: MemberPool) => {
+      const { assetAmount, runeAmount, assetValue, runeValue, totalValue } =
+        getPositionDetails(position);
+      const isSingleSided = parseFloat(runeAmount) === 0;
+
+      return (
+        <div key={position.pool} className="mb-4">
+          <div className="flex-col items-center text-base font-medium text-neutral-900 mb-1">
+            <div>
+              {assetAmount} {assetSymbol} (${assetValue}) + {runeAmount} RUNE ($
+              {runeValue})
+            </div>
+          </div>
+          <button
+            className="w-full border-red-500 border-2 text-red-500 font-bold py-3 rounded-full
+                       hover:text-opacity-50 hover:border-opacity-50 transition-all 
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => handleRemove(position)}
+            disabled={showLoadingState || !isSingleSided}
+          >
+            {showLoadingState
+              ? "Loading..."
+              : isSingleSided
+                ? "Remove"
+                : "Coming Soon..."}
+          </button>
+        </div>
+      );
+    });
+  };
+
+  const renderPositionsContent = () => (
     <>
       <div className="mb-2 md:mb-8 bg-white rounded-xl w-full p-3">
         <div className="text-gray-700 font-medium text-lg mb-2">DEPOSIT</div>
@@ -250,17 +299,10 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         </div>
       </div>
 
-      {position && (
-        <button
-          className="w-full border-red-500 border-2 text-red-500 font-bold py-3 rounded-full
-                     hover:text-opacity-50 hover:border-opacity-50 transition-all 
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={handleRemove}
-          disabled={showLoadingState}
-        >
-          {showLoadingState ? "Loading..." : "Remove Position"}
-        </button>
-      )}
+      <div className="mb-4 md:mb-8 bg-white rounded-xl w-full p-3">
+        <div className="text-gray-700 font-medium text-lg mb-2">POSITIONS</div>
+        {renderPositionsDetails()}
+      </div>
     </>
   );
 
@@ -312,10 +354,18 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             )}
-            {renderPositionContent()}
+            {renderPositionsContent()}
           </TranslucentCard>
         </div>
       </div>
+
+      {showRemoveLiquidityModal && selectedPosition && (
+        <RemoveLiquidityModal
+          pool={pool}
+          memberStats={memberStats}
+          onClose={handleRemoveLiquidityClose}
+        />
+      )}
 
       {showAddLiquidityModal && (
         <AddLiquidityModal
