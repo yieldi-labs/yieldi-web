@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from "react";
 import { useAppState } from "@/utils/context";
 import { client, getMemberDetail, getPool } from "@/midgard";
 import type { MemberPool, PoolDetail } from "@/midgard";
-import { normalizeAddress, SupportedChain } from "@/app/utils";
+import { normalizeAddress } from "@/app/utils";
 import { Address, parseUnits } from "viem";
 import { useContracts } from "./useContracts";
 import { useUTXO } from "./useUTXO";

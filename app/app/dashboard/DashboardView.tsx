@@ -2,9 +2,11 @@
 
 import { addDollarSignAndSuffix } from "../utils";
 import DashboardHighlightsCard from "./components/DashboardHighlightsCards";
+import PositionsList from "./components/PositionsList";
+import { PositionsPerAsset } from "./types";
 
 interface PositionsViewProps {
-  positions: any[];
+  positions: PositionsPerAsset;
 }
 
 export default function DashboardView({ positions }: PositionsViewProps) {
@@ -31,7 +33,8 @@ export default function DashboardView({ positions }: PositionsViewProps) {
         <h2 className={titleStyle}>
           Your positions
         </h2>
-        <div className="w-2/3 text-neutral-800 text-sm font-normal leading-tight">Manage your active positions and track your earnings.</div>
+        <div className="w-2/3 text-neutral-800 text-sm font-normal leading-tight mb-7">Manage your active positions and track your earnings.</div>
+        <PositionsList positions={positions} />
       </div>
     </main>
   );
