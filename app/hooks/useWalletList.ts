@@ -50,12 +50,16 @@ export function useWalletList(
 
   const isWalletValidForChain = useCallback(
     (wallet: WalletType): boolean => {
-      const selectedChainKeys = new Set(
-        selectedChains.map((chain) => chain.name)
-      );
-      return wallet.chains.some((chainKey: ChainKey) =>
-        selectedChainKeys.has(chainKey)
-      );
+      if (selectedChains.length) {
+        const selectedChainKeys = new Set(
+          selectedChains.map((chain) => chain.name)
+        );
+        return wallet.chains.some((chainKey: ChainKey) =>
+          selectedChainKeys.has(chainKey)
+        );
+      } else {
+        return true;
+      }
     },
     [selectedChains]
   );

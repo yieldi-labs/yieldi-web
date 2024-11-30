@@ -1,6 +1,7 @@
 import { cloneElement } from "react";
 import { UIComponents } from "@shared/components";
 import { ChainType } from "@/utils/interfaces";
+import React from "react";
 
 interface ChainSelectorProps {
   chains: ChainType[];
@@ -40,7 +41,9 @@ export function ChainSelector({
             onClick={() => handleSelect(chain)}
           >
             <UIComponents.Tooltip text={chain.name}>
-              {cloneElement(<svg {...chain.icon} />)}
+              {React.isValidElement(chain.icon)
+                ? cloneElement(chain.icon)
+                : null}
             </UIComponents.Tooltip>
           </button>
         ))}

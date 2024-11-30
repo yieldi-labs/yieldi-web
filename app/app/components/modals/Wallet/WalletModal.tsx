@@ -50,7 +50,7 @@ export default function WalletModal() {
   const handleHardwareWalletSelect = async (wallet: any) => {
     setWalletsState(((prevState: ConnectedWalletsState) => ({
       ...prevState,
-      [`ledger-${wallet.chain}`]: {
+      [wallet.chain]: {
         ...(wallet as WalletState),
       },
     })) as unknown as ConnectedWalletsState);
