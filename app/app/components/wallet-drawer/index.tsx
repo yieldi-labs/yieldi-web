@@ -1,10 +1,5 @@
 "use client";
-import {
-  cloneElement,
-  FC,
-  useEffect,
-  useState,
-} from "react";
+import { cloneElement, FC, useEffect, useState } from "react";
 import { formatNumber } from "@/app/utils";
 import Image from "next/image";
 import {
@@ -30,11 +25,7 @@ import {
   isERC20,
   normalizeAddress,
 } from "@/app/utils";
-import {
-  decodeFunctionResult,
-  encodeFunctionData,
-  formatUnits,
-} from "viem";
+import { decodeFunctionResult, encodeFunctionData, formatUnits } from "viem";
 import { getPools } from "@/midgard";
 import { Network } from "@xchainjs/xchain-client";
 import {
@@ -407,64 +398,68 @@ const Component: FC = () => {
               <Exit strokeColor="#ff6656" strokeWidth={1.5} />
             </span>
           </div>
-          {Object.keys(walletsState!).map((key) => {
-            const wallet = walletsState![key];
-            return (
-              <div key={wallet.walletId} className="p-4">
-                <div className="bg-white flex gap-2 rounded-lg p-4">
-                  <span className="leading-6">
-                    {cloneElement(SUPPORTED_WALLETS[wallet.walletId].icon, {
-                      className: "icon",
-                    })}
-                  </span>
-                  <span className="flex-1 leading-6 px-2">
-                    <MiddleTruncate text={wallet.address} />
-                  </span>
-                  <span className="cursor-pointer">
-                    <Copy strokeColor="#627eea" />
-                  </span>
-                  <span className="cursor-pointer">
-                    <QRCode strokeColor="#627eea" />
-                  </span>
-                  <span className="cursor-pointer">
-                    <LinkExternal strokeColor="#627eea" />
-                  </span>
-                  <span className="cursor-pointer -mr-1">
-                    <Exit strokeColor="#ff6656" />
-                  </span>
-                </div>
-                {walletTokensData &&
-                  walletTokensData[key as ChainKey].map((token: TokenData) => (
-                    <div
-                      key={token.chainName + token.asset}
-                      className="px-2 py-4"
-                    >
-                      <div className="flex gap-2 items-center">
-                        <Image
-                          src={getLogoPath(token.asset)}
-                          alt={`${getAssetSymbol(token.asset)} logo`}
-                          width={26}
-                          height={26}
-                          className="rounded-full"
-                        />
-                        <div className="flex flex-1 flex-col">
-                          <span className="font-bold leading-5">
-                            {token.symbol}
-                          </span>
-                          <span className="leading-4 text-gray-500">
-                            {token.chainName}
-                          </span>
+          <div className="overflow-auto max-h-[calc(100vh-6rem)] custom-scroll ">
+            {Object.keys(walletsState!).map((key) => {
+              const wallet = walletsState![key];
+              return (
+                <div key={wallet.walletId} className="p-4">
+                  <div className="bg-white flex gap-2 rounded-lg p-4">
+                    <span className="leading-6">
+                      {cloneElement(SUPPORTED_WALLETS[wallet.walletId].icon, {
+                        className: "icon",
+                      })}
+                    </span>
+                    <span className="flex-1 leading-6 px-2">
+                      <MiddleTruncate text={wallet.address} />
+                    </span>
+                    <span className="cursor-pointer">
+                      <Copy strokeColor="#627eea" />
+                    </span>
+                    <span className="cursor-pointer">
+                      <QRCode strokeColor="#627eea" />
+                    </span>
+                    <span className="cursor-pointer">
+                      <LinkExternal strokeColor="#627eea" />
+                    </span>
+                    <span className="cursor-pointer -mr-1">
+                      <Exit strokeColor="#ff6656" />
+                    </span>
+                  </div>
+                  {walletTokensData &&
+                    walletTokensData[key as ChainKey].map(
+                      (token: TokenData) => (
+                        <div
+                          key={token.chainName + token.asset}
+                          className="px-2 py-4"
+                        >
+                          <div className="flex gap-2 items-center">
+                            <Image
+                              src={getLogoPath(token.asset)}
+                              alt={`${getAssetSymbol(token.asset)} logo`}
+                              width={26}
+                              height={26}
+                              className="rounded-full"
+                            />
+                            <div className="flex flex-1 flex-col">
+                              <span className="font-bold leading-5">
+                                {token.symbol}
+                              </span>
+                              <span className="leading-4 text-gray-500">
+                                {token.chainName}
+                              </span>
+                            </div>
+                            <span className="font-bold">
+                              {formatNumber(token.balance, 6) ||
+                                formatNumber(token.formattedBalance!, 6)}
+                            </span>
+                          </div>
                         </div>
-                        <span className="font-bold">
-                          {formatNumber(token.balance, 6) ||
-                            formatNumber(token.formattedBalance!, 6)}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            );
-          })}
+                      )
+                    )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </>
     )

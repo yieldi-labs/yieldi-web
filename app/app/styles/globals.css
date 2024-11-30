@@ -168,3 +168,17 @@ a:hover {
   background: var(--secondaryBtn);
   cursor: pointer;
 }
+
+.custom-scroll::-webkit-scrollbar {
+  background-color: rgb(161 253 89 / 0.5);
+  width: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-corner {
+  background-color: rgb(161 253 89 / 0.5);
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background-color: rgb(131, 230, 56);
+  border-radius: 10px;
+}
