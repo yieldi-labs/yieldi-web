@@ -409,20 +409,21 @@ const Component: FC = () => {
                         className: "icon",
                       })}
                     </span>
+                    <span className="flex-3 font-bold leading-6">{key}</span>
                     <span className="flex-1 leading-6 px-2">
                       <MiddleTruncate text={wallet.address} />
                     </span>
-                    <span className="cursor-pointer">
-                      <Copy strokeColor="#627eea" />
+                    <span className="cursor-pointer my-auto ">
+                      <Copy strokeColor="#627eea" size={14} />
                     </span>
-                    <span className="cursor-pointer">
-                      <QRCode strokeColor="#627eea" />
+                    <span className="cursor-pointer my-auto ">
+                      <QRCode strokeColor="#627eea" size={14} />
                     </span>
-                    <span className="cursor-pointer">
-                      <LinkExternal strokeColor="#627eea" />
+                    <span className="cursor-pointer my-auto ">
+                      <LinkExternal strokeColor="#627eea" size={14} />
                     </span>
-                    <span className="cursor-pointer -mr-1">
-                      <Exit strokeColor="#ff6656" />
+                    <span className="cursor-pointer my-auto -mr-1">
+                      <Exit strokeColor="#ff6656" size={14} />
                     </span>
                   </div>
                   {walletTokensData &&
