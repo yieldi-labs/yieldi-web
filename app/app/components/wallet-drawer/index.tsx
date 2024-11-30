@@ -26,13 +26,14 @@ import {
   normalizeAddress,
 } from "@/app/utils";
 import { decodeFunctionResult, encodeFunctionData, formatUnits } from "viem";
-import { getPools } from "@/midgard";
+import { getBalance, getPools } from "@/midgard";
 import { Network } from "@xchainjs/xchain-client";
 import {
   Client as BitcoinClient,
   defaultBTCParams,
 } from "@xchainjs/xchain-bitcoin";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
+import { useRuneBalance } from "@/hooks";
 
 type TokenData = {
   asset: string;
@@ -198,7 +199,27 @@ const Component: FC = () => {
 
           await Promise.all(fetchPromises);
         };
+
+        if (
+          walletsState[ChainKey.THORCHAIN] &&
+          walletsState[ChainKey.THORCHAIN].address
+        ) {
+          const info = await getRuneBalance(
+            walletsState[ChainKey.THORCHAIN].address
+          );
+          addTokenData(ChainKey.THORCHAIN, {
+            name: ChainKey.THORCHAIN,
+            symbol: "RUNE",
+            decimals: 8,
+            balance: info?.coins[0]
+              ? Number(formatNumber(info?.coins[0].amount, 8))
+              : 0,
+            asset: "THOR.RUNE",
+            chainName: "Native",
+          });
+        }
         await fetchPoolTokens();
+
         setWalletTokensData({ ...updatedTokensData });
       } catch (error) {
         console.error("Error fetching wallet balances:", error);
@@ -368,6 +389,19 @@ const Component: FC = () => {
       }
     };
     return await getBalance(walletAddress);
+  };
+
+  const getRuneBalance = async (walletAddress: string) => {
+    try {
+      const { data: runeBalance } = await getBalance({
+        path: {
+          address: walletAddress,
+        },
+      });
+      return runeBalance;
+    } catch (err) {
+      return undefined;
+    }
   };
 
   return (

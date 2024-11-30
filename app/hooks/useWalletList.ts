@@ -34,15 +34,13 @@ export function useWalletList(
     const walletList: WalletType[] = Object.values(
       SUPPORTED_WALLETS
     ) as WalletType[];
-    const selectedChainKeys = new Set(
-      selectedChains.map((chain) => chain.name)
-    );
     const commonWallets = selectedChains.length
-      ? walletList.filter((wallet) =>
-          wallet.chains.some((chainKey) => selectedChainKeys.has(chainKey))
-        )
+      ? walletList.filter((wallet) => {
+          return selectedChains.every((chain) =>
+            wallet.chains.includes(chain.name)
+          );
+        })
       : walletList;
-
     commonWallets.forEach(processWallet);
 
     return { detected, undetected };

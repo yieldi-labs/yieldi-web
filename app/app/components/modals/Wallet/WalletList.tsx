@@ -20,28 +20,28 @@ interface WalletSectionProps {
 const WalletList = ({
   isWalletValidForChain,
   onWalletSelect,
+  detected,
+  undetected,
 }: WalletListProps) => (
   <div className="flex flex-col gap-4">
     <h3 className="text-base text-neutral-900 font-medium font-gt-america">
       Select Wallet
     </h3>
-    <WalletSection
-      title="Detected"
-      wallets={
-        Object.values(SUPPORTED_WALLETS)
-          .filter((wallet) => wallet.isAvailable)
-          .sort((a, b) => a.id.localeCompare(b.id)) as WalletType[]
-      }
-      isWalletValidForChain={isWalletValidForChain}
-      onWalletSelect={onWalletSelect}
-    />
+    {detected.length > 0 && (
+      <WalletSection
+        title="Detected"
+        wallets={
+          detected.sort((a, b) => a.id.localeCompare(b.id)) as WalletType[]
+        }
+        isWalletValidForChain={isWalletValidForChain}
+        onWalletSelect={onWalletSelect}
+      />
+    )}
 
     <WalletSection
       title="Other"
       wallets={
-        Object.values(SUPPORTED_WALLETS)
-          .filter((wallet) => !wallet.isAvailable)
-          .sort((a, b) => a.id.localeCompare(b.id)) as WalletType[]
+        undetected.sort((a, b) => a.id.localeCompare(b.id)) as WalletType[]
       }
       isWalletValidForChain={isWalletValidForChain}
       onWalletSelect={onWalletSelect}
