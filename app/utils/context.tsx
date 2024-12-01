@@ -15,6 +15,7 @@ import {
 } from "./wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { connectEVMWallet, connectUTXOWallet } from "./wallet/walletConnect";
+import { TokenData, WalletTokensData } from "./interfaces";
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
@@ -25,6 +26,8 @@ interface AppStateContextType {
   getChainKeyFromChain: (chain: string) => ChainKey;
   toggleWalletDrawer: () => void;
   isWalletDrawerOpen: boolean;
+  walletTokensData: WalletTokensData;
+  setWalletTokensData: React.Dispatch<React.SetStateAction<WalletTokensData>>;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -35,6 +38,35 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false);
   const [walletsState, setWalletsState] = useState<ConnectedWalletsState>({});
+  const initialWalletTokensData: WalletTokensData = {
+    [ChainKey.ARBITRUM]: {},
+    [ChainKey.AVALANCHE]: {},
+    [ChainKey.BASE]: {},
+    [ChainKey.BITCOIN]: {},
+    [ChainKey.BITCOINCASH]: {},
+    [ChainKey.BLAST]: {},
+    [ChainKey.BSCCHAIN]: {},
+    [ChainKey.CRONOSCHAIN]: {},
+    [ChainKey.DASH]: {},
+    [ChainKey.DOGECOIN]: {},
+    [ChainKey.DYDX]: {},
+    [ChainKey.ETHEREUM]: {},
+    [ChainKey.GAIACHAIN]: {},
+    [ChainKey.KUJIRA]: {},
+    [ChainKey.LITECOIN]: {},
+    [ChainKey.MAYACHAIN]: {},
+    [ChainKey.OPTIMISM]: {},
+    [ChainKey.POLKADOT]: {},
+    [ChainKey.POLYGON]: {},
+    [ChainKey.SOLANA]: {},
+    [ChainKey.SUI]: {},
+    [ChainKey.THORCHAIN]: {},
+    [ChainKey.TON]: {},
+    [ChainKey.ZKSYNC]: {},
+  };
+  const [walletTokensData, setWalletTokensData] = useState<WalletTokensData>(
+    initialWalletTokensData
+  );
 
   const toggleWalletModal = () => {
     setIsWalletModalOpen((prevState) => !prevState);
@@ -265,6 +297,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         getChainKeyFromChain,
         isWalletDrawerOpen,
         toggleWalletDrawer,
+        walletTokensData,
+        setWalletTokensData,
       }}
     >
       {children}

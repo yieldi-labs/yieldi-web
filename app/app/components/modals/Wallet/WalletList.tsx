@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Wallet from "./Wallet";
 import { WalletType } from "@/utils/interfaces";
-import { SUPPORTED_WALLETS } from "@/utils/wallet/constants";
 
 interface WalletListProps {
   detected: WalletType[];

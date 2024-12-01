@@ -33,19 +33,7 @@ import {
   defaultBTCParams,
 } from "@xchainjs/xchain-bitcoin";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
-import { useRuneBalance } from "@/hooks";
-
-type TokenData = {
-  asset: string;
-  name?: string;
-  balance: number;
-  formattedBalance?: number;
-  decimals?: number;
-  symbol?: string;
-  chainName?: string;
-};
-
-type WalletTokensData = Record<ChainKey, TokenData[]>;
+import { WalletTokensData, TokenData } from "@/utils/interfaces";
 
 const Component: FC = () => {
   const {
@@ -54,293 +42,371 @@ const Component: FC = () => {
     toggleWalletDrawer,
     toggleWalletModal,
     getChainKeyFromChain,
+    walletTokensData,
+    setWalletTokensData,
   } = useAppState();
 
   const initialWalletTokensData: WalletTokensData = {
-    [ChainKey.ETHEREUM]: [],
-    [ChainKey.BITCOIN]: [],
-    [ChainKey.DOGECOIN]: [],
-    [ChainKey.ARBITRUM]: [],
-    [ChainKey.AVALANCHE]: [],
-    [ChainKey.BASE]: [],
-    [ChainKey.BITCOINCASH]: [],
-    [ChainKey.BLAST]: [],
-    [ChainKey.BSCCHAIN]: [],
-    [ChainKey.CRONOSCHAIN]: [],
-    [ChainKey.DASH]: [],
-    [ChainKey.DYDX]: [],
-    [ChainKey.GAIACHAIN]: [],
-    [ChainKey.KUJIRA]: [],
-    [ChainKey.LITECOIN]: [],
-    [ChainKey.MAYACHAIN]: [],
-    [ChainKey.OPTIMISM]: [],
-    [ChainKey.POLKADOT]: [],
-    [ChainKey.POLYGON]: [],
-    [ChainKey.SOLANA]: [],
-    [ChainKey.SUI]: [],
-    [ChainKey.THORCHAIN]: [],
-    [ChainKey.TON]: [],
-    [ChainKey.ZKSYNC]: [],
+    [ChainKey.ARBITRUM]: {},
+    [ChainKey.AVALANCHE]: {},
+    [ChainKey.BASE]: {},
+    [ChainKey.BITCOIN]: {},
+    [ChainKey.BITCOINCASH]: {},
+    [ChainKey.BLAST]: {},
+    [ChainKey.BSCCHAIN]: {},
+    [ChainKey.CRONOSCHAIN]: {},
+    [ChainKey.DASH]: {},
+    [ChainKey.DOGECOIN]: {},
+    [ChainKey.DYDX]: {},
+    [ChainKey.ETHEREUM]: {},
+    [ChainKey.GAIACHAIN]: {},
+    [ChainKey.KUJIRA]: {},
+    [ChainKey.LITECOIN]: {},
+    [ChainKey.MAYACHAIN]: {},
+    [ChainKey.OPTIMISM]: {},
+    [ChainKey.POLKADOT]: {},
+    [ChainKey.POLYGON]: {},
+    [ChainKey.SOLANA]: {},
+    [ChainKey.SUI]: {},
+    [ChainKey.THORCHAIN]: {},
+    [ChainKey.TON]: {},
+    [ChainKey.ZKSYNC]: {},
   };
-
-  const [walletTokensData, setWalletTokensData] = useState<WalletTokensData>(
-    initialWalletTokensData
-  );
 
   const handleAddWallet = () => {
     toggleWalletModal();
     toggleWalletDrawer();
   };
 
-  useEffect(() => {
+  const fetchWalletTokens = async () => {
     if (!walletsState) return;
 
-    const fetchWalletBalances = async () => {
-      try {
-        const updatedTokensData: WalletTokensData = {
-          ...initialWalletTokensData,
+    try {
+      const updatedTokensData: WalletTokensData = {
+        ...initialWalletTokensData,
+      };
+
+      const addTokenData = (chainKey: ChainKey, tokenData: TokenData) => {
+        updatedTokensData[chainKey] = {
+          ...(updatedTokensData[chainKey] || {}),
+          [tokenData.asset]: tokenData,
         };
+      };
 
-        const addTokenData = (chainKey: ChainKey, tokenData: TokenData) => {
-          updatedTokensData[chainKey] = [
-            ...(updatedTokensData[chainKey] || []),
-            tokenData,
-          ];
-        };
+      const fetchNativeTokens = async (poolAsset: string) => {
+        const chainKey = getChainKeyFromChain(poolAsset.split(".")[0]);
 
-        const fetchNativeBalances = async (poolAsset: string) => {
-          const chainKey = getChainKeyFromChain(poolAsset.split(".")[0]);
-
-          const wallet = walletsState[chainKey as ChainKey];
-          if (wallet?.address && wallet?.provider) {
-            try {
-              const info = await getERC20TokenInfo(
-                chainKey,
-                walletsState[chainKey].address,
-                walletsState[chainKey].provider
-              );
-              if (info) {
-                addTokenData(chainKey as ChainKey, {
-                  name: chainKey,
-                  symbol: poolAsset.split(".")[0],
-                  decimals: 18,
-                  balance: parseFloat(info.balance.toString()),
-                  asset: poolAsset,
-                  chainName: "Native",
-                });
-              }
-            } catch (error) {
-              console.error(
-                `Error fetching native balance for ${chainKey}:`,
-                error
-              );
-            }
+        const wallet = walletsState[chainKey as ChainKey];
+        if (wallet?.address && wallet?.provider) {
+          try {
+            addTokenData(chainKey as ChainKey, {
+              name: chainKey,
+              symbol: poolAsset.split(".")[0],
+              decimals: 18,
+              balance: 0,
+              asset: poolAsset,
+              chainName: "Native",
+              chainKey: chainKey,
+              tokenAddress: "0x",
+            });
+          } catch (error) {
+            console.error(
+              `Error fetching native balance for ${chainKey}:`,
+              error
+            );
           }
-        };
-
-        const fetchPoolTokens = async () => {
-          const { data: pools } = await getPools({
-            query: { period: "30d", status: "available" },
-          });
-
-          if (!pools) return;
-
-          const fetchPromises = pools.map(async (pool: any) => {
-            const assetType = pool.asset.split(".")[0].toLowerCase();
-
-            if (isERC20(pool.asset)) {
-              const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
-              const chainKey = getChainKeyFromChain(pool.asset.split(".")[0]);
-              const tokenAddress = normalizeAddress(poolViemAddress!);
-
-              if (
-                tokenAddress &&
-                walletsState[chainKey]?.address &&
-                walletsState[chainKey]?.provider
-              ) {
-                const info = await getERC20TokenInfo(
-                  chainKey,
-                  walletsState[chainKey].address,
-                  walletsState[chainKey].provider,
-                  tokenAddress
-                );
-                if (info && info.balance > 0) {
-                  addTokenData(chainKey, {
-                    ...info,
-                    asset: pool.asset,
-                    balance: info.balance,
-                    chainName: pool.asset.split(".")[0],
-                  });
-                }
-              }
-            } else if (assetType === "btc" || assetType === "doge") {
-              const chainKey =
-                assetType === "btc" ? ChainKey.BITCOIN : ChainKey.DOGECOIN;
-              if (walletsState[chainKey]?.address) {
-                const info = await getUTXOInfo(
-                  chainKey,
-                  walletsState[chainKey].address
-                );
-                if (info) {
-                  addTokenData(chainKey, {
-                    ...info,
-                    asset: pool.asset,
-                    symbol: chainKey,
-                    chainName: pool.asset.split(".")[0],
-                    balance: info.formattedBalance,
-                    formattedBalance: info.formattedBalance,
-                  });
-                }
-              }
-            } else if (walletsState[getChainKeyFromChain(assetType)]) {
-              await fetchNativeBalances(pool.asset);
-            }
-          });
-
-          await Promise.all(fetchPromises);
-        };
-
-        if (
-          walletsState[ChainKey.THORCHAIN] &&
-          walletsState[ChainKey.THORCHAIN].address
-        ) {
-          const info = await getRuneBalance(
-            walletsState[ChainKey.THORCHAIN].address
-          );
-          addTokenData(ChainKey.THORCHAIN, {
-            name: ChainKey.THORCHAIN,
-            symbol: "RUNE",
-            decimals: 8,
-            balance: info?.coins[0]
-              ? Number(formatNumber(info?.coins[0].amount, 8))
-              : 0,
-            asset: "THOR.RUNE",
-            chainName: "Native",
-          });
         }
-        await fetchPoolTokens();
+      };
 
-        setWalletTokensData({ ...updatedTokensData });
-      } catch (error) {
-        console.error("Error fetching wallet balances:", error);
-      }
-    };
+      const fetchPoolTokens = async () => {
+        const { data: pools } = await getPools({
+          query: { period: "30d", status: "available" },
+        });
 
-    fetchWalletBalances();
+        if (!pools) return;
+        const fetchPromises = pools.map(async (pool: any) => {
+          const assetType = pool.asset.split(".")[0].toLowerCase();
+          if (isERC20(pool.asset)) {
+            const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
+            const chainKey = getChainKeyFromChain(pool.asset.split(".")[0]);
+            const tokenAddress = normalizeAddress(poolViemAddress!);
+            if (tokenAddress) {
+              addTokenData(chainKey, {
+                asset: pool.asset,
+                balance: 0,
+                chainName: pool.asset.split(".")[0],
+                chainKey: chainKey,
+                tokenAddress: tokenAddress,
+              });
+            }
+          } else if (assetType === "btc" || assetType === "doge") {
+            const chainKey =
+              assetType === "btc" ? ChainKey.BITCOIN : ChainKey.DOGECOIN;
+            addTokenData(chainKey, {
+              asset: pool.asset,
+              symbol: chainKey,
+              chainName: pool.asset.split(".")[0],
+              balance: 0,
+              formattedBalance: 0,
+              chainKey: chainKey,
+              tokenAddress: "0x",
+            });
+          } else if (walletsState[getChainKeyFromChain(assetType)]) {
+            await fetchNativeTokens(pool.asset);
+          }
+        });
+
+        await Promise.all(fetchPromises);
+      };
+
+      addTokenData(ChainKey.THORCHAIN, {
+        name: ChainKey.THORCHAIN,
+        symbol: "RUNE",
+        decimals: 8,
+        balance: 0,
+        asset: "THOR.RUNE",
+        chainName: "Native",
+        chainKey: ChainKey.THORCHAIN,
+        tokenAddress: "",
+      });
+
+      await fetchPoolTokens();
+
+      setWalletTokensData({ ...updatedTokensData });
+    } catch (error) {
+      console.error("Error fetching wallet balances:", error);
+    }
+  };
+
+  const [walletBalanceData, setWalletBalanceData] = useState<WalletTokensData>(
+    initialWalletTokensData
+  );
+  useEffect(() => {
+    fetchWalletTokens();
   }, [walletsState]);
 
-  const getERC20TokenInfo = async (
+  useEffect(() => {
+    const getBalance = async () => {
+      for (const key of Object.keys(walletTokensData)) {
+        if (walletsState && walletsState[key]) {
+          const list = walletTokensData[key as ChainKey];
+          switch (key as ChainKey) {
+            case ChainKey.AVALANCHE:
+            case ChainKey.BSCCHAIN:
+            case ChainKey.ETHEREUM: {
+              for (const tokenKey of Object.keys(list)) {
+                const token = list[tokenKey];
+                if (token.balance === 0) {
+                  const info = await checkAndSwitchChain(
+                    key as ChainKey,
+                    walletsState[key].address,
+                    walletsState[key].provider,
+                    token.tokenAddress as `0x${string}`
+                  );
+                  if (info?.balance) {
+                    setWalletBalanceData((prevData) => {
+                      return {
+                        ...prevData,
+                        [key as ChainKey]: {
+                          ...prevData[key as ChainKey],
+                          [tokenKey]: {
+                            ...prevData[key as ChainKey][tokenKey],
+                            ...walletTokensData[key as ChainKey][tokenKey],
+                            ...info,
+                          },
+                        },
+                      };
+                    });
+                  }
+                }
+              }
+              break;
+            }
+            case ChainKey.THORCHAIN: {
+              for (const tokenKey of Object.keys(list)) {
+                const token = list[tokenKey];
+                if (token.balance === 0) {
+                  const info = await getRuneBalance(
+                    walletsState[ChainKey.THORCHAIN].address
+                  );
+                  if (info) {
+                    setWalletBalanceData((prevData) => {
+                      return {
+                        ...prevData,
+                        [key as ChainKey]: {
+                          ...prevData[key as ChainKey],
+                          [tokenKey]: {
+                            ...prevData[key as ChainKey][tokenKey],
+                            ...walletTokensData[key as ChainKey][tokenKey],
+                            balance: info?.coins[0]
+                              ? Number(formatNumber(info?.coins[0].amount, 8))
+                              : 0,
+                          },
+                        },
+                      };
+                    });
+                  }
+                }
+              }
+              break;
+            }
+            case ChainKey.DOGECOIN:
+            case ChainKey.BITCOIN: {
+              for (const tokenKey of Object.keys(list)) {
+                const token = list[tokenKey];
+                if (token.balance === 0) {
+                  const info = await getUTXOInfo(
+                    key as ChainKey,
+                    walletsState[key as ChainKey].address
+                  );
+                  if (info) {
+                    setWalletBalanceData((prevData) => {
+                      return {
+                        ...prevData,
+                        [key as ChainKey]: {
+                          ...prevData[key as ChainKey],
+                          [tokenKey]: {
+                            ...prevData[key as ChainKey][tokenKey],
+                            ...walletTokensData[key as ChainKey][tokenKey],
+                            ...info,
+                          },
+                        },
+                      };
+                    });
+                  }
+                }
+              }
+              break;
+            }
+          }
+        }
+      }
+    };
+    getBalance();
+  }, [walletTokensData]);
+
+  const checkAndSwitchChain = async (
     chainKey: ChainKey,
     walletAddress: string,
     provider: any,
     tokenAddress?: `0x${string}`
   ) => {
-    try {
-      let providerChainId = await provider.request({
-        method: "eth_chainId",
+    let providerChainId = await provider.request({
+      method: "eth_chainId",
+    });
+    const currentChain = EVM_CHAINS.find(
+      ({ chainId }) => chainId == providerChainId
+    );
+    if (currentChain?.name === chainKey) {
+      return getERC20TokenInfo(walletAddress, provider, tokenAddress);
+    } else {
+      providerChainId = await provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [
+          {
+            chainId: EVM_CHAINS.find(({ name }) => name == chainKey)?.chainId,
+          },
+        ],
       });
-      const currentChain = EVM_CHAINS.find(
-        ({ chainId }) => chainId == providerChainId
+      return checkAndSwitchChain(
+        chainKey,
+        walletAddress,
+        provider,
+        tokenAddress
       );
-      if (currentChain?.name != chainKey) {
-        providerChainId = await provider.request({
-          method: "wallet_switchEthereumChain",
-          params: [
-            {
-              chainId: EVM_CHAINS.find(({ name }) => name == chainKey)?.chainId,
-            },
-          ],
-        });
-        return getERC20TokenInfo(
-          chainKey,
-          walletAddress,
-          provider,
-          tokenAddress
-        );
-      }
-      if (!tokenAddress) {
-        // Fetch native ETH balance
+    }
+  };
+
+  const getERC20TokenInfo = async (
+    walletAddress: string,
+    provider: any,
+    tokenAddress?: `0x${string}`
+  ) => {
+    try {
+      if (tokenAddress === "0x") {
+        // Native Balance
         const balanceHex = await provider.request({
           method: "eth_getBalance",
           params: [walletAddress, "latest"],
         });
         const balanceBigInt = BigInt(balanceHex);
         const balance = Number(formatUnits(balanceBigInt, 18));
-        return { name: "Ethereum", symbol: "ETH", decimals: 18, balance };
+        return { balance };
+      } else {
+        // Encode function calls
+        const nameData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "name",
+        });
+
+        const symbolData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "symbol",
+        });
+
+        const decimalsData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "decimals",
+        });
+
+        const balanceData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "balanceOf",
+          args: [walletAddress],
+        });
+
+        // Make parallel RPC calls
+        const [nameHex, symbolHex, decimalsHex, balanceHex] = await Promise.all(
+          [
+            provider.request({
+              method: "eth_call",
+              params: [{ to: tokenAddress, data: nameData }, "latest"],
+            }),
+            provider.request({
+              method: "eth_call",
+              params: [{ to: tokenAddress, data: symbolData }, "latest"],
+            }),
+            provider.request({
+              method: "eth_call",
+              params: [{ to: tokenAddress, data: decimalsData }, "latest"],
+            }),
+            provider.request({
+              method: "eth_call",
+              params: [{ to: tokenAddress, data: balanceData }, "latest"],
+            }),
+          ]
+        );
+        // Decode results
+        const name = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "name",
+          data: nameHex,
+        }) as string;
+
+        const symbol = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "symbol",
+          data: symbolHex,
+        }) as string;
+
+        const decimals = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "decimals",
+          data: decimalsHex,
+        }) as number;
+
+        const balanceBigInt = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "balanceOf",
+          data: balanceHex,
+        }) as bigint;
+        const balance = Number(formatUnits(balanceBigInt, Number(decimals)));
+
+        return { name, symbol, decimals, balance };
       }
-
-      // Encode function calls
-      const nameData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "name",
-      });
-
-      const symbolData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "symbol",
-      });
-
-      const decimalsData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "decimals",
-      });
-
-      const balanceData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "balanceOf",
-        args: [walletAddress],
-      });
-
-      // Make parallel RPC calls
-      const [nameHex, symbolHex, decimalsHex, balanceHex] = await Promise.all([
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: nameData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: symbolData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: decimalsData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: balanceData }, "latest"],
-        }),
-      ]);
-      // Decode results
-      const name = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "name",
-        data: nameHex,
-      }) as string;
-
-      const symbol = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "symbol",
-        data: symbolHex,
-      }) as string;
-
-      const decimals = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "decimals",
-        data: decimalsHex,
-      }) as number;
-
-      const balanceBigInt = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "balanceOf",
-        data: balanceHex,
-      }) as bigint;
-      const balance = Number(formatUnits(balanceBigInt, Number(decimals)));
-
-      return { name, symbol, decimals, balance };
     } catch (err) {
       console.log(err);
     }
-    return null;
   };
 
   const getUXTOClient = (chainKey: ChainKey) => {
@@ -399,7 +465,7 @@ const Component: FC = () => {
         },
       });
       return runeBalance;
-    } catch (err) {
+    } catch {
       return undefined;
     }
   };
@@ -436,7 +502,7 @@ const Component: FC = () => {
             {Object.keys(walletsState!).map((key) => {
               const wallet = walletsState![key];
               return (
-                <div key={wallet.walletId} className="p-4">
+                <div key={wallet.walletId + key} className="p-4">
                   <div className="bg-white flex gap-2 rounded-lg p-4">
                     <span className="leading-6">
                       {cloneElement(SUPPORTED_WALLETS[wallet.walletId].icon, {
@@ -460,36 +526,38 @@ const Component: FC = () => {
                       <Exit strokeColor="#ff6656" size={14} />
                     </span>
                   </div>
-                  {walletTokensData &&
-                    walletTokensData[key as ChainKey].map(
-                      (token: TokenData) => (
-                        <div
-                          key={token.chainName + token.asset}
-                          className="px-2 py-4"
-                        >
-                          <div className="flex gap-2 items-center">
-                            <Image
-                              src={getLogoPath(token.asset)}
-                              alt={`${getAssetSymbol(token.asset)} logo`}
-                              width={26}
-                              height={26}
-                              className="rounded-full"
-                            />
-                            <div className="flex flex-1 flex-col">
-                              <span className="font-bold leading-5">
-                                {token.symbol}
-                              </span>
-                              <span className="leading-4 text-gray-500">
-                                {token.chainName}
+                  {walletBalanceData &&
+                    Object.values(walletBalanceData[key as ChainKey]).map(
+                      (token: TokenData) => {
+                        return (
+                          <div
+                            key={token.chainName + token.asset}
+                            className="px-2 py-4"
+                          >
+                            <div className="flex gap-2 items-center">
+                              <Image
+                                src={getLogoPath(token.asset)}
+                                alt={`${getAssetSymbol(token.asset)} logo`}
+                                width={26}
+                                height={26}
+                                className="rounded-full"
+                              />
+                              <div className="flex flex-1 flex-col">
+                                <span className="font-bold leading-5">
+                                  {token.symbol}
+                                </span>
+                                <span className="leading-4 text-gray-500">
+                                  {token.chainName}
+                                </span>
+                              </div>
+                              <span className="font-bold">
+                                {formatNumber(token.balance, 6) ||
+                                  formatNumber(token.formattedBalance!, 6)}
                               </span>
                             </div>
-                            <span className="font-bold">
-                              {formatNumber(token.balance, 6) ||
-                                formatNumber(token.formattedBalance!, 6)}
-                            </span>
                           </div>
-                        </div>
-                      )
+                        );
+                      }
                     )}
                 </div>
               );

@@ -2,6 +2,20 @@ import { ChainKey, ProviderKey, WalletKey } from "@/utils/wallet/constants";
 import { GetConnectorsReturnType } from "@wagmi/core";
 import { SVGProps } from "react";
 
+export type TokenData = {
+  asset: string;
+  name?: string;
+  balance: number;
+  formattedBalance?: number;
+  decimals?: number;
+  symbol?: string;
+  chainName?: string;
+  tokenAddress: string;
+  chainKey: ChainKey;
+};
+export type TokenRecord = Record<string, TokenData>;
+export type WalletTokensData = Record<ChainKey, TokenRecord>;
+
 export interface WalletOption {
   id: string;
   name: string;
