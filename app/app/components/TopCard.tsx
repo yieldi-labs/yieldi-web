@@ -28,10 +28,18 @@ export const TopCard: React.FC<TopCardProps> = ({
     index! > 0 ? "text-base" : "text-xl",
   );
   const labelClass = "text-gray-700 md:text-base text-xs mt-1 font-medium";
+  const isMobile = useMobileDetection();
 
   return (
     <TranslucentCard className="md:p-4 p-2 rounded-2xl flex flex-col items-start">
       <div className="flex items-center md:mb-7 md:p-0 mb-2">
+        <Image
+          src={getLogoPath(asset)}
+          alt={`${getAssetSymbol(asset)} logo`}
+          width={isMobile ? 32 : 42}
+          height={isMobile ? 32 : 42}
+          className="rounded-full"
+        />
         <span className="ml-2 md:text-2xl text-lg font-medium font-gt-america-ext">
           {getAssetSymbol(asset)}
         </span>
