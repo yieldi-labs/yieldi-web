@@ -6,7 +6,7 @@ export default function ErrorCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`bg-red-500 text-white p-4 ${className || ""}`}>
+    <div className={`bg-red text-white p-4 ${className || ""}`}>
       {children}
     </div>
   );

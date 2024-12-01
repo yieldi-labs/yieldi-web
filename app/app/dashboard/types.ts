@@ -1,15 +1,19 @@
+export enum PositionType {
+  SAVER = 'SAVER',
+  SLP = 'SLP',
+  DLP = 'DLP'
+}
+
 export interface Position {
     assetId: string;
-    type: 'SAVER' | 'LP'
+    type: PositionType
     deposit: {
-      asset: number;
       usd: number;
     };
     gain: {
-      asset: number;
       usd: number;
+      percentage: string;
     };
-    apy: number
 }
   
 export type PositionsPerAsset = Position[];

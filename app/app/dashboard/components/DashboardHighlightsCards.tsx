@@ -3,7 +3,7 @@ import Image from "next/image";
 
 interface DashboardHighlightsCardProps {
     title: string,
-    figure: string,
+    figure?: string,
     iconPath: string
 }
  
@@ -20,7 +20,7 @@ const DashboardHighlightsCard: React.FC<DashboardHighlightsCardProps> = ({ title
                     height={20}
                 />
             </div>
-            <div className="md:mt-5 text-neutral text-[28px] font-medium">{figure}</div>
+            <div className="md:mt-5 text-neutral text-[28px] font-medium">{figure ? figure : '-'}</div>
         </TranslucentCard>
     );
 }

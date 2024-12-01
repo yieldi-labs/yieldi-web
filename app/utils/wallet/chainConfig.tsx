@@ -61,6 +61,7 @@ const singleWalletChains = [
     id: "dogecoin",
     name: "Dogecoin",
     thorchainIdentifier: "doge",
+    nativeAsset: "doge",
     icon: <ChainSvg.Dogechain />,
     wallets: [
       { id: "xdefi-doge", ...baseWalletConfig.CTRL },
@@ -79,6 +80,7 @@ const singleWalletChains = [
     id: "bitcoincash",
     name: "Bitcoin Cash",
     thorchainIdentifier: "bch",
+    nativeAsset: "bch",
     icon: <ChainSvg.BitcoinCash />,
     wallets: [
       { id: "xdefi-bch", ...baseWalletConfig.CTRL },
@@ -97,6 +99,7 @@ const singleWalletChains = [
     id: "litecoin",
     name: "Litecoin",
     thorchainIdentifier: "ltc",
+    nativeAsset: "ltc",
     icon: <ChainSvg.Litecoin />,
     wallets: [
       { id: "xdefi-ltc", ...baseWalletConfig.CTRL },
@@ -115,6 +118,7 @@ const singleWalletChains = [
     id: "thorchain",
     name: "THORChain",
     thorchainIdentifier: "thor",
+    nativeAsset: "rune",
     icon: <ChainSvg.Thorchain />,
     wallets: [
       { id: "xdefi-thorchain", ...baseWalletConfig.CTRL },
@@ -133,6 +137,7 @@ const singleWalletChains = [
     id: "solana",
     name: "Solana",
     thorchainIdentifier: "sol",
+    nativeAsset: "sol",
     icon: <ChainSvg.Solana />,
     wallets: [
       { id: "phantom-solana", ...baseWalletConfig.Phantom },
@@ -155,6 +160,7 @@ const evmChains = [
     name: "Ethereum",
     icon: <ChainSvg.Ethereum />,
     thorchainIdentifier: "eth",
+    nativeAsset: "eth",
     chainId: mainnet.id,
     wallets: evmWallets,
   },
@@ -162,6 +168,7 @@ const evmChains = [
     id: "binance-smart-chain",
     name: "BSC",
     thorchainIdentifier: "bsc",
+    nativeAsset: "bnb",
     icon: <ChainSvg.BSC />,
     chainId: bsc.id,
     wallets: evmWallets.map((wallet) =>
@@ -172,6 +179,7 @@ const evmChains = [
     id: "avalanche",
     name: "Avalanche",
     thorchainIdentifier: "avax",
+    nativeAsset: "avax",
     icon: <ChainSvg.Avax />,
     chainId: avalanche.id,
     wallets: evmWallets.map((wallet) =>
@@ -185,6 +193,7 @@ export const chainConfig: ChainConfig[] = [
     id: "bitcoin",
     name: "Bitcoin",
     thorchainIdentifier: "btc",
+    nativeAsset: "btc",
     icon: <ChainSvg.Bitcoin />,
     wallets: [
       ...utxoWallets,

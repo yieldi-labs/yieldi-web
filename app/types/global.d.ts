@@ -12,6 +12,7 @@ interface ChainConfig {
   chainId?: number;
   name: string;
   thorchainIdentifier?: string;
+  nativeAsset: string;
   icon: JSX.Element;
   wallets: WalletOption[];
 }

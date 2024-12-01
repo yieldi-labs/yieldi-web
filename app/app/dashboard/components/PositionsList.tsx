@@ -1,23 +1,20 @@
 import React, { useMemo, useState } from "react";
-import TranslucentCard from "@/app/TranslucentCard";
-import {
-  addDollarSignAndSuffix,
-  getAssetSymbol,
-  getLogoPath,
-} from "@/app/utils";
-import Image from "next/image";
 import { PositionsPerAsset } from "../types";
 import { SortableHeader } from "@shared/components/ui";
 import { SortDirection } from "@shared/components/ui/types";
+import PositionRow from "./PositionRow";
+import { PoolDetail } from "@/midgard";
 
 interface PositionsList {
   positions: PositionsPerAsset;
+  onAdd: (assetId: string) => void;
+  onRemove: (assetId: string) => void;
 }
 
 enum PoolSortKey {
   PRINCIPAL = "principal",
   TOTAL_EARNING = "totalEarning",
-  APY = "apy",
+  GAIN = "GAIN",
 }
 
 interface SortConfig {
@@ -25,9 +22,9 @@ interface SortConfig {
   direction: SortDirection;
 }
 
-export default function PositionsList({ positions }: PositionsList) {
+export default function PositionsList({ positions, onAdd, onRemove }: PositionsList) {
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: PoolSortKey.APY,
+    key: PoolSortKey.PRINCIPAL,
     direction: SortDirection.DESC,
   });
   const sortedPositions = useMemo(() => {
@@ -36,9 +33,9 @@ export default function PositionsList({ positions }: PositionsList) {
       let aValue: number, bValue: number;
 
       switch (sortConfig.key) {
-        case PoolSortKey.APY:
-          aValue = a.apy;
-          bValue = b.apy;
+        case PoolSortKey.GAIN:
+          aValue = Number(a.gain.percentage);
+          bValue = Number(b.gain.percentage);
           break;
         case PoolSortKey.PRINCIPAL:
           aValue = a.deposit.usd - a.gain.usd;
@@ -76,18 +73,18 @@ export default function PositionsList({ positions }: PositionsList) {
   return (
     <>
       <div className="flex text-left text-base text-gray-700 mb-2 px-4">
-        <div className="py-3 w-1/3 md:w-1/2">Asset</div>
-        <div className="flex flex-1 w-2/3 md:w-1/2 justify-between">
-          <div className="w-1/3">
+        <div className="py-3 md:w-1/5 w-1/2">Asset</div>
+        <div className="flex flex-1 md:w-4/5 w-1/2 justify-between">
+          <div className="w-1/2 md:w-1/5">
             <SortableHeader<PoolSortKey>
-              label="APY"
-              sortKey={PoolSortKey.APY}
+              label="Gain"
+              sortKey={PoolSortKey.GAIN}
               currentSortKey={sortConfig.key}
               sortDirection={sortConfig.direction}
               onSort={sortData}
             />
           </div>
-          <div className="w-1/3">
+          <div className="w-1/2 md:w-1/5">
             <SortableHeader<PoolSortKey>
               label="Principal"
               sortKey={PoolSortKey.PRINCIPAL}
@@ -96,7 +93,7 @@ export default function PositionsList({ positions }: PositionsList) {
               onSort={sortData}
             />
           </div>
-          <div className="w-1/3">
+          <div className="hidden md:flex w-1/3 md:w-1/5">
             <SortableHeader<PoolSortKey>
               label="Total earning"
               sortKey={PoolSortKey.TOTAL_EARNING}
@@ -105,46 +102,17 @@ export default function PositionsList({ positions }: PositionsList) {
               onSort={sortData}
             />
           </div>
+          <div className="hidden md:flex px-3 py-3 w-2/5">Actions</div>
         </div>
       </div>
       <div className="space-y-1.5">
         {sortedPositions.map((position) => (
-          <TranslucentCard key={`${position.assetId}-${position.type}`} className="rounded-xl mb-1.5">
-            <div className="flex items-center w-full">
-              <div className="px-3 whitespace-nowrap w-1/3 md:w-1/2">
-                <div className="flex items-center">
-                  <Image
-                    src={getLogoPath(position.assetId)}
-                    alt={`${getAssetSymbol(position.assetId)} logo`}
-                    width={28}
-                    height={28}
-                    className="rounded-full"
-                  />
-                  <div className="flex flex-col">
-                    <span className="ml-3 font-medium">
-                      {getAssetSymbol(position.assetId)}
-                    </span>
-                    <span className="hidden md:block ml-3 font-medium font-normal text-sm text-neutral-700">
-                      {position.type === "SAVER" ? "Savers" : "LP"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-start w-2/3 md:w-1/2">
-                <div className="px-3 py-3 md:py-0 whitespace-nowrap flex-1 w-1/3">
-                  {position.apy * 100}%
-                </div>
-                <div className="px-3 py-3 md:py-0 whitespace-nowrap flex-1 w-1/3">
-                  {addDollarSignAndSuffix(
-                    position.deposit.usd + position.gain.usd
-                  )}
-                </div>
-                <div className="px-3 py-3 md:py-0 whitespace-nowrap flex-1 w-1/3">
-                  {addDollarSignAndSuffix(position.gain.usd)}
-                </div>
-              </div>
-            </div>
-          </TranslucentCard>
+          <PositionRow 
+            key={`${position.assetId}-${position.type}`} 
+            position={position} 
+            onAdd={onAdd} 
+            onRemove={onRemove} 
+          />
         ))}
       </div>
     </>
