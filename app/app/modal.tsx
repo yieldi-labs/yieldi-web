@@ -15,7 +15,7 @@ export default function Modal({
       onClick={onClose}
     >
       <div
-        className="relative z-20 max-w-2xl mx-auto mb-auto mt-[5vh] rounded-large border-4 border-white bg-neutral-100"
+        className="md:relative z-20 md:min-w-[570px] w-full md:w-auto md:mx-auto mt-auto md:mt-[5vh] md:mb-auto rounded-t-large md:rounded-large border-4 border-white bg-neutral-100"
         onClick={(e) => e.stopPropagation()}
         style={style}
       >
