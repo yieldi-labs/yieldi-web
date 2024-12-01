@@ -3,7 +3,6 @@ import { PositionsPerAsset } from "../types";
 import { SortableHeader } from "@shared/components/ui";
 import { SortDirection } from "@shared/components/ui/types";
 import PositionRow from "./PositionRow";
-import { PoolDetail } from "@/midgard";
 
 interface PositionsList {
   positions: PositionsPerAsset;
@@ -14,7 +13,7 @@ interface PositionsList {
 enum PoolSortKey {
   PRINCIPAL = "principal",
   TOTAL_EARNING = "totalEarning",
-  GAIN = "GAIN",
+  GAIN = "gain",
 }
 
 interface SortConfig {
