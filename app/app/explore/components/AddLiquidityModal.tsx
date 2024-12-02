@@ -325,10 +325,6 @@ export default function AddLiquidityModal({
       />
     );
   }
-  const handlePercentageClick = (percentage: number) => {
-    const newAmount = (assetBalance * percentage).toFixed(8);
-    setAssetAmount(newAmount);
-  };
   return (
     <Modal onClose={() => onClose(false)}>
       <div className="p-2 w-full">

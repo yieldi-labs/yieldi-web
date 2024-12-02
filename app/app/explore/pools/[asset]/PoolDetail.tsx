@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import TranslucentCard from "@/app/TranslucentCard";
 import {
   calculateVolumeDepthRatio,
