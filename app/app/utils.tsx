@@ -7,7 +7,7 @@ import { mainnet } from "viem/chains";
 import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { Saver } from "@/app/explore/types";
-import { getPool, PoolDetail } from "@/midgard";
+import { getPool, MemberPool, PoolDetail } from "@/midgard";
 import { liquidityProvider } from "@/thornode";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { chainConfig } from "@/utils/wallet/chainConfig";
@@ -554,4 +554,21 @@ export const calculateGain = async (
     console.error("Failed to calculate gains:", err);
     return null;
   }
+};
+
+export interface PositionDetails {
+  assetAdded: number;
+  runeAdded: number;
+}
+
+export const getPositionDetails = (
+  pool: PoolDetail,
+  position: MemberPool,
+): PositionDetails => {
+  const assetAdded = parseFloat(position.assetAdded) / DECIMALS;
+  const runeAdded = parseFloat(position.runeAdded) / DECIMALS;
+  return {
+    assetAdded,
+    runeAdded,
+  } as PositionDetails;
 };

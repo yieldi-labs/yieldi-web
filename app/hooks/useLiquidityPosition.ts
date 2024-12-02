@@ -51,7 +51,7 @@ export function useLiquidityPosition({
   const { wallet } = useAppState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [position, setPosition] = useState<MemberPool | null>(null);
+  const [positions, setPositions] = useState<MemberPool[] | null>(null);
   const [pool, setPool] = useState<PoolDetail>(poolProp);
   const thorChainClient = useThorchain({ wallet });
 
@@ -134,12 +134,12 @@ export function useLiquidityPosition({
           return null;
         }
 
-        const poolPosition = memberResponse.data.pools.find(
+        const poolPositions = memberResponse.data.pools.filter(
           (p) => p.pool === asset,
         );
 
-        if (poolPosition) {
-          setPosition(poolPosition);
+        if (poolPositions) {
+          setPositions(poolPositions);
         }
 
         if (poolResponse.data) {
@@ -147,8 +147,9 @@ export function useLiquidityPosition({
         }
 
         return {
-          position: poolPosition,
+          positions: poolPositions,
           pool: poolResponse.data,
+          memberDetails: memberResponse.data,
         };
       } catch (err) {
         setError(
@@ -396,7 +397,7 @@ export function useLiquidityPosition({
   return {
     loading,
     error,
-    position,
+    positions,
     pool,
     getMemberDetails,
     addLiquidity,
