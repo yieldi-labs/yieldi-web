@@ -166,7 +166,6 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
             },
             (error: any, result: any) => {
               if (error) {
-                console.error("Transfer error:", error);
                 setError(error.message || "Transfer failed");
                 reject(error);
               } else {
@@ -176,7 +175,6 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
                   hash: result,
                 }));
                 resolve(result);
-                console.log("Transfer result:", result);
               }
             }
           );
@@ -192,7 +190,6 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
     [wallet, getFees, chain]
   );
 
-  // Add liquidity to a pool using transfer
   // Add liquidity to a pool using transfer
   const addLiquidity = useCallback(
     async ({
@@ -220,7 +217,6 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
             memo,
             feeRate: fees.fast,
           });
-          console.log("Add liquidity tx hash:", txHash);
           resolve(txHash);
         });
       } catch (err) {

@@ -27,7 +27,7 @@ export default function WalletModal() {
     handleConnect,
     selectedWallet,
     setSelectedWallet,
-  } = useWalletConnection(setWalletsState, toggleWalletModal);
+  } = useWalletConnection();
   const { detected, undetected, isWalletValidForChain } =
     useWalletList(selectedChains);
 

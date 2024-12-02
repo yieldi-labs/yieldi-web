@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { Balance, getBalance } from "@/midgard";
 import { WalletState } from "./useWalletConnection";
+import { DECIMALS } from "@/app/utils";
+import { WalletType } from "@/utils/interfaces";
 
 interface UseRuneBalanceProps {
   wallet: WalletState | null;
@@ -38,7 +40,7 @@ export const useRuneBalance = ({
       try {
         const balance: Balance | undefined = await getRuneBalance();
         const amountStr: string = balance?.coins[0]?.amount || "0";
-        setRuneBalance(parseInt(amountStr));
+        setRuneBalance(parseInt(amountStr) / DECIMALS);
         setError(null);
       } catch (err) {
         setError(

@@ -32,6 +32,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getProviderTypeFromChain = (chain: string): ProviderKey => {
+    chain = chain.toUpperCase();
     switch (chain) {
       case "AVAX":
       case "BSC":
@@ -43,6 +44,9 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       }
       case "DOGE": {
         return ProviderKey.DOGECOIN;
+      }
+      case "THOR": {
+        return ProviderKey.THORCHAIN;
       }
       default: {
         return ProviderKey.EVM;

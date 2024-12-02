@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useConnectors, useSwitchChain } from "wagmi";
-import { ProviderKey, WalletKey } from "@/utils/wallet/constants";
+import { CHAINS, ProviderKey, WalletKey } from "@/utils/wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { ChainType, WalletType } from "@/utils/interfaces";
+import { useAppState } from "@/utils/context";
 
 export interface WalletState {
   provider: any;
@@ -16,14 +17,11 @@ export interface ConnectedWalletsState {
   [key: string]: WalletState;
 }
 
-export function useWalletConnection(
-  setWalletsState: React.Dispatch<React.SetStateAction<ConnectedWalletsState>>,
-  toggleWalletModal: () => void
-) {
+export function useWalletConnection() {
   const ethConnectors = useConnectors();
   const [selectedChains, setSelectedChains] = useState<ChainType[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<WalletType>();
-
+  const { setWalletsState, toggleWalletModal } = useAppState();
   const handleProviderConnection = async (
     wallet: WalletType,
     providerType: ProviderKey,
@@ -65,6 +63,28 @@ export function useWalletConnection(
       },
     };
   };
+
+  const saveNetworkAddressToLocalStorage = (
+    providerKey: ProviderKey,
+    address: string
+  ) => {
+    let key = "";
+    CHAINS.forEach((chain) => {
+      if (chain.providerType === providerKey) {
+        key = chain.providerType;
+      }
+    });
+    localStorage.setItem(`wallet-${key}-address`, address);
+  };
+
+  const getNetworkAddressFromLocalStorage = (providerKey: ProviderKey) => {
+    return localStorage.getItem(`wallet-${providerKey}-address`);
+  };
+
+  const hasThorAddressInLocalStorage = () => {
+    return !!localStorage.getItem(`wallet-${ProviderKey.THORCHAIN}-address`);
+  };
+
   const handleConnect = async (wallet: WalletType) => {
     if (!selectedChains.length) {
       console.error("No chains selected.");
@@ -89,8 +109,9 @@ export function useWalletConnection(
           providerType,
           ethConnectors
         );
-        if (!connection) continue;
 
+        if (!connection) continue;
+        saveNetworkAddressToLocalStorage(providerType, connection.address);
         setWalletsState((prevState) =>
           updateWalletState(
             prevState,
@@ -116,5 +137,7 @@ export function useWalletConnection(
     selectedWallet,
     setSelectedWallet,
     updateWalletState,
+    getNetworkAddressFromLocalStorage,
+    hasThorAddressInLocalStorage,
   };
 }
