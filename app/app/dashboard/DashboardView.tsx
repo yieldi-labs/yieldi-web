@@ -22,7 +22,6 @@ import { useState } from "react";
 export default function DashboardView() {
   const { wallet } = useAppState();
   const { getAllNetworkAddressesFromLocalStorage } = useWalletConnection();
-  const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [selectedPool, setSelectedPool] = useState<PoolDetail>();
   const { isPending, data } = useQuery({
     queryKey: ["dashboard-info"],
@@ -148,8 +147,8 @@ export default function DashboardView() {
   const titleStyle =
     "my-2 md:mb-4 md:mt-0 md:text-2xl font-medium md:mb-6 text-neutral-900 md:text-neutral font-gt-america-ext uppercase";
   return (
-    <main className="md:mx-16">
-      <div className="flex flex-col md:mb-10">
+    <main className="md:mx-16 md:space-y-5">
+      <div className="flex flex-col">
         <h2 className={titleStyle}>Dashboard</h2>
         <div className="grid grid-cols-6 gap-4 md:gap-8">
           <div className="col-span-6 md:col-span-2">
@@ -188,10 +187,9 @@ export default function DashboardView() {
               onAdd={(assetId) => {
                 setSelectedPool(
                   data?.pools?.find(
-                    (pool) => pool.asset === assetId.replace("/", "."),
+                    (pool) => pool.asset === assetId,
                   ),
                 );
-                setShowAddLiquidityModal(true);
               }}
               onRemove={() => {}}
             />
@@ -200,12 +198,11 @@ export default function DashboardView() {
           <PositionsPlaceholder />
         )}
       </div>
-      {showAddLiquidityModal && selectedPool && (
+      {selectedPool && (
         <AddLiquidityModal
           pool={selectedPool}
           runePriceUSD={0}
           onClose={() => {
-            setShowAddLiquidityModal(false);
             setSelectedPool(undefined);
           }}
         />

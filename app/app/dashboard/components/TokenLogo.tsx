@@ -8,7 +8,7 @@ interface TokenLogoProps {
 
 export default function TokenLogo({ assetId }: TokenLogoProps) {
   return (
-    <div className={`relative max-w-max w-[32px]`}>
+    <div className="relative max-w-max w-[32px]">
       <Image
         src={getLogoPath(assetId.replace("/", "."))}
         alt={`${getAssetSymbol(assetId)} logo`}
