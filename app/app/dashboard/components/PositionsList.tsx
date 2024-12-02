@@ -21,7 +21,11 @@ interface SortConfig {
   direction: SortDirection;
 }
 
-export default function PositionsList({ positions, onAdd, onRemove }: PositionsList) {
+export default function PositionsList({
+  positions,
+  onAdd,
+  onRemove,
+}: PositionsList) {
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: PoolSortKey.PRINCIPAL,
     direction: SortDirection.DESC,
@@ -106,11 +110,11 @@ export default function PositionsList({ positions, onAdd, onRemove }: PositionsL
       </div>
       <div className="space-y-1.5">
         {sortedPositions.map((position) => (
-          <PositionRow 
-            key={`${position.assetId}-${position.type}`} 
-            position={position} 
-            onAdd={onAdd} 
-            onRemove={onRemove} 
+          <PositionRow
+            key={`${position.assetId}-${position.type}`}
+            position={position}
+            onAdd={onAdd}
+            onRemove={onRemove}
           />
         ))}
       </div>

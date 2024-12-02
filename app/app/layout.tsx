@@ -17,7 +17,10 @@ export default function RootLayout({
         <Providers>
           <AppStateProvider>
             <UIComponents.Navbar
-              links={[{ label: "explore", href: "/explore" }, { label: "dashboard", href: "/dashboard" }]}
+              links={[
+                { label: "explore", href: "/explore" },
+                { label: "dashboard", href: "/dashboard" },
+              ]}
               buttons={[{ component: <WalletButton /> }]}
             />
             <div className="p-4 mt-[100px] md:mt-[130px]">{children}</div>

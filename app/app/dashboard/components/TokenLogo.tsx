@@ -3,10 +3,10 @@ import Image from "next/image";
 import { getAssetSymbol, getLogoPath, getNetworkLogoPath } from "@/app/utils";
 
 interface TokenLogoProps {
-    assetId: string;
-  }
+  assetId: string;
+}
 
-export default function TokenLogo({assetId}: TokenLogoProps) {
+export default function TokenLogo({ assetId }: TokenLogoProps) {
   return (
     <div className={`relative max-w-max w-[32px]`}>
       <Image

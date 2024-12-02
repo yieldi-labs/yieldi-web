@@ -1,10 +1,7 @@
 import React from "react";
 import { Position, PositionType } from "../types";
 import TranslucentCard from "@/app/TranslucentCard";
-import {
-  addDollarSignAndSuffix,
-  getAssetSymbol,
-} from "@/app/utils";
+import { addDollarSignAndSuffix, getAssetSymbol } from "@/app/utils";
 import TokenLogo from "./TokenLogo";
 
 interface PositionsRow {
@@ -13,11 +10,13 @@ interface PositionsRow {
   onRemove: (assetId: string) => void;
 }
 
-export default function PositionRow({ position, onAdd, onRemove }: PositionsRow) {
+export default function PositionRow({
+  position,
+  onAdd,
+  onRemove,
+}: PositionsRow) {
   return (
-    <TranslucentCard
-      className="rounded-xl mb-1.5 overflow-scroll overflow-y-hidden overflow-x-hidden"
-    >
+    <TranslucentCard className="rounded-xl mb-1.5 overflow-scroll overflow-y-hidden overflow-x-hidden">
       <div className="flex items-center w-full">
         <div className="px-3 whitespace-nowrap md:w-1/5 w-1/2">
           <div className="flex items-center">
@@ -27,7 +26,11 @@ export default function PositionRow({ position, onAdd, onRemove }: PositionsRow)
                 {getAssetSymbol(position.assetId)}
               </span>
               <span className="hidden md:block ml-3 font-medium font-normal text-sm text-neutral-700">
-                {position.type === PositionType.SAVER ? "Savers" : position.type === PositionType.DLP ? "DLP" : "SLP"}
+                {position.type === PositionType.SAVER
+                  ? "Savers"
+                  : position.type === PositionType.DLP
+                    ? "DLP"
+                    : "SLP"}
               </span>
             </div>
           </div>

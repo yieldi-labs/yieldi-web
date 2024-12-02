@@ -428,11 +428,11 @@ export const calculateVolumeDepthRatio = (
 
 export const getAssetSymbol = (assetString: string): string => {
   // https://dev.thorchain.org/concepts/asset-notation.html#asset-notation
-  const asset = assetFromString(assetString)
+  const asset = assetFromString(assetString);
   if (!asset) {
-    throw new Error('Invalid asset')
+    throw new Error("Invalid asset");
   }
-  return asset?.ticker
+  return asset?.ticker;
 };
 
 export const getLogoPath = (asset: string): string => {
@@ -441,8 +441,10 @@ export const getLogoPath = (asset: string): string => {
 };
 
 export const getNetworkLogoPath = (assetString: string): string => {
-  const asset = assetFromString(assetString)
-  const chain = chainConfig.find(chain => chain.thorchainIdentifier === asset?.chain.toLowerCase())
+  const asset = assetFromString(assetString);
+  const chain = chainConfig.find(
+    (chain) => chain.thorchainIdentifier === asset?.chain.toLowerCase(),
+  );
   return `https://storage.googleapis.com/token-list-swapkit-dev/images/${chain?.thorchainIdentifier}.${chain?.nativeAsset}.png`;
 };
 

@@ -1,10 +1,24 @@
 import TranslucentCard from "@/app/TranslucentCard";
-import { addDollarSignAndSuffix, calculateVolumeDepthRatio, calculateVolumeUSD, formatNumber, getAssetSymbol, getFormattedPoolTVL, getLogoPath } from "@/app/utils";
+import {
+  addDollarSignAndSuffix,
+  calculateVolumeDepthRatio,
+  calculateVolumeUSD,
+  formatNumber,
+  getAssetSymbol,
+  getFormattedPoolTVL,
+  getLogoPath,
+} from "@/app/utils";
 import { PoolDetail } from "@/midgard";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function LiquidityPoolCardMobile({ pool, runePriceUSD }: { pool: PoolDetail, runePriceUSD: number }) {
+export default function LiquidityPoolCardMobile({
+  pool,
+  runePriceUSD,
+}: {
+  pool: PoolDetail;
+  runePriceUSD: number;
+}) {
   return (
     <Link key={pool.asset} href={`/explore/pools/${pool.asset}`}>
       <TranslucentCard className="rounded-xl mb-1.5">
@@ -55,5 +69,5 @@ export default function LiquidityPoolCardMobile({ pool, runePriceUSD }: { pool: 
         </div>
       </TranslucentCard>
     </Link>
-  )
-};
+  );
+}
