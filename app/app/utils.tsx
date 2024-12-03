@@ -552,14 +552,11 @@ export interface PositionDetails {
   runeAdded: number;
 }
 
-export const getPositionDetails = (
-  pool: PoolDetail,
-  position: MemberPool,
-): PositionDetails => {
+export const getPositionDetails = (position: MemberPool): PositionDetails => {
   const assetAdded = parseFloat(position.assetAdded) / DECIMALS;
   const runeAdded = parseFloat(position.runeAdded) / DECIMALS;
   return {
     assetAdded,
     runeAdded,
-  } as PositionDetails;
+  };
 };

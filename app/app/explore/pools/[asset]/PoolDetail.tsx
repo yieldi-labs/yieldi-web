@@ -67,12 +67,12 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     setShowRemoveLiquidityModal(true);
   };
 
-  const handleRemoveLiquidityClose = (transactionSubmitted?: boolean) => {
+  const handleRemoveLiquidityClose = () => {
     setShowRemoveLiquidityModal(false);
     setSelectedPosition(null);
   };
 
-  const handleAddLiquidityClose = (transactionSubmitted?: boolean) => {
+  const handleAddLiquidityClose = () => {
     setShowAddLiquidityModal(false);
   };
 

@@ -38,10 +38,7 @@ export default function RemoveLiquidityModal({
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { assetAdded: positionAssetAmount } = getPositionDetails(
-    pool,
-    position,
-  );
+  const { assetAdded: positionAssetAmount } = getPositionDetails(position);
   const positionAssetUsdValue =
     parseFloat(pool.assetPriceUSD) * positionAssetAmount;
 
