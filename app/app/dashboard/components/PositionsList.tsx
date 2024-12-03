@@ -89,7 +89,7 @@ export default function PositionsList({
           </div>
           <div className="w-1/2 md:w-1/5">
             <SortableHeader<PoolSortKey>
-              label="Principal"
+              label="Deposit"
               sortKey={PoolSortKey.PRINCIPAL}
               currentSortKey={sortConfig.key}
               sortDirection={sortConfig.direction}
