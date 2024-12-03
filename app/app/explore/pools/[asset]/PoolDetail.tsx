@@ -18,7 +18,11 @@ import RemoveLiquidityModal from "@/app/explore/components/RemoveLiquidityModal"
 import { TopCard } from "@/app/components/TopCard";
 import { useAppState } from "@/utils/context";
 import { isSupportedChain, parseAssetString } from "@/utils/chain";
-import { usePositionStats, PositionStats } from "@/hooks/usePositionStats";
+import {
+  usePositionStats,
+  PositionStats,
+  emptyPositionStats,
+} from "@/hooks/usePositionStats";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -107,41 +111,65 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     );
   };
 
-  const position = positions[0];
+  const consolidated = positions?.reduce((total, position) => {
+    return {
+      assetId: total.assetId,
+      type: total.type,
+      deposit: {
+        usd: total.deposit.usd + position.deposit.usd,
+        asset: total.deposit.asset + position.deposit.asset,
+        assetAdded: total.deposit.assetAdded + position.deposit.assetAdded,
+        runeAdded: total.deposit.runeAdded + position.deposit.runeAdded,
+      },
+      gain: {
+        usd: total.gain.usd + position.gain.usd,
+        asset: total.gain.asset + position.gain.asset,
+        percentage: total.gain.percentage,
+      },
+      pool: total.pool,
+      liquidityUnits: total.liquidityUnits,
+      memberDetails: total.memberDetails,
+    };
+  }, emptyPositionStats());
 
   const renderPositionsDetails = () => {
-    if (!position) return null;
+    if (!positions) return null;
 
-    const isSingleSided = position.deposit.runeAdded === 0;
-    const assetAmount = formatNumber(
-      position.deposit.assetAdded || 0,
-      parseInt(pool.nativeDecimal),
-      8,
-    );
-    const runeAmount = formatNumber(position.deposit.runeAdded || 0, DECIMALS);
+    return positions.map((position) => {
+      const isSingleSided = position.deposit.runeAdded === 0;
+      const assetAmount = formatNumber(
+        position.deposit.assetAdded || 0,
+        parseInt(pool.nativeDecimal),
+        8,
+      );
+      const runeAmount = formatNumber(
+        position.deposit.runeAdded || 0,
+        DECIMALS,
+      );
 
-    return (
-      <div key={position.liquidityUnits} className="mb-4">
-        <div className="flex-col items-center text-base font-medium text-neutral-900 mb-1">
-          <div>
-            {assetAmount} {assetSymbol} + {runeAmount} RUNE
+      return (
+        <div key={position.liquidityUnits} className="mb-4">
+          <div className="flex-col items-center text-base font-medium text-neutral-900 mb-1">
+            <div>
+              {assetAmount} {assetSymbol} + {runeAmount} RUNE
+            </div>
           </div>
+          <button
+            className="w-full border-red border-2 text-red font-bold py-3 rounded-full
+                       hover:text-opacity-50 hover:border-opacity-50 transition-all 
+                       disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => handleRemove(position)}
+            disabled={showLoadingState || !isSingleSided}
+          >
+            {showLoadingState
+              ? "Loading..."
+              : isSingleSided
+                ? "Remove"
+                : "Coming Soon..."}
+          </button>
         </div>
-        <button
-          className="w-full border-red-500 border-2 text-red-500 font-bold py-3 rounded-full
-                     hover:text-opacity-50 hover:border-opacity-50 transition-all 
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => handleRemove(position)}
-          disabled={showLoadingState || !isSingleSided}
-        >
-          {showLoadingState
-            ? "Loading..."
-            : isSingleSided
-              ? "Remove"
-              : "Coming Soon..."}
-        </button>
-      </div>
-    );
+      );
+    });
   };
 
   const renderPositionsContent = () => (
@@ -150,10 +178,10 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         <div className="text-gray-700 font-medium text-lg mb-2">DEPOSIT</div>
         <div className="flex justify-between">
           <div className="text-2xl font-medium text-gray-900">
-            ${formatNumber(position?.deposit.usd || 0, 2)}
+            ${formatNumber(consolidated?.deposit.usd || 0, 2)}
           </div>
           <div className="text-2xl font-medium text-gray-900">
-            {formatNumber(position?.deposit.asset || 0)} {assetSymbol}
+            {formatNumber(consolidated?.deposit.asset || 0)} {assetSymbol}
           </div>
         </div>
       </div>
@@ -162,11 +190,11 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         <div className="text-gray-700 font-medium text-lg mb-2">GAIN</div>
         <div className="flex justify-between">
           <div className="text-2xl font-medium text-gray-900">
-            {position?.gain.usd >= 0 ? "$" : "-$"}
-            {formatNumber(Math.abs(position?.gain.usd || 0), 2)}
+            {consolidated?.gain.usd >= 0 ? "$" : "-$"}
+            {formatNumber(Math.abs(consolidated?.gain.usd || 0), 2)}
           </div>
           <div className="text-2xl font-medium text-gray-900">
-            {formatNumber(position?.gain.asset || 0)} {assetSymbol}
+            {formatNumber(consolidated?.gain.asset || 0)} {assetSymbol}
           </div>
         </div>
       </div>
@@ -250,7 +278,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
       )}
 
       {error && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg">
+        <div className="fixed bottom-4 right-4 bg-red text-white p-4 rounded-lg">
           {error.message}
         </div>
       )}

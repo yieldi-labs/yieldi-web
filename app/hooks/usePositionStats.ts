@@ -15,8 +15,8 @@ export interface PositionStats {
   deposit: {
     usd: number;
     asset: number;
-    assetAdded?: number;
-    runeAdded?: number;
+    assetAdded: number;
+    runeAdded: number;
   };
   gain: {
     usd: number;
@@ -32,6 +32,24 @@ interface UsePositionStatsProps {
   addresses: string[];
   specificPool?: PoolDetail;
   refetchInterval?: number;
+}
+
+export function emptyPositionStats(): PositionStats {
+  return {
+    assetId: "",
+    type: PositionType.SLP,
+    deposit: {
+      usd: 0,
+      asset: 0,
+      assetAdded: 0,
+      runeAdded: 0,
+    },
+    gain: {
+      usd: 0,
+      asset: 0,
+      percentage: "0",
+    },
+  };
 }
 
 export function usePositionStats({

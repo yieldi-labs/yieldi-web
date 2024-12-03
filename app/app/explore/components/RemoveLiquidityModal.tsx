@@ -164,7 +164,7 @@ export default function RemoveLiquidityModal({
         <button
           onClick={handleRemoveLiquidity}
           disabled={isSubmitting}
-          className="w-full bg-red-500 text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-red text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Submitting Transaction..." : "Remove"}
         </button>
