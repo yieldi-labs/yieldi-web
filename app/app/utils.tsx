@@ -12,15 +12,6 @@ import { liquidityProvider } from "@/thornode";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { chainConfig } from "@/utils/wallet/chainConfig";
 
-export const ONE = BigInt("1000000000000000000");
-export const ONE6 = BigInt("1000000");
-export const ONE12 = BigInt("1000000000000");
-export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
-export const UINT_MAX = BigInt(
-  "115792089237316195423570985008687907853269984665640564039457584007913129639935",
-);
-export const UINT128_MAX = BigInt("340282366920938463463374607431768211455");
-
 export interface Wallet {
   chain: string;
   symbol: string;

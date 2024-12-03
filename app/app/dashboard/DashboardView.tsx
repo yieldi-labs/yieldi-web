@@ -186,9 +186,7 @@ export default function DashboardView() {
               positions={data?.positions}
               onAdd={(assetId) => {
                 setSelectedPool(
-                  data?.pools?.find(
-                    (pool) => pool.asset === assetId,
-                  ),
+                  data?.pools?.find((pool) => pool.asset === assetId),
                 );
               }}
               onRemove={() => {}}
