@@ -17,16 +17,16 @@ export default function DashboardView() {
   const { wallet } = useAppState();
   const { getAllNetworkAddressesFromLocalStorage } = useWalletConnection();
   const [selectedPool, setSelectedPool] = useState<PoolDetail>();
-  
+
   const addresses = wallet ? getAllNetworkAddressesFromLocalStorage() : [];
-  const { positions, isPending } = usePositionStats(addresses);
-  
+  const { positions, isPending } = usePositionStats({ addresses });
+
   const { data: poolsData } = useQuery({
     queryKey: ["pools"],
     queryFn: async () => {
       const result = await getPools();
       return result.data;
-    }
+    },
   });
 
   // Calculate totals
@@ -81,7 +81,7 @@ export default function DashboardView() {
               positions={positions}
               onAdd={(assetId) => {
                 setSelectedPool(
-                  poolsData?.find((pool) => pool.asset === assetId)
+                  poolsData?.find((pool) => pool.asset === assetId),
                 );
               }}
               onRemove={() => {}}
