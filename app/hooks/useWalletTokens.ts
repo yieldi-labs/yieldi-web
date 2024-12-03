@@ -11,8 +11,10 @@ import {
   Client as BitcoinClient,
   defaultBTCParams,
 } from "@xchainjs/xchain-bitcoin";
+import * as viemChains from "viem/chains";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
 import { ConnectedWalletsState } from "./useWalletConnection";
+
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   const { getChainKeyFromChain } = useAppState();
   const initialWalletTokensData: WalletTokensData = {
@@ -256,21 +258,63 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     if (currentChain?.name === chainKey) {
       return getERC20TokenInfo(walletAddress, provider, tokenAddress);
     } else {
-      providerChainId = await provider.request({
-        method: "wallet_switchEthereumChain",
-        params: [
-          {
-            chainId: EVM_CHAINS.find(({ name }) => name == chainKey)?.chainId,
-          },
-        ],
-      });
-      return checkAndSwitchChain(
-        chainKey,
-        walletAddress,
-        provider,
-        tokenAddress
-      );
+      try {
+        providerChainId = await provider.request({
+          method: "wallet_switchEthereumChain",
+          params: [
+            {
+              chainId: EVM_CHAINS.find(({ name }) => name == chainKey)?.chainId,
+            },
+          ],
+        });
+        if (providerChainId) {
+          return checkAndSwitchChain(
+            chainKey,
+            walletAddress,
+            provider,
+            tokenAddress
+          );
+        }
+      } catch (err) {
+        // need to add chain
+
+        if ((err as { code: number }).code === 4902) {
+          const chainId = EVM_CHAINS.find(
+            ({ name }) => name == chainKey
+          )?.chainId;
+          const config = getChainConfigById(chainId!);
+          const addRequest = {
+            chainId: chainId,
+            chainName: config?.name,
+            rpcUrls: config?.rpcUrls.default.http,
+            iconUrls: [],
+            nativeCurrency: config?.nativeCurrency,
+            blockExplorerUrls: config?.blockExplorers?.default.url,
+          };
+
+          if (chainId) {
+            providerChainId = await provider.request({
+              method: "wallet_addEthereumChain",
+              params: [addRequest],
+            });
+            if (providerChainId) {
+              checkAndSwitchChain(
+                chainKey,
+                walletAddress,
+                provider,
+                tokenAddress
+              );
+            }
+          }
+        }
+      }
     }
+  };
+
+  const getChainConfigById = (chainId: string) => {
+    return Object.values(viemChains).find(
+      (chain) => chain.id === Number(chainId)
+    );
   };
 
   const getUXTOClient = (chainKey: ChainKey) => {
@@ -434,7 +478,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   useEffect(() => {
     fetchWalletTokens();
   }, [walletsState]);
-  
+
   useEffect(() => {
     getTokenBalances();
   }, [walletTokensData]);

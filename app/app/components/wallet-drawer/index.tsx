@@ -25,13 +25,16 @@ const Component: FC = () => {
     toggleWalletDrawer,
     toggleWalletModal,
   } = useAppState();
-
+  const { fetch, balanceList } = useWalletTokens(walletsState!);
   const handleAddWallet = () => {
     toggleWalletModal();
     toggleWalletDrawer();
   };
 
-  const { fetch, balanceList } = useWalletTokens(walletsState!);
+  const handleWalletRefresh = () => {
+    fetch();
+  };
+
   useEffect(() => {
     fetch();
   }, []);
@@ -51,7 +54,7 @@ const Component: FC = () => {
             <span className="border-r cursor-pointer px-2">
               <Eye strokeColor="#627eea" strokeWidth={1.5} />
             </span>
-            <span className="border-r cursor-pointer px-2">
+            <span className="border-r cursor-pointer px-2" onClick={handleWalletRefresh}>
               <Synchronize strokeColor="#627eea" strokeWidth={1.5} />
             </span>
             <span

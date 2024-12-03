@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Eth from "@ledgerhq/hw-app-eth";
 import Btc from "@ledgerhq/hw-app-btc";
+import Cosmos from "@ledgerhq/hw-app-cosmos";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { IconSvg, WalletSvg } from "@/svg";
 import { useAppState } from "@/utils/context";
@@ -31,19 +32,64 @@ export default function HardwareWallets({
 
       const transport = await TransportWebUSB.create();
       let address: string;
+      switch (chain) {
+        case ChainKey.AVALANCHE:
+        case ChainKey.ETHEREUM: {
+          const eth = new Eth(transport);
+          const result = await eth.getAddress("44'/60'/0'/0/0");
+          address = result.address;
+          break;
+        }
 
-      if (chain === ChainKey.ETHEREUM) {
-        const eth = new Eth(transport);
-        const result = await eth.getAddress("44'/60'/0'/0/0");
-        address = result.address;
-      } else if (chain === ChainKey.BITCOIN) {
-        const btc = new Btc({ transport });
-        const { bitcoinAddress } = await btc.getWalletPublicKey(
-          "44'/0'/0'/0/0"
-        );
-        address = bitcoinAddress;
-      } else {
-        throw new Error(`Unsupported chain: ${chain}`);
+        case ChainKey.BITCOIN: {
+          const btc = new Btc({ transport });
+          const { bitcoinAddress } = await btc.getWalletPublicKey(
+            "44'/0'/0'/0/0"
+          );
+          address = bitcoinAddress;
+          break;
+        }
+
+        case ChainKey.LITECOIN: {
+          const ltc = new Btc({ transport });
+          const { bitcoinAddress } = await ltc.getWalletPublicKey(
+            "44'/2'/0'/0/0"
+          );
+          address = bitcoinAddress;
+          break;
+        }
+
+        case ChainKey.THORCHAIN: {
+          const cosmos = new Cosmos(transport);
+          const { address: thorchainAddress } = await cosmos.getAddress(
+            "44'/931'/0'/0/0",
+            "thor"
+          );
+          address = thorchainAddress;
+          break;
+        }
+
+        case ChainKey.BITCOINCASH: {
+          const bch = new Btc({ transport });
+          const { bitcoinAddress } = await bch.getWalletPublicKey(
+            "44'/145'/0'/0/0"
+          );
+          address = bitcoinAddress;
+          break;
+        }
+
+        case ChainKey.DOGECOIN: {
+          const doge = new Btc({ transport });
+          const { bitcoinAddress } = await doge.getWalletPublicKey(
+            "44'/3'/0'/0/0"
+          );
+          address = bitcoinAddress;
+          break;
+        }
+
+        default: {
+          throw new Error(`Unsupported chain: ${chain}`);
+        }
       }
 
       if (!address) {
@@ -90,7 +136,9 @@ export default function HardwareWallets({
             `}
           >
             <WalletSvg.Ledger className="w-[30px]" />
-            <span>{isConnecting ? "Connecting..." : `Ledger (${chain})`}</span>
+            <span>
+              {isConnecting ? "Connecting..." : `Ledger (${chain.name})`}
+            </span>
           </button>
         ))}
       </div>
