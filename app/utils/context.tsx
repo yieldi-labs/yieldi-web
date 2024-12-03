@@ -6,10 +6,13 @@ import React, {
   useState,
   useEffect,
   ReactNode,
+  Dispatch,
+  SetStateAction,
 } from "react";
 import { ProviderKey, SUPPORTED_WALLETS, WalletKey } from "./wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { connectEVMWallet, connectUTXOWallet } from "./wallet/walletConnect";
+import { ChainType, WalletType } from "./interfaces";
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
@@ -17,6 +20,10 @@ interface AppStateContextType {
   walletsState: ConnectedWalletsState | null;
   setWalletsState: React.Dispatch<React.SetStateAction<ConnectedWalletsState>>;
   getProviderTypeFromChain: (chain: string) => ProviderKey;
+  selectedChains: ChainType[];
+  setSelectedChains: Dispatch<SetStateAction<ChainType[]>>;
+  selectedWallet: WalletType | undefined;
+  setSelectedWallet: Dispatch<SetStateAction<WalletType | undefined>>;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -24,6 +31,8 @@ const AppStateContext = createContext<AppStateContextType | undefined>(
 );
 
 export const AppStateProvider = ({ children }: { children: ReactNode }) => {
+  const [selectedChains, setSelectedChains] = useState<ChainType[]>([]);
+  const [selectedWallet, setSelectedWallet] = useState<WalletType>();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [walletsState, setWalletsState] = useState<ConnectedWalletsState>({});
 
@@ -222,6 +231,10 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         walletsState,
         setWalletsState,
         getProviderTypeFromChain,
+        selectedChains,
+        selectedWallet,
+        setSelectedChains,
+        setSelectedWallet,
       }}
     >
       {children}

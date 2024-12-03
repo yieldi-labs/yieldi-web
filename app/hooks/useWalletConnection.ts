@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useConnectors, useSwitchChain } from "wagmi";
 import { CHAINS, ProviderKey, WalletKey } from "@/utils/wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { ChainType, WalletType } from "@/utils/interfaces";
 import { useAppState } from "@/utils/context";
+import { useWalletList } from "./useWalletList";
 
 export interface WalletState {
   provider: any;
@@ -19,8 +20,7 @@ export interface ConnectedWalletsState {
 
 export function useWalletConnection() {
   const ethConnectors = useConnectors();
-  const [selectedChains, setSelectedChains] = useState<ChainType[]>([]);
-  const [selectedWallet, setSelectedWallet] = useState<WalletType>();
+  const { selectedChains, selectedWallet } = useAppState();
   const { setWalletsState, toggleWalletModal } = useAppState();
   const handleProviderConnection = async (
     wallet: WalletType,
@@ -131,11 +131,7 @@ export function useWalletConnection() {
   };
 
   return {
-    selectedChains,
-    setSelectedChains,
     handleConnect,
-    selectedWallet,
-    setSelectedWallet,
     updateWalletState,
     getNetworkAddressFromLocalStorage,
     hasThorAddressInLocalStorage,

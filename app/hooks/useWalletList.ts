@@ -1,20 +1,24 @@
-import { useCallback, useMemo } from "react";
 import {
   ChainKey,
   SUPPORTED_WALLETS,
   WalletKey,
 } from "@/utils/wallet/constants";
 import { ChainType, WalletType } from "@/utils/interfaces";
+import { useMemo, useCallback, useEffect } from "react";
+import { useAppState } from "@/utils/context";
 
 interface UseWalletListReturn {
   detected: WalletType[];
   undetected: WalletType[];
   isWalletValidForChain: (wallet: WalletType) => boolean;
+  isChainSupportedByWallet: (
+    chain: ChainType,
+    selectedWallet?: WalletType
+  ) => boolean;
 }
 
-export function useWalletList(
-  selectedChains: ChainType[] | []
-): UseWalletListReturn {
+export function useWalletList(): UseWalletListReturn {
+  const { selectedChains, selectedWallet } = useAppState();
   const { detected, undetected } = useMemo(() => {
     const detected: WalletType[] = [];
     const undetected: WalletType[] = [];
@@ -31,18 +35,17 @@ export function useWalletList(
       }
       processedWallets.add(wallet.id);
     };
+
     const walletList: WalletType[] = Object.values(
       SUPPORTED_WALLETS
     ) as WalletType[];
-    const selectedChainKeys = new Set(
-      selectedChains.map((chain) => chain.name)
-    );
     const commonWallets = selectedChains.length
-      ? walletList.filter((wallet) =>
-          wallet.chains.some((chainKey) => selectedChainKeys.has(chainKey))
-        )
+      ? walletList.filter((wallet) => {
+          return selectedChains.every((chain) =>
+            wallet.chains.includes(chain.name)
+          );
+        })
       : walletList;
-
     commonWallets.forEach(processWallet);
 
     return { detected, undetected };
@@ -63,10 +66,23 @@ export function useWalletList(
     },
     [selectedChains]
   );
-  
+
+  const isChainSupportedByWallet = useCallback(
+    (chain: ChainType): boolean => {
+      if (!selectedWallet) {
+        return true;
+      }
+      const isSupported = selectedWallet.chains.includes(chain.name);
+      return isSupported;
+    },
+    [selectedWallet,selectedChains]
+  );
+
+ 
   return {
     detected,
     undetected,
     isWalletValidForChain,
+    isChainSupportedByWallet,
   };
 }

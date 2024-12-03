@@ -50,6 +50,7 @@ export interface ChainType {
   name: ChainKey;
   providerType: ProviderKey;
   chainId?: number;
+  disabled?:boolean
 }
 
 export interface WalletOption {
