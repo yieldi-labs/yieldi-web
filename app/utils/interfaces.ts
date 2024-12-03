@@ -50,7 +50,9 @@ export interface ChainType {
   name: ChainKey;
   providerType: ProviderKey;
   chainId?: number;
-  disabled?:boolean
+  disabled?: boolean;
+  thorchainIdentifier: string;
+  nativeAsset: string;
 }
 
 export interface WalletOption {

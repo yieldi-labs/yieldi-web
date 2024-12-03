@@ -303,7 +303,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
       )}
 
       {error && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg">
+        <div className="fixed bottom-4 right-4 bg-red text-white p-4 rounded-lg">
           {error}
         </div>
       )}

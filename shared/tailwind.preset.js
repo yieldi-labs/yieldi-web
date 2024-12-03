@@ -31,6 +31,7 @@ module.exports = {
         dark: "#003944",
         highlight: "#A1FD59",
         secondaryBtn: "#627EEA",
+        red: "#ff6656",
         border: {
           DEFAULT: "#524B48",
           light: "#6D655D",

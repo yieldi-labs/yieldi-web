@@ -9,13 +9,15 @@ import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { Saver } from "@/app/explore/types";
 import { getPool, MemberPool, PoolDetail } from "@/midgard";
 import { liquidityProvider } from "@/thornode";
+import { assetFromString } from "@xchainjs/xchain-util";
+import { CHAINS } from "@/utils/wallet/constants";
 
 export const ONE = BigInt("1000000000000000000");
 export const ONE6 = BigInt("1000000");
 export const ONE12 = BigInt("1000000000000");
 export const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 export const UINT_MAX = BigInt(
-  "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+  "115792089237316195423570985008687907853269984665640564039457584007913129639935"
 );
 export const UINT128_MAX = BigInt("340282366920938463463374607431768211455");
 
@@ -99,7 +101,7 @@ export function formatAddress(a: undefined | null | string) {
 export function formatNumber(
   amount: string | number,
   decimals = 8,
-  decimalsShown = 4,
+  decimalsShown = 4
 ) {
   if (!amount && amount != 0) return "-";
   if (typeof amount !== "number") {
@@ -116,7 +118,7 @@ export async function fetchJson(url: string, options?: object) {
   const res = await fetch(url, options);
   if (!res.ok) {
     throw new Error(
-      "fetchJson: http error: " + res.status + ": " + (await res.text()),
+      "fetchJson: http error: " + res.status + ": " + (await res.text())
     );
   }
   return await res.json();
@@ -136,7 +138,7 @@ function getAtom<V>(a: Atom<V>) {
 export function setAtom<V>(
   a: Atom<V>,
   b: ((prev: V) => V) | Partial<V> | string,
-  c?: any,
+  c?: any
 ): void {
   if (typeof b === "function") {
     a.v = (b as (prev: V) => V)(a.v);
@@ -183,7 +185,7 @@ export const walletClient = viem.createWalletClient({
   transport: viem.custom(
     typeof window === "undefined" || !window.ethereum
       ? { request: async () => undefined }
-      : window.ethereum,
+      : window.ethereum
   ),
 });
 
@@ -306,7 +308,7 @@ interface Utxo {
 export async function bitcoinUtxos(address: string) {
   if (!address) throw new Error("Wallet not connected");
   const utxos: [Utxo] = await fetchJson(
-    `${mempoolUrl}/address/${address}/utxo`,
+    `${mempoolUrl}/address/${address}/utxo`
   );
   const confirmedUTXOs = utxos
     .filter((utxo) => utxo.status.confirmed)
@@ -321,8 +323,8 @@ export async function bitcoinUtxos(address: string) {
       spend = address.match(/^(2|3)/)
         ? btc.p2sh(btc.p2wpkh(pubKey, BITCOIN_NETWORK), BITCOIN_NETWORK)
         : address.match(/^(tb1p|bc1p)/)
-          ? btc.p2tr(pubKey, undefined, BITCOIN_NETWORK, true)
-          : btc.p2wpkh(pubKey, BITCOIN_NETWORK);
+        ? btc.p2tr(pubKey, undefined, BITCOIN_NETWORK, true)
+        : btc.p2wpkh(pubKey, BITCOIN_NETWORK);
     }
     result.push({
       ...spend,
@@ -403,10 +405,10 @@ export const getFormattedPoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
 
 export const getFormattedPoolEarnings = (
   pool: PoolDetail,
-  runePriceUSD: number,
+  runePriceUSD: number
 ) => {
   return addDollarSignAndSuffix(
-    (parseInt(pool.earnings) * runePriceUSD) / DECIMALS,
+    (parseInt(pool.earnings) * runePriceUSD) / DECIMALS
   );
 };
 
@@ -417,20 +419,33 @@ export const calculateVolumeUSD = (pool: PoolDetail, runePriceUSD: number) => {
 
 export const calculateVolumeDepthRatio = (
   pool: PoolDetail,
-  runePriceUSD: number,
+  runePriceUSD: number
 ): number => {
   const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
   const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
   return volumeUSD / tvlUSD;
 };
 
-export const getAssetSymbol = (asset: string): string => {
-  return asset.split("-")[0] || asset;
+export const getAssetSymbol = (assetString: string): string => {
+  // https://dev.thorchain.org/concepts/asset-notation.html#asset-notation
+  const asset = assetFromString(assetString);
+  if (!asset) {
+    throw new Error("Invalid asset");
+  }
+  return asset?.ticker;
 };
 
 export const getLogoPath = (asset: string): string => {
   const assetLower = asset.toLowerCase();
   return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
+};
+
+export const getNetworkLogoPath = (assetString: string): string => {
+  const asset = assetFromString(assetString);
+  const chain = CHAINS.find(
+    (chain) => chain.thorchainIdentifier === asset?.chain.toLowerCase()
+  );
+  return `https://storage.googleapis.com/token-list-swapkit-dev/images/${chain?.thorchainIdentifier}.${chain?.nativeAsset}.png`;
 };
 
 export const getAssetCanonicalSymbol = (asset: string) => {
@@ -487,7 +502,7 @@ export const DECIMALS = 1e8;
 export const calculateGain = async (
   poolAsset: string,
   walletAddress: string,
-  runePriceUSD: number,
+  runePriceUSD: number
 ) => {
   try {
     const [poolResponse, lpResponse] = await Promise.all([
@@ -548,7 +563,7 @@ export interface PositionDetails {
 
 export const getPositionDetails = (
   pool: PoolDetail,
-  position: MemberPool,
+  position: MemberPool
 ): PositionDetails => {
   const assetAdded = parseFloat(position.assetAdded) / DECIMALS;
   const runeAdded = parseFloat(position.runeAdded) / DECIMALS;

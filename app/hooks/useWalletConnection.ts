@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
-import { useConnectors, useSwitchChain } from "wagmi";
+import { useConnectors } from "wagmi";
 import { CHAINS, ProviderKey, WalletKey } from "@/utils/wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
-import { ChainType, WalletType } from "@/utils/interfaces";
+import { WalletType } from "@/utils/interfaces";
 import { useAppState } from "@/utils/context";
-import { useWalletList } from "./useWalletList";
 
 export interface WalletState {
   provider: any;
@@ -81,6 +79,12 @@ export function useWalletConnection() {
     return localStorage.getItem(`wallet-${providerKey}-address`);
   };
 
+  const getAllNetworkAddressesFromLocalStorage = () => {
+    return CHAINS.map((chain) =>
+      localStorage.getItem(`wallet-${chain.providerType}-address`)
+    ).filter((address) => address != undefined);
+  };
+
   const hasThorAddressInLocalStorage = () => {
     return !!localStorage.getItem(`wallet-${ProviderKey.THORCHAIN}-address`);
   };
@@ -134,6 +138,7 @@ export function useWalletConnection() {
     handleConnect,
     updateWalletState,
     getNetworkAddressFromLocalStorage,
+    getAllNetworkAddressesFromLocalStorage,
     hasThorAddressInLocalStorage,
   };
 }
