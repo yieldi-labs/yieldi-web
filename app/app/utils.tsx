@@ -9,6 +9,8 @@ import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { Saver } from "@/app/explore/types";
 import { getPool, MemberPool, PoolDetail } from "@/midgard";
 import { liquidityProvider } from "@/thornode";
+import { assetFromString } from "@xchainjs/xchain-util";
+import { chainConfig } from "@/utils/wallet/chainConfig";
 
 export const ONE = BigInt("1000000000000000000");
 export const ONE6 = BigInt("1000000");
@@ -424,13 +426,26 @@ export const calculateVolumeDepthRatio = (
   return volumeUSD / tvlUSD;
 };
 
-export const getAssetSymbol = (asset: string): string => {
-  return asset.split("-")[0] || asset;
+export const getAssetSymbol = (assetString: string): string => {
+  // https://dev.thorchain.org/concepts/asset-notation.html#asset-notation
+  const asset = assetFromString(assetString);
+  if (!asset) {
+    throw new Error("Invalid asset");
+  }
+  return asset?.ticker;
 };
 
 export const getLogoPath = (asset: string): string => {
   const assetLower = asset.toLowerCase();
   return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
+};
+
+export const getNetworkLogoPath = (assetString: string): string => {
+  const asset = assetFromString(assetString);
+  const chain = chainConfig.find(
+    (chain) => chain.thorchainIdentifier === asset?.chain.toLowerCase(),
+  );
+  return `https://storage.googleapis.com/token-list-swapkit-dev/images/${chain?.thorchainIdentifier}.${chain?.nativeAsset}.png`;
 };
 
 export const getAssetCanonicalSymbol = (asset: string) => {
