@@ -17,6 +17,9 @@ importers:
       '@ledgerhq/hw-app-btc':
         specifier: ^10.4.3
         version: 10.4.3
+      '@ledgerhq/hw-app-cosmos':
+        specifier: ^6.30.4
+        version: 6.30.4
       '@ledgerhq/hw-app-eth':
         specifier: ^6.40.3
         version: 6.40.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -1332,6 +1335,9 @@ packages:
 
   '@ledgerhq/hw-app-btc@10.4.3':
     resolution: {integrity: sha512-UAbq7AE2ApdIIpgkmVPxtI2r9YigE2VD+q8W4rZxvQbfnRAwBtKRxSn+1IVta6NgY1WzbqO1zKPDXvsY9ys47g==}
+
+  '@ledgerhq/hw-app-cosmos@6.30.4':
+    resolution: {integrity: sha512-YyX2zKHvCbT8aehLQPE0dNyT1Bl9ZmN0WabpE+RaKvBgmrid6Kp5CypvOTVRrKyv06E3yKlX06yM2EESlILlzA==}
 
   '@ledgerhq/hw-app-eth@6.36.0':
     resolution: {integrity: sha512-PnIUicutm3vGtsWMBPXvn24msFhfcxQc7iR+UOVK+h1pYVTkBwOOGvNMtPjrayfDIr+66eLtKBrQrAJpUDHF/A==}
@@ -10105,6 +10111,12 @@ snapshots:
       sha.js: 2.4.11
       tiny-secp256k1: 1.1.6
       varuint-bitcoin: 1.1.2
+
+  '@ledgerhq/hw-app-cosmos@6.30.4':
+    dependencies:
+      '@ledgerhq/errors': 6.19.1
+      '@ledgerhq/hw-transport': 6.31.4
+      bip32-path: 0.4.2
 
   '@ledgerhq/hw-app-eth@6.36.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:

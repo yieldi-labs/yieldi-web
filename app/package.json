@@ -28,6 +28,7 @@
     "@coinbase/wallet-sdk": "^4.1.0",
     "@ethersproject/providers": "^5.7.2",
     "@ledgerhq/hw-app-btc": "^10.4.3",
+    "@ledgerhq/hw-app-cosmos": "^6.30.4",
     "@ledgerhq/hw-app-eth": "^6.40.3",
     "@ledgerhq/hw-transport-webusb": "^6.29.4",
     "@rainbow-me/rainbowkit": "^2.1.7",
