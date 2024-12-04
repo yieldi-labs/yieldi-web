@@ -86,7 +86,7 @@ export function useWalletConnection() {
     if (typeof window !== "undefined" && localStorage) {
       return CHAINS.map((chain) =>
         localStorage.getItem(`wallet-${chain.name}-address`)
-      ).filter((address) => address != undefined);
+      ).filter((address) => address != undefined) ?? [];
     }
     return [];
   };
