@@ -54,7 +54,10 @@ const Component: FC = () => {
             <span className="border-r cursor-pointer px-2">
               <Eye strokeColor="#627eea" strokeWidth={1.5} />
             </span>
-            <span className="border-r cursor-pointer px-2" onClick={handleWalletRefresh}>
+            <span
+              className="border-r cursor-pointer px-2"
+              onClick={handleWalletRefresh}
+            >
               <Synchronize strokeColor="#627eea" strokeWidth={1.5} />
             </span>
             <span
@@ -120,8 +123,9 @@ const Component: FC = () => {
                                 </span>
                               </div>
                               <span className="font-bold">
-                                {formatNumber(token.balance, 6) ||
-                                  formatNumber(token.formattedBalance!, 6)}
+                                {token.balance > 0
+                                  ? formatNumber(token.balance, 6)
+                                  : formatNumber(token.formattedBalance!, 6)}
                               </span>
                             </div>
                           </div>

@@ -50,6 +50,14 @@ export const connectUTXOWallet = async (wallet: any): Promise<any> => {
           provider: wallet.provider,
           address: address[0],
         };
+      case "xdefi-solana": {
+        const resp = await wallet.provider.connect();
+
+        return {
+          provider: wallet.provider,
+          address: resp.publicKey.toString(),
+        };
+      }
       case "phantom-utxo":
         accounts = await wallet.provider.requestAccounts();
         return {

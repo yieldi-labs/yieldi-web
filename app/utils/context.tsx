@@ -75,7 +75,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getChainKeyFromChain = (chain: string): ChainKey => {
-    chain = chain.toLocaleUpperCase();
+    chain = chain.toUpperCase();
     switch (chain) {
       case "AVAX": {
         return ChainKey.AVALANCHE;
@@ -100,6 +100,9 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       }
       case "BCH": {
         return ChainKey.BITCOINCASH;
+      }
+      case "THOR": {
+        return ChainKey.THORCHAIN;
       }
       default: {
         return ChainKey.ETHEREUM;
@@ -152,6 +155,13 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   id: "xdefi-bch",
                   name: "CTRL Wallet",
                   provider: window?.xfi?.bitcoincash,
+                }),
+
+              [ProviderKey.SOLANA]: async () =>
+                await connectUTXOWallet({
+                  id: "xdefi-solana",
+                  name: "CTRL Wallet",
+                  provider: window?.xfi?.solana,
                 }),
             };
           } else {

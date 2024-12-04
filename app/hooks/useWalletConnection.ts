@@ -25,7 +25,7 @@ export function useWalletConnection() {
     ethConnectors: GetConnectorsReturnType
   ) => {
     if (!wallet.chainConnect[chain.providerType])
-      throw new Error("Chain Not Supported!");
+      throw new Error(`Chain ${chain.name}  Not Supported!`);
     const connectedWallet =
       chain.providerType === ProviderKey.EVM
         ? await wallet.chainConnect[chain.providerType]!(ethConnectors)

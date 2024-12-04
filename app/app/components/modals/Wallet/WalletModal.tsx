@@ -31,14 +31,21 @@ export default function WalletModal() {
   const isHWDisabled = selectedChains.some((chain) =>
     [ChainKey.SOLANA, ChainKey.KUJIRA, ChainKey.BSCCHAIN].includes(chain.name)
   );
-
   const handleWalletSelect = (wallet: WalletType): void => {
-    setSelectedWallet(wallet);
     const validChains = wallet.chains;
-    if (!selectedChains.length)
-      setSelectedChains(
-        CHAINS.filter(({ name }) => validChains.includes(name))
-      );
+    if (!selectedChains.length || selectedWallet) {
+      if (selectedWallet === wallet) {
+        setSelectedChains([]);
+        setSelectedWallet(undefined);
+      } else {
+        setSelectedChains(
+          CHAINS.filter(({ name }) => validChains.includes(name))
+        );
+        setSelectedWallet(wallet);
+      }
+    } else {
+      setSelectedWallet(wallet);
+    }
   };
 
   const handleConnectWallet = () => {

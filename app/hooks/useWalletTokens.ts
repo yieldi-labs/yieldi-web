@@ -1,6 +1,10 @@
 import { formatNumber, isERC20, normalizeAddress } from "@/app/utils";
 import { useAppState } from "@/utils/context";
-import { WalletTokensData, TokenData, ConnectedWalletsState } from "@/utils/interfaces";
+import {
+  WalletTokensData,
+  TokenData,
+  ConnectedWalletsState,
+} from "@/utils/interfaces";
 import { ChainKey, EVM_CHAINS } from "@/utils/wallet/constants";
 import { useEffect, useState } from "react";
 import { formatUnits, encodeFunctionData, decodeFunctionResult } from "viem";
@@ -13,7 +17,6 @@ import {
 } from "@xchainjs/xchain-bitcoin";
 import * as viemChains from "viem/chains";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
-
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   const { getChainKeyFromChain } = useAppState();
@@ -389,13 +392,30 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
             for (const tokenKey of Object.keys(list)) {
               const token = list[tokenKey];
               if (token.balance === 0) {
-                const info = await checkAndSwitchChain(
-                  key as ChainKey,
-                  walletsState[key].address,
-                  walletsState[key].provider,
-                  token.tokenAddress as `0x${string}`
-                );
-                if (info?.balance) {
+                try {
+                  const info = await checkAndSwitchChain(
+                    key as ChainKey,
+                    walletsState[key].address,
+                    walletsState[key].provider,
+                    token.tokenAddress as `0x${string}`
+                  );
+                  if (info?.balance) {
+                    setWalletBalanceData((prevData) => {
+                      return {
+                        ...prevData,
+                        [key as ChainKey]: {
+                          ...prevData[key as ChainKey],
+                          [tokenKey]: {
+                            ...prevData[key as ChainKey][tokenKey],
+                            ...walletTokensData[key as ChainKey][tokenKey],
+                            ...info,
+                          },
+                        },
+                      };
+                    });
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
                   setWalletBalanceData((prevData) => {
                     return {
                       ...prevData,
@@ -404,7 +424,8 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                         [tokenKey]: {
                           ...prevData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          ...info,
+                          formattedBlanace: 0,
+                          balance: 0,
                         },
                       },
                     };
@@ -418,10 +439,29 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
             for (const tokenKey of Object.keys(list)) {
               const token = list[tokenKey];
               if (token.balance === 0) {
-                const info = await getRuneBalance(
-                  walletsState[ChainKey.THORCHAIN].address
-                );
-                if (info) {
+                try {
+                  const info = await getRuneBalance(
+                    walletsState[ChainKey.THORCHAIN].address
+                  );
+                  if (info) {
+                    setWalletBalanceData((prevData) => {
+                      return {
+                        ...prevData,
+                        [key as ChainKey]: {
+                          ...prevData[key as ChainKey],
+                          [tokenKey]: {
+                            ...prevData[key as ChainKey][tokenKey],
+                            ...walletTokensData[key as ChainKey][tokenKey],
+                            balance: info?.coins[0]
+                              ? Number(formatNumber(info?.coins[0].amount, 8))
+                              : 0,
+                          },
+                        },
+                      };
+                    });
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
                   setWalletBalanceData((prevData) => {
                     return {
                       ...prevData,
@@ -430,9 +470,8 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                         [tokenKey]: {
                           ...prevData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          balance: info?.coins[0]
-                            ? Number(formatNumber(info?.coins[0].amount, 8))
-                            : 0,
+                          formattedBlanace: 0,
+                          balance: 0,
                         },
                       },
                     };
@@ -447,11 +486,28 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
             for (const tokenKey of Object.keys(list)) {
               const token = list[tokenKey];
               if (token.balance === 0) {
-                const info = await getUTXOInfo(
-                  key as ChainKey,
-                  walletsState[key as ChainKey].address
-                );
-                if (info) {
+                try {
+                  const info = await getUTXOInfo(
+                    key as ChainKey,
+                    walletsState[key as ChainKey].address
+                  );
+                  if (info) {
+                    setWalletBalanceData((prevData) => {
+                      return {
+                        ...prevData,
+                        [key as ChainKey]: {
+                          ...prevData[key as ChainKey],
+                          [tokenKey]: {
+                            ...prevData[key as ChainKey][tokenKey],
+                            ...walletTokensData[key as ChainKey][tokenKey],
+                            ...info,
+                          },
+                        },
+                      };
+                    });
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
                   setWalletBalanceData((prevData) => {
                     return {
                       ...prevData,
@@ -460,7 +516,8 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                         [tokenKey]: {
                           ...prevData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          ...info,
+                          formattedBlanace: 0,
+                          balance: 0,
                         },
                       },
                     };
