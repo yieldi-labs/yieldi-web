@@ -11,7 +11,6 @@ import {
   WalletType,
 } from "@/utils/interfaces";
 import { GetConnectorsReturnType } from "wagmi/actions";
-import { useState } from "react";
 import { useAppState } from "@/utils/context";
 
 export function useWalletConnection() {
