@@ -1,3 +1,4 @@
+"use client"
 import { useState, useEffect } from "react";
 import { detectWallets } from "@/utils/wallet/detectedWallets";
 import { chainConfig } from "@/utils/wallet/chainConfig";

@@ -21,6 +21,8 @@ import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
 import { useRuneBalance, useWalletConnection } from "@/hooks";
 import { isEVMAddress } from "@/utils/chain";
+import { useLiquidityPositions } from "@/utils/PositionsContext";
+import { PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -57,6 +59,8 @@ export default function AddLiquidityModal({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDualSided, setIsDualSided] = useState(false);
+
+  const { positions, markPositionAsPending } = useLiquidityPositions()
 
   const utxoChain = useMemo(() => {
     const chain = pool.asset.split(".")[0].toLowerCase();
@@ -240,6 +244,8 @@ export default function AddLiquidityModal({
         pairedAddress,
       });
 
+      markPositionAsPending(pool.asset, type)
+
       if (hash) {
         setTimeout(() => {
           setTxHash(hash);
@@ -292,10 +298,12 @@ export default function AddLiquidityModal({
     return Math.abs(currentPercentage - targetPercentage) <= tolerance;
   };
 
-  if (showConfirmation && txHash) {
+  const type = isDualSided ? PositionType.DLP : PositionType.SLP
+  if (showConfirmation && txHash && positions && positions[pool.asset][type]) {
     return (
       <TransactionConfirmationModal
-        txHash={txHash}
+        position={positions[pool.asset][type]}
+        txHash={txHash || ''}
         onClose={() => {
           setShowConfirmation(false);
           setTxHash(null);
