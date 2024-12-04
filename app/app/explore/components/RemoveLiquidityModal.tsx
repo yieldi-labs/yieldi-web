@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo } from "react";
 import Image from "next/image";
 import { NumberFormatValues, NumericFormat } from "react-number-format";
+import BigNumber from "bignumber.js";
 import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail, MemberPool } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
@@ -22,6 +23,12 @@ interface RemoveLiquidityModalProps {
   onClose: (transactionSubmitted: boolean) => void;
 }
 
+const DECIMALS = {
+  PERCENTAGE: 2,
+  USD: 2,
+  ASSET: 6,
+};
+
 export default function RemoveLiquidityModal({
   pool,
   position,
@@ -38,31 +45,41 @@ export default function RemoveLiquidityModal({
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const [percentage, setPercentage] = useState(0);
   const [assetAmount, setAssetAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { assetAdded: positionAssetAmount } = getPositionDetails(
-    pool,
-    position
-  );
   const chainKey = getChainKeyFromChain(assetChain);
   const selectedWallet = walletsState![chainKey];
-  const positionAssetUsdValue =
-    parseFloat(pool.assetPriceUSD) * positionAssetAmount;
+  const { assetAdded: positionAssetAmount } = getPositionDetails(position);
+  const positionAssetUsdValue = new BigNumber(pool.assetPriceUSD)
+    .times(positionAssetAmount)
+    .decimalPlaces(DECIMALS.USD)
+    .toNumber();
+
+  const percentage = assetAmount
+    ? new BigNumber(assetAmount)
+        .div(positionAssetAmount)
+        .times(100)
+        .decimalPlaces(DECIMALS.PERCENTAGE)
+        .toNumber()
+    : 0;
+
+  const usdValue = new BigNumber(assetAmount || 0)
+    .times(pool.assetPriceUSD)
+    .decimalPlaces(DECIMALS.USD)
+    .toNumber();
 
   const handlePercentageClick = (percent: number) => {
-    setPercentage(percent);
-    const amount = (positionAssetAmount * percent) / 100;
-    setAssetAmount(amount.toString());
+    const amount = new BigNumber(positionAssetAmount)
+      .times(percent)
+      .div(100)
+      .decimalPlaces(DECIMALS.ASSET)
+      .toString();
+    setAssetAmount(amount);
   };
 
   const handleValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
-    const amount = parseFloat(values.value);
-    const percentage = (amount / positionAssetAmount) * 100;
-    setPercentage(percentage);
   };
 
   const handleRemoveLiquidity = async () => {
@@ -93,9 +110,13 @@ export default function RemoveLiquidityModal({
     }
   };
 
-  const error = liquidityError;
+  const EPSILON = 0.0001;
+  const isPercentageMatch = (percent: number) => {
+    const diff = new BigNumber(percentage).minus(percent).abs();
+    return diff.lte(EPSILON);
+  };
+
   const assetSymbol = getAssetShortSymbol(pool.asset);
-  const usdValue = parseFloat(assetAmount) * parseFloat(pool.assetPriceUSD);
 
   if (txHash) {
     return (
@@ -112,7 +133,9 @@ export default function RemoveLiquidityModal({
   return (
     <Modal onClose={() => onClose(false)} title="Remove">
       <div className="p-2 w-m">
-        {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
+        {liquidityError && (
+          <ErrorCard className="mb-4">{liquidityError}</ErrorCard>
+        )}
 
         <div className="bg-white rounded-xl p-4 mb-6">
           <div className="flex items-center gap-2 mb-2">
@@ -123,7 +146,7 @@ export default function RemoveLiquidityModal({
               placeholder="0"
               className="flex-1 text-xl font-medium outline-none"
               thousandSeparator=","
-              decimalScale={6}
+              decimalScale={DECIMALS.ASSET}
               allowNegative={false}
             />
             <div className="flex items-center gap-2">
@@ -138,7 +161,7 @@ export default function RemoveLiquidityModal({
             </div>
           </div>
           <div className="flex justify-between text-base font-medium text-neutral-800">
-            <div>≈ ${formatNumber(usdValue, 2)}</div>
+            <div>≈ ${formatNumber(usdValue, DECIMALS.USD)}</div>
             <div>
               Balance:{" "}
               {formatNumber(
@@ -146,10 +169,11 @@ export default function RemoveLiquidityModal({
                 parseFloat(pool.nativeDecimal)
               )}{" "}
               ($
-              {formatNumber(positionAssetUsdValue, 2)})
+              {formatNumber(positionAssetUsdValue, DECIMALS.USD)})
             </div>
           </div>
         </div>
+
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
             <button
@@ -157,7 +181,7 @@ export default function RemoveLiquidityModal({
               onClick={() => handlePercentageClick(percent)}
               className={twMerge(
                 "px-6 py-2 rounded-full font-medium transition-colors",
-                percentage === percent
+                isPercentageMatch(percent)
                   ? "bg-secondaryBtn text-white"
                   : "bg-white text-secondaryBtn"
               )}
@@ -171,7 +195,7 @@ export default function RemoveLiquidityModal({
         <button
           onClick={handleRemoveLiquidity}
           disabled={isSubmitting}
-          className="w-full bg-red-500 text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-red text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Submitting Transaction..." : "Remove"}
         </button>
