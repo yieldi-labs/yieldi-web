@@ -89,11 +89,23 @@ export type ActionMeta = {
 
 export type AddLiquidityMetadata = {
   /**
+   * Affiliate fee address of the addLiquidity
+   */
+  affiliateAddress: string;
+  /**
+   * Int64 (Basis points, 0-1000, where 1000=10%)
+   */
+  affiliateFee: string;
+  /**
    * Int64, amount of liquidity units assigned to the member as result of the liquidity
    * deposit
    *
    */
   liquidityUnits: string;
+  /**
+   * Transaction memo of the addLiquidity action
+   */
+  memo: string;
 };
 
 export type Balance = {
@@ -1198,6 +1210,63 @@ export type RefundMetadata = {
   txType: string;
 };
 
+export type ReserveHistory = {
+  intervals: ReserveIntervals;
+  meta: ReserveMeta;
+};
+
+export type ReserveIntervals = Array<ReserveItem>;
+
+export type ReserveItem = {
+  /**
+   * Int64, The end time of bucket in unix timestamp
+   */
+  endTime: string;
+  /**
+   * Int64(e8), fee made from outbound
+   */
+  gasFeeOutbound: string;
+  /**
+   * Int64(e8), RUNE paid to the pool for compensating the gas fees
+   */
+  gasReimbursement: string;
+  /**
+   * Int64(e8), RUNE paid to the system on deposit, send messages
+   *
+   */
+  networkFee: string;
+  /**
+   * Int64, The beginning time of bucket in unix timestamp
+   */
+  startTime: string;
+};
+
+export type ReserveMeta = {
+  /**
+   * Int64, The end time of bucket in unix timestamp
+   */
+  endTime: string;
+  /**
+   * Int64(e8), fee made from outbound
+   *
+   */
+  gasFeeOutbound: string;
+  /**
+   * Int64(e8), RUNE paid to the pool for compensating the gas fees
+   *
+   */
+  gasReimbursement: string;
+  /**
+   * Int64(e8), RUNE paid to the system on deposit, send messages
+   *
+   */
+  networkFee: string;
+  /**
+   * Int64, The beginning time of bucket in unix timestamp
+   */
+  startTime: string;
+};
+
 export type ReverseTHORNames = Array<string>;
 
 export type RunePoolDepositMetadata = {
@@ -1674,6 +1743,10 @@ export type SwapMetadata = {
    */
   affiliateFee: string;
   /**
+   * in asset price usd at the first interval
+   */
+  inPriceUSD: string;
+  /**
    * indicate whether this action was streaming
    */
   isStreamingSwap: boolean;
@@ -1686,6 +1759,10 @@ export type SwapMetadata = {
    */
   memo: string;
   networkFees: NetworkFees;
+  /**
+   * out asset price usd at the first interval
+   */
+  outPriceUSD: string;
   streamingSwapMeta?: StreamingSwapMeta;
   /**
    * Int64 (Basis points, 0-10000, where 10000=100%), swap slip percentage
@@ -2362,6 +2439,32 @@ export type GetPoolsData = {
 export type GetPoolsResponse = PoolDetails;
 
 export type GetPoolsError = unknown;
+
+export type GetReserveHistoryData = {
+  query?: {
+    /**
+     * Number of intervals to return. Should be between [1..400].
+     */
+    count?: number;
+    /**
+     * Start time of the query as unix timestamp
+     */
+    from?: number;
+    /**
+     * Interval of calculations
+     */
+    interval?: "5min" | "hour" | "day" | "week" | "month" | "quarter" | "year";
+    /**
+     * End time of the query as unix timestamp. If only count is given, defaults to now.
+     *
+     */
+    to?: number;
+  };
+};
+
+export type GetReserveHistoryResponse = ReserveHistory;
+
+export type GetReserveHistoryError = unknown;
 
 export type GetRunePoolDetailData = {
   path: {
