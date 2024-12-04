@@ -251,7 +251,21 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     walletAddress: string,
     provider: any,
     tokenAddress?: `0x${string}`
-  ) => {
+  ): Promise<
+    | {
+        balance: number;
+        name?: undefined;
+        symbol?: undefined;
+        decimals?: undefined;
+      }
+    | {
+        name: string;
+        symbol: string;
+        decimals: number;
+        balance: number;
+      }
+    | undefined
+  > => {
     let providerChainId = await provider.request({
       method: "eth_chainId",
     });
