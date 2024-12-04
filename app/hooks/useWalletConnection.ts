@@ -1,4 +1,5 @@
-import { useConnectors } from "wagmi";
+
+"use client"
 import {
   ChainKey,
   CHAINS,
@@ -11,6 +12,7 @@ import {
   WalletType,
 } from "@/utils/interfaces";
 import { GetConnectorsReturnType } from "wagmi/actions";
+import { useConnectors } from "wagmi";
 import { useAppState } from "@/utils/context";
 
 export function useWalletConnection() {

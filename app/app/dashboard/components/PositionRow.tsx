@@ -1,11 +1,11 @@
 import React from "react";
-import { Position, PositionType } from "../types";
 import TranslucentCard from "@/app/TranslucentCard";
 import { addDollarSignAndSuffix, getAssetSymbol } from "@/app/utils";
 import TokenLogo from "./TokenLogo";
+import { PositionStats, PositionStatus, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 
 interface PositionsRow {
-  position: Position;
+  position: PositionStats;
   onAdd: (assetId: string) => void;
   onRemove: (assetId: string) => void;
   hideAddButton?: boolean;
@@ -30,7 +30,12 @@ export default function PositionRow({
               <span className="hidden md:block ml-3 font-medium text-sm text-neutral-700">
                 {position.type === PositionType.DLP ? "DLP" : "SLP"}
               </span>
-            </div>
+              <span className="hidden md:block ml-3 font-medium text-sm text-neutral-700">
+                {position.status === PositionStatus.LP_POSITION_COMPLETE
+                  ? <></>
+                  : "PENDING"
+                }
+              </span>            </div>
           </div>
         </div>
         <div className="flex items-center md:w-4/5 w-1/2">

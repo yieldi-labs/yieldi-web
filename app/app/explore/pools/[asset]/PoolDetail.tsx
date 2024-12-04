@@ -18,12 +18,11 @@ import { TopCard } from "@/app/components/TopCard";
 import { useAppState } from "@/utils/context";
 import { isSupportedChain, parseAssetString } from "@/utils/chain";
 import {
-  usePositionStats,
-  PositionStats,
   emptyPositionStats,
 } from "@/hooks/usePositionStats";
-import { PositionType } from "@/app/dashboard/types";
 import PositionRow from "@/app/dashboard/components/PositionRow";
+import { PositionData, Positions, PositionStats, PositionStatus, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
+import { useLiquidityPositions } from "@/utils/PositionsContext";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -46,12 +45,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const wallet =
     walletsState && walletsState[chainKey] ? walletsState![chainKey] : null;
 
-  const addresses = wallet ? [wallet.address] : [];
-  const { positions, isPending, error } = usePositionStats({
-    addresses,
-    specificPool: pool,
-    refetchInterval: 5000,
-  });
+  const { positions, isPending, error } = useLiquidityPositions();
 
   useEffect(() => {
     if (!initialLoadComplete && !isPending) {
@@ -115,19 +109,24 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     );
   };
 
-  const consolidated = positions?.reduce((total, position) => {
+  // TODO: Improve default value handling
+  const consolidated = !positions || !(positions as Positions)[pool.asset] ? emptyPositionStats() : [(positions as Positions)[pool.asset].SLP, (positions as Positions)[pool.asset].DLP, (positions as Positions)[pool.asset].SAVER]
+  .filter(position => position?.data !== null && position?.data !== undefined)  
+  .reduce((total, position) => {
+    position = position as PositionData
     return {
       assetId: total.assetId,
+      status: PositionStatus.LP_POSITION_COMPLETE,
       type: total.type,
       deposit: {
-        usd: total.deposit.usd + position.deposit.usd,
-        asset: total.deposit.asset + position.deposit.asset,
-        assetAdded: total.deposit.assetAdded + position.deposit.assetAdded,
-        runeAdded: total.deposit.runeAdded + position.deposit.runeAdded,
+        usd: total.deposit.usd + position.data.deposit.usd,
+        asset: total.deposit.asset + position.data.deposit.asset,
+        // assetAdded: total.deposit.assetAdded + position.data.deposit.assetAdded, // TODO: Uncomment thisa
+        // runeAdded: total.deposit.runeAdded + position.data.deposit.runeAdded,
       },
       gain: {
-        usd: total.gain.usd + position.gain.usd,
-        asset: total.gain.asset + position.gain.asset,
+        usd: total.gain.usd + position.data.gain.usd,
+        // asset: total.gain.asset + position.data.gain.asset,
         percentage: total.gain.percentage,
       },
       pool: total.pool,
@@ -139,30 +138,32 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   const renderPositionsDetails = () => {
     if (!positions) return null;
 
-    return positions.map((position) => {
-      const isSingleSided = position.deposit.runeAdded === 0;
-
-      return (
-        <PositionRow
-          key={position.liquidityUnits}
-          position={{
-            assetId: pool.asset,
-            type: isSingleSided ? PositionType.SLP : PositionType.DLP,
-            deposit: {
-              usd: position.deposit.usd,
-              asset: position.deposit.asset,
-            },
-            gain: {
-              usd: position.gain.usd,
-              percentage: position.gain.percentage,
-            },
-          }}
-          onAdd={() => {}}
-          onRemove={() => handleRemove(position)}
-          hideAddButton={true}
-        />
-      );
-    });
+    return Object.entries(positions[pool.asset])
+      .filter(([, position]) => position?.data !== null && position?.data !== undefined)
+      .map(([type, position]) => {
+        position = position as PositionData
+        return (
+          <PositionRow
+            key={position.data.liquidityUnits}
+            position={{
+              assetId: pool.asset,
+              status: position.status,
+              type: type as PositionType,
+              deposit: {
+                usd: position.data.deposit.usd,
+                asset: position.data.deposit.asset,
+              },
+              gain: {
+                usd: position.data.gain.usd,
+                percentage: position.data.gain.percentage,
+              },
+            }}
+            onAdd={() => {}}
+            onRemove={() => handleRemove(position.data)}
+            hideAddButton={true}
+          />
+        );
+      });
   };
 
   const renderPositionsContent = () => (
@@ -194,16 +195,18 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
       <div className="mb-4 md:mb-8 bg-white rounded-xl w-full p-3">
         <div className="text-gray-700 font-medium text-lg mb-2">POSITIONS</div>
-        {positions && positions.length > 0 && (
-          <div className="flex items-center w-full px-3 py-2 text-sm text-center">
-            <div className="md:w-1/5 w-1/2"></div>
-            <div className="md:w-1/5 w-1/2">Gain (%)</div>
-            <div className="md:w-1/5 w-1/2">Deposit</div>
-            <div className="md:w-1/5 w-1/2">Gain</div>
-            <div className="md:w-2/5 w-1/2"></div>
-          </div>
+        {positions && positions[pool.asset] && (positions[pool.asset].SLP || positions[pool.asset].DLP || positions[pool.asset].SAVER) && (
+          <>
+            <div className="flex items-center w-full px-3 py-2 text-sm text-center">
+              <div className="md:w-1/5 w-1/2"></div>
+              <div className="md:w-1/5 w-1/2">Gain (%)</div>
+              <div className="md:w-1/5 w-1/2">Deposit</div>
+              <div className="md:w-1/5 w-1/2">Gain</div>
+              <div className="md:w-2/5 w-1/2"></div>
+            </div>
+            {renderPositionsDetails()}
+          </>
         )}
-        {renderPositionsDetails()}
       </div>
     </>
   );

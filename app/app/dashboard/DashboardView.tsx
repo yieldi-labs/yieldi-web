@@ -1,26 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { addDollarSignAndSuffix } from "../utils";
 import DashboardHighlightsCard from "./components/DashboardHighlightsCards";
 import PositionsList from "./components/PositionsList";
 import { PoolDetail } from "@/midgard";
-import { useWalletConnection } from "@/hooks";
-import { useAppState } from "@/utils/context";
 import PositionsPlaceholder from "./components/PositionsPlaceholder";
 import AddLiquidityModal from "../explore/components/AddLiquidityModal";
-import { usePositionStats } from "@/hooks/usePositionStats";
+import { emptyPositionStats } from "@/hooks/usePositionStats";
 import { useQuery } from "@tanstack/react-query";
 import { getPools } from "@/midgard";
+import { PositionData, PositionStats } from "@/hooks/dataTransformers/positionsTransformer";
+import { useLiquidityPositions } from "@/utils/PositionsContext";
 
 export default function DashboardView() {
-  const { walletsState } = useAppState();
-  const { getAllNetworkAddressesFromLocalStorage } = useWalletConnection();
   const [selectedPool, setSelectedPool] = useState<PoolDetail>();
 
-  const addresses = walletsState ? getAllNetworkAddressesFromLocalStorage() : [];
-  const { positions, isPending } = usePositionStats({ addresses });
-
+  const { positions, isPending } = useLiquidityPositions();
+  
   const { data: poolsData } = useQuery({
     queryKey: ["pools"],
     queryFn: async () => {
@@ -29,12 +26,22 @@ export default function DashboardView() {
     },
   });
 
+  const allPositionsArray = useMemo(() => {
+    if (!positions) return [emptyPositionStats()]
+    return Object.entries(positions).reduce((pools: PositionStats[], [, types]) => {
+      const chainPools = Object.entries(types)
+        .filter(([, position]) => position)
+        .map(([, position]) => (position as PositionData).data);
+      return pools.concat(chainPools);
+    }, []);
+  }, [positions])
+
   // Calculate totals
-  const totalValue = positions?.reduce((total, position) => {
+  const totalValue = allPositionsArray?.reduce((total, position) => {
     return total + position.deposit.usd + position.gain.usd;
   }, 0);
 
-  const totalGain = positions?.reduce((total, position) => {
+  const totalGain = allPositionsArray?.reduce((total, position) => {
     return total + position.gain.usd;
   }, 0);
 
@@ -74,11 +81,11 @@ export default function DashboardView() {
           Manage your active positions and track your earnings.
         </div>
         {positions ? (
-          isPending ? (
+          isPending && !positions ? (
             "Loading..."
           ) : (
             <PositionsList
-              positions={positions}
+              positions={allPositionsArray}
               onAdd={(assetId) => {
                 setSelectedPool(
                   poolsData?.find((pool) => pool.asset === assetId),
