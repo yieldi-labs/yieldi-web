@@ -16,7 +16,7 @@ export default function Error({
 
   return (
     <div className="text-center py-16">
-      <h2 className="text-xl font-bold red-500 mb-4">Something went wrong!</h2>
+      <h2 className="text-xl font-bold red mb-4">Something went wrong!</h2>
       <Button onClick={() => reset()}>Try again</Button>
     </div>
   );
