@@ -32,7 +32,7 @@ export function useWalletConnection() {
         : await wallet.chainConnect[chain.providerType]!();
     if (!connectedWallet) return;
     const provider = connectedWallet.provider;
-    let chainId = null;
+    let chainId = null ;
     if (chain.providerType === ProviderKey.EVM) {
       chainId = await connectedWallet.provider.request({
         method: "eth_chainId",
