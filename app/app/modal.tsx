@@ -9,31 +9,20 @@ export default function Modal({
   onClose: () => void;
   style?: object;
 }) {
-  const xIcon = (
-    <svg className="icon" viewBox="0 0 24 24">
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-    </svg>
-  );
   return (
     <div
       className="fixed z-30 inset-0 w-auto h-full overflow-y-auto bg-[rgb(0,0,0,0.5)] flex justify-center text-left"
       onClick={onClose}
     >
       <div
-        className="relative max-w-2xl mx-auto mb-auto mt-[5vh] rounded-large border-4 border-white bg-secondary"
+        className="md:relative z-20 md:min-w-[570px] w-full md:w-auto md:mx-auto mt-auto md:mt-[5vh] md:mb-auto rounded-t-large md:rounded-large border-4 border-white bg-neutral-100"
         onClick={(e) => e.stopPropagation()}
         style={style}
       >
         {title && (
-          <div className="flex border-b">
-            <h2 className="flex-1 mt-0 leading-none font-bold text-2xl px-6  py-4 border-r tracking-wider">
-              {title}
-            </h2>
-            <a className="cursor-pointer foreground p-4" onClick={onClose}>
-              {xIcon}
-            </a>
-          </div>
+          <h2 className="text-foreground text-center text-xl w-full font-medium mt-7">
+            {title}
+          </h2>
         )}
         <div className="p-6">{children}</div>
       </div>

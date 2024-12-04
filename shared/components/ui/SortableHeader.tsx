@@ -21,16 +21,16 @@ function SortableHeader<T extends string>({
 
   return (
     <div
-      className="px-3 py-3 flex items-center cursor-pointer group min-w-0"
+      className="md:px-3 py-3 flex items-center cursor-pointer group min-w-0"
       onClick={() => onSort(sortKey)}
     >
       <div className="flex items-center min-w-0 justify-between">
-        <div className="truncate mr-2">
+        <div className="truncate md:mr-2">
           <span className={`${isActive ? "font-bold" : "font-normal"}`}>
             {label}
           </span>
         </div>
-        <div className="flex-shrink-0 w-4 flex items-center justify-center">
+        <div className="hidden md:flex flex-shrink-0 w-4 items-center justify-center">
           {isActive ? (
             sortDirection === SortDirection.ASC ? (
               <ArrowUp className="w-4 h-4" />

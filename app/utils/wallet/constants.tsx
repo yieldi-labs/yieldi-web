@@ -1,7 +1,7 @@
 import { ChainSvg, WalletSvg } from "@/svg";
 import { connectWalletConnect } from "./walletConnect";
 import { GetConnectorsReturnType } from "wagmi/actions";
-import { ChainType } from "@/utils/interfaces";
+import { ChainType } from "../interfaces";
 
 export enum ChainKey {
   ARBITRUM = "Arbitrum",
@@ -29,7 +29,6 @@ export enum ChainKey {
   TON = "TON",
   ZKSYNC = "Zksync",
 }
-
 export enum ProviderKey {
   EVM = "evm",
   BITCOIN = "bitcoin",
@@ -53,49 +52,67 @@ export const CHAINS: ChainType[] = [
     icon: <ChainSvg.Avax />,
     name: ChainKey.AVALANCHE,
     providerType: ProviderKey.EVM,
+    thorchainIdentifier: "avax",
+    nativeAsset: "avax",
     chainId: "0xa86a",
   },
   {
     icon: <ChainSvg.Bitcoin />,
     name: ChainKey.BITCOIN,
     providerType: ProviderKey.BITCOIN,
+    thorchainIdentifier: "btc",
+    nativeAsset: "btc",
   },
   {
     icon: <ChainSvg.BitcoinCash />,
     name: ChainKey.BITCOINCASH,
     providerType: ProviderKey.BITCOINCASH,
+    thorchainIdentifier: "bch",
+    nativeAsset: "bch",
   },
   {
     icon: <ChainSvg.BSC />,
     name: ChainKey.BSCCHAIN,
     providerType: ProviderKey.EVM,
     chainId: "0x38",
+    thorchainIdentifier: "bsc",
+    nativeAsset: "bnb",
   },
   {
     icon: <ChainSvg.Dogechain />,
     name: ChainKey.DOGECOIN,
     providerType: ProviderKey.DOGECOIN,
+    thorchainIdentifier: "doge",
+    nativeAsset: "doge",
   },
   {
     icon: <ChainSvg.Ethereum />,
     name: ChainKey.ETHEREUM,
     providerType: ProviderKey.EVM,
     chainId: "0x1",
+    thorchainIdentifier: "eth",
+    nativeAsset: "eth",
   },
   {
     icon: <ChainSvg.Litecoin />,
     name: ChainKey.LITECOIN,
     providerType: ProviderKey.LITECOIN,
+    thorchainIdentifier: "ltc",
+    nativeAsset: "ltc",
   },
   {
     icon: <ChainSvg.Solana />,
     name: ChainKey.SOLANA,
     providerType: ProviderKey.SOLANA,
+    thorchainIdentifier: "sol",
+    nativeAsset: "sol",
   },
   {
     icon: <ChainSvg.Thorchain />,
     name: ChainKey.THORCHAIN,
     providerType: ProviderKey.THORCHAIN,
+    thorchainIdentifier: "thor",
+    nativeAsset: "rune",
   },
 ];
 
@@ -105,18 +122,24 @@ export const EVM_CHAINS: ChainType[] = [
     name: ChainKey.AVALANCHE,
     providerType: ProviderKey.EVM,
     chainId: "0xa86a",
+    thorchainIdentifier: "avax",
+    nativeAsset: "avax",
   },
   {
     icon: <ChainSvg.BSC />,
     name: ChainKey.BSCCHAIN,
     providerType: ProviderKey.EVM,
     chainId: "0x38",
+    thorchainIdentifier: "bsc",
+    nativeAsset: "bnb",
   },
   {
     icon: <ChainSvg.Ethereum />,
     name: ChainKey.ETHEREUM,
     providerType: ProviderKey.EVM,
     chainId: "0x1",
+    thorchainIdentifier: "eth",
+    nativeAsset: "eth",
   },
 ];
 

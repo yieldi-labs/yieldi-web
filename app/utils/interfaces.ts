@@ -45,6 +45,19 @@ export interface LiquidityProvider {
   asset_deposit_value: string;
 }
 
+export interface WalletState {
+  provider: any;
+  address: string;
+  providerType: ProviderKey;
+  chainType: ChainKey;
+  walletId: WalletKey;
+  chainId?: string;
+}
+
+export interface ConnectedWalletsState {
+  [key: string]: WalletState;
+}
+
 export interface WalletType {
   id: WalletKey;
   name: string;
@@ -64,4 +77,6 @@ export interface ChainType {
   name: ChainKey;
   providerType: ProviderKey;
   chainId?: string;
+  thorchainIdentifier: string;
+  nativeAsset: string;
 }

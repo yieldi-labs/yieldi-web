@@ -1,6 +1,7 @@
-import { useState } from "react";
+
 import Wallet from "./Wallet";
 import { WalletType } from "@/utils/interfaces";
+import { useAppState } from "@/utils/context";
 
 interface WalletListProps {
   detected: WalletType[];
@@ -54,10 +55,9 @@ function WalletSection({
   isWalletValidForChain,
   onWalletSelect,
 }: WalletSectionProps) {
-  const [selectedWalletId, setSelectedWalletId] = useState("");
+  const { selectedWallet } = useAppState();
   const handleWalletSelect = (wallet: WalletType) => {
     if (wallet.isAvailable) {
-      setSelectedWalletId(wallet.id);
       onWalletSelect(wallet);
     } else {
       window.open(wallet.downloadUrl, "_blank");
@@ -74,7 +74,7 @@ function WalletSection({
             isSupported={isWalletValidForChain(wallet)}
             onSelect={() => handleWalletSelect(wallet)}
             className={`${
-              wallet.id === selectedWalletId
+              wallet.id === selectedWallet?.id
                 ? "border-primary"
                 : "border-transparent"
             } `}

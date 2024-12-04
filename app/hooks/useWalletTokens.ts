@@ -1,6 +1,6 @@
 import { formatNumber, isERC20, normalizeAddress } from "@/app/utils";
 import { useAppState } from "@/utils/context";
-import { WalletTokensData, TokenData } from "@/utils/interfaces";
+import { WalletTokensData, TokenData, ConnectedWalletsState } from "@/utils/interfaces";
 import { ChainKey, EVM_CHAINS } from "@/utils/wallet/constants";
 import { useEffect, useState } from "react";
 import { formatUnits, encodeFunctionData, decodeFunctionResult } from "viem";
@@ -13,7 +13,7 @@ import {
 } from "@xchainjs/xchain-bitcoin";
 import * as viemChains from "viem/chains";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
-import { ConnectedWalletsState } from "./useWalletConnection";
+
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   const { getChainKeyFromChain } = useAppState();

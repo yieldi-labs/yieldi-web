@@ -4,31 +4,29 @@ import Modal from "@/app/modal";
 import WalletList from "./WalletList";
 import { useAppState } from "@/utils/context";
 import { ChainSelector } from "./ChainSelector";
-import {
-  useWalletList,
-  useWalletConnection,
-  WalletState,
-  ConnectedWalletsState,
-} from "@/hooks";
+import { useWalletList, useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
 import HardwareWallets from "./HardwareWallets";
-import { WalletType } from "@/utils/interfaces";
+import {
+  ConnectedWalletsState,
+  WalletState,
+  WalletType,
+} from "@/utils/interfaces";
 import { ChainKey, CHAINS } from "@/utils/wallet/constants";
 
 export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
-  const { toggleWalletModal, isWalletModalOpen, setWalletsState } =
-    useAppState();
   const {
-    selectedChains,
-    setSelectedChains,
-    handleConnect,
+    toggleWalletModal,
+    isWalletModalOpen,
+    setWalletsState,
     selectedWallet,
     setSelectedWallet,
-  } = useWalletConnection(setWalletsState, toggleWalletModal);
-  const { detected, undetected, isWalletValidForChain } =
-    useWalletList(selectedChains);
+    setSelectedChains,
+  } = useAppState();
+  const { selectedChains, handleConnect } = useWalletConnection();
+  const { detected, undetected, isWalletValidForChain } = useWalletList();
 
   const isHWDisabled = selectedChains.some((chain) =>
     [ChainKey.SOLANA, ChainKey.KUJIRA, ChainKey.BSCCHAIN].includes(chain.name)

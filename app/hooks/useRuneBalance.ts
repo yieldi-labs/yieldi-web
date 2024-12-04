@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Balance, getBalance } from "@/midgard";
 import { WalletState } from "./useWalletConnection";
+import { DECIMALS } from "@/app/utils";
 
 interface UseRuneBalanceProps {
   wallet: WalletState | null;
@@ -37,8 +38,10 @@ export const useRuneBalance = ({
       setLoading(true);
       try {
         const balance: Balance | undefined = await getRuneBalance();
-        const amountStr: string = balance?.coins[0]?.amount || "0";
-        setRuneBalance(parseInt(amountStr));
+        const amountStr: string =
+          balance?.coins.find((coin) => coin.asset === "THOR.RUNE")?.amount ||
+          "0"; // A RUNE address can hold several assets, look for the RUNE id to display the correct balance.
+        setRuneBalance(parseInt(amountStr) / DECIMALS);
         setError(null);
       } catch (err) {
         setError(
