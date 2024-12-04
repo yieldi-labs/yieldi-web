@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Balance, getBalance } from "@/midgard";
-import { WalletState } from "./useWalletConnection";
 import { DECIMALS } from "@/app/utils";
+import { WalletState } from "@/utils/interfaces";
 
 interface UseRuneBalanceProps {
   wallet: WalletState | null;
