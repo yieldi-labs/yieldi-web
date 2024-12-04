@@ -6,7 +6,6 @@ import * as viem from "viem";
 import { mainnet } from "viem/chains";
 import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
-import { Saver } from "@/app/explore/types";
 import { getPool, MemberPool, PoolDetail } from "@/midgard";
 import { liquidityProvider } from "@/thornode";
 import { assetFromString } from "@xchainjs/xchain-util";
@@ -371,16 +370,6 @@ export const addDollarSignAndSuffix = (value: number) => {
   } else {
     return `$${formatNumber(value, 2, 2)}`;
   }
-};
-
-export const calculateSaverTVL = (saver: Saver) => {
-  return (
-    (parseFloat(saver.saversDepth) * parseFloat(saver.assetPriceUSD)) / DECIMALS
-  );
-};
-
-export const getFormattedSaverTVL = (saver: Saver) => {
-  return addDollarSignAndSuffix(calculateSaverTVL(saver));
 };
 
 export const calculatePoolTVL = (pool: PoolDetail, runePriceUSD: number) => {

@@ -9,11 +9,6 @@ const components = [
     borderColor: "#627EEA",
   },
   {
-    header: "L1 Savers Vaults",
-    description: "Access secure savings vaults for low-risk native yield",
-    borderColor: "#F09242",
-  },
-  {
     header: "Yield Streaming (coming soon)",
     description:
       "The yield asset of your choice, streamed straight to your wallet.",
