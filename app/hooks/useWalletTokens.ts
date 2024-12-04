@@ -264,7 +264,6 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
         decimals: number;
         balance: number;
       }
-    | undefined
   > => {
     let providerChainId = await provider.request({
       method: "eth_chainId",
@@ -272,9 +271,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     const currentChain = EVM_CHAINS.find(
       ({ chainId }) => chainId == providerChainId
     );
-    if (currentChain?.name === chainKey) {
-      return getERC20TokenInfo(walletAddress, provider, tokenAddress);
-    } else {
+    if (currentChain?.name !== chainKey) {
       try {
         providerChainId = await provider.request({
           method: "wallet_switchEthereumChain",
@@ -285,12 +282,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
           ],
         });
         if (providerChainId) {
-          return checkAndSwitchChain(
-            chainKey,
-            walletAddress,
-            provider,
-            tokenAddress
-          );
+          checkAndSwitchChain(chainKey, walletAddress, provider, tokenAddress);
         }
       } catch (err) {
         // need to add chain
@@ -326,6 +318,16 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
         }
       }
     }
+
+    const tokenInfo = await getERC20TokenInfo(
+      walletAddress,
+      provider,
+      tokenAddress
+    );
+    if (!tokenInfo) {
+      throw new Error("Failed to fetch token info");
+    }
+    return tokenInfo;
   };
 
   const getChainConfigById = (chainId: string) => {
