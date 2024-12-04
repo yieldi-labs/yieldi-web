@@ -9,7 +9,6 @@ import {
   getFormattedPoolTVL,
   getAssetSimpleSymbol,
   getFormattedPoolEarnings,
-  DECIMALS,
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
@@ -23,6 +22,8 @@ import {
   PositionStats,
   emptyPositionStats,
 } from "@/hooks/usePositionStats";
+import { PositionType } from "@/app/dashboard/types";
+import PositionRow from "@/app/dashboard/components/PositionRow";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -137,37 +138,26 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
     return positions.map((position) => {
       const isSingleSided = position.deposit.runeAdded === 0;
-      const assetAmount = formatNumber(
-        position.deposit.assetAdded || 0,
-        parseInt(pool.nativeDecimal),
-        8,
-      );
-      const runeAmount = formatNumber(
-        position.deposit.runeAdded || 0,
-        DECIMALS,
-      );
 
       return (
-        <div key={position.liquidityUnits} className="mb-4">
-          <div className="flex-col items-center text-base font-medium text-neutral-900 mb-1">
-            <div>
-              {assetAmount} {assetSymbol} + {runeAmount} RUNE
-            </div>
-          </div>
-          <button
-            className="w-full border-red border-2 text-red font-bold py-3 rounded-full
-                       hover:text-opacity-50 hover:border-opacity-50 transition-all 
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={() => handleRemove(position)}
-            disabled={showLoadingState || !isSingleSided}
-          >
-            {showLoadingState
-              ? "Loading..."
-              : isSingleSided
-                ? "Remove"
-                : "Coming Soon..."}
-          </button>
-        </div>
+        <PositionRow
+          key={position.liquidityUnits}
+          position={{
+            assetId: pool.asset,
+            type: isSingleSided ? PositionType.SLP : PositionType.DLP,
+            deposit: {
+              usd: position.deposit.usd,
+              asset: position.deposit.asset,
+            },
+            gain: {
+              usd: position.gain.usd,
+              percentage: position.gain.percentage,
+            },
+          }}
+          onAdd={() => {}}
+          onRemove={() => handleRemove(position)}
+          hideAddButton={true}
+        />
       );
     });
   };
@@ -201,6 +191,15 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
       <div className="mb-4 md:mb-8 bg-white rounded-xl w-full p-3">
         <div className="text-gray-700 font-medium text-lg mb-2">POSITIONS</div>
+        {positions && positions.length > 0 && (
+          <div className="flex items-center w-full px-3 py-2 text-sm text-center">
+            <div className="md:w-1/5 w-1/2"></div>
+            <div className="md:w-1/5 w-1/2">Gain (%)</div>
+            <div className="md:w-1/5 w-1/2">Deposit</div>
+            <div className="md:w-1/5 w-1/2">Gain</div>
+            <div className="md:w-2/5 w-1/2"></div>
+          </div>
+        )}
         {renderPositionsDetails()}
       </div>
     </>

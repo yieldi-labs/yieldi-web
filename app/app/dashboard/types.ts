@@ -9,6 +9,7 @@ export interface Position {
   type: PositionType;
   deposit: {
     usd: number;
+    asset: number;
   };
   gain: {
     usd: number;
