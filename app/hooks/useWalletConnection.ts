@@ -70,21 +70,32 @@ export function useWalletConnection() {
     chainKey: ChainKey,
     address: string
   ) => {
-    localStorage.setItem(`wallet-${chainKey}-address`, address);
+    if (typeof window !== "undefined" && localStorage) {
+      localStorage.setItem(`wallet-${chainKey}-address`, address);
+    }
   };
 
   const getNetworkAddressFromLocalStorage = (chainKey: ChainKey) => {
-    return localStorage.getItem(`wallet-${chainKey}-address`);
+    if (typeof window !== "undefined" && localStorage) {
+      return localStorage.getItem(`wallet-${chainKey}-address`);
+    }
+    return null;
   };
 
   const getAllNetworkAddressesFromLocalStorage = () => {
-    return CHAINS.map((chain) =>
-      localStorage.getItem(`wallet-${chain.name}-address`)
-    ).filter((address) => address != undefined);
+    if (typeof window !== "undefined" && localStorage) {
+      return CHAINS.map((chain) =>
+        localStorage.getItem(`wallet-${chain.name}-address`)
+      ).filter((address) => address != undefined);
+    }
+    return [];
   };
 
   const hasThorAddressInLocalStorage = () => {
-    return !!localStorage.getItem(`wallet-${ChainKey.THORCHAIN}-address`);
+    if (typeof window !== "undefined" && localStorage) {
+      return !!localStorage.getItem(`wallet-${ChainKey.THORCHAIN}-address`);
+    }
+    return false;
   };
 
   const handleConnect = async (wallet: WalletType) => {
