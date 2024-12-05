@@ -124,6 +124,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           )
           .reduce((total, position) => {
             position = position as PositionStats;
+            total = total as PositionStats
             return {
               assetId: total.assetId,
               status: PositionStatus.LP_POSITION_COMPLETE,

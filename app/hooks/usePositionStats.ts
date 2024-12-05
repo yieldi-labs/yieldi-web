@@ -9,7 +9,6 @@ import {
 } from "./dataTransformers/positionsTransformer";
 import { useCallback, useEffect, useState } from "react";
 import { useAppState } from "@/utils/context";
-import { pools } from "@/thornode";
 
 interface UsePositionStatsProps {
   refetchInterval?: number;
