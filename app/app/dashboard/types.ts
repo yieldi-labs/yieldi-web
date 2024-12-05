@@ -1,5 +1,4 @@
 export enum PositionType {
-  SAVER = "SAVER",
   SLP = "SLP",
   DLP = "DLP",
 }

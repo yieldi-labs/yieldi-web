@@ -1,10 +1,10 @@
 # Yieldi
 
-Yieldi is a decentralized application (dApp) that allows users to earn yield on native assets using Thorchain Savers.
+Yieldi is a decentralized application (dApp) that allows users to manage liquidity positions on Thorchain.
 
 ## Features
 
-- Stake Bitcoin (BTC) and Ethereum (ETH) in Thorchain Savers
+- Add and remove liquidity for Bitcoin (BTC) and Ethereum (ETH) on Thorchain
 - View current APY and TVL for each asset
 - Deposit and withdraw funds
 - Connect to Bitcoin and Ethereum wallets

@@ -28,11 +28,7 @@ export default function PositionRow({
                 {getAssetSymbol(position.assetId)}
               </span>
               <span className="hidden md:block ml-3 font-medium text-sm text-neutral-700">
-                {position.type === PositionType.SAVER
-                  ? "Savers"
-                  : position.type === PositionType.DLP
-                    ? "DLP"
-                    : "SLP"}
+                {position.type === PositionType.DLP ? "DLP" : "SLP"}
               </span>
             </div>
           </div>
@@ -51,7 +47,6 @@ export default function PositionRow({
             {!hideAddButton && (
               <button
                 onClick={() => onAdd(position.assetId)}
-                disabled={position.type === PositionType.SAVER}
                 className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
               >
                 Add
