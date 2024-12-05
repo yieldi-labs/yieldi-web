@@ -33,7 +33,7 @@ export enum SupportedChain {
   Dogecoin = "DOGE",
   Ethereum = "ETH",
   // Kujira = "KUJI",
-  // Litecoin = "LTC",
+  Litecoin = "LTC",
   // Maya = "MAYA",
   // Optimism = "OP",
   // Polkadot = "DOT",
