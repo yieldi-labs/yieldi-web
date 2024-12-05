@@ -7,9 +7,7 @@ import PositionsList from "./components/PositionsList";
 import { PoolDetail } from "@/midgard";
 import PositionsPlaceholder from "./components/PositionsPlaceholder";
 import AddLiquidityModal from "../explore/components/AddLiquidityModal";
-import {
-  PositionStats,
-} from "@/hooks/dataTransformers/positionsTransformer";
+import { PositionStats } from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 import Loader from "../components/Loader";
 import { useAppState } from "@/utils/context";
@@ -18,18 +16,16 @@ import { emptyPositionStats } from "@/hooks/usePositionStats";
 export default function DashboardView() {
   const [selectedPool, setSelectedPool] = useState<PoolDetail>();
 
-  const { positions, pools, isPending } = useLiquidityPositions()
-  const { walletsState } = useAppState()
+  const { positions, pools, isPending } = useLiquidityPositions();
+  const { walletsState } = useAppState();
   const numberConnectedWallets = Object.keys(walletsState || {}).length;
-  const allPositionsArray = positions && Object.entries(positions).reduce(
-    (pools: PositionStats[], [, types]) => {
+  const allPositionsArray = (positions &&
+    Object.entries(positions).reduce((pools: PositionStats[], [, types]) => {
       const chainPools = Object.entries(types)
         .filter(([, position]) => position)
-        .map(([, position]) => (position as PositionStats));
+        .map(([, position]) => position as PositionStats);
       return pools.concat(chainPools);
-    },
-    [],
-  ) || [emptyPositionStats()];
+    }, [])) || [emptyPositionStats()];
 
   // Calculate totals
   const totalValue = allPositionsArray?.reduce((total, position) => {
@@ -84,9 +80,7 @@ export default function DashboardView() {
             <PositionsList
               positions={allPositionsArray}
               onAdd={(assetId) => {
-                setSelectedPool(
-                  pools?.find((pool) => pool.asset === assetId),
-                );
+                setSelectedPool(pools?.find((pool) => pool.asset === assetId));
               }}
               onRemove={() => {}}
             />

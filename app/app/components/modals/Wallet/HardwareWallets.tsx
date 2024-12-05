@@ -43,18 +43,16 @@ export default function HardwareWallets({
 
         case ChainKey.BITCOIN: {
           const btc = new Btc({ transport });
-          const { bitcoinAddress } = await btc.getWalletPublicKey(
-            "44'/0'/0'/0/0"
-          );
+          const { bitcoinAddress } =
+            await btc.getWalletPublicKey("44'/0'/0'/0/0");
           address = bitcoinAddress;
           break;
         }
 
         case ChainKey.LITECOIN: {
           const ltc = new Btc({ transport });
-          const { bitcoinAddress } = await ltc.getWalletPublicKey(
-            "44'/2'/0'/0/0"
-          );
+          const { bitcoinAddress } =
+            await ltc.getWalletPublicKey("44'/2'/0'/0/0");
           address = bitcoinAddress;
           break;
         }
@@ -63,7 +61,7 @@ export default function HardwareWallets({
           const cosmos = new Cosmos(transport);
           const { address: thorchainAddress } = await cosmos.getAddress(
             "44'/931'/0'/0/0",
-            "thor"
+            "thor",
           );
           address = thorchainAddress;
           break;
@@ -71,18 +69,16 @@ export default function HardwareWallets({
 
         case ChainKey.BITCOINCASH: {
           const bch = new Btc({ transport });
-          const { bitcoinAddress } = await bch.getWalletPublicKey(
-            "44'/145'/0'/0/0"
-          );
+          const { bitcoinAddress } =
+            await bch.getWalletPublicKey("44'/145'/0'/0/0");
           address = bitcoinAddress;
           break;
         }
 
         case ChainKey.DOGECOIN: {
           const doge = new Btc({ transport });
-          const { bitcoinAddress } = await doge.getWalletPublicKey(
-            "44'/3'/0'/0/0"
-          );
+          const { bitcoinAddress } =
+            await doge.getWalletPublicKey("44'/3'/0'/0/0");
           address = bitcoinAddress;
           break;
         }

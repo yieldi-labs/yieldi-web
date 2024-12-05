@@ -29,7 +29,7 @@ export default function WalletModal() {
   const { detected, undetected, isWalletValidForChain } = useWalletList();
 
   const isHWDisabled = selectedChains.some((chain) =>
-    [ChainKey.SOLANA, ChainKey.KUJIRA, ChainKey.BSCCHAIN].includes(chain.name)
+    [ChainKey.SOLANA, ChainKey.KUJIRA, ChainKey.BSCCHAIN].includes(chain.name),
   );
   const handleWalletSelect = (wallet: WalletType): void => {
     const validChains = wallet.chains;
@@ -39,7 +39,7 @@ export default function WalletModal() {
         setSelectedWallet(undefined);
       } else {
         setSelectedChains(
-          CHAINS.filter(({ name }) => validChains.includes(name))
+          CHAINS.filter(({ name }) => validChains.includes(name)),
         );
         setSelectedWallet(wallet);
       }
@@ -86,7 +86,7 @@ export default function WalletModal() {
                 "bg-white rounded-2xl p-4",
                 "border-2 border-transparent",
                 "hover:border-primary cursor-pointer",
-                "transition-all duration-75"
+                "transition-all duration-75",
               )}
             >
               <h3 className="text-sm text-neutral-900 font-medium font-gt-america">

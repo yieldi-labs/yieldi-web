@@ -1,5 +1,4 @@
-
-"use client"
+"use client";
 import {
   ChainKey,
   CHAINS,
@@ -24,7 +23,7 @@ export function useWalletConnection() {
   const handleProviderConnection = async (
     wallet: WalletType,
     chain: ChainType,
-    ethConnectors: GetConnectorsReturnType
+    ethConnectors: GetConnectorsReturnType,
   ) => {
     if (!wallet.chainConnect[chain.providerType])
       throw new Error(`Chain ${chain.name}  Not Supported!`);
@@ -53,7 +52,7 @@ export function useWalletConnection() {
     chainType: ChainKey,
     provider: any,
     address: string,
-    chainId?: string
+    chainId?: string,
   ): ConnectedWalletsState => {
     return {
       ...prevState,
@@ -70,7 +69,7 @@ export function useWalletConnection() {
 
   const saveNetworkAddressToLocalStorage = (
     chainKey: ChainKey,
-    address: string
+    address: string,
   ) => {
     if (typeof window !== "undefined" && localStorage) {
       localStorage.setItem(`wallet-${chainKey}-address`, address);
@@ -89,7 +88,7 @@ export function useWalletConnection() {
     if (typeof window !== "undefined" && localStorage) {
       for (const config of CHAINS) {
         const address = localStorage.getItem(
-          `wallet-${config.thorchainIdentifier}-address`
+          `wallet-${config.thorchainIdentifier}-address`,
         );
         if (!address) continue;
         addresses.push(address);
@@ -122,7 +121,7 @@ export function useWalletConnection() {
         const connection = await handleProviderConnection(
           wallet,
           chain,
-          ethConnectors
+          ethConnectors,
         );
         if (!connection) continue;
         saveNetworkAddressToLocalStorage(chain.name, connection.address);
@@ -134,8 +133,8 @@ export function useWalletConnection() {
             chain.name,
             connection.provider,
             connection.address,
-            connection.chainId
-          )
+            connection.chainId,
+          ),
         );
       }
 

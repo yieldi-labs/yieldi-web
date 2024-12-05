@@ -113,26 +113,26 @@ export const positionsTransformer = (
     runeAdded = depositValueRune.amount().toNumber();
 
     result[key][type] = {
-        assetId: memberPool.pool,
-        type: determinePositionType(memberPool),
-        status: determinePositionStatus(memberPool),
-        deposit: {
-          usd: totalAddedValueInUsd.amount().toNumber(),
-          totalInAsset: totalAddedValueInAsset.amount().toNumber(),
-          assetAdded,
-          runeAdded,
-        },
-        gain: {
-          usd: gainInUsd.amount().toNumber(),
-          asset: gainInAsset.amount().toNumber(),
-          percentage: gainInUsd
-            .div(totalAddedValueInUsd)
-            .times(100)
-            .amount()
-            .toFixed(4),
-        },
-        pool,
-        memberDetails: memberPool,
+      assetId: memberPool.pool,
+      type: determinePositionType(memberPool),
+      status: determinePositionStatus(memberPool),
+      deposit: {
+        usd: totalAddedValueInUsd.amount().toNumber(),
+        totalInAsset: totalAddedValueInAsset.amount().toNumber(),
+        assetAdded,
+        runeAdded,
+      },
+      gain: {
+        usd: gainInUsd.amount().toNumber(),
+        asset: gainInAsset.amount().toNumber(),
+        percentage: gainInUsd
+          .div(totalAddedValueInUsd)
+          .times(100)
+          .amount()
+          .toFixed(4),
+      },
+      pool,
+      memberDetails: memberPool,
     };
   });
 

@@ -14,7 +14,6 @@ import {
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
 
-
 // Define BTC and DOGE assets
 const AssetBTC: Asset = {
   chain: "BTC",
@@ -110,7 +109,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         throw err;
       }
     },
-    [client, chain]
+    [client, chain],
   );
 
   // Get network fees
@@ -177,7 +176,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
                 }));
                 resolve(result);
               }
-            }
+            },
           );
         });
       } catch (err) {
@@ -188,7 +187,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         setLoading(false);
       }
     },
-    [wallet, getFees, chain]
+    [wallet, getFees, chain],
   );
 
   // Add liquidity to a pool using transfer
@@ -227,7 +226,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         throw new Error(errMsg);
       }
     },
-    [wallet]
+    [wallet],
   );
 
   // Remove liquidity from a pool using transfer
@@ -265,7 +264,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         throw new Error(errMsg);
       }
     },
-    [transfer, wallet, getFees]
+    [transfer, wallet, getFees],
   );
 
   return {

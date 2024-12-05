@@ -19,7 +19,8 @@ export const useRuneBalance = ({
   const getRuneBalance = useCallback(async () => {
     if (!wallet?.address) return;
     try {
-      const { data: runeBalance } = await getBalance({ // TODO: Research why this is calling with non RUNE addreses
+      const { data: runeBalance } = await getBalance({
+        // TODO: Research why this is calling with non RUNE addreses
         path: {
           address: wallet.address,
         },

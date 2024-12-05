@@ -13,7 +13,7 @@ interface UseWalletListReturn {
   isWalletValidForChain: (wallet: WalletType) => boolean;
   isChainSupportedByWallet: (
     chain: ChainType,
-    selectedWallet?: WalletType
+    selectedWallet?: WalletType,
   ) => boolean;
 }
 
@@ -37,12 +37,12 @@ export function useWalletList(): UseWalletListReturn {
     };
 
     const walletList: WalletType[] = Object.values(
-      SUPPORTED_WALLETS
+      SUPPORTED_WALLETS,
     ) as WalletType[];
     const commonWallets = selectedChains.length
       ? walletList.filter((wallet) => {
           return selectedChains.every((chain) =>
-            wallet.chains.includes(chain.name)
+            wallet.chains.includes(chain.name),
           );
         })
       : walletList;
@@ -55,16 +55,16 @@ export function useWalletList(): UseWalletListReturn {
     (wallet: WalletType): boolean => {
       if (selectedChains.length) {
         const selectedChainKeys = new Set(
-          selectedChains.map((chain) => chain.name)
+          selectedChains.map((chain) => chain.name),
         );
         return wallet.chains.some((chainKey: ChainKey) =>
-          selectedChainKeys.has(chainKey)
+          selectedChainKeys.has(chainKey),
         );
       } else {
         return true;
       }
     },
-    [selectedChains]
+    [selectedChains],
   );
 
   const isChainSupportedByWallet = useCallback(
@@ -75,7 +75,7 @@ export function useWalletList(): UseWalletListReturn {
       const isSupported = selectedWallet.chains.includes(chain.name);
       return isSupported;
     },
-    [selectedWallet, selectedChains]
+    [selectedWallet, selectedChains],
   );
 
   return {
