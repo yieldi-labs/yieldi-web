@@ -118,7 +118,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
       : [
           (positions as Positions)[pool.asset].SLP,
           (positions as Positions)[pool.asset].DLP,
-          (positions as Positions)[pool.asset].SAVER,
         ]
           .filter(
             (position) => position !== null,
@@ -198,8 +197,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         {positions &&
           positions[pool.asset] &&
           (positions[pool.asset].SLP ||
-            positions[pool.asset].DLP ||
-            positions[pool.asset].SAVER) && (
+            positions[pool.asset].DLP) && (
             <>
               <div className="flex items-center w-full px-3 py-2 text-sm text-center">
                 <div className="md:w-1/5 w-1/2"></div>

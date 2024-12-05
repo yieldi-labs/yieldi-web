@@ -41,7 +41,6 @@ export interface Positions {
   [pool: string]: {
     DLP: PositionStats | null;
     SLP: PositionStats | null;
-    SAVER: PositionStats | null;
   };
 }
 
@@ -57,7 +56,7 @@ export const positionsTransformer = (
     const key = memberPool.pool.replace("/", ".");
 
     if (!result[key]) {
-      result[key] = { DLP: null, SLP: null, SAVER: null };
+      result[key] = { DLP: null, SLP: null };
     }
 
     const pool = pools?.find(
@@ -72,72 +71,46 @@ export const positionsTransformer = (
     let assetAdded = 0;
     let runeAdded = 0;
 
-    if (memberPool.pool.includes("/")) {
-      // Savers calculations
-      const userSaversPercentage = BigNumber(memberPool.liquidityUnits).div(
-        pool.saversUnits,
-      );
-      const assetSaverToRedeem = baseAmount(
-        BigNumber(pool.saversDepth).times(userSaversPercentage),
-      );
-      const totalRedeemValueInUsd = baseToAsset(assetSaverToRedeem).times(
-        pool.assetPriceUSD,
-      );
+    const userPoolPercentage = BigNumber(memberPool.liquidityUnits).div(
+      pool.units,
+    );
+    const assetToRedeem = baseAmount(
+      BigNumber(pool.assetDepth).times(userPoolPercentage),
+    );
+    const runeToRedeem = baseAmount(
+      BigNumber(pool.runeDepth).times(userPoolPercentage),
+    );
 
-      const depositSaverValueAsset = baseToAsset(
-        baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn),
-      );
-      totalAddedValueInUsd = depositSaverValueAsset.times(pool.assetPriceUSD);
-      gainInUsd = totalRedeemValueInUsd.minus(totalAddedValueInUsd);
+    const redeemValueAssetInUsd = baseToAsset(assetToRedeem).times(
+      pool.assetPriceUSD,
+    );
+    const redeemValueRuneInUsd = baseToAsset(runeToRedeem)
+      .div(pool.assetPrice)
+      .times(pool.assetPriceUSD);
+    const totalRedeemValueInUsd =
+      redeemValueAssetInUsd.plus(redeemValueRuneInUsd);
 
-      totalAddedValueInAsset = depositSaverValueAsset;
-      gainInAsset = baseToAsset(assetSaverToRedeem).minus(
-        depositSaverValueAsset,
-      );
-      assetAdded = depositSaverValueAsset.amount().toNumber();
-    } else {
-      // Liquidity Provider calculations
-      const userPoolPercentage = BigNumber(memberPool.liquidityUnits).div(
-        pool.units,
-      );
-      const assetToRedeem = baseAmount(
-        BigNumber(pool.assetDepth).times(userPoolPercentage),
-      );
-      const runeToRedeem = baseAmount(
-        BigNumber(pool.runeDepth).times(userPoolPercentage),
-      );
+    const depositValueAsset = baseToAsset(
+      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn),
+    );
+    const depositValueRune = baseToAsset(
+      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn),
+    );
 
-      const redeemValueAssetInUsd = baseToAsset(assetToRedeem).times(
-        pool.assetPriceUSD,
-      );
-      const redeemValueRuneInUsd = baseToAsset(runeToRedeem)
-        .div(pool.assetPrice)
-        .times(pool.assetPriceUSD);
-      const totalRedeemValueInUsd =
-        redeemValueAssetInUsd.plus(redeemValueRuneInUsd);
+    totalAddedValueInUsd = depositValueAsset
+      .times(pool.assetPriceUSD)
+      .plus(depositValueRune.div(pool.assetPrice).times(pool.assetPriceUSD));
+    gainInUsd = totalRedeemValueInUsd.minus(totalAddedValueInUsd);
 
-      const depositValueAsset = baseToAsset(
-        baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn),
-      );
-      const depositValueRune = baseToAsset(
-        baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn),
-      );
+    totalAddedValueInAsset = depositValueAsset.plus(
+      depositValueRune.div(pool.assetPrice),
+    );
+    gainInAsset = baseToAsset(assetToRedeem)
+      .plus(baseToAsset(runeToRedeem).div(pool.assetPrice))
+      .minus(totalAddedValueInAsset);
 
-      totalAddedValueInUsd = depositValueAsset
-        .times(pool.assetPriceUSD)
-        .plus(depositValueRune.div(pool.assetPrice).times(pool.assetPriceUSD));
-      gainInUsd = totalRedeemValueInUsd.minus(totalAddedValueInUsd);
-
-      totalAddedValueInAsset = depositValueAsset.plus(
-        depositValueRune.div(pool.assetPrice),
-      );
-      gainInAsset = baseToAsset(assetToRedeem)
-        .plus(baseToAsset(runeToRedeem).div(pool.assetPrice))
-        .minus(totalAddedValueInAsset);
-
-      assetAdded = depositValueAsset.amount().toNumber();
-      runeAdded = depositValueRune.amount().toNumber();
-    }
+    assetAdded = depositValueAsset.amount().toNumber();
+    runeAdded = depositValueRune.amount().toNumber();
 
     result[key][type] = {
         assetId: memberPool.pool,
@@ -167,7 +140,6 @@ export const positionsTransformer = (
 };
 
 const determinePositionType = (memberPool: MemberPool): PositionType => {
-  if (memberPool.pool.includes("/")) return PositionType.SAVER;
   if (
     (memberPool.runeAdded !== "0" && memberPool.assetDeposit !== "0") ||
     memberPool.runePending !== "0" ||
