@@ -31,7 +31,7 @@ export function useWalletConnection() {
         : await wallet.chainConnect[chain.providerType]!();
     if (!connectedWallet) return;
     const provider = connectedWallet.provider;
-    let chainId = null ;
+    let chainId = null;
     if (chain.providerType === ProviderKey.EVM) {
       chainId = await connectedWallet.provider.request({
         method: "eth_chainId",
@@ -81,13 +81,18 @@ export function useWalletConnection() {
     return null;
   };
 
-  const getAllNetworkAddressesFromLocalStorage = () => {
+  const getAllNetworkAddressesFromLocalStorage = (): string[] => {
+    const addresses: string[] = [];
     if (typeof window !== "undefined" && localStorage) {
-      return CHAINS.map((chain) =>
-        localStorage.getItem(`wallet-${chain.name}-address`)
-      ).filter((address) => address != undefined) ?? [];
+      for (const config of CHAINS) {
+        const address = localStorage.getItem(
+          `wallet-${config.thorchainIdentifier}-address`
+        );
+        if (!address) continue;
+        addresses.push(address);
+      }
     }
-    return [];
+    return addresses;
   };
 
   const hasThorAddressInLocalStorage = () => {

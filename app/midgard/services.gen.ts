@@ -66,6 +66,9 @@ import type {
   GetPoolsData,
   GetPoolsError,
   GetPoolsResponse,
+  GetReserveHistoryData,
+  GetReserveHistoryError,
+  GetReserveHistoryResponse,
   GetRunePoolDetailData,
   GetRunePoolDetailError,
   GetRunePoolDetailResponse,
@@ -89,7 +92,7 @@ import type {
 
 export const client = createClient(
   createConfig({
-    baseUrl: "https://midgard.ninerealms.com/",
+    baseUrl: "https://midgard.ninerealms.com/", // REPLACE WITH VALID `baseUrl`
   }),
 );
 
@@ -691,6 +694,25 @@ export const getPools = <ThrowOnError extends boolean = false>(
   >({
     ...options,
     url: "/v2/pools",
+  });
+};
+
+/**
+ * Reserve income and expenses over bucketed history
+ * Returns reserve module network fee, outbound fee, and gas reimbursement flow in
+ * bucketed history
+ *
+ */
+export const getReserveHistory = <ThrowOnError extends boolean = false>(
+  options?: Options<GetReserveHistoryData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    GetReserveHistoryResponse,
+    GetReserveHistoryError,
+    ThrowOnError
+  >({
+    ...options,
+    url: "/v2/reserve",
   });
 };
 
