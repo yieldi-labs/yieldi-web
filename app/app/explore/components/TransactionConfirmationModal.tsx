@@ -1,11 +1,18 @@
+import Loader from "@/app/components/Loader";
 import Modal from "@/app/modal";
+import {
+  PositionStats,
+  PositionStatus,
+} from "@/hooks/dataTransformers/positionsTransformer";
 
 interface TransactionConfirmationModalProps {
+  position: PositionStats | null;
   txHash: string;
   onClose: () => void;
 }
 
 export default function TransactionConfirmationModal({
+  position,
   txHash,
   onClose,
 }: TransactionConfirmationModalProps) {
@@ -35,18 +42,24 @@ export default function TransactionConfirmationModal({
     >
       <div className="p-6 flex flex-col items-center">
         {/* Success Icon */}
-        <div className="w-16 h-16 mb-6 bg-primary rounded-full flex items-center justify-center">
-          <svg viewBox="0 0 24 24" className="w-8 h-8 text-black">
-            <polyline
-              points="20 6 9 17 4 12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
+        {position?.status === PositionStatus.LP_POSITION_PENDING ? (
+          <div className="mb-3">
+            <Loader />
+          </div>
+        ) : (
+          <div className="w-16 h-16  bg-primary rounded-full flex items-center justify-center">
+            <svg viewBox="0 0 24 24" className="w-8 h-8 text-black">
+              <polyline
+                points="20 6 9 17 4 12"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+        )}
 
         {/* Message */}
         <p className="text-lg text-center mb-6">

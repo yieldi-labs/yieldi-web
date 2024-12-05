@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { PositionsPerAsset } from "../types";
 import { SortableHeader } from "@shared/components/ui";
 import { SortDirection } from "@shared/components/ui/types";
 import PositionRow from "./PositionRow";
+import { PositionStats } from "@/hooks/dataTransformers/positionsTransformer";
 
 interface PositionsList {
-  positions: PositionsPerAsset;
+  positions: PositionStats[];
   onAdd: (assetId: string) => void;
   onRemove: (assetId: string) => void;
 }

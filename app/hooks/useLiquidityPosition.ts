@@ -112,7 +112,7 @@ export function useLiquidityPosition({
       provider: !utxoChain ? wallet?.provider : undefined,
     });
 
-  const getMemberDetails = useCallback(
+  const getMemberDetails = useCallback( // TODO: Is this function really neccessary ?
     async (address: string, asset: string) => {
       if (!address || !asset) {
         setError("Address and asset are required");

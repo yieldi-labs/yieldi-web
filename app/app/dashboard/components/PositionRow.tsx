@@ -1,11 +1,16 @@
 import React from "react";
-import { Position, PositionType } from "../types";
 import TranslucentCard from "@/app/TranslucentCard";
 import { addDollarSignAndSuffix, getAssetSymbol } from "@/app/utils";
 import TokenLogo from "./TokenLogo";
+import {
+  PositionStats,
+  PositionStatus,
+  PositionType,
+} from "@/hooks/dataTransformers/positionsTransformer";
+import Loader from "@/app/components/Loader";
 
 interface PositionsRow {
-  position: Position;
+  position: PositionStats;
   onAdd: (assetId: string) => void;
   onRemove: (assetId: string) => void;
   hideAddButton?: boolean;
@@ -31,6 +36,9 @@ export default function PositionRow({
                 {position.type === PositionType.DLP ? "DLP" : "SLP"}
               </span>
             </div>
+          </div>
+          <div>
+
           </div>
         </div>
         <div className="flex items-center md:w-4/5 w-1/2">
@@ -61,6 +69,14 @@ export default function PositionRow({
             >
               Remove
             </button>
+            <span className="ml-3 font-medium text-sm text-neutral-700 flex items-center">
+              {position.status === PositionStatus.LP_POSITION_INCOMPLETE && (
+                "INCOMPLETE"
+              )}
+              {position.status === PositionStatus.LP_POSITION_PENDING && (
+                <Loader sizeInPixels={4} />
+              )}
+            </span>{" "}
           </div>
         </div>
       </div>
