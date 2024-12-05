@@ -16,6 +16,8 @@ import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
 import { parseAssetString } from "@/utils/chain";
+import { PositionType } from "@/hooks/dataTransformers/positionsTransformer";
+import { useLiquidityPositions } from "@/utils/PositionsContext";
 
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;
@@ -44,6 +46,7 @@ export default function RemoveLiquidityModal({
     [pool.asset]
   );
 
+  const { positions, markPositionAsPending } = useLiquidityPositions();
   const inputRef = useRef<HTMLInputElement>(null);
   const [assetAmount, setAssetAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -98,6 +101,7 @@ export default function RemoveLiquidityModal({
       });
 
       if (hash) {
+        markPositionAsPending(pool.asset, PositionType.SLP) // TODO: Update with support for SLP and DLP
         setTimeout(() => {
           setTxHash(hash);
           onClose(true);
@@ -118,9 +122,10 @@ export default function RemoveLiquidityModal({
 
   const assetSymbol = getAssetShortSymbol(pool.asset);
 
-  if (txHash) {
+  if (txHash && positions && positions[pool.asset][PositionType.SLP]) { // TODO: Update with support for SLP and DLP
     return (
       <TransactionConfirmationModal
+        position={positions[pool.asset][PositionType.SLP]} // TODO: Update with support for SLP and DLP
         txHash={txHash}
         onClose={() => {
           setTxHash(null);
