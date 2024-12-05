@@ -48,16 +48,16 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   };
 
   const [walletTokensData, setWalletTokensData] = useState<WalletTokensData>(
-    initialWalletTokensData
+    initialWalletTokensData,
   );
   const [walletBalanceData, setWalletBalanceData] = useState<WalletTokensData>(
-    initialWalletTokensData
+    initialWalletTokensData,
   );
 
   const getERC20TokenInfo = async (
     walletAddress: string,
     provider: any,
-    tokenAddress?: `0x${string}`
+    tokenAddress?: `0x${string}`,
   ) => {
     try {
       if (tokenAddress === "0x") {
@@ -111,7 +111,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
               method: "eth_call",
               params: [{ to: tokenAddress, data: balanceData }, "latest"],
             }),
-          ]
+          ],
         );
         // Decode results
         const name = decodeFunctionResult({
@@ -180,7 +180,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
           } catch (error) {
             console.error(
               `Error fetching native balance for ${chainKey}:`,
-              error
+              error,
             );
           }
         }
@@ -250,7 +250,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     chainKey: ChainKey,
     walletAddress: string,
     provider: any,
-    tokenAddress?: `0x${string}`
+    tokenAddress?: `0x${string}`,
   ): Promise<
     | {
         balance: number;
@@ -269,7 +269,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       method: "eth_chainId",
     });
     const currentChain = EVM_CHAINS.find(
-      ({ chainId }) => chainId == providerChainId
+      ({ chainId }) => chainId == providerChainId,
     );
     if (currentChain?.name !== chainKey) {
       try {
@@ -289,7 +289,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
         if ((err as { code: number }).code === 4902) {
           const chainId = EVM_CHAINS.find(
-            ({ name }) => name == chainKey
+            ({ name }) => name == chainKey,
           )?.chainId;
           const config = getChainConfigById(chainId!);
           const addRequest = {
@@ -311,7 +311,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                 chainKey,
                 walletAddress,
                 provider,
-                tokenAddress
+                tokenAddress,
               );
             }
           }
@@ -322,7 +322,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     const tokenInfo = await getERC20TokenInfo(
       walletAddress,
       provider,
-      tokenAddress
+      tokenAddress,
     );
     if (!tokenInfo) {
       throw new Error("Failed to fetch token info");
@@ -332,7 +332,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
   const getChainConfigById = (chainId: string) => {
     return Object.values(viemChains).find(
-      (chain) => chain.id === Number(chainId)
+      (chain) => chain.id === Number(chainId),
     );
   };
 
@@ -413,7 +413,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                     key as ChainKey,
                     walletsState[key].address,
                     walletsState[key].provider,
-                    token.tokenAddress as `0x${string}`
+                    token.tokenAddress as `0x${string}`,
                   );
                   if (info?.balance) {
                     setWalletBalanceData((prevData) => {
@@ -457,7 +457,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
               if (token.balance === 0) {
                 try {
                   const info = await getRuneBalance(
-                    walletsState[ChainKey.THORCHAIN].address
+                    walletsState[ChainKey.THORCHAIN].address,
                   );
                   if (info) {
                     setWalletBalanceData((prevData) => {
@@ -505,7 +505,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                 try {
                   const info = await getUTXOInfo(
                     key as ChainKey,
-                    walletsState[key as ChainKey].address
+                    walletsState[key as ChainKey].address,
                   );
                   if (info) {
                     setWalletBalanceData((prevData) => {

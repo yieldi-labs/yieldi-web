@@ -61,7 +61,7 @@ export function useLiquidityPosition({
   // Parse asset details
   const [assetChain, assetIdentifier] = useMemo(
     () => parseAssetString(pool.asset),
-    [pool.asset]
+    [pool.asset],
   );
 
   const wallet = walletsState![getChainKeyFromChain(assetChain)];
@@ -76,7 +76,7 @@ export function useLiquidityPosition({
   // Check if it's a native asset
   const isNativeAsset = useMemo(
     () => assetIdentifier.indexOf("-") === -1,
-    [assetIdentifier]
+    [assetIdentifier],
   );
 
   // Get token address for non-native assets
@@ -112,7 +112,8 @@ export function useLiquidityPosition({
       provider: !utxoChain ? wallet?.provider : undefined,
     });
 
-  const getMemberDetails = useCallback( // TODO: Is this function really neccessary ?
+  const getMemberDetails = useCallback(
+    // TODO: Is this function really neccessary ?
     async (address: string, asset: string) => {
       if (!address || !asset) {
         setError("Address and asset are required");
@@ -139,7 +140,7 @@ export function useLiquidityPosition({
         }
 
         const poolPositions = memberResponse.data.pools.filter(
-          (p) => p.pool === asset
+          (p) => p.pool === asset,
         );
 
         if (poolPositions) {
@@ -159,14 +160,14 @@ export function useLiquidityPosition({
         setError(
           err instanceof Error
             ? err.message
-            : "Failed to fetch position details"
+            : "Failed to fetch position details",
         );
         return null;
       } finally {
         setLoading(false);
       }
     },
-    []
+    [],
   );
 
   const addLiquidity = useCallback(
@@ -187,7 +188,7 @@ export function useLiquidityPosition({
         const inboundAddresses = await getInboundAddresses();
         const [assetChain] = parseAssetString(asset);
         const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase()
+          (i) => i.chain === assetChain.toUpperCase(),
         );
         if (!inbound) {
           throw new Error(`No inbound address found for ${assetChain}`);
@@ -199,7 +200,7 @@ export function useLiquidityPosition({
           asset,
           pairedAddress,
           affiliate,
-          feeBps
+          feeBps,
         );
 
         if (wallet.chainType === ChainKey.THORCHAIN) {
@@ -249,7 +250,7 @@ export function useLiquidityPosition({
             tokenAddress,
             parsedAmount,
             memo,
-            expiry
+            expiry,
           );
         } else {
           // Handle native asset deposit
@@ -260,7 +261,7 @@ export function useLiquidityPosition({
             "0x0000000000000000000000000000000000000000",
             parsedAmount,
             memo,
-            expiry
+            expiry,
           );
         }
 
@@ -287,7 +288,7 @@ export function useLiquidityPosition({
       utxoChain,
       addUTXOLiquidity,
       thorChainClient,
-    ]
+    ],
   );
 
   const removeLiquidity = useCallback(
@@ -314,7 +315,7 @@ export function useLiquidityPosition({
         }
 
         const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase()
+          (i) => i.chain === assetChain.toUpperCase(),
         );
 
         if (!inbound) {
@@ -330,7 +331,7 @@ export function useLiquidityPosition({
           undefined,
           undefined,
           percentage,
-          withdrawAsset
+          withdrawAsset,
         );
 
         // Handle Thorchain withdrawals
@@ -373,7 +374,7 @@ export function useLiquidityPosition({
           "0x0000000000000000000000000000000000000000",
           BigInt(minAmountByChain),
           memo,
-          expiry
+          expiry,
         );
 
         await getMemberDetails(address, asset);
@@ -395,7 +396,7 @@ export function useLiquidityPosition({
       removeUTXOLiquidity,
       pool.nativeDecimal,
       thorChainClient,
-    ]
+    ],
   );
 
   return {

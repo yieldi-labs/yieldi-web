@@ -1,5 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { getMemberDetail, getPools, MemberPool, PoolDetail, PoolDetails } from "@/midgard";
+import {
+  getMemberDetail,
+  getPools,
+  MemberPool,
+  PoolDetail,
+  PoolDetails,
+} from "@/midgard";
 import {
   Positions,
   PositionStats,
@@ -36,23 +42,22 @@ export function emptyPositionStats(): PositionStats {
       percentage: "0",
     },
     pool: {} as PoolDetail,
-    memberDetails: {} as MemberPool
+    memberDetails: {} as MemberPool,
   };
 }
 
 export function usePositionStats({
   refetchInterval = 15000,
 }: UsePositionStatsProps) {
-
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     PositionsCache | undefined
   >();
 
   const [addresses, setAddresses] = useState<string[]>([]);
   const { walletsState } = useAppState();
-  
+
   useEffect(() => {
-    const addresses = []
+    const addresses = [];
     for (const key in walletsState!) {
       if (walletsState!.hasOwnProperty(key)) {
         const wallet = walletsState![key];
@@ -67,7 +72,7 @@ export function usePositionStats({
     enabled: addresses.length > 0,
     refetchInterval, // TODO: Dependant on pending positions (transaction pending and block confirmation times of pending chains)
     queryFn: async () => {
-      console.log('New fech with addresses', addresses)
+      console.log("New fech with addresses", addresses);
       const resultPools = await getPools();
       const pools = resultPools.data;
       const result = await getMemberDetail({
@@ -90,7 +95,10 @@ export function usePositionStats({
       );
 
       const newPayload = updatePendingPositions(
-        currentPositionsStats || { positions: genericPositionsDataStructure, pools },
+        currentPositionsStats || {
+          positions: genericPositionsDataStructure,
+          pools,
+        },
         { positions: genericPositionsDataStructure, pools },
       );
       setCurrentPositionsStats(newPayload);
@@ -112,7 +120,7 @@ export function usePositionStats({
         }
 
         if (!updatedPositions.positions[pooldId][type]) {
-          updatedPositions.positions[pooldId][type] = emptyPositionStats()
+          updatedPositions.positions[pooldId][type] = emptyPositionStats();
         } else {
           updatedPositions.positions[pooldId][type] = {
             ...updatedPositions.positions[pooldId][type],
@@ -130,14 +138,17 @@ export function usePositionStats({
     previous: PositionsCache,
     newPayload: PositionsCache,
   ) => {
-    if (Object.entries(previous.positions).length !== Object.entries(newPayload.positions).length) {
+    if (
+      Object.entries(previous.positions).length !==
+      Object.entries(newPayload.positions).length
+    ) {
       return {
         pools: newPayload.pools,
         positions: {
           ...newPayload.positions,
-          ...previous.positions
-        }
-      }
+          ...previous.positions,
+        },
+      };
     }
     Object.entries(previous.positions).forEach(([poolId, positions]) => {
       Object.entries(positions).forEach(([type, position]) => {
@@ -153,7 +164,8 @@ export function usePositionStats({
           ) {
             const updatedPositions = { ...previous };
             updatedPositions.positions[poolId][positionType] = {
-              ...(newPayload.positions[poolId][positionType] || emptyPositionStats())
+              ...(newPayload.positions[poolId][positionType] ||
+                emptyPositionStats()),
             };
             return updatedPositions;
           }

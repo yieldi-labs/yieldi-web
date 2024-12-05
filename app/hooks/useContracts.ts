@@ -12,7 +12,7 @@ import ERC20_ABI from "./erc20.json";
 import ROUTER_ABI from "./routerABI.json";
 
 const MAX_UINT256 = BigInt(
-  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
 );
 
 interface UseContractProps {
@@ -29,7 +29,7 @@ interface TokenMetadata {
 
 async function waitForTransaction(
   provider: any,
-  txHash: string
+  txHash: string,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const checkReceipt = async () => {
@@ -171,7 +171,7 @@ export function useContracts({
         return BigInt(0);
       }
     },
-    [tokenAddress, walletAddress, provider]
+    [tokenAddress, walletAddress, provider],
   );
 
   const approveSpending = useCallback(
@@ -206,7 +206,7 @@ export function useContracts({
         throw new Error(message);
       }
     },
-    [tokenAddress, walletAddress, provider]
+    [tokenAddress, walletAddress, provider],
   );
 
   // Router Functions
@@ -246,7 +246,7 @@ export function useContracts({
         throw new Error(message);
       }
     },
-    [routerAddress, walletAddress, provider]
+    [routerAddress, walletAddress, provider],
   );
 
   const depositWithExpiry = useCallback(
@@ -256,7 +256,7 @@ export function useContracts({
       asset: Address,
       amount: bigint,
       memo: string,
-      expiration: bigint
+      expiration: bigint,
     ) => {
       if (!walletAddress || !provider) {
         throw new Error("Wallet or provider not available");
@@ -293,7 +293,7 @@ export function useContracts({
         throw new Error(message);
       }
     },
-    [walletAddress, provider]
+    [walletAddress, provider],
   );
 
   // Utility functions
@@ -301,14 +301,14 @@ export function useContracts({
     (amount: bigint): string => {
       return formatUnits(amount, tokenMetadata.decimals || 18);
     },
-    [tokenMetadata.decimals]
+    [tokenMetadata.decimals],
   );
 
   const parseAmount = useCallback(
     (amount: string): bigint => {
       return parseUnits(amount, tokenMetadata.decimals || 18);
     },
-    [tokenMetadata.decimals]
+    [tokenMetadata.decimals],
   );
 
   return {

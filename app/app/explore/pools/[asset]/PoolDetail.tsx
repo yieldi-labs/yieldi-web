@@ -119,20 +119,20 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           (positions as Positions)[pool.asset].SLP,
           (positions as Positions)[pool.asset].DLP,
         ]
-          .filter(
-            (position) => position !== null,
-          )
+          .filter((position) => position !== null)
           .reduce((total, position) => {
             position = position as PositionStats;
-            total = total as PositionStats
+            total = total as PositionStats;
             return {
               assetId: total.assetId,
               status: PositionStatus.LP_POSITION_COMPLETE,
               type: total.type,
               deposit: {
                 usd: total.deposit.usd + position.deposit.usd,
-                totalInAsset: total.deposit.totalInAsset + position.deposit.totalInAsset,
-                assetAdded: total.deposit.assetAdded + position.deposit.assetAdded,
+                totalInAsset:
+                  total.deposit.totalInAsset + position.deposit.totalInAsset,
+                assetAdded:
+                  total.deposit.assetAdded + position.deposit.assetAdded,
                 runeAdded: total.deposit.runeAdded + position.deposit.runeAdded,
               },
               gain: {
@@ -149,9 +149,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     if (!positions) return null;
 
     return Object.entries(positions[pool.asset])
-      .filter(
-        ([, position]) => position !== null
-      )
+      .filter(([, position]) => position !== null)
       .map(([, position]) => {
         position = position as PositionStats;
         return (
@@ -175,7 +173,8 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             ${formatNumber(consolidated?.deposit.usd || 0, 2)}
           </div>
           <div className="text-2xl font-medium text-gray-900">
-            {formatNumber(consolidated?.deposit.totalInAsset || 0)} {assetSymbol}
+            {formatNumber(consolidated?.deposit.totalInAsset || 0)}{" "}
+            {assetSymbol}
           </div>
         </div>
       </div>
@@ -197,8 +196,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         <div className="text-gray-700 font-medium text-lg mb-2">POSITIONS</div>
         {positions &&
           positions[pool.asset] &&
-          (positions[pool.asset].SLP ||
-            positions[pool.asset].DLP) && (
+          (positions[pool.asset].SLP || positions[pool.asset].DLP) && (
             <>
               <div className="flex items-center w-full px-3 py-2 text-sm text-center">
                 <div className="md:w-1/5 w-1/2"></div>

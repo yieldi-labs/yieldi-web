@@ -91,7 +91,7 @@ export function formatAddress(a: undefined | null | string) {
 export function formatNumber(
   amount: string | number,
   decimals = 8,
-  decimalsShown = 4
+  decimalsShown = 4,
 ) {
   if (!amount && amount != 0) return "-";
   if (typeof amount !== "number") {
@@ -108,7 +108,7 @@ export async function fetchJson(url: string, options?: object) {
   const res = await fetch(url, options);
   if (!res.ok) {
     throw new Error(
-      "fetchJson: http error: " + res.status + ": " + (await res.text())
+      "fetchJson: http error: " + res.status + ": " + (await res.text()),
     );
   }
   return await res.json();
@@ -128,7 +128,7 @@ function getAtom<V>(a: Atom<V>) {
 export function setAtom<V>(
   a: Atom<V>,
   b: ((prev: V) => V) | Partial<V> | string,
-  c?: any
+  c?: any,
 ): void {
   if (typeof b === "function") {
     a.v = (b as (prev: V) => V)(a.v);
@@ -175,7 +175,7 @@ export const walletClient = viem.createWalletClient({
   transport: viem.custom(
     typeof window === "undefined" || !window.ethereum
       ? { request: async () => undefined }
-      : window.ethereum
+      : window.ethereum,
   ),
 });
 
@@ -298,7 +298,7 @@ interface Utxo {
 export async function bitcoinUtxos(address: string) {
   if (!address) throw new Error("Wallet not connected");
   const utxos: [Utxo] = await fetchJson(
-    `${mempoolUrl}/address/${address}/utxo`
+    `${mempoolUrl}/address/${address}/utxo`,
   );
   const confirmedUTXOs = utxos
     .filter((utxo) => utxo.status.confirmed)
@@ -313,8 +313,8 @@ export async function bitcoinUtxos(address: string) {
       spend = address.match(/^(2|3)/)
         ? btc.p2sh(btc.p2wpkh(pubKey, BITCOIN_NETWORK), BITCOIN_NETWORK)
         : address.match(/^(tb1p|bc1p)/)
-        ? btc.p2tr(pubKey, undefined, BITCOIN_NETWORK, true)
-        : btc.p2wpkh(pubKey, BITCOIN_NETWORK);
+          ? btc.p2tr(pubKey, undefined, BITCOIN_NETWORK, true)
+          : btc.p2wpkh(pubKey, BITCOIN_NETWORK);
     }
     result.push({
       ...spend,
@@ -385,10 +385,10 @@ export const getFormattedPoolTVL = (pool: PoolDetail, runePriceUSD: number) => {
 
 export const getFormattedPoolEarnings = (
   pool: PoolDetail,
-  runePriceUSD: number
+  runePriceUSD: number,
 ) => {
   return addDollarSignAndSuffix(
-    (parseInt(pool.earnings) * runePriceUSD) / DECIMALS
+    (parseInt(pool.earnings) * runePriceUSD) / DECIMALS,
   );
 };
 
@@ -399,7 +399,7 @@ export const calculateVolumeUSD = (pool: PoolDetail, runePriceUSD: number) => {
 
 export const calculateVolumeDepthRatio = (
   pool: PoolDetail,
-  runePriceUSD: number
+  runePriceUSD: number,
 ): number => {
   const volumeUSD = calculateVolumeUSD(pool, runePriceUSD);
   const tvlUSD = calculatePoolTVL(pool, runePriceUSD);
@@ -423,7 +423,7 @@ export const getLogoPath = (asset: string): string => {
 export const getNetworkLogoPath = (assetString: string): string => {
   const asset = assetFromString(assetString);
   const chain = CHAINS.find(
-    (chain) => chain.thorchainIdentifier === asset?.chain.toLowerCase()
+    (chain) => chain.thorchainIdentifier === asset?.chain.toLowerCase(),
   );
   return `https://storage.googleapis.com/token-list-swapkit-dev/images/${chain?.thorchainIdentifier}.${chain?.nativeAsset}.png`;
 };
@@ -482,7 +482,7 @@ export const DECIMALS = 1e8;
 export const calculateGain = async (
   poolAsset: string,
   walletAddress: string,
-  runePriceUSD: number
+  runePriceUSD: number,
 ) => {
   try {
     const [poolResponse, lpResponse] = await Promise.all([

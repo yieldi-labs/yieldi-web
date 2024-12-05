@@ -36,7 +36,7 @@ interface AppStateContextType {
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const AppStateProvider = ({ children }: { children: ReactNode }) => {
@@ -119,7 +119,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType
+                ethConnectors: GetConnectorsReturnType,
               ) => await connectEVMWallet(window.xfi?.ethereum),
 
               [ProviderKey.THORCHAIN]: async () =>
@@ -175,11 +175,11 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType
+                ethConnectors: GetConnectorsReturnType,
               ) => {
                 if (!ethConnectors) return;
                 const connector = ethConnectors.find(
-                  (c) => c.id === WalletKey.METAMASK
+                  (c) => c.id === WalletKey.METAMASK,
                 );
                 if (!connector) return;
                 return await connectEVMWallet(window.ethereum);
@@ -195,11 +195,11 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType
+                ethConnectors: GetConnectorsReturnType,
               ) => {
                 if (!ethConnectors) return;
                 const connector = ethConnectors.find(
-                  (c) => c.id === WalletKey.OKX
+                  (c) => c.id === WalletKey.OKX,
                 );
                 if (!connector) return;
                 return await connectEVMWallet(window.ethereum);
@@ -221,11 +221,11 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType
+                ethConnectors: GetConnectorsReturnType,
               ) => {
                 if (!ethConnectors) return;
                 const connector = ethConnectors.find(
-                  (c) => c.id === WalletKey.PHANTOM
+                  (c) => c.id === WalletKey.PHANTOM,
                 );
                 if (!connector) return;
                 return await connectEVMWallet(window.phantom?.ethereum);
@@ -254,7 +254,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType
+                ethConnectors: GetConnectorsReturnType,
               ) => await connectEVMWallet(window.vultisig?.ethereum),
               [ProviderKey.THORCHAIN]: async () =>
                 await connectUTXOWallet({

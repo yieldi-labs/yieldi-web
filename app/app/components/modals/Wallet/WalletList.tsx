@@ -1,4 +1,3 @@
-
 import Wallet from "./Wallet";
 import { WalletType } from "@/utils/interfaces";
 import { useAppState } from "@/utils/context";

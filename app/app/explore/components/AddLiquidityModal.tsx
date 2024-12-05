@@ -52,7 +52,7 @@ export default function AddLiquidityModal({
   // Parse asset details
   const [assetChain] = useMemo(
     () => parseAssetString(pool.asset),
-    [pool.asset]
+    [pool.asset],
   );
   const chainKey = getChainKeyFromChain(assetChain);
   const selectedWallet =
@@ -142,7 +142,7 @@ export default function AddLiquidityModal({
           const balanceAmount = balance.amount.amount();
           const balanceBigInt = BigInt(balanceAmount.toString());
           const formattedBalance = Number(
-            formatUnits(balanceBigInt, poolNativeDecimal)
+            formatUnits(balanceBigInt, poolNativeDecimal),
           );
           setAssetBalance(formattedBalance);
         })
@@ -154,7 +154,7 @@ export default function AddLiquidityModal({
   useEffect(() => {
     if (!utxoChain && tokenBalance?.value) {
       setAssetBalance(
-        Number(formatUnits(tokenBalance.value, tokenBalance.decimals))
+        Number(formatUnits(tokenBalance.value, tokenBalance.decimals)),
       );
     }
   }, [utxoChain, tokenBalance]);
@@ -293,7 +293,7 @@ export default function AddLiquidityModal({
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
       "px-6 py-2 rounded-full font-medium transition-colors",
-      isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn"
+      isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
     );
 
   const currentAssetPercentage = useMemo(() => {
@@ -308,7 +308,7 @@ export default function AddLiquidityModal({
 
   const isCloseToPercentage = (
     currentPercentage: number,
-    targetPercentage: number
+    targetPercentage: number,
   ) => {
     const tolerance = 0.01;
     if (targetPercentage === 100) {
@@ -347,7 +347,7 @@ export default function AddLiquidityModal({
                   "flex justify-center items-center gap-2 flex-1 py-2 rounded-3xl text-lg",
                   !isDualSided
                     ? "bg-neutral-50 text-neutral-800 shadow-toggle"
-                    : "bg-transparent text-neutral-800 border border-transparent shadow-none"
+                    : "bg-transparent text-neutral-800 border border-transparent shadow-none",
                 )}
                 onClick={() => setIsDualSided(false)}
               >
@@ -358,7 +358,7 @@ export default function AddLiquidityModal({
                   "flex justify-center items-center gap-2 flex-1 py-2 rounded-3xl text-lg",
                   isDualSided
                     ? "bg-neutral-50 text-neutral-800 shadow-toggle"
-                    : "bg-transparent text-neutral-800 border border-transparent shadow-none"
+                    : "bg-transparent text-neutral-800 border border-transparent shadow-none",
                 )}
                 onClick={() => setIsDualSided(true)}
               >
@@ -405,7 +405,7 @@ export default function AddLiquidityModal({
               key={percent}
               onClick={() => handleAssetPercentageClick(percent / 100)}
               className={percentageButtonClasses(
-                isCloseToPercentage(currentAssetPercentage, percent)
+                isCloseToPercentage(currentAssetPercentage, percent),
               )}
               disabled={isBalanceLoading || isSubmitting}
             >
@@ -453,7 +453,7 @@ export default function AddLiquidityModal({
                   key={percent}
                   onClick={() => handleRunePercentageClick(percent / 100)}
                   className={percentageButtonClasses(
-                    isCloseToPercentage(currentRunePercentage, percent)
+                    isCloseToPercentage(currentRunePercentage, percent),
                   )}
                   disabled={isBalanceLoading || isSubmitting}
                 >
@@ -472,12 +472,12 @@ export default function AddLiquidityModal({
           {!selectedWallet?.address
             ? "Connect Wallet"
             : isBalanceLoading
-            ? "Loading..."
-            : isSubmitting
-            ? "Submitting Transaction..."
-            : !isValidAmount && assetAmount
-            ? "Invalid Amount"
-            : "Add"}
+              ? "Loading..."
+              : isSubmitting
+                ? "Submitting Transaction..."
+                : !isValidAmount && assetAmount
+                  ? "Invalid Amount"
+                  : "Add"}
         </button>
       </div>
     </Modal>

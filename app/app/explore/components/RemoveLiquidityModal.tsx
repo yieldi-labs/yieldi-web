@@ -43,7 +43,7 @@ export default function RemoveLiquidityModal({
     useAppState();
   const [assetChain] = useMemo(
     () => parseAssetString(pool.asset),
-    [pool.asset]
+    [pool.asset],
   );
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
@@ -101,7 +101,7 @@ export default function RemoveLiquidityModal({
       });
 
       if (hash) {
-        markPositionAsPending(pool.asset, PositionType.SLP) // TODO: Update with support for SLP and DLP
+        markPositionAsPending(pool.asset, PositionType.SLP); // TODO: Update with support for SLP and DLP
         setTimeout(() => {
           setTxHash(hash);
           onClose(true);
@@ -122,7 +122,8 @@ export default function RemoveLiquidityModal({
 
   const assetSymbol = getAssetShortSymbol(pool.asset);
 
-  if (txHash && positions && positions[pool.asset][PositionType.SLP]) { // TODO: Update with support for SLP and DLP
+  if (txHash && positions && positions[pool.asset][PositionType.SLP]) {
+    // TODO: Update with support for SLP and DLP
     return (
       <TransactionConfirmationModal
         position={positions[pool.asset][PositionType.SLP]} // TODO: Update with support for SLP and DLP
@@ -171,7 +172,7 @@ export default function RemoveLiquidityModal({
               Balance:{" "}
               {formatNumber(
                 positionAssetAmount,
-                parseFloat(pool.nativeDecimal)
+                parseFloat(pool.nativeDecimal),
               )}{" "}
               ($
               {formatNumber(positionAssetUsdValue, DECIMALS.USD)})
@@ -188,7 +189,7 @@ export default function RemoveLiquidityModal({
                 "px-6 py-2 rounded-full font-medium transition-colors",
                 isPercentageMatch(percent)
                   ? "bg-secondaryBtn text-white"
-                  : "bg-white text-secondaryBtn"
+                  : "bg-white text-secondaryBtn",
               )}
               disabled={isSubmitting}
             >

@@ -130,7 +130,7 @@ const Component: FC = () => {
                             </div>
                           </div>
                         );
-                      }
+                      },
                     )}
                 </div>
               );

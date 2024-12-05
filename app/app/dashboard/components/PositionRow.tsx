@@ -37,9 +37,7 @@ export default function PositionRow({
               </span>
             </div>
           </div>
-          <div>
-
-          </div>
+          <div></div>
         </div>
         <div className="flex items-center md:w-4/5 w-1/2">
           <div className="md:px-3 py-3 md:py-0 whitespace-nowrap flex-1 w-1/2 md:w-1/5">
@@ -70,9 +68,8 @@ export default function PositionRow({
               Remove
             </button>
             <span className="ml-3 font-medium text-sm text-neutral-700 flex items-center">
-              {position.status === PositionStatus.LP_POSITION_INCOMPLETE && (
-                "INCOMPLETE"
-              )}
+              {position.status === PositionStatus.LP_POSITION_INCOMPLETE &&
+                "INCOMPLETE"}
               {position.status === PositionStatus.LP_POSITION_PENDING && (
                 <Loader sizeInPixels={4} />
               )}

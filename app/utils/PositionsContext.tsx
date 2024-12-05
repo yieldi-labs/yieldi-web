@@ -1,11 +1,10 @@
 "use client";
-import React, {
-  createContext,
-  ReactNode,
-  useContext,
-} from "react";
+import React, { createContext, ReactNode, useContext } from "react";
 import { usePositionStats } from "@/hooks/usePositionStats";
-import { Positions, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
+import {
+  Positions,
+  PositionType,
+} from "@/hooks/dataTransformers/positionsTransformer";
 import { PoolDetails } from "@/midgard";
 interface LiquidityPositionsContextType {
   positions: Positions | undefined;
@@ -26,7 +25,7 @@ export const LiquidityPositionsProvider = ({
 }) => {
   const { positions, pools, markPositionAsPending, isPending, error } =
     usePositionStats({});
-  
+
   return (
     <LiquidityPositionsContext.Provider
       value={{
