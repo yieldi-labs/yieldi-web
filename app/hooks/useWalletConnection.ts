@@ -13,6 +13,7 @@ import {
 } from "@/utils/interfaces";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { useConnectors } from "wagmi";
+import { useCallback } from "react";
 import { useAppState } from "@/utils/context";
 
 export function useWalletConnection() {
@@ -83,7 +84,7 @@ export function useWalletConnection() {
     return null;
   };
 
-  const getAllNetworkAddressesFromLocalStorage = (): string[] => {
+  const getAllNetworkAddressesFromLocalStorage = useCallback((): string[] => {
     const addresses: string[] = [];
     if (typeof window !== "undefined" && localStorage) {
       for (const config of CHAINS) {
@@ -95,7 +96,7 @@ export function useWalletConnection() {
       }
     }
     return addresses;
-  };
+  }, []);
 
   const hasThorAddressInLocalStorage = () => {
     if (typeof window !== "undefined" && localStorage) {

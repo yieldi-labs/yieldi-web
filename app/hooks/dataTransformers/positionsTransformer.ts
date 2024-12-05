@@ -19,36 +19,29 @@ export enum PositionType {
 }
 
 export interface PositionStats {
-  // TODO: Review data structure
   assetId: string;
   type: PositionType;
   status: PositionStatus;
   deposit: {
     usd: number;
-    asset: number; // TODO: Rename: Total Asset OR REMOVE IF NOT NECCESSARY
-    assetAdded?: number;
-    runeAdded?: number;
+    totalInAsset: number;
+    assetAdded: number;
+    runeAdded: number;
   };
   gain: {
     usd: number;
-    asset?: number;
+    asset: number;
     percentage: string;
   };
-  pool?: PoolDetail;
-  liquidityUnits?: string;
-  memberDetails?: MemberPool;
-}
-
-export interface PositionData {
-  status: PositionStatus;
-  data: PositionStats;
+  pool: PoolDetail;
+  memberDetails: MemberPool;
 }
 
 export interface Positions {
   [pool: string]: {
-    DLP: PositionData | null;
-    SLP: PositionData | null;
-    SAVER: PositionData | null;
+    DLP: PositionStats | null;
+    SLP: PositionStats | null;
+    SAVER: PositionStats | null;
   };
 }
 
@@ -147,14 +140,12 @@ export const positionsTransformer = (
     }
 
     result[key][type] = {
-      status: determineStatus(memberPool), // TODO: Remove status from this level
-      data: {
         assetId: memberPool.pool,
         type: determinePositionType(memberPool),
-        status: determineStatus(memberPool),
+        status: determinePositionStatus(memberPool),
         deposit: {
           usd: totalAddedValueInUsd.amount().toNumber(),
-          asset: totalAddedValueInAsset.amount().toNumber(),
+          totalInAsset: totalAddedValueInAsset.amount().toNumber(),
           assetAdded,
           runeAdded,
         },
@@ -168,9 +159,7 @@ export const positionsTransformer = (
             .toFixed(4),
         },
         pool,
-        liquidityUnits: memberPool.liquidityUnits,
         memberDetails: memberPool,
-      },
     };
   });
 
@@ -188,7 +177,7 @@ const determinePositionType = (memberPool: MemberPool): PositionType => {
   return PositionType.SLP;
 };
 
-const determineStatus = (memberPool: MemberPool) => {
+const determinePositionStatus = (memberPool: MemberPool) => {
   if (Number(memberPool.assetPending) > 0 || Number(memberPool.runePending) > 0)
     return PositionStatus.LP_POSITION_INCOMPLETE;
   return PositionStatus.LP_POSITION_COMPLETE;

@@ -1,8 +1,14 @@
 import React from "react";
 
-const Loader: React.FC = () => {
+interface LoaderProps {
+  sizeInPixels?: number
+}
+
+const Loader: React.FC<LoaderProps> = ({
+  sizeInPixels = 16
+}) => {
   return (
-    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary"></div>
+    <div className={`animate-spin rounded-full h-${sizeInPixels} w-${sizeInPixels} border-b-4 border-primary`}></div>
   );
 };
 

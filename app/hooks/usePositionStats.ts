@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getMemberDetail, getPools, PoolDetail, PoolDetails } from "@/midgard";
+import { getMemberDetail, getPools, MemberPool, PoolDetail, PoolDetails } from "@/midgard";
 import {
   Positions,
   PositionStats,
@@ -27,7 +27,7 @@ export function emptyPositionStats(): PositionStats {
     type: PositionType.SLP,
     deposit: {
       usd: 0,
-      asset: 0,
+      totalInAsset: 0,
       assetAdded: 0,
       runeAdded: 0,
     },
@@ -36,6 +36,8 @@ export function emptyPositionStats(): PositionStats {
       asset: 0,
       percentage: "0",
     },
+    pool: {} as PoolDetail,
+    memberDetails: {} as MemberPool
   };
 }
 
@@ -98,8 +100,6 @@ export function usePositionStats({
       setCurrentPositionsStats((prev) => {
         const updatedPositions = { ...prev };
 
-        console.log("Udpdating position");
-
         if (
           !updatedPositions.positions ||
           !updatedPositions.positions[pooldId]
@@ -108,10 +108,7 @@ export function usePositionStats({
         }
 
         if (!updatedPositions.positions[pooldId][type]) {
-          updatedPositions.positions[pooldId][type] = {
-            data: emptyPositionStats(),
-            status: PositionStatus.LP_POSITION_PENDING,
-          };
+          updatedPositions.positions[pooldId][type] = emptyPositionStats()
         } else {
           updatedPositions.positions[pooldId][type] = {
             ...updatedPositions.positions[pooldId][type],
@@ -132,12 +129,11 @@ export function usePositionStats({
     Object.entries(previous.positions).forEach(([poolId, positions]) => {
       Object.entries(positions).forEach(([type, position]) => {
         if (position?.status === PositionStatus.LP_POSITION_PENDING) {
-          const positionType = type as PositionType; // TODO: Improve typing
-          const previousData = previous.positions[poolId]?.[positionType]?.data;
-          const currentData =
-            newPayload.positions[poolId]?.[positionType]?.data;
+          const positionType = type as PositionType;
+          const previousData = previous.positions[poolId]?.[positionType];
+          const currentData = newPayload.positions[poolId]?.[positionType];
 
-          // TODO: Preview deep comparison
+          // TODO: Review deep comparison
           if (
             currentData &&
             JSON.stringify(previousData?.memberDetails) !==
@@ -145,13 +141,7 @@ export function usePositionStats({
           ) {
             const updatedPositions = { ...previous };
             updatedPositions.positions[poolId][positionType] = {
-              ...(newPayload.positions[poolId][positionType] || {
-                data: emptyPositionStats(),
-              }), // TODO: Improve this default case
-              status:
-                currentData.liquidityUnits !== "0" // TODO: Create real logic
-                  ? PositionStatus.LP_POSITION_COMPLETE
-                  : position.status,
+              ...(newPayload.positions[poolId][positionType] || emptyPositionStats())
             };
             return updatedPositions;
           }

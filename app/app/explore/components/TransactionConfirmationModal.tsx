@@ -1,12 +1,12 @@
 import Loader from "@/app/components/Loader";
 import Modal from "@/app/modal";
 import {
-  PositionData,
+  PositionStats,
   PositionStatus,
 } from "@/hooks/dataTransformers/positionsTransformer";
 
 interface TransactionConfirmationModalProps {
-  position: PositionData | null;
+  position: PositionStats | null;
   txHash: string;
   onClose: () => void;
 }
@@ -18,8 +18,6 @@ export default function TransactionConfirmationModal({
 }: TransactionConfirmationModalProps) {
   const thorchainUrl = `https://thorchain.net/tx/${txHash}`;
   const runescanUrl = `https://runescan.io/tx/${txHash}`;
-
-  console.log("position", position);
 
   const ExternalLinkIcon = () => (
     <svg
@@ -45,7 +43,7 @@ export default function TransactionConfirmationModal({
       <div className="p-6 flex flex-col items-center">
         {/* Success Icon */}
         {position?.status === PositionStatus.LP_POSITION_PENDING ? (
-          <div className="mb-6">
+          <div className="mb-3">
             <Loader />
           </div>
         ) : (

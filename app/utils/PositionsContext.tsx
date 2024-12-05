@@ -7,13 +7,12 @@ import React, {
   useState,
 } from "react";
 import { usePositionStats } from "@/hooks/usePositionStats";
-import { Positions } from "@/hooks/dataTransformers/positionsTransformer";
+import { Positions, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 import { PoolDetails } from "@/midgard";
-import { PositionType } from "@/app/dashboard/types";
 import { useWalletConnection } from "@/hooks";
 
 interface LiquidityPositionsContextType {
-  positions: Positions | undefined; // TODO: Unify types location related with positions
+  positions: Positions | undefined;
   pools: PoolDetails | undefined;
   markPositionAsPending: (pooldId: string, type: PositionType) => void;
   isPending: boolean;
@@ -34,7 +33,7 @@ export const LiquidityPositionsProvider = ({
 
   useEffect(() => {
     setAddresses(getAllNetworkAddressesFromLocalStorage());
-  }, []);
+  }, [getAllNetworkAddressesFromLocalStorage]);
 
   const { positions, pools, markPositionAsPending, isPending, error } =
     usePositionStats({ addresses });

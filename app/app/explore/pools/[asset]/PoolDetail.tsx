@@ -20,11 +20,9 @@ import { isSupportedChain, parseAssetString } from "@/utils/chain";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
 import PositionRow from "@/app/dashboard/components/PositionRow";
 import {
-  PositionData,
   Positions,
   PositionStats,
   PositionStatus,
-  PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 
@@ -123,28 +121,26 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           (positions as Positions)[pool.asset].SAVER,
         ]
           .filter(
-            (position) =>
-              position?.data !== null && position?.data !== undefined,
+            (position) => position !== null,
           )
           .reduce((total, position) => {
-            position = position as PositionData;
+            position = position as PositionStats;
             return {
               assetId: total.assetId,
               status: PositionStatus.LP_POSITION_COMPLETE,
               type: total.type,
               deposit: {
-                usd: total.deposit.usd + position.data.deposit.usd,
-                asset: total.deposit.asset + position.data.deposit.asset,
-                // assetAdded: total.deposit.assetAdded + position.data.deposit.assetAdded, // TODO: Uncomment thisa
-                // runeAdded: total.deposit.runeAdded + position.data.deposit.runeAdded,
+                usd: total.deposit.usd + position.deposit.usd,
+                totalInAsset: total.deposit.totalInAsset + position.deposit.totalInAsset,
+                assetAdded: total.deposit.assetAdded + position.deposit.assetAdded,
+                runeAdded: total.deposit.runeAdded + position.deposit.runeAdded,
               },
               gain: {
-                usd: total.gain.usd + position.data.gain.usd,
-                // asset: total.gain.asset + position.data.gain.asset,
+                usd: total.gain.usd + position.gain.usd,
+                asset: total.gain.asset + position.gain.asset,
                 percentage: total.gain.percentage,
               },
               pool: total.pool,
-              liquidityUnits: total.liquidityUnits,
               memberDetails: total.memberDetails,
             };
           }, emptyPositionStats());
@@ -154,29 +150,16 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
     return Object.entries(positions[pool.asset])
       .filter(
-        ([, position]) =>
-          position?.data !== null && position?.data !== undefined,
+        ([, position]) => position !== null
       )
-      .map(([type, position]) => {
-        position = position as PositionData;
+      .map(([, position]) => {
+        position = position as PositionStats;
         return (
           <PositionRow
-            key={position.data.liquidityUnits}
-            position={{
-              assetId: pool.asset,
-              status: position.status,
-              type: type as PositionType,
-              deposit: {
-                usd: position.data.deposit.usd,
-                asset: position.data.deposit.asset,
-              },
-              gain: {
-                usd: position.data.gain.usd,
-                percentage: position.data.gain.percentage,
-              },
-            }}
+            key={position.memberDetails.liquidityUnits}
+            position={position}
             onAdd={() => {}}
-            onRemove={() => handleRemove(position.data)}
+            onRemove={() => handleRemove(position)}
             hideAddButton={true}
           />
         );
@@ -192,7 +175,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             ${formatNumber(consolidated?.deposit.usd || 0, 2)}
           </div>
           <div className="text-2xl font-medium text-gray-900">
-            {formatNumber(consolidated?.deposit.asset || 0)} {assetSymbol}
+            {formatNumber(consolidated?.deposit.totalInAsset || 0)} {assetSymbol}
           </div>
         </div>
       </div>

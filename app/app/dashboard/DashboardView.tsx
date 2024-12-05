@@ -8,34 +8,26 @@ import { PoolDetail } from "@/midgard";
 import PositionsPlaceholder from "./components/PositionsPlaceholder";
 import AddLiquidityModal from "../explore/components/AddLiquidityModal";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
-import { useQuery } from "@tanstack/react-query";
-import { getPools } from "@/midgard";
 import {
-  PositionData,
   PositionStats,
 } from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
+import Loader from "../components/Loader";
+import { useAppState } from "@/utils/context";
 
 export default function DashboardView() {
   const [selectedPool, setSelectedPool] = useState<PoolDetail>();
 
-  const { positions, isPending } = useLiquidityPositions();
+  const { positions, pools, isPending } = useLiquidityPositions()
+  const { wallet } = useAppState()
 
-  const { data: poolsData } = useQuery({
-    queryKey: ["pools"],
-    queryFn: async () => {
-      const result = await getPools();
-      return result.data;
-    },
-  });
-
-  const allPositionsArray = useMemo(() => {
+  const allPositionsArray = useMemo(() => { // TODO: Centralized this on provider
     if (!positions) return [emptyPositionStats()];
     return Object.entries(positions).reduce(
       (pools: PositionStats[], [, types]) => {
         const chainPools = Object.entries(types)
           .filter(([, position]) => position)
-          .map(([, position]) => (position as PositionData).data);
+          .map(([, position]) => (position as PositionStats));
         return pools.concat(chainPools);
       },
       [],
@@ -86,15 +78,17 @@ export default function DashboardView() {
         <div className="w-2/3 text-neutral-800 text-sm font-normal leading-tight mb-7">
           Manage your active positions and track your earnings.
         </div>
-        {positions ? (
+        {positions && wallet ? (
           isPending && !positions ? (
-            "Loading..."
+            <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl md:mx-16">
+              <Loader />
+            </div>
           ) : (
             <PositionsList
               positions={allPositionsArray}
               onAdd={(assetId) => {
                 setSelectedPool(
-                  poolsData?.find((pool) => pool.asset === assetId),
+                  pools?.find((pool) => pool.asset === assetId),
                 );
               }}
               onRemove={() => {}}
