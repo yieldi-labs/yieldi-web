@@ -96,14 +96,26 @@ This token is needed to be given for previous page.
 
 export const AddLiquidityMetadataSchema = {
   properties: {
+    affiliateAddress: {
+      description: "Affiliate fee address of the addLiquidity",
+      type: "string",
+    },
+    affiliateFee: {
+      description: "Int64 (Basis points, 0-1000, where 1000=10%)",
+      type: "string",
+    },
     liquidityUnits: {
       description: `Int64, amount of liquidity units assigned to the member as result of the liquidity
 deposit
 `,
       type: "string",
     },
+    memo: {
+      description: "Transaction memo of the addLiquidity action",
+      type: "string",
+    },
   },
-  required: ["liquidityUnits"],
+  required: ["liquidityUnits", "memo", "affiliateAddress", "affiliateFee"],
   type: "object",
 } as const;
 
@@ -1750,6 +1762,97 @@ Type of Transaction type:
   type: "object",
 } as const;
 
+export const ReserveHistorySchema = {
+  properties: {
+    intervals: {
+      $ref: "#/components/schemas/ReserveIntervals",
+    },
+    meta: {
+      $ref: "#/components/schemas/ReserveMeta",
+    },
+  },
+  required: ["meta", "intervals"],
+  type: "object",
+} as const;
+
+export const ReserveIntervalsSchema = {
+  items: {
+    $ref: "#/components/schemas/ReserveItem",
+  },
+  type: "array",
+} as const;
+
+export const ReserveItemSchema = {
+  properties: {
+    endTime: {
+      description: "Int64, The end time of bucket in unix timestamp",
+      type: "string",
+    },
+    gasFeeOutbound: {
+      description: "Int64(e8), fee made from outbound",
+      type: "string",
+    },
+    gasReimbursement: {
+      description:
+        "Int64(e8), RUNE paid to the pool for compensating the gas fees",
+      type: "string",
+    },
+    networkFee: {
+      description: `Int64(e8), RUNE paid to the system on deposit, send messages
+`,
+      type: "string",
+    },
+    startTime: {
+      description: "Int64, The beginning time of bucket in unix timestamp",
+      type: "string",
+    },
+  },
+  required: [
+    "startTime",
+    "endTime",
+    "gasFeeOutbound",
+    "gasReimbursement",
+    "networkFee",
+  ],
+  type: "object",
+} as const;
+
+export const ReserveMetaSchema = {
+  properties: {
+    endTime: {
+      description: "Int64, The end time of bucket in unix timestamp",
+      type: "string",
+    },
+    gasFeeOutbound: {
+      description: `Int64(e8), fee made from outbound
+`,
+      type: "string",
+    },
+    gasReimbursement: {
+      description: `Int64(e8), RUNE paid to the pool for compensating the gas fees
+`,
+      type: "string",
+    },
+    networkFee: {
+      description: `Int64(e8), RUNE paid to the system on deposit, send messages
+`,
+      type: "string",
+    },
+    startTime: {
+      description: "Int64, The beginning time of bucket in unix timestamp",
+      type: "string",
+    },
+  },
+  required: [
+    "startTime",
+    "endTime",
+    "gasFeeOutbound",
+    "gasReimbursement",
+    "networkFee",
+  ],
+  type: "object",
+} as const;
+
 export const ReverseTHORNamesSchema = {
   items: {
     description: "THORName name",
@@ -2446,6 +2549,10 @@ export const SwapMetadataSchema = {
       description: "Int64 (Basis points, 0-1000, where 1000=10%)",
       type: "string",
     },
+    inPriceUSD: {
+      description: "in asset price usd at the first interval",
+      type: "string",
+    },
     isStreamingSwap: {
       description: "indicate whether this action was streaming",
       example: true,
@@ -2461,6 +2568,10 @@ export const SwapMetadataSchema = {
     },
     networkFees: {
       $ref: "#/components/schemas/NetworkFees",
+    },
+    outPriceUSD: {
+      description: "out asset price usd at the first interval",
+      type: "string",
     },
     streamingSwapMeta: {
       $ref: "#/components/schemas/StreamingSwapMeta",
@@ -2496,6 +2607,8 @@ Type of Transaction:
     "memo",
     "isStreamingSwap",
     "txType",
+    "inPriceUSD",
+    "outPriceUSD",
   ],
   type: "object",
 } as const;

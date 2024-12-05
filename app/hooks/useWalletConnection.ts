@@ -60,12 +60,16 @@ export function useWalletConnection() {
     return localStorage.getItem(`wallet-${thorchainIdentifier}-address`);
   };
 
-  const getAllNetworkAddressesFromLocalStorage = () => {
-    return chainConfig
-      .map((config) =>
-        localStorage.getItem(`wallet-${config.thorchainIdentifier}-address`),
-      )
-      .filter((address) => address != undefined);
+  const getAllNetworkAddressesFromLocalStorage = (): string[] => {
+    const addresses: string[] = [];
+    for (const config of chainConfig) {
+      const address = localStorage.getItem(
+        `wallet-${config.thorchainIdentifier}-address`,
+      );
+      if (!address) continue;
+      addresses.push(address);
+    }
+    return addresses;
   };
 
   //TODO: this is a temporary solution to check if thor address is in local storage
