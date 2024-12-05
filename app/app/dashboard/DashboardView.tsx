@@ -19,8 +19,8 @@ export default function DashboardView() {
   const [selectedPool, setSelectedPool] = useState<PoolDetail>();
 
   const { positions, pools, isPending } = useLiquidityPositions()
-  const { wallet } = useAppState()
-
+  const { walletsState } = useAppState()
+  const numberConnectedWallets = Object.keys(walletsState || {}).length;
   const allPositionsArray = positions && Object.entries(positions).reduce(
     (pools: PositionStats[], [, types]) => {
       const chainPools = Object.entries(types)
@@ -75,7 +75,7 @@ export default function DashboardView() {
         <div className="w-2/3 text-neutral-800 text-sm font-normal leading-tight mb-7">
           Manage your active positions and track your earnings.
         </div>
-        {positions && wallet ? (
+        {positions && numberConnectedWallets > 0 ? (
           isPending && !positions ? (
             <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl md:mx-16">
               <Loader />

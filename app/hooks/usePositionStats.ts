@@ -7,11 +7,11 @@ import {
   positionsTransformer,
   PositionType,
 } from "./dataTransformers/positionsTransformer";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useAppState } from "@/utils/context";
+import { pools } from "@/thornode";
 
 interface UsePositionStatsProps {
-  addresses: string[];
-  specificPool?: PoolDetail;
   refetchInterval?: number;
 }
 
@@ -42,19 +42,33 @@ export function emptyPositionStats(): PositionStats {
 }
 
 export function usePositionStats({
-  addresses,
-  specificPool,
   refetchInterval = 15000,
 }: UsePositionStatsProps) {
+
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     PositionsCache | undefined
   >();
 
+  const [addresses, setAddresses] = useState<string[]>([]);
+  const { walletsState } = useAppState();
+  
+  useEffect(() => {
+    const addresses = []
+    for (const key in walletsState!) {
+      if (walletsState!.hasOwnProperty(key)) {
+        const wallet = walletsState![key];
+        addresses.push(wallet.address);
+      }
+    }
+    setAddresses(addresses);
+  }, [walletsState]);
+
   const { isFetching: isPending, error } = useQuery({
-    queryKey: ["position-stats", addresses, specificPool?.asset],
+    queryKey: ["position-stats", addresses],
     enabled: addresses.length > 0,
     refetchInterval, // TODO: Dependant on pending positions (transaction pending and block confirmation times of pending chains)
     queryFn: async () => {
+      console.log('New fech with addresses', addresses)
       const resultPools = await getPools();
       const pools = resultPools.data;
       const result = await getMemberDetail({
@@ -75,23 +89,14 @@ export function usePositionStats({
         result.data?.pools,
         pools,
       );
-      let positions = genericPositionsDataStructure;
-
-      if (specificPool) {
-        positions = {
-          [specificPool.asset]: {
-            ...genericPositionsDataStructure[specificPool.asset],
-          },
-        };
-      }
 
       const newPayload = updatePendingPositions(
-        currentPositionsStats || { positions, pools },
-        { positions, pools },
+        currentPositionsStats || { positions: genericPositionsDataStructure, pools },
+        { positions: genericPositionsDataStructure, pools },
       );
       setCurrentPositionsStats(newPayload);
 
-      return { positions, pools };
+      return { positions: genericPositionsDataStructure, pools };
     },
   });
 
@@ -126,6 +131,15 @@ export function usePositionStats({
     previous: PositionsCache,
     newPayload: PositionsCache,
   ) => {
+    if (Object.entries(previous.positions).length !== Object.entries(newPayload.positions).length) {
+      return {
+        pools: newPayload.pools,
+        positions: {
+          ...newPayload.positions,
+          ...previous.positions
+        }
+      }
+    }
     Object.entries(previous.positions).forEach(([poolId, positions]) => {
       Object.entries(positions).forEach(([type, position]) => {
         if (position?.status === PositionStatus.LP_POSITION_PENDING) {

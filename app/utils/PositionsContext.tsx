@@ -3,14 +3,10 @@ import React, {
   createContext,
   ReactNode,
   useContext,
-  useEffect,
-  useState,
 } from "react";
 import { usePositionStats } from "@/hooks/usePositionStats";
 import { Positions, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 import { PoolDetails } from "@/midgard";
-import { useWalletConnection } from "@/hooks";
-
 interface LiquidityPositionsContextType {
   positions: Positions | undefined;
   pools: PoolDetails | undefined;
@@ -28,16 +24,9 @@ export const LiquidityPositionsProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [addresses, setAddresses] = useState<string[]>([]);
-  const { getAllNetworkAddressesFromLocalStorage } = useWalletConnection();
-
-  useEffect(() => {
-    setAddresses(getAllNetworkAddressesFromLocalStorage());
-  }, [getAllNetworkAddressesFromLocalStorage]);
-
   const { positions, pools, markPositionAsPending, isPending, error } =
-    usePositionStats({ addresses });
-
+    usePositionStats({});
+  
   return (
     <LiquidityPositionsContext.Provider
       value={{
