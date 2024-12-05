@@ -8,8 +8,9 @@ import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { getPool, MemberPool, PoolDetail } from "@/midgard";
 import { liquidityProvider } from "@/thornode";
-import { assetFromString } from "@xchainjs/xchain-util";
 import { CHAINS } from "@/utils/wallet/constants";
+import { assetFromString, baseToAsset } from "@xchainjs/xchain-util";
+import { Client as LitecoinClient } from "@xchainjs/xchain-litecoin";
 
 export interface Wallet {
   chain: string;
@@ -286,6 +287,17 @@ export async function bitcoinBalance(address: string) {
     (data.chain_stats.funded_txo_sum - data.chain_stats.spent_txo_sum) /
     DECIMALS
   );
+}
+
+export async function litecoinBalance(address: string) {
+  const ltcClient = new LitecoinClient();
+  const balance = await ltcClient.getBalance(address);
+  return parseFloat(baseToAsset(balance[0].amount).amount().toString());
+}
+
+export async function litecoinFees() {
+  const ltcClient = new LitecoinClient();
+  return await ltcClient.getFeeRates();
 }
 
 interface Utxo {
