@@ -10,14 +10,17 @@ import AddLiquidityModal from "../explore/components/AddLiquidityModal";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
 import { useQuery } from "@tanstack/react-query";
 import { getPools } from "@/midgard";
-import { PositionData, PositionStats } from "@/hooks/dataTransformers/positionsTransformer";
+import {
+  PositionData,
+  PositionStats,
+} from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 
 export default function DashboardView() {
   const [selectedPool, setSelectedPool] = useState<PoolDetail>();
 
   const { positions, isPending } = useLiquidityPositions();
-  
+
   const { data: poolsData } = useQuery({
     queryKey: ["pools"],
     queryFn: async () => {
@@ -27,14 +30,17 @@ export default function DashboardView() {
   });
 
   const allPositionsArray = useMemo(() => {
-    if (!positions) return [emptyPositionStats()]
-    return Object.entries(positions).reduce((pools: PositionStats[], [, types]) => {
-      const chainPools = Object.entries(types)
-        .filter(([, position]) => position)
-        .map(([, position]) => (position as PositionData).data);
-      return pools.concat(chainPools);
-    }, []);
-  }, [positions])
+    if (!positions) return [emptyPositionStats()];
+    return Object.entries(positions).reduce(
+      (pools: PositionStats[], [, types]) => {
+        const chainPools = Object.entries(types)
+          .filter(([, position]) => position)
+          .map(([, position]) => (position as PositionData).data);
+        return pools.concat(chainPools);
+      },
+      [],
+    );
+  }, [positions]);
 
   // Calculate totals
   const totalValue = allPositionsArray?.reduce((total, position) => {

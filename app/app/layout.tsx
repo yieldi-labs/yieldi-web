@@ -26,7 +26,7 @@ export default function RootLayout({
                 ]}
                 buttons={[{ component: <WalletButton /> }]}
               />
-                <div className="p-4 mt-[100px] md:mt-[130px]">{children}</div>
+              <div className="p-4 mt-[100px] md:mt-[130px]">{children}</div>
               <WalletModal />
               <WalletDrawer />
             </LiquidityPositionsProvider>

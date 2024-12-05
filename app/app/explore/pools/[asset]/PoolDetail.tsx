@@ -17,11 +17,15 @@ import RemoveLiquidityModal from "@/app/explore/components/RemoveLiquidityModal"
 import { TopCard } from "@/app/components/TopCard";
 import { useAppState } from "@/utils/context";
 import { isSupportedChain, parseAssetString } from "@/utils/chain";
-import {
-  emptyPositionStats,
-} from "@/hooks/usePositionStats";
+import { emptyPositionStats } from "@/hooks/usePositionStats";
 import PositionRow from "@/app/dashboard/components/PositionRow";
-import { PositionData, Positions, PositionStats, PositionStatus, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
+import {
+  PositionData,
+  Positions,
+  PositionStats,
+  PositionStatus,
+  PositionType,
+} from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 
 interface PoolDetailProps {
@@ -110,38 +114,51 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   };
 
   // TODO: Improve default value handling
-  const consolidated = !positions || !(positions as Positions)[pool.asset] ? emptyPositionStats() : [(positions as Positions)[pool.asset].SLP, (positions as Positions)[pool.asset].DLP, (positions as Positions)[pool.asset].SAVER]
-  .filter(position => position?.data !== null && position?.data !== undefined)  
-  .reduce((total, position) => {
-    position = position as PositionData
-    return {
-      assetId: total.assetId,
-      status: PositionStatus.LP_POSITION_COMPLETE,
-      type: total.type,
-      deposit: {
-        usd: total.deposit.usd + position.data.deposit.usd,
-        asset: total.deposit.asset + position.data.deposit.asset,
-        // assetAdded: total.deposit.assetAdded + position.data.deposit.assetAdded, // TODO: Uncomment thisa
-        // runeAdded: total.deposit.runeAdded + position.data.deposit.runeAdded,
-      },
-      gain: {
-        usd: total.gain.usd + position.data.gain.usd,
-        // asset: total.gain.asset + position.data.gain.asset,
-        percentage: total.gain.percentage,
-      },
-      pool: total.pool,
-      liquidityUnits: total.liquidityUnits,
-      memberDetails: total.memberDetails,
-    };
-  }, emptyPositionStats());
+  const consolidated =
+    !positions || !(positions as Positions)[pool.asset]
+      ? emptyPositionStats()
+      : [
+          (positions as Positions)[pool.asset].SLP,
+          (positions as Positions)[pool.asset].DLP,
+          (positions as Positions)[pool.asset].SAVER,
+        ]
+          .filter(
+            (position) =>
+              position?.data !== null && position?.data !== undefined,
+          )
+          .reduce((total, position) => {
+            position = position as PositionData;
+            return {
+              assetId: total.assetId,
+              status: PositionStatus.LP_POSITION_COMPLETE,
+              type: total.type,
+              deposit: {
+                usd: total.deposit.usd + position.data.deposit.usd,
+                asset: total.deposit.asset + position.data.deposit.asset,
+                // assetAdded: total.deposit.assetAdded + position.data.deposit.assetAdded, // TODO: Uncomment thisa
+                // runeAdded: total.deposit.runeAdded + position.data.deposit.runeAdded,
+              },
+              gain: {
+                usd: total.gain.usd + position.data.gain.usd,
+                // asset: total.gain.asset + position.data.gain.asset,
+                percentage: total.gain.percentage,
+              },
+              pool: total.pool,
+              liquidityUnits: total.liquidityUnits,
+              memberDetails: total.memberDetails,
+            };
+          }, emptyPositionStats());
 
   const renderPositionsDetails = () => {
     if (!positions) return null;
 
     return Object.entries(positions[pool.asset])
-      .filter(([, position]) => position?.data !== null && position?.data !== undefined)
+      .filter(
+        ([, position]) =>
+          position?.data !== null && position?.data !== undefined,
+      )
       .map(([type, position]) => {
-        position = position as PositionData
+        position = position as PositionData;
         return (
           <PositionRow
             key={position.data.liquidityUnits}
@@ -195,18 +212,22 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
 
       <div className="mb-4 md:mb-8 bg-white rounded-xl w-full p-3">
         <div className="text-gray-700 font-medium text-lg mb-2">POSITIONS</div>
-        {positions && positions[pool.asset] && (positions[pool.asset].SLP || positions[pool.asset].DLP || positions[pool.asset].SAVER) && (
-          <>
-            <div className="flex items-center w-full px-3 py-2 text-sm text-center">
-              <div className="md:w-1/5 w-1/2"></div>
-              <div className="md:w-1/5 w-1/2">Gain (%)</div>
-              <div className="md:w-1/5 w-1/2">Deposit</div>
-              <div className="md:w-1/5 w-1/2">Gain</div>
-              <div className="md:w-2/5 w-1/2"></div>
-            </div>
-            {renderPositionsDetails()}
-          </>
-        )}
+        {positions &&
+          positions[pool.asset] &&
+          (positions[pool.asset].SLP ||
+            positions[pool.asset].DLP ||
+            positions[pool.asset].SAVER) && (
+            <>
+              <div className="flex items-center w-full px-3 py-2 text-sm text-center">
+                <div className="md:w-1/5 w-1/2"></div>
+                <div className="md:w-1/5 w-1/2">Gain (%)</div>
+                <div className="md:w-1/5 w-1/2">Deposit</div>
+                <div className="md:w-1/5 w-1/2">Gain</div>
+                <div className="md:w-2/5 w-1/2"></div>
+              </div>
+              {renderPositionsDetails()}
+            </>
+          )}
       </div>
     </>
   );

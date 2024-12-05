@@ -71,7 +71,7 @@ export default function AddLiquidityModal({
     error: runeBalanceError,
   } = useRuneBalance({ wallet: selectedWallet });
 
-  const { positions, markPositionAsPending } = useLiquidityPositions()
+  const { positions, markPositionAsPending } = useLiquidityPositions();
 
   const utxoChain = useMemo(() => {
     const chain = pool.asset.split(".")[0].toLowerCase();
@@ -265,7 +265,7 @@ export default function AddLiquidityModal({
         pairedAddress,
       });
 
-      markPositionAsPending(pool.asset, type)
+      markPositionAsPending(pool.asset, type);
 
       if (hash) {
         setTimeout(() => {
@@ -319,12 +319,12 @@ export default function AddLiquidityModal({
     return Math.abs(currentPercentage - targetPercentage) <= tolerance;
   };
 
-  const type = isDualSided ? PositionType.DLP : PositionType.SLP
+  const type = isDualSided ? PositionType.DLP : PositionType.SLP;
   if (showConfirmation && txHash && positions && positions[pool.asset][type]) {
     return (
       <TransactionConfirmationModal
         position={positions[pool.asset][type]}
-        txHash={txHash || ''}
+        txHash={txHash || ""}
         onClose={() => {
           setShowConfirmation(false);
           setTxHash(null);
