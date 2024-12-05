@@ -133,7 +133,6 @@ export function usePositionStats({
           const previousData = previous.positions[poolId]?.[positionType];
           const currentData = newPayload.positions[poolId]?.[positionType];
 
-          // TODO: Review deep comparison
           if (
             currentData &&
             JSON.stringify(previousData?.memberDetails) !==

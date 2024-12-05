@@ -7,6 +7,7 @@ import {
   PositionStatus,
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
+import Loader from "@/app/components/Loader";
 
 interface PositionsRow {
   position: PositionStats;
@@ -34,14 +35,10 @@ export default function PositionRow({
               <span className="hidden md:block ml-3 font-medium text-sm text-neutral-700">
                 {position.type === PositionType.DLP ? "DLP" : "SLP"}
               </span>
-              <span className="hidden md:block ml-3 font-medium text-sm text-neutral-700">
-                {position.status === PositionStatus.LP_POSITION_COMPLETE ? (
-                  <></>
-                ) : (
-                  "PENDING"
-                )}
-              </span>{" "}
             </div>
+          </div>
+          <div>
+
           </div>
         </div>
         <div className="flex items-center md:w-4/5 w-1/2">
@@ -72,6 +69,14 @@ export default function PositionRow({
             >
               Remove
             </button>
+            <span className="ml-3 font-medium text-sm text-neutral-700 flex items-center">
+              {position.status === PositionStatus.LP_POSITION_INCOMPLETE && (
+                "INCOMPLETE"
+              )}
+              {position.status === PositionStatus.LP_POSITION_PENDING && (
+                <Loader sizeInPixels={4} />
+              )}
+            </span>{" "}
           </div>
         </div>
       </div>

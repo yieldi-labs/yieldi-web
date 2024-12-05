@@ -1,19 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { addDollarSignAndSuffix } from "../utils";
 import DashboardHighlightsCard from "./components/DashboardHighlightsCards";
 import PositionsList from "./components/PositionsList";
 import { PoolDetail } from "@/midgard";
 import PositionsPlaceholder from "./components/PositionsPlaceholder";
 import AddLiquidityModal from "../explore/components/AddLiquidityModal";
-import { emptyPositionStats } from "@/hooks/usePositionStats";
 import {
   PositionStats,
 } from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 import Loader from "../components/Loader";
 import { useAppState } from "@/utils/context";
+import { emptyPositionStats } from "@/hooks/usePositionStats";
 
 export default function DashboardView() {
   const [selectedPool, setSelectedPool] = useState<PoolDetail>();
@@ -21,18 +21,15 @@ export default function DashboardView() {
   const { positions, pools, isPending } = useLiquidityPositions()
   const { wallet } = useAppState()
 
-  const allPositionsArray = useMemo(() => { // TODO: Centralized this on provider
-    if (!positions) return [emptyPositionStats()];
-    return Object.entries(positions).reduce(
-      (pools: PositionStats[], [, types]) => {
-        const chainPools = Object.entries(types)
-          .filter(([, position]) => position)
-          .map(([, position]) => (position as PositionStats));
-        return pools.concat(chainPools);
-      },
-      [],
-    );
-  }, [positions]);
+  const allPositionsArray = positions && Object.entries(positions).reduce(
+    (pools: PositionStats[], [, types]) => {
+      const chainPools = Object.entries(types)
+        .filter(([, position]) => position)
+        .map(([, position]) => (position as PositionStats));
+      return pools.concat(chainPools);
+    },
+    [],
+  ) || [emptyPositionStats()];
 
   // Calculate totals
   const totalValue = allPositionsArray?.reduce((total, position) => {
