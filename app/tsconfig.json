@@ -2,6 +2,7 @@
   "extends": "../shared/tsconfig.json",
   "compilerOptions": {
     "skipLibCheck": true,
+    "downlevelIteration": true,
     "plugins": [
       {
         "name": "next"

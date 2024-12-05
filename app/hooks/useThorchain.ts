@@ -3,7 +3,6 @@ import {
   Client as ThorchainClient,
   defaultClientConfig,
 } from "@xchainjs/xchain-thorchain";
-import { Network } from "@xchainjs/xchain-client";
 import {
   assetToBase,
   assetAmount,
@@ -11,8 +10,7 @@ import {
   AssetType,
 } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
-import { WalletState } from "./useWalletConnection";
-import { DECIMALS } from "@/app/utils";
+import { WalletState } from "@/utils/interfaces";
 
 // Define RUNE asset
 const AssetRUNE: Asset = {
@@ -42,7 +40,6 @@ export interface TxResult {
 export function useThorchain({ wallet }: UseThorchainProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   // Initialize Thorchain client with proper configuration
   const client = useMemo(() => {
     if (!wallet?.provider) return null;

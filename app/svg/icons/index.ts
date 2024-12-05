@@ -1,2 +1,9 @@
-export { default as Wallet } from "./Wallet";
-export { default as ChevronLeft } from "./ChevronLeft";
+export { default as ChevronLeft } from "@/svg/icons/ChevronLeft";
+export { default as Copy } from "@/svg/icons/Copy";
+export { default as Exit } from "@/svg/icons/Exit";
+export { default as Eye } from "@/svg/icons/Eye";
+export { default as LinkExternal } from "@/svg/icons/LinkExternal";
+export { default as Plus } from "@/svg/icons/Plus";
+export { default as QRCode } from "@/svg/icons/QRCode";
+export { default as Synchronize } from "@/svg/icons/Synchronize";
+export { default as Wallet } from "@/svg/icons/Wallet";

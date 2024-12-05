@@ -1,70 +1,87 @@
-import { useCallback, useMemo } from "react";
-import { chainConfig } from "@/utils/wallet/chainConfig";
+import {
+  ChainKey,
+  SUPPORTED_WALLETS,
+  WalletKey,
+} from "@/utils/wallet/constants";
+import { ChainType, WalletType } from "@/utils/interfaces";
+import { useMemo, useCallback, useEffect } from "react";
+import { useAppState } from "@/utils/context";
 
 interface UseWalletListReturn {
-  detected: WalletOption[];
-  undetected: WalletOption[];
-  isWalletValidForChain: (walletName: string) => boolean;
+  detected: WalletType[];
+  undetected: WalletType[];
+  isWalletValidForChain: (wallet: WalletType) => boolean;
+  isChainSupportedByWallet: (
+    chain: ChainType,
+    selectedWallet?: WalletType
+  ) => boolean;
 }
 
-export function useWalletList(
-  selectedChain: string | null,
-  detectedWallets: WalletOption[],
-): UseWalletListReturn {
+export function useWalletList(): UseWalletListReturn {
+  const { selectedChains, selectedWallet } = useAppState();
   const { detected, undetected } = useMemo(() => {
-    const detected: WalletOption[] = [];
-    const undetected: WalletOption[] = [];
-    const processedWallets = new Set();
+    const detected: WalletType[] = [];
+    const undetected: WalletType[] = [];
+    const processedWallets = new Set<WalletKey>();
 
-    const processWallet = (wallet: WalletOption) => {
-      const baseId = wallet.id.split("-")[0];
-      if (processedWallets.has(baseId)) return;
-
-      if (wallet.id === "walletConnect") {
+    const processWallet = (wallet: WalletType) => {
+      if (processedWallets.has(wallet.id)) return;
+      if (wallet.id === WalletKey.WALLETCONNECT) {
         undetected.push(wallet);
-        processedWallets.add(baseId);
-        return;
-      }
-
-      const isDetected = detectedWallets.some((w) => {
-        const detectedBaseId = w.id.split("-")[0];
-        return detectedBaseId === baseId;
-      });
-
-      if (isDetected) {
+      } else if (wallet.isAvailable) {
         detected.push(wallet);
       } else {
         undetected.push(wallet);
       }
-      processedWallets.add(baseId);
+      processedWallets.add(wallet.id);
     };
 
-    if (selectedChain) {
-      const chainWallets =
-        chainConfig.find((chain) => selectedChain === chain.id)?.wallets || [];
-      chainWallets.forEach(processWallet);
-    } else {
-      chainConfig.forEach((chain) => {
-        chain.wallets.forEach(processWallet);
-      });
-    }
+    const walletList: WalletType[] = Object.values(
+      SUPPORTED_WALLETS
+    ) as WalletType[];
+    const commonWallets = selectedChains.length
+      ? walletList.filter((wallet) => {
+          return selectedChains.every((chain) =>
+            wallet.chains.includes(chain.name)
+          );
+        })
+      : walletList;
+    commonWallets.forEach(processWallet);
 
     return { detected, undetected };
-  }, [selectedChain, detectedWallets]);
+  }, [selectedChains]);
 
   const isWalletValidForChain = useCallback(
-    (walletName: string): boolean => {
-      if (!selectedChain) return true;
-      const chainWallets =
-        chainConfig.find((chain) => selectedChain === chain.id)?.wallets || [];
-      return chainWallets.some((w) => w.name === walletName);
+    (wallet: WalletType): boolean => {
+      if (selectedChains.length) {
+        const selectedChainKeys = new Set(
+          selectedChains.map((chain) => chain.name)
+        );
+        return wallet.chains.some((chainKey: ChainKey) =>
+          selectedChainKeys.has(chainKey)
+        );
+      } else {
+        return true;
+      }
     },
-    [selectedChain],
+    [selectedChains]
+  );
+
+  const isChainSupportedByWallet = useCallback(
+    (chain: ChainType): boolean => {
+      if (!selectedWallet) {
+        return true;
+      }
+      const isSupported = selectedWallet.chains.includes(chain.name);
+      return isSupported;
+    },
+    [selectedWallet, selectedChains]
   );
 
   return {
     detected,
     undetected,
     isWalletValidForChain,
+    isChainSupportedByWallet,
   };
 }

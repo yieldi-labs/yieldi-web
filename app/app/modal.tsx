@@ -11,7 +11,7 @@ export default function Modal({
 }) {
   return (
     <div
-      className="fixed z-10 inset-0 w-auto h-full overflow-y-auto bg-[rgb(0,0,0,0.5)] flex justify-center text-left"
+      className="fixed z-30 inset-0 w-auto h-full overflow-y-auto bg-[rgb(0,0,0,0.5)] flex justify-center text-left"
       onClick={onClose}
     >
       <div

@@ -14,11 +14,11 @@ import { useQuery } from "@tanstack/react-query";
 import { getPools } from "@/midgard";
 
 export default function DashboardView() {
-  const { wallet } = useAppState();
+  const { walletsState } = useAppState();
   const { getAllNetworkAddressesFromLocalStorage } = useWalletConnection();
   const [selectedPool, setSelectedPool] = useState<PoolDetail>();
 
-  const addresses = wallet ? getAllNetworkAddressesFromLocalStorage() : [];
+  const addresses = walletsState ? getAllNetworkAddressesFromLocalStorage() : [];
   const { positions, isPending } = usePositionStats({ addresses });
 
   const { data: poolsData } = useQuery({

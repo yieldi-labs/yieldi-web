@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import Image from "next/image";
 import { NumberFormatValues, NumericFormat } from "react-number-format";
 import BigNumber from "bignumber.js";
@@ -15,6 +15,7 @@ import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
+import { parseAssetString } from "@/utils/chain";
 
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;
@@ -33,17 +34,22 @@ export default function RemoveLiquidityModal({
   position,
   onClose,
 }: RemoveLiquidityModalProps) {
-  const { wallet } = useAppState();
   const { error: liquidityError, removeLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal } = useAppState();
+  const { toggleWalletModal, walletsState, getChainKeyFromChain } =
+    useAppState();
+  const [assetChain] = useMemo(
+    () => parseAssetString(pool.asset),
+    [pool.asset]
+  );
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [assetAmount, setAssetAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const chainKey = getChainKeyFromChain(assetChain);
+  const selectedWallet = walletsState![chainKey];
   const { assetAdded: positionAssetAmount } = getPositionDetails(position);
   const positionAssetUsdValue = new BigNumber(pool.assetPriceUSD)
     .times(positionAssetAmount)
@@ -77,7 +83,7 @@ export default function RemoveLiquidityModal({
   };
 
   const handleRemoveLiquidity = async () => {
-    if (!wallet?.address) {
+    if (!selectedWallet?.address) {
       toggleWalletModal();
       return;
     }
@@ -88,7 +94,7 @@ export default function RemoveLiquidityModal({
       const hash = await removeLiquidity({
         asset: pool.asset,
         percentage,
-        address: wallet.address,
+        address: selectedWallet.address,
       });
 
       if (hash) {
@@ -160,7 +166,7 @@ export default function RemoveLiquidityModal({
               Balance:{" "}
               {formatNumber(
                 positionAssetAmount,
-                parseFloat(pool.nativeDecimal),
+                parseFloat(pool.nativeDecimal)
               )}{" "}
               ($
               {formatNumber(positionAssetUsdValue, DECIMALS.USD)})
@@ -177,7 +183,7 @@ export default function RemoveLiquidityModal({
                 "px-6 py-2 rounded-full font-medium transition-colors",
                 isPercentageMatch(percent)
                   ? "bg-secondaryBtn text-white"
-                  : "bg-white text-secondaryBtn",
+                  : "bg-white text-secondaryBtn"
               )}
               disabled={isSubmitting}
             >

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { NumberFormatValues, NumericFormat } from "react-number-format";
 import Modal from "@/app/modal";
-import { PoolDetail as IPoolDetail } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
   getAssetShortSymbol,
@@ -12,6 +11,7 @@ import {
   formatNumber,
   DECIMALS,
 } from "@/app/utils";
+import { PoolDetail as IPoolDetail } from "@/midgard";
 import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
@@ -21,6 +21,9 @@ import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
 import { useRuneBalance, useWalletConnection } from "@/hooks";
 import { isEVMAddress } from "@/utils/chain";
+
+import { parseAssetString } from "@/utils/chain";
+import { ChainKey } from "@/utils/wallet/constants";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -36,19 +39,22 @@ export default function AddLiquidityModal({
   onClose,
 }: AddLiquidityModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { wallet } = useAppState();
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal } = useAppState();
+  const { toggleWalletModal, walletsState, getChainKeyFromChain } =
+    useAppState();
   const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } =
     useWalletConnection();
-  const {
-    runeBalance,
-    loading: runeBalanceLoading,
-    error: runeBalanceError,
-  } = useRuneBalance({ wallet });
 
+  // Parse asset details
+  const [assetChain] = useMemo(
+    () => parseAssetString(pool.asset),
+    [pool.asset]
+  );
+  const chainKey = getChainKeyFromChain(assetChain);
+  const selectedWallet =
+    walletsState && walletsState[chainKey] ? walletsState[chainKey] : null;
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -57,6 +63,11 @@ export default function AddLiquidityModal({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDualSided, setIsDualSided] = useState(false);
+  const {
+    runeBalance,
+    loading: runeBalanceLoading,
+    error: runeBalanceError,
+  } = useRuneBalance({ wallet: selectedWallet });
 
   const utxoChain = useMemo(() => {
     const chain = pool.asset.split(".")[0].toLowerCase();
@@ -69,7 +80,7 @@ export default function AddLiquidityModal({
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
 
-  if (!wallet?.provider) {
+  if (!selectedWallet?.provider) {
     throw new Error("Wallet provider not found, please connect your wallet.");
   }
 
@@ -79,7 +90,7 @@ export default function AddLiquidityModal({
     error: utxoError,
   } = useUTXO({
     chain: utxoChain as "BTC" | "DOGE",
-    wallet: utxoChain ? wallet : null,
+    wallet: utxoChain ? selectedWallet : null,
   });
 
   const poolViemAddress = !utxoChain
@@ -96,7 +107,7 @@ export default function AddLiquidityModal({
     loadMetadata,
   } = useContracts({
     tokenAddress,
-    provider: !utxoChain ? wallet?.provider : undefined,
+    provider: !utxoChain ? selectedWallet?.provider : undefined,
   });
 
   useEffect(() => {
@@ -104,32 +115,42 @@ export default function AddLiquidityModal({
   }, []);
 
   useEffect(() => {
-    if (!utxoChain && wallet?.provider && isEVMAddress(wallet.address)) {
+    if (
+      !utxoChain &&
+      selectedWallet?.provider &&
+      isEVMAddress(selectedWallet.address)
+    ) {
       loadMetadata();
     }
-  }, [utxoChain, wallet?.provider, wallet?.address, loadMetadata, pool.asset]);
+  }, [
+    utxoChain,
+    selectedWallet?.provider,
+    selectedWallet?.address,
+    loadMetadata,
+    pool.asset,
+  ]);
 
   useEffect(() => {
-    if (utxoChain && wallet?.address) {
+    if (utxoChain && selectedWallet?.address) {
       setBalanceLoading(true);
-      getUTXOBalance(wallet.address)
+      getUTXOBalance(selectedWallet.address)
         .then((balance) => {
           const balanceAmount = balance.amount.amount();
           const balanceBigInt = BigInt(balanceAmount.toString());
           const formattedBalance = Number(
-            formatUnits(balanceBigInt, poolNativeDecimal),
+            formatUnits(balanceBigInt, poolNativeDecimal)
           );
           setAssetBalance(formattedBalance);
         })
         .catch(console.error)
         .finally(() => setBalanceLoading(false));
     }
-  }, [utxoChain, wallet?.address, getUTXOBalance, poolNativeDecimal]);
+  }, [utxoChain, selectedWallet?.address, getUTXOBalance, poolNativeDecimal]);
 
   useEffect(() => {
     if (!utxoChain && tokenBalance?.value) {
       setAssetBalance(
-        Number(formatUnits(tokenBalance.value, tokenBalance.decimals)),
+        Number(formatUnits(tokenBalance.value, tokenBalance.decimals))
       );
     }
   }, [utxoChain, tokenBalance]);
@@ -193,7 +214,7 @@ export default function AddLiquidityModal({
   ]);
 
   const handleAddLiquidity = async () => {
-    if (!wallet?.address) {
+    if (!selectedWallet?.address) {
       toggleWalletModal();
       return;
     }
@@ -221,9 +242,9 @@ export default function AddLiquidityModal({
       if (isDualSided) {
         if (parsedRuneAmount === 0 || Number.isNaN(parsedRuneAmount)) {
           pairedAddress =
-            getNetworkAddressFromLocalStorage("thor") || undefined;
+            getNetworkAddressFromLocalStorage(ChainKey.THORCHAIN) || undefined;
         } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
-          const identifier = pool.asset.split(".")[0].toLowerCase();
+          const identifier = getChainKeyFromChain(pool.asset.split(".")[0]);
           pairedAddress =
             getNetworkAddressFromLocalStorage(identifier) || undefined;
         }
@@ -266,7 +287,7 @@ export default function AddLiquidityModal({
   const percentageButtonClasses = (isActive: boolean) =>
     twMerge(
       "px-6 py-2 rounded-full font-medium transition-colors",
-      isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
+      isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn"
     );
 
   const currentAssetPercentage = useMemo(() => {
@@ -281,7 +302,7 @@ export default function AddLiquidityModal({
 
   const isCloseToPercentage = (
     currentPercentage: number,
-    targetPercentage: number,
+    targetPercentage: number
   ) => {
     const tolerance = 0.01;
     if (targetPercentage === 100) {
@@ -304,7 +325,6 @@ export default function AddLiquidityModal({
       />
     );
   }
-
   return (
     <Modal onClose={() => onClose(false)}>
       <div className="p-2 w-full">
@@ -319,7 +339,7 @@ export default function AddLiquidityModal({
                   "flex justify-center items-center gap-2 flex-1 py-2 rounded-3xl text-lg",
                   !isDualSided
                     ? "bg-neutral-50 text-neutral-800 shadow-toggle"
-                    : "bg-transparent text-neutral-800 border border-transparent shadow-none",
+                    : "bg-transparent text-neutral-800 border border-transparent shadow-none"
                 )}
                 onClick={() => setIsDualSided(false)}
               >
@@ -330,7 +350,7 @@ export default function AddLiquidityModal({
                   "flex justify-center items-center gap-2 flex-1 py-2 rounded-3xl text-lg",
                   isDualSided
                     ? "bg-neutral-50 text-neutral-800 shadow-toggle"
-                    : "bg-transparent text-neutral-800 border border-transparent shadow-none",
+                    : "bg-transparent text-neutral-800 border border-transparent shadow-none"
                 )}
                 onClick={() => setIsDualSided(true)}
               >
@@ -377,7 +397,7 @@ export default function AddLiquidityModal({
               key={percent}
               onClick={() => handleAssetPercentageClick(percent / 100)}
               className={percentageButtonClasses(
-                isCloseToPercentage(currentAssetPercentage, percent),
+                isCloseToPercentage(currentAssetPercentage, percent)
               )}
               disabled={isBalanceLoading || isSubmitting}
             >
@@ -425,7 +445,7 @@ export default function AddLiquidityModal({
                   key={percent}
                   onClick={() => handleRunePercentageClick(percent / 100)}
                   className={percentageButtonClasses(
-                    isCloseToPercentage(currentRunePercentage, percent),
+                    isCloseToPercentage(currentRunePercentage, percent)
                   )}
                   disabled={isBalanceLoading || isSubmitting}
                 >
@@ -441,15 +461,15 @@ export default function AddLiquidityModal({
           disabled={!isValidAmount || isBalanceLoading || isSubmitting}
           className="w-full bg-primary text-black font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {!wallet?.address
+          {!selectedWallet?.address
             ? "Connect Wallet"
             : isBalanceLoading
-              ? "Loading..."
-              : isSubmitting
-                ? "Submitting Transaction..."
-                : !isValidAmount && assetAmount
-                  ? "Invalid Amount"
-                  : "Add"}
+            ? "Loading..."
+            : isSubmitting
+            ? "Submitting Transaction..."
+            : !isValidAmount && assetAmount
+            ? "Invalid Amount"
+            : "Add"}
         </button>
       </div>
     </Modal>

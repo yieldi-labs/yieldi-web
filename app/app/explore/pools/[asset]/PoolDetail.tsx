@@ -31,13 +31,20 @@ interface PoolDetailProps {
 }
 
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
-  const { wallet, toggleWalletModal } = useAppState();
+  const { walletsState, toggleWalletModal, getChainKeyFromChain } =
+    useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
   const [selectedPosition, setSelectedPosition] =
     useState<PositionStats | null>(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  // Get chain from pool asset
+  const [assetChain] = parseAssetString(pool.asset);
+  const isChainSupported = isSupportedChain(assetChain);
+  const chainKey = getChainKeyFromChain(assetChain);
+  const wallet =
+    walletsState && walletsState[chainKey] ? walletsState![chainKey] : null;
 
   const addresses = wallet ? [wallet.address] : [];
   const { positions, isPending, error } = usePositionStats({
@@ -45,10 +52,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     specificPool: pool,
     refetchInterval: 5000,
   });
-
-  // Get chain from pool asset
-  const [assetChain] = parseAssetString(pool.asset);
-  const isChainSupported = isSupportedChain(assetChain);
 
   useEffect(() => {
     if (!initialLoadComplete && !isPending) {
@@ -78,7 +81,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
   };
 
   const renderActionButton = () => {
-    if (!wallet?.address) {
+    if (!wallet) {
       return (
         <button
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 hover:opacity-50 transition-opacity"

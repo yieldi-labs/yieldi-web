@@ -1,192 +1,150 @@
-import { useState, useEffect } from "react";
-import { detectWallets } from "@/utils/wallet/detectedWallets";
-import { chainConfig } from "@/utils/wallet/chainConfig";
-import { useConnectors, useSwitchChain } from "wagmi";
+import { useConnectors } from "wagmi";
+import {
+  ChainKey,
+  CHAINS,
+  ProviderKey,
+  WalletKey,
+} from "@/utils/wallet/constants";
+import {
+  ChainType,
+  ConnectedWalletsState,
+  WalletType,
+} from "@/utils/interfaces";
+import { GetConnectorsReturnType } from "wagmi/actions";
 import { useAppState } from "@/utils/context";
 
-export interface WalletState {
-  provider: any;
-  address: string;
-  network: string;
-}
-
 export function useWalletConnection() {
-  const { switchChain } = useSwitchChain();
   const ethConnectors = useConnectors();
-  const [selectedChain, setSelectedChain] = useState<string | null>("bitcoin");
-  const [detectedWallets, setDetectedWallets] = useState<WalletOption[]>([]);
-  const { toggleWalletModal, setWalletState } = useAppState();
+  const { setWalletsState, toggleWalletModal, selectedChains, selectedWallet } =
+    useAppState();
 
-  useEffect(() => {
-    const wallets = detectWallets(ethConnectors);
-    const walletsWithIcons = wallets
-      .map((detectedWallet) => {
-        for (const chain of chainConfig) {
-          const matchingWallet = chain.wallets.find(
-            (w) => w.id === detectedWallet.id,
-          );
-          if (matchingWallet) {
-            return {
-              ...detectedWallet,
-              icon: matchingWallet.icon,
-              name: matchingWallet.name,
-              downloadUrl: matchingWallet.downloadUrl,
-            };
-          }
-        }
-        return null;
-      })
-      .filter((w): w is NonNullable<typeof w> => w !== null);
-
-    setDetectedWallets(walletsWithIcons);
-  }, []);
-
-  // TODO: this is a temporary solution to save the thorchain address to local storage
-  // when multi-chain wallet connection is implemented, this should be replaced
-  const saveNetworkAddressToLocalStorage = (
-    network: string,
-    address: string,
+  const handleProviderConnection = async (
+    wallet: WalletType,
+    chain: ChainType,
+    ethConnectors: GetConnectorsReturnType
   ) => {
-    let thorchainIdentifier = "";
-    chainConfig.forEach((chain) => {
-      if (chain.thorchainIdentifier === network) {
-        thorchainIdentifier = chain.thorchainIdentifier;
-      }
-    });
-    localStorage.setItem(`wallet-${thorchainIdentifier}-address`, address);
+    if (!wallet.chainConnect[chain.providerType])
+      throw new Error(`Chain ${chain.name}  Not Supported!`);
+    const connectedWallet =
+      chain.providerType === ProviderKey.EVM
+        ? await wallet.chainConnect[chain.providerType]!(ethConnectors)
+        : await wallet.chainConnect[chain.providerType]!();
+    if (!connectedWallet) return;
+    const provider = connectedWallet.provider;
+    let chainId = null;
+    if (chain.providerType === ProviderKey.EVM) {
+      chainId = await connectedWallet.provider.request({
+        method: "eth_chainId",
+      });
+    }
+    return {
+      provider,
+      address: connectedWallet.address,
+      chainId,
+    };
+  };
+  const updateWalletState = (
+    prevState: ConnectedWalletsState,
+    walletId: WalletKey,
+    providerType: ProviderKey,
+    chainType: ChainKey,
+    provider: any,
+    address: string,
+    chainId?: string
+  ): ConnectedWalletsState => {
+    return {
+      ...prevState,
+      [chainType]: {
+        provider,
+        walletId,
+        address,
+        chainType,
+        providerType,
+        chainId,
+      },
+    };
   };
 
-  const getNetworkAddressFromLocalStorage = (thorchainIdentifier: string) => {
-    return localStorage.getItem(`wallet-${thorchainIdentifier}-address`);
+  const saveNetworkAddressToLocalStorage = (
+    chainKey: ChainKey,
+    address: string
+  ) => {
+    if (typeof window !== "undefined" && localStorage) {
+      localStorage.setItem(`wallet-${chainKey}-address`, address);
+    }
+  };
+
+  const getNetworkAddressFromLocalStorage = (chainKey: ChainKey) => {
+    if (typeof window !== "undefined" && localStorage) {
+      return localStorage.getItem(`wallet-${chainKey}-address`);
+    }
+    return null;
   };
 
   const getAllNetworkAddressesFromLocalStorage = (): string[] => {
     const addresses: string[] = [];
-    for (const config of chainConfig) {
-      const address = localStorage.getItem(
-        `wallet-${config.thorchainIdentifier}-address`,
-      );
-      if (!address) continue;
-      addresses.push(address);
+    if (typeof window !== "undefined" && localStorage) {
+      for (const config of CHAINS) {
+        const address = localStorage.getItem(
+          `wallet-${config.thorchainIdentifier}-address`
+        );
+        if (!address) continue;
+        addresses.push(address);
+      }
     }
     return addresses;
   };
 
-  //TODO: this is a temporary solution to check if thor address is in local storage
-  // when multi-chain wallet connection is implemented, this should be replaced
-  // by a method that checks if the user has a connected wallet for THORChain.
   const hasThorAddressInLocalStorage = () => {
-    return !!localStorage.getItem("wallet-thor-address");
+    if (typeof window !== "undefined" && localStorage) {
+      return !!localStorage.getItem(`wallet-${ChainKey.THORCHAIN}-address`);
+    }
+    return false;
   };
 
-  const handleConnect = async (wallet: WalletOption) => {
-    if (!selectedChain) {
-      console.error("No chain selected.");
+  const handleConnect = async (wallet: WalletType) => {
+    if (!selectedChains.length) {
+      console.error("No chains selected.");
       return;
     }
 
     try {
-      const chainIdentifiers: Record<string, string> = {
-        solana: "solana",
-        thorchain: "thorchain",
-        litecoin: "ltc",
-        dogecoin: "doge",
-        bitcoincash: "bch",
-        bitcoin: "utxo",
-      };
-
-      const detectedWalletForChain = detectedWallets.find((w) => {
-        const identifier = chainIdentifiers[selectedChain];
-
-        if (!identifier) {
-          return w.id.split("-")[0] === wallet.id.split("-")[0];
-        }
-
-        return (
-          (w.id.includes(identifier) || wallet.id.includes(identifier)) &&
-          w.id === wallet.id
-        );
-      });
-
-      if (!detectedWalletForChain) {
+      if (!wallet.isAvailable) {
         window.open(wallet.downloadUrl, "_blank");
         return;
       }
 
-      const selectedChainConfig = chainConfig.find(
-        (chain) => chain.id === selectedChain,
-      );
-
-      const isWalletConnect =
-        detectedWalletForChain.id.includes("walletConnect");
-      const isNonEVM = detectedWalletForChain.id.includes("-");
-      const isVultisig = detectedWalletForChain.id.includes("vultisig");
-      const connectedWallet = await detectedWalletForChain.connect();
-
-      if (isWalletConnect) {
-        saveNetworkAddressToLocalStorage(
-          selectedChainConfig?.thorchainIdentifier!,
-          connectedWallet.address,
+      if (!selectedWallet) return;
+      for (const chain of selectedChains) {
+        const connection = await handleProviderConnection(
+          wallet,
+          chain,
+          ethConnectors
         );
-        setWalletState({
-          provider: connectedWallet.provider,
-          address: connectedWallet.address,
-          network: selectedChain,
-        });
-        toggleWalletModal();
-        return;
+        if (!connection) continue;
+        saveNetworkAddressToLocalStorage(chain.name, connection.address);
+        setWalletsState((prevState) =>
+          updateWalletState(
+            prevState,
+            selectedWallet.id,
+            chain.providerType,
+            chain.name,
+            connection.provider,
+            connection.address,
+            connection.chainId
+          )
+        );
       }
 
-      const provider =
-        isVultisig || isNonEVM
-          ? connectedWallet.provider
-          : await connectedWallet.provider.getProvider();
-
-      const vultiChainId = isVultisig
-        ? await connectedWallet.provider.request({
-            method: "eth_chainId",
-          })
-        : undefined;
-
-      const chainId = isVultisig
-        ? vultiChainId
-        : isNonEVM
-          ? undefined
-          : await connectedWallet.provider.getChainId();
-
-      if (selectedChainConfig?.chainId) {
-        if (chainId !== selectedChainConfig.chainId) {
-          if (connectedWallet.provider.id === "xdefi") {
-            await provider.request({
-              method: "wallet_switchEthereumChain",
-              params: [{ chainId: selectedChainConfig.chainId }],
-            });
-          }
-
-          switchChain({ chainId: selectedChainConfig.chainId });
-        }
-      }
-
-      saveNetworkAddressToLocalStorage(
-        selectedChainConfig?.thorchainIdentifier!,
-        connectedWallet.address,
-      );
-      setWalletState({
-        provider: provider,
-        address: connectedWallet.address,
-        network: selectedChain,
-      });
       toggleWalletModal();
     } catch (error) {
-      console.error(`Error connecting to ${wallet.name}:`, error);
+      console.error(`Error connecting to ${wallet.id}:`, error);
     }
   };
 
   return {
-    selectedChain,
-    setSelectedChain,
+    selectedChains,
     handleConnect,
-    detectedWallets,
     getNetworkAddressFromLocalStorage,
     getAllNetworkAddressesFromLocalStorage,
     hasThorAddressInLocalStorage,
