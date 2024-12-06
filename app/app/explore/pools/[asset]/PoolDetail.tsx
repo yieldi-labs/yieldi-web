@@ -32,8 +32,7 @@ interface PoolDetailProps {
 }
 
 export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
-  const { walletsState, toggleWalletModal } =
-    useAppState();
+  const { walletsState, toggleWalletModal } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
