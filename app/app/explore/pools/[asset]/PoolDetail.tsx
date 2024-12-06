@@ -16,7 +16,11 @@ import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
 import RemoveLiquidityModal from "@/app/explore/components/RemoveLiquidityModal";
 import { TopCard } from "@/app/components/TopCard";
 import { useAppState } from "@/utils/context";
-import { getChainKeyFromChain, isSupportedChain, parseAssetString } from "@/utils/chain";
+import {
+  getChainKeyFromChain,
+  isSupportedChain,
+  parseAssetString,
+} from "@/utils/chain";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
 import PositionRow from "@/app/dashboard/components/PositionRow";
 import {
