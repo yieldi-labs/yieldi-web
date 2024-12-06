@@ -6,8 +6,6 @@ import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
   getAssetShortSymbol,
   getLogoPath,
-  isERC20,
-  normalizeAddress,
   formatNumber,
   DECIMALS,
 } from "@/app/utils";
@@ -15,17 +13,15 @@ import { PoolDetail as IPoolDetail } from "@/midgard";
 import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
-import { useContracts } from "@/hooks/useContracts";
-import { useUTXO } from "@/hooks/useUTXO";
-import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
 import { useWalletConnection } from "@/hooks";
-import { getChainKeyFromChain, isEVMAddress } from "@/utils/chain";
+import { getChainKeyFromChain } from "@/utils/chain";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 import { PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 
 import { parseAssetString } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
+import { assetFromString } from "@xchainjs/xchain-util";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -60,102 +56,25 @@ export default function AddLiquidityModal({
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [assetBalance, setAssetBalance] = useState(0);
-  const [balanceLoading, setBalanceLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDualSided, setIsDualSided] = useState(false);
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
 
-  const utxoChain = useMemo(() => {
-    const chainMap: Record<string, string> = {
-      btc: "BTC",
-      doge: "DOGE",
-      ltc: "LTC",
-    };
-    return chainMap[pool.asset.split(".")[0].toLowerCase()] || null;
-  }, [pool.asset]);
-
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
-  const runeBalance = balanceList[ChainKey.THORCHAIN]['THOR.RUNE'].balance
+  const runeBalance = balanceList[ChainKey.THORCHAIN]['THOR.RUNE'] ? balanceList[ChainKey.THORCHAIN]['THOR.RUNE'].balance : 0
+  const assetBalance = balanceList[getChainKeyFromChain(assetFromString(pool.asset)?.chain as string)][pool.asset].balance
 
   if (!selectedWallet?.provider) {
     throw new Error("Wallet provider not found, please connect your wallet.");
   }
 
-  const {
-    getBalance: getUTXOBalance,
-    loading: utxoLoading,
-    error: utxoError,
-  } = useUTXO({
-    chain: utxoChain as "BTC" | "DOGE" | "LTC",
-    wallet: utxoChain ? selectedWallet : null,
-  });
-
-  const poolViemAddress = !utxoChain
-    ? pool.asset.split(".")[1].split("-")[1]
-    : undefined;
-  const tokenAddress =
-    !utxoChain && isERC20(pool.asset)
-      ? normalizeAddress(poolViemAddress!)
-      : undefined;
-
-  const {
-    balance: tokenBalance,
-    error: tokenError,
-    loadMetadata,
-  } = useContracts({
-    tokenAddress,
-    provider: !utxoChain ? selectedWallet?.provider : undefined,
-  });
-
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-
-  useEffect(() => {
-    if (
-      !utxoChain &&
-      selectedWallet?.provider &&
-      isEVMAddress(selectedWallet.address)
-    ) {
-      loadMetadata();
-    }
-  }, [
-    utxoChain,
-    selectedWallet?.provider,
-    selectedWallet?.address,
-    loadMetadata,
-    pool.asset,
-  ]);
-
-  useEffect(() => {
-    if (utxoChain && selectedWallet?.address) {
-      setBalanceLoading(true);
-      getUTXOBalance(selectedWallet.address)
-        .then((balance) => {
-          const balanceAmount = balance.amount.amount();
-          const balanceBigInt = BigInt(balanceAmount.toString());
-          const formattedBalance = Number(
-            formatUnits(balanceBigInt, poolNativeDecimal),
-          );
-          setAssetBalance(formattedBalance);
-        })
-        .catch(console.error)
-        .finally(() => setBalanceLoading(false));
-    }
-  }, [utxoChain, selectedWallet?.address, getUTXOBalance, poolNativeDecimal]);
-
-  useEffect(() => {
-    if (!utxoChain && tokenBalance?.value) {
-      setAssetBalance(
-        Number(formatUnits(tokenBalance.value, tokenBalance.decimals)),
-      );
-    }
-  }, [utxoChain, tokenBalance]);
 
   const handleValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
@@ -278,8 +197,7 @@ export default function AddLiquidityModal({
     }
   };
 
-  const isBalanceLoading = balanceLoading || utxoLoading;
-  const error = liquidityError || tokenError || utxoError;
+  const error = liquidityError;
   const assetSymbol = getAssetShortSymbol(pool.asset);
   const usdValue = assetAmount
     ? parseFloat(pool.assetPriceUSD) * parseFloat(assetAmount)
@@ -392,7 +310,7 @@ export default function AddLiquidityModal({
           <div className="flex justify-between text-base font-medium text-neutral-800">
             <div>≈ ${formatNumber(usdValue, 2)}</div>
             <div>
-              Balance: {formatNumber(assetBalance, 6)} ($
+              Balance: {formatNumber(assetBalance)} ($
               {formatNumber(assetUsdBalance, 2)})
             </div>
           </div>
@@ -405,7 +323,7 @@ export default function AddLiquidityModal({
               className={percentageButtonClasses(
                 isCloseToPercentage(currentAssetPercentage, percent),
               )}
-              disabled={isBalanceLoading || isSubmitting}
+              disabled={isSubmitting}
             >
               {percent === 100 ? "MAX" : `${percent}%`}
             </button>
@@ -453,7 +371,7 @@ export default function AddLiquidityModal({
                   className={percentageButtonClasses(
                     isCloseToPercentage(currentRunePercentage, percent),
                   )}
-                  disabled={isBalanceLoading || isSubmitting}
+                  disabled={isSubmitting}
                 >
                   {percent === 100 ? "MAX" : `${percent}%`}
                 </button>
@@ -464,14 +382,12 @@ export default function AddLiquidityModal({
 
         <button
           onClick={handleAddLiquidity}
-          disabled={!isValidAmount || isBalanceLoading || isSubmitting}
+          disabled={!isValidAmount || isSubmitting}
           className="w-full bg-primary text-black font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {!selectedWallet?.address
             ? "Connect Wallet"
-            : isBalanceLoading
-              ? "Loading..."
-              : isSubmitting
+            : isSubmitting
                 ? "Submitting Transaction..."
                 : !isValidAmount && assetAmount
                   ? "Invalid Amount"
