@@ -197,13 +197,38 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.vultisig) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () =>
-                await connectEVMWallet(window.vultisig?.ethereum),
+              [ProviderKey.EVM]: async () => {
+                return await connectEVMWallet(window.vultisig?.ethereum);
+              },
               [ProviderKey.THORCHAIN]: async () =>
                 await connectUTXOWallet({
                   id: "vultisig-thorchain",
                   name: "Vultisig",
                   provider: window.thorchain || window.vultisig?.thorchain,
+                }),
+              [ProviderKey.BITCOIN]: async () =>
+                await connectUTXOWallet({
+                  id: "vultisig-utxo",
+                  name: "Vultisig",
+                  provider: window.bitcoin || window.vultisig?.bitcoin,
+                }),
+              [ProviderKey.BITCOINCASH]: async () =>
+                await connectUTXOWallet({
+                  id: "vultisig-bch",
+                  name: "Vultisig",
+                  provider: window.bitcoincash || window.vultisig?.bitcoincash,
+                }),
+              [ProviderKey.LITECOIN]: async () =>
+                await connectUTXOWallet({
+                  id: "vultisig-ltc",
+                  name: "Vultisig",
+                  provider: window.litecoin || window.vultisig?.litecoin,
+                }),
+              [ProviderKey.DOGECOIN]: async () =>
+                await connectUTXOWallet({
+                  id: "vultisig-doge",
+                  name: "Vultisig",
+                  provider: window.dogecoin || window.vultisig?.dogecoin,
                 }),
             };
           } else {

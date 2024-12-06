@@ -126,6 +126,10 @@ export function useWalletConnection() {
       let newWalletState = { ...walletsState };
 
       for (const chain of selectedChains) {
+        if (walletsState[chain.name] && walletsState[chain.name].address) {
+          // Already connected
+          continue;
+        }
         const connection = await handleProviderConnection(
           wallet,
           chain,
