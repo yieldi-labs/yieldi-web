@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import Image from "next/image";
 import { PoolDetails } from "@/midgard";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -7,7 +6,6 @@ import {
   formatNumber,
   addDollarSignAndSuffix,
   getAssetSymbol,
-  getLogoPath,
   calculateVolumeUSD,
   calculateVolumeDepthRatio,
   calculatePoolTVL,
@@ -25,6 +23,7 @@ import { SortDirection } from "@shared/components/ui/types";
 import { SortableHeader } from "@shared/components/ui";
 import Link from "next/link";
 import LiquidityPoolCardMobile from "../components/LiquidityPoolCardMobile";
+import TokenLogo from "@/app/dashboard/components/TokenLogo";
 
 interface LiquidityPoolsProps {
   pools: PoolDetails;
@@ -234,13 +233,14 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                 <div className="flex items-center w-full">
                   <div className="px-3 whitespace-nowrap flex-1 w-1/3">
                     <div className="flex items-center">
-                      <Image
+                      {/* <Image
                         src={getLogoPath(pool.asset)}
                         alt={`${getAssetSymbol(pool.asset)} logo`}
                         width={28}
                         height={28}
                         className="rounded-full"
-                      />
+                      /> */}
+                      <TokenLogo assetId={pool.asset} />
                       <span className="ml-3 font-medium">
                         {getAssetSymbol(pool.asset)}
                       </span>

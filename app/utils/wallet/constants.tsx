@@ -143,7 +143,7 @@ export const EVM_CHAINS: ChainType[] = [
   },
 ];
 
-export let SUPPORTED_WALLETS = {
+export const SUPPORTED_WALLETS = {
   [WalletKey.CTRL]: {
     id: WalletKey.CTRL,
     name: "CTRL",
