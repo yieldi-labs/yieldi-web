@@ -40,8 +40,7 @@ export default function AddLiquidityModal({
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState, balanceList } =
-    useAppState();
+  const { toggleWalletModal, walletsState, balanceList } = useAppState();
   const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } =
     useWalletConnection();
 
@@ -65,8 +64,13 @@ export default function AddLiquidityModal({
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
-  const runeBalance = balanceList[ChainKey.THORCHAIN]['THOR.RUNE'] ? balanceList[ChainKey.THORCHAIN]['THOR.RUNE'].balance : 0
-  const assetBalance = balanceList[getChainKeyFromChain(assetFromString(pool.asset)?.chain as string)][pool.asset].balance
+  const runeBalance = balanceList[ChainKey.THORCHAIN]["THOR.RUNE"]
+    ? balanceList[ChainKey.THORCHAIN]["THOR.RUNE"].balance
+    : 0;
+  const assetBalance =
+    balanceList[
+      getChainKeyFromChain(assetFromString(pool.asset)?.chain as string)
+    ][pool.asset].balance;
 
   if (!selectedWallet?.provider) {
     throw new Error("Wallet provider not found, please connect your wallet.");
@@ -97,7 +101,7 @@ export default function AddLiquidityModal({
   };
 
   const handleRunePercentageClick = (percentage: number) => {
-    if (balanceList[ChainKey.THORCHAIN]['THOR.RUNE'].balance <= 0) return;
+    if (balanceList[ChainKey.THORCHAIN]["THOR.RUNE"].balance <= 0) return;
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
@@ -388,10 +392,10 @@ export default function AddLiquidityModal({
           {!selectedWallet?.address
             ? "Connect Wallet"
             : isSubmitting
-                ? "Submitting Transaction..."
-                : !isValidAmount && assetAmount
-                  ? "Invalid Amount"
-                  : "Add"}
+              ? "Submitting Transaction..."
+              : !isValidAmount && assetAmount
+                ? "Invalid Amount"
+                : "Add"}
         </button>
       </div>
     </Modal>

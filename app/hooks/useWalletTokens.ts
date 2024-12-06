@@ -47,7 +47,6 @@ const initialWalletTokensData: WalletTokensData = {
 };
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
-
   const [walletTokensData, setWalletTokensData] = useState<WalletTokensData>(
     initialWalletTokensData,
   );
@@ -469,7 +468,14 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                           [tokenKey]: {
                             ...prevData[key as ChainKey][tokenKey],
                             ...walletTokensData[key as ChainKey][tokenKey],
-                            balance: Number(formatNumber(info?.coins.find((coin) => coin.asset === "THOR.RUNE")?.amount || 0, 8))
+                            balance: Number(
+                              formatNumber(
+                                info?.coins.find(
+                                  (coin) => coin.asset === "THOR.RUNE",
+                                )?.amount || 0,
+                                8,
+                              ),
+                            ),
                           },
                         },
                       };
@@ -506,7 +512,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                     key as ChainKey,
                     walletsState[key as ChainKey].address,
                   );
-                  console.log('UTXO info', info)
+                  console.log("UTXO info", info);
                   if (info) {
                     setWalletBalanceData((prevData) => {
                       return {

@@ -9,15 +9,16 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
-import {
-  ProviderKey,
-  SUPPORTED_WALLETS,
-  WalletKey,
-} from "./wallet/constants";
+import { ProviderKey, SUPPORTED_WALLETS, WalletKey } from "./wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { connectEVMWallet, connectUTXOWallet } from "./wallet/walletConnect";
 
-import { ChainType, ConnectedWalletsState, WalletTokensData, WalletType } from "./interfaces";
+import {
+  ChainType,
+  ConnectedWalletsState,
+  WalletTokensData,
+  WalletType,
+} from "./interfaces";
 import { useWalletTokens } from "@/hooks/useWalletTokens";
 
 interface AppStateContextType {
@@ -234,7 +235,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         setSelectedChains,
         setSelectedWallet,
         refreshBalances,
-        balanceList
+        balanceList,
       }}
     >
       {children}

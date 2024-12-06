@@ -35,7 +35,15 @@ const Component: FC = () => {
     refreshBalances();
   };
 
+<<<<<<< HEAD
   const { copy } = useCopyToClipboard()
+=======
+  useEffect(() => {
+    refreshBalances();
+  }, [refreshBalances]);
+
+  const { copy } = useCopyToClipboard();
+>>>>>>> 87053da (Apply formater)
 
   return (
     isWalletDrawerOpen && (
@@ -83,8 +91,11 @@ const Component: FC = () => {
                     <span className="flex-1 leading-6 px-2">
                       <MiddleTruncate text={wallet.address} />
                     </span>
-                    <span className={`cursor-pointer my-auto p-2 rounded-full transition-all transform 
-              hover:bg-blue-100 hover:scale-110 active:scale-95`} onClick={() => copy(wallet.address)}>
+                    <span
+                      className={`cursor-pointer my-auto p-2 rounded-full transition-all transform 
+              hover:bg-blue-100 hover:scale-110 active:scale-95`}
+                      onClick={() => copy(wallet.address)}
+                    >
                       <Copy strokeColor="#627eea" size={14} />
                     </span>
                     <span className="cursor-pointer my-auto ">

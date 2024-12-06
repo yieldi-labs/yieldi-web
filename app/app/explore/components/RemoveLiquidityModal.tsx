@@ -39,8 +39,7 @@ export default function RemoveLiquidityModal({
   const { error: liquidityError, removeLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState } =
-    useAppState();
+  const { toggleWalletModal, walletsState } = useAppState();
   const [assetChain] = useMemo(
     () => parseAssetString(pool.asset),
     [pool.asset],
