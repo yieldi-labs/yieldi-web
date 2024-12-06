@@ -20,7 +20,7 @@ import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
 import { useRuneBalance, useWalletConnection } from "@/hooks";
-import { isEVMAddress } from "@/utils/chain";
+import { getChainKeyFromChain, isEVMAddress } from "@/utils/chain";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 import { PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 
@@ -44,7 +44,7 @@ export default function AddLiquidityModal({
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState, getChainKeyFromChain } =
+  const { toggleWalletModal, walletsState } =
     useAppState();
   const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } =
     useWalletConnection();

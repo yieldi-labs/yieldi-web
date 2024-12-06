@@ -15,7 +15,7 @@ import { useAppState } from "@/utils/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
-import { parseAssetString } from "@/utils/chain";
+import { getChainKeyFromChain, parseAssetString } from "@/utils/chain";
 import { PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 
@@ -39,7 +39,7 @@ export default function RemoveLiquidityModal({
   const { error: liquidityError, removeLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState, getChainKeyFromChain } =
+  const { toggleWalletModal, walletsState } =
     useAppState();
   const [assetChain] = useMemo(
     () => parseAssetString(pool.asset),
