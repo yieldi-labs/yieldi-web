@@ -2,7 +2,10 @@ import React, { useMemo, useState } from "react";
 import { SortableHeader } from "@shared/components/ui";
 import { SortDirection } from "@shared/components/ui/types";
 import PositionRow from "./PositionRow";
-import { PositionStats, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
+import {
+  PositionStats,
+  PositionType,
+} from "@/hooks/dataTransformers/positionsTransformer";
 
 interface PositionsList {
   positions: PositionStats[];
