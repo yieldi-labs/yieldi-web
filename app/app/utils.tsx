@@ -289,17 +289,6 @@ export async function bitcoinBalance(address: string) {
   );
 }
 
-export async function litecoinBalance(address: string) {
-  const ltcClient = new LitecoinClient();
-  const balance = await ltcClient.getBalance(address);
-  return parseFloat(baseToAsset(balance[0].amount).amount().toString());
-}
-
-export async function litecoinFees() {
-  const ltcClient = new LitecoinClient();
-  return await ltcClient.getFeeRates();
-}
-
 interface Utxo {
   txid: string;
   vout: number;
