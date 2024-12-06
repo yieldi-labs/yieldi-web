@@ -72,7 +72,6 @@ export function usePositionStats({
     enabled: addresses.length > 0,
     refetchInterval, // TODO: Dependant on pending positions (transaction pending and block confirmation times of pending chains)
     queryFn: async () => {
-      console.log("New fech with addresses", addresses);
       const resultPools = await getPools();
       const pools = resultPools.data;
       const result = await getMemberDetail({

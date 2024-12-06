@@ -2,12 +2,12 @@ import React, { useMemo, useState } from "react";
 import { SortableHeader } from "@shared/components/ui";
 import { SortDirection } from "@shared/components/ui/types";
 import PositionRow from "./PositionRow";
-import { PositionStats } from "@/hooks/dataTransformers/positionsTransformer";
+import { PositionStats, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 
 interface PositionsList {
   positions: PositionStats[];
   onAdd: (assetId: string) => void;
-  onRemove: (assetId: string) => void;
+  onRemove: (poolId: string, type: PositionType) => void;
 }
 
 enum PoolSortKey {
