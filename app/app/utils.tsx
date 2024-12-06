@@ -9,8 +9,7 @@ import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { getPool, MemberPool, PoolDetail } from "@/midgard";
 import { liquidityProvider } from "@/thornode";
 import { CHAINS } from "@/utils/wallet/constants";
-import { assetFromString, baseToAsset } from "@xchainjs/xchain-util";
-import { Client as LitecoinClient } from "@xchainjs/xchain-litecoin";
+import { assetFromString } from "@xchainjs/xchain-util";
 
 export interface Wallet {
   chain: string;
