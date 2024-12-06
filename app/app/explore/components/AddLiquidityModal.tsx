@@ -19,7 +19,7 @@ import { useContracts } from "@/hooks/useContracts";
 import { useUTXO } from "@/hooks/useUTXO";
 import { formatUnits } from "viem";
 import { twMerge } from "tailwind-merge";
-import { useRuneBalance, useWalletConnection } from "@/hooks";
+import { useWalletConnection } from "@/hooks";
 import { getChainKeyFromChain, isEVMAddress } from "@/utils/chain";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 import { PositionType } from "@/hooks/dataTransformers/positionsTransformer";
@@ -44,7 +44,7 @@ export default function AddLiquidityModal({
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState } =
+  const { toggleWalletModal, walletsState, balanceList } =
     useAppState();
   const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } =
     useWalletConnection();
@@ -65,11 +65,6 @@ export default function AddLiquidityModal({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDualSided, setIsDualSided] = useState(false);
-  const {
-    runeBalance,
-    loading: runeBalanceLoading,
-    error: runeBalanceError,
-  } = useRuneBalance({ wallet: selectedWallet });
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
 
@@ -85,6 +80,7 @@ export default function AddLiquidityModal({
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
+  const runeBalance = balanceList[ChainKey.THORCHAIN]['THOR.RUNE'].balance
 
   if (!selectedWallet?.provider) {
     throw new Error("Wallet provider not found, please connect your wallet.");
@@ -182,7 +178,7 @@ export default function AddLiquidityModal({
   };
 
   const handleRunePercentageClick = (percentage: number) => {
-    if (runeBalance <= 0) return;
+    if (balanceList[ChainKey.THORCHAIN]['THOR.RUNE'].balance <= 0) return;
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
@@ -282,8 +278,8 @@ export default function AddLiquidityModal({
     }
   };
 
-  const isBalanceLoading = balanceLoading || utxoLoading || runeBalanceLoading;
-  const error = liquidityError || tokenError || utxoError || runeBalanceError;
+  const isBalanceLoading = balanceLoading || utxoLoading;
+  const error = liquidityError || tokenError || utxoError;
   const assetSymbol = getAssetShortSymbol(pool.asset);
   const usdValue = assetAmount
     ? parseFloat(pool.assetPriceUSD) * parseFloat(assetAmount)

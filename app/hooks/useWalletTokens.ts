@@ -468,8 +468,8 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                           [tokenKey]: {
                             ...prevData[key as ChainKey][tokenKey],
                             ...walletTokensData[key as ChainKey][tokenKey],
-                            balance: info?.coins[0]
-                              ? Number(formatNumber(info?.coins[0].amount, 8))
+                            balance: info?.coins.find((coin) => coin.asset === "THOR.RUNE")?.amount
+                              ? Number(formatNumber(info?.coins.find((coin) => coin.asset === "THOR.RUNE")?.amount, 8))
                               : 0,
                           },
                         },
