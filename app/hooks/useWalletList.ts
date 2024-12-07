@@ -4,7 +4,7 @@ import {
   WalletKey,
 } from "@/utils/wallet/constants";
 import { ChainType, WalletType } from "@/utils/interfaces";
-import { useMemo, useCallback, useEffect } from "react";
+import { useMemo, useCallback } from "react";
 import { useAppState } from "@/utils/context";
 
 interface UseWalletListReturn {

@@ -1,5 +1,4 @@
 import { formatNumber, isERC20, normalizeAddress } from "@/app/utils";
-import { useAppState } from "@/utils/context";
 import {
   WalletTokensData,
   TokenData,
@@ -17,36 +16,37 @@ import {
 } from "@xchainjs/xchain-bitcoin";
 import * as viemChains from "viem/chains";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
+import { getChainKeyFromChain } from "@/utils/chain";
+import { baseToAsset } from "@xchainjs/xchain-util";
+
+const initialWalletTokensData: WalletTokensData = {
+  [ChainKey.ARBITRUM]: {},
+  [ChainKey.AVALANCHE]: {},
+  [ChainKey.BASE]: {},
+  [ChainKey.BITCOIN]: {},
+  [ChainKey.BITCOINCASH]: {},
+  [ChainKey.BLAST]: {},
+  [ChainKey.BSCCHAIN]: {},
+  [ChainKey.CRONOSCHAIN]: {},
+  [ChainKey.DASH]: {},
+  [ChainKey.DOGECOIN]: {},
+  [ChainKey.DYDX]: {},
+  [ChainKey.ETHEREUM]: {},
+  [ChainKey.GAIACHAIN]: {},
+  [ChainKey.KUJIRA]: {},
+  [ChainKey.LITECOIN]: {},
+  [ChainKey.MAYACHAIN]: {},
+  [ChainKey.OPTIMISM]: {},
+  [ChainKey.POLKADOT]: {},
+  [ChainKey.POLYGON]: {},
+  [ChainKey.SOLANA]: {},
+  [ChainKey.SUI]: {},
+  [ChainKey.THORCHAIN]: {},
+  [ChainKey.TON]: {},
+  [ChainKey.ZKSYNC]: {},
+};
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
-  const { getChainKeyFromChain } = useAppState();
-  const initialWalletTokensData: WalletTokensData = {
-    [ChainKey.ARBITRUM]: {},
-    [ChainKey.AVALANCHE]: {},
-    [ChainKey.BASE]: {},
-    [ChainKey.BITCOIN]: {},
-    [ChainKey.BITCOINCASH]: {},
-    [ChainKey.BLAST]: {},
-    [ChainKey.BSCCHAIN]: {},
-    [ChainKey.CRONOSCHAIN]: {},
-    [ChainKey.DASH]: {},
-    [ChainKey.DOGECOIN]: {},
-    [ChainKey.DYDX]: {},
-    [ChainKey.ETHEREUM]: {},
-    [ChainKey.GAIACHAIN]: {},
-    [ChainKey.KUJIRA]: {},
-    [ChainKey.LITECOIN]: {},
-    [ChainKey.MAYACHAIN]: {},
-    [ChainKey.OPTIMISM]: {},
-    [ChainKey.POLKADOT]: {},
-    [ChainKey.POLYGON]: {},
-    [ChainKey.SOLANA]: {},
-    [ChainKey.SUI]: {},
-    [ChainKey.THORCHAIN]: {},
-    [ChainKey.TON]: {},
-    [ChainKey.ZKSYNC]: {},
-  };
-
   const [walletTokensData, setWalletTokensData] = useState<WalletTokensData>(
     initialWalletTokensData,
   );
@@ -385,10 +385,10 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       try {
         const res = await client.getBalance(address);
         const balance = res[0];
-        const balanceAmount = balance.amount.amount();
-        const balanceBigInt = BigInt(balanceAmount.toString());
-        const formattedBalance = Number(formatUnits(balanceBigInt, 8));
-        return { balanceAmount, balanceBigInt, formattedBalance };
+        const balanceAmount = baseToAsset(balance.amount).amount().toNumber();
+        const balanceBigInt = BigInt(balance.amount.amount().toString());
+        const formattedBalance = Number(formatUnits(balanceBigInt, 8)); // TODO: Remove decimal numbers hardcoded
+        return { balance: balanceAmount, balanceBigInt, formattedBalance };
       } catch (err) {
         console.error(`Error getting ${chainKey} balance:`, err);
         throw err;
@@ -468,9 +468,14 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                           [tokenKey]: {
                             ...prevData[key as ChainKey][tokenKey],
                             ...walletTokensData[key as ChainKey][tokenKey],
-                            balance: info?.coins[0]
-                              ? Number(formatNumber(info?.coins[0].amount, 8))
-                              : 0,
+                            balance: Number(
+                              formatNumber(
+                                info?.coins.find(
+                                  (coin) => coin.asset === "THOR.RUNE",
+                                )?.amount || 0,
+                                8,
+                              ),
+                            ),
                           },
                         },
                       };
@@ -507,6 +512,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                     key as ChainKey,
                     walletsState[key as ChainKey].address,
                   );
+                  console.log("UTXO info", info);
                   if (info) {
                     setWalletBalanceData((prevData) => {
                       return {
@@ -557,7 +563,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   }, [walletTokensData]);
 
   return {
-    fetch: fetchWalletTokens,
+    refreshBalances: fetchWalletTokens, // TODO: Avoid refresh all at once
     balanceList: walletBalanceData,
   };
 };
