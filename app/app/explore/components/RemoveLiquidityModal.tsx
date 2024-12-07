@@ -102,10 +102,7 @@ export default function RemoveLiquidityModal({
 
       if (hash) {
         markPositionAsPending(pool.asset, PositionType.SLP); // TODO: Update with support for SLP and DLP
-        setTimeout(() => {
-          setTxHash(hash);
-          onClose(true);
-        }, 0);
+        setTxHash(hash);
       }
     } catch (err) {
       console.error("Failed to remove liquidity:", err);

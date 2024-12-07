@@ -268,7 +268,6 @@ export async function bitcoinConnectInjected() {
       if (response.status === "error") {
         throw new Error(response.error.message);
       }
-      console.log(response);
       return response.result.txid;
     },
   };

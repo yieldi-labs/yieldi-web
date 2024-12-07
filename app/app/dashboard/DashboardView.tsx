@@ -7,14 +7,23 @@ import PositionsList from "./components/PositionsList";
 import { PoolDetail } from "@/midgard";
 import PositionsPlaceholder from "./components/PositionsPlaceholder";
 import AddLiquidityModal from "../explore/components/AddLiquidityModal";
-import { PositionStats } from "@/hooks/dataTransformers/positionsTransformer";
+import {
+  PositionStats,
+  PositionType,
+} from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 import Loader from "../components/Loader";
 import { useAppState } from "@/utils/context";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
+import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
 
 export default function DashboardView() {
-  const [selectedPool, setSelectedPool] = useState<PoolDetail>();
+  const [selectedPool, setSelectedPool] = useState<PoolDetail | null>(null);
+  const [selectedPosition, setSelectedPosition] =
+    useState<PositionStats | null>(null);
+  const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
+    useState(false);
+  const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
   const { positions, pools, isPending } = useLiquidityPositions();
   const { walletsState } = useAppState();
@@ -79,22 +88,43 @@ export default function DashboardView() {
           ) : (
             <PositionsList
               positions={allPositionsArray}
-              onAdd={(assetId) => {
-                setSelectedPool(pools?.find((pool) => pool.asset === assetId));
+              onAdd={(poolId) => {
+                setSelectedPool(
+                  pools?.find((pool) => pool.asset === poolId) || null,
+                );
+                setShowAddLiquidityModal(true);
               }}
-              onRemove={() => {}}
+              onRemove={(poolId: string, type: PositionType) => {
+                setSelectedPool(
+                  pools?.find((pool) => pool.asset === poolId) || null,
+                );
+                setSelectedPosition(positions[poolId][type]);
+                setShowRemoveLiquidityModal(true);
+              }}
             />
           )
         ) : (
           <PositionsPlaceholder />
         )}
       </div>
-      {selectedPool && (
+      {showAddLiquidityModal && selectedPool && (
         <AddLiquidityModal
           pool={selectedPool}
           runePriceUSD={0}
           onClose={() => {
-            setSelectedPool(undefined);
+            setSelectedPool(null);
+            setShowAddLiquidityModal(false);
+          }}
+        />
+      )}
+      {showRemoveLiquidityModal && selectedPool && selectedPosition && (
+        <RemoveLiquidityModal
+          pool={selectedPool}
+          position={selectedPosition?.memberDetails}
+          onClose={() => {
+            setSelectedPool(null);
+            setSelectedPosition(null);
+            setShowRemoveLiquidityModal(false);
           }}
         />
       )}
