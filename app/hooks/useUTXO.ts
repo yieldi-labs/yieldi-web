@@ -4,6 +4,10 @@ import {
   defaultBTCParams,
 } from "@xchainjs/xchain-bitcoin";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
+import {
+  defaultLtcParams,
+  Client as LitecoinClient,
+} from "@xchainjs/xchain-litecoin";
 import { Network } from "@xchainjs/xchain-client";
 import {
   assetToBase,
@@ -14,7 +18,7 @@ import {
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
 
-// Define BTC and DOGE assets
+// Define BTC, DOGE, and LTC assets
 const AssetBTC: Asset = {
   chain: "BTC",
   symbol: "BTC",
@@ -29,7 +33,14 @@ const AssetDOGE: Asset = {
   type: AssetType.NATIVE,
 };
 
-type UTXOChain = "BTC" | "DOGE";
+const AssetLTC: Asset = {
+  chain: "LTC",
+  symbol: "LTC",
+  ticker: "LTC",
+  type: AssetType.NATIVE,
+};
+
+type UTXOChain = "BTC" | "DOGE" | "LTC";
 
 interface UseUTXOProps {
   chain: UTXOChain;
@@ -60,10 +71,24 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   const [error, setError] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<UTXOMetadata>({
     network: Network.Mainnet,
-    explorerUrl:
-      chain === "BTC"
-        ? defaultBTCParams.explorerProviders[Network.Mainnet].getExplorerUrl()
-        : defaultDogeParams.explorerProviders[Network.Mainnet].getExplorerUrl(),
+    explorerUrl: (() => {
+      switch (chain) {
+        case "BTC":
+          return defaultBTCParams.explorerProviders[
+            Network.Mainnet
+          ].getExplorerUrl();
+        case "DOGE":
+          return defaultDogeParams.explorerProviders[
+            Network.Mainnet
+          ].getExplorerUrl();
+        case "LTC":
+          return defaultLtcParams.explorerProviders[
+            Network.Mainnet
+          ].getExplorerUrl();
+        default:
+          return "";
+      }
+    })(),
   });
 
   // Initialize UTXO client with proper configuration
@@ -85,6 +110,11 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         case "DOGE":
           return new DogeClient({
             ...defaultDogeParams,
+            ...commonConfig,
+          });
+        case "LTC":
+          return new LitecoinClient({
+            ...defaultLtcParams,
             ...commonConfig,
           });
         default:
@@ -142,7 +172,20 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
 
       try {
         const fees = feeRate || (await getFees()).fast;
-        const asset = chain === "BTC" ? AssetBTC : AssetDOGE;
+        let asset;
+        switch (chain) {
+          case "BTC":
+            asset = AssetBTC;
+            break;
+          case "DOGE":
+            asset = AssetDOGE;
+            break;
+          case "LTC":
+            asset = AssetLTC;
+            break;
+          default:
+            throw new Error(`Unsupported UTXO chain: ${chain}`);
+        }
         const from = wallet.address;
         const nativeDecimal = parseInt(pool.nativeDecimal);
         const finalAmount = assetToBase(assetAmount(amount, nativeDecimal));
@@ -245,6 +288,8 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       if (!wallet?.address) {
         throw new Error("Wallet not initialized");
       }
+
+      console.log("Removing liquidity", pool, vault, amount, memo);
 
       try {
         const fees = await getFees();

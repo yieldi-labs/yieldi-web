@@ -74,10 +74,12 @@ export default function AddLiquidityModal({
   const { positions, markPositionAsPending } = useLiquidityPositions();
 
   const utxoChain = useMemo(() => {
-    const chain = pool.asset.split(".")[0].toLowerCase();
-    if (chain === "btc") return "BTC";
-    if (chain === "doge") return "DOGE";
-    return null;
+    const chainMap: Record<string, string> = {
+      btc: "BTC",
+      doge: "DOGE",
+      ltc: "LTC",
+    };
+    return chainMap[pool.asset.split(".")[0].toLowerCase()] || null;
   }, [pool.asset]);
 
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
@@ -93,7 +95,7 @@ export default function AddLiquidityModal({
     loading: utxoLoading,
     error: utxoError,
   } = useUTXO({
-    chain: utxoChain as "BTC" | "DOGE",
+    chain: utxoChain as "BTC" | "DOGE" | "LTC",
     wallet: utxoChain ? selectedWallet : null,
   });
 

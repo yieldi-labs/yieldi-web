@@ -109,9 +109,8 @@ export const isSupportedChain = (assetChain: string): boolean => {
 export const getMinAmountByChain = (chain: SupportedChain): number => {
   switch (chain) {
     case SupportedChain.Bitcoin:
-      // case SupportedChain.Litecoin:
+    case SupportedChain.Litecoin:
       // case SupportedChain.BitcoinCash:
-      // case SupportedChain.Dash:
       return 0.00010001;
     case SupportedChain.Dogecoin:
       return 1.00000001;

@@ -8,8 +8,8 @@ import { getAccount } from "wagmi/actions";
 import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { getPool, MemberPool, PoolDetail } from "@/midgard";
 import { liquidityProvider } from "@/thornode";
-import { assetFromString } from "@xchainjs/xchain-util";
 import { CHAINS } from "@/utils/wallet/constants";
+import { assetFromString } from "@xchainjs/xchain-util";
 
 export interface Wallet {
   chain: string;
@@ -32,7 +32,7 @@ export enum SupportedChain {
   Dogecoin = "DOGE",
   Ethereum = "ETH",
   // Kujira = "KUJI",
-  // Litecoin = "LTC",
+  Litecoin = "LTC",
   // Maya = "MAYA",
   // Optimism = "OP",
   // Polkadot = "DOT",

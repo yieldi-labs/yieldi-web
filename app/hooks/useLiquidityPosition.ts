@@ -67,10 +67,12 @@ export function useLiquidityPosition({
   const wallet = walletsState![getChainKeyFromChain(assetChain)];
   // Determine if this is a UTXO chain and which one
   const utxoChain = useMemo(() => {
-    const chain = assetChain.toLowerCase();
-    if (chain === "btc") return "BTC";
-    if (chain === "doge") return "DOGE";
-    return null;
+    const chainMap: Record<string, string> = {
+      btc: "BTC",
+      doge: "DOGE",
+      ltc: "LTC",
+    };
+    return chainMap[assetChain.toLowerCase()] || null;
   }, [assetChain]);
 
   // Check if it's a native asset
@@ -99,7 +101,7 @@ export function useLiquidityPosition({
     addLiquidity: addUTXOLiquidity,
     removeLiquidity: removeUTXOLiquidity,
   } = useUTXO({
-    chain: utxoChain as "BTC" | "DOGE",
+    chain: utxoChain as "BTC" | "DOGE" | "LTC", // Add Litecoin support
     wallet: utxoChain ? wallet : null,
   });
 
