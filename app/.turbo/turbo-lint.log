@@ -1,0 +1,10 @@
+
+
+> yieldi@0.1.0 lint /Users/matt/code/yieldi-web/app
+> npm run lint:prettier && npm run lint:next && npm run lint:tsc
+
+
+> yieldi@0.1.0 lint:prettier
+> npx prettier --check .
+
+[1G[0K[1G[0K\[1G[0K|[1G[0K/[1G[0K-[1G[0K\[1G[0K|[1G[0K/[1G[0K-[1G[0K\[1G[0K|[1G[0K/[1G[0K-[1G[0K\[1G[0K|[1G[0K/

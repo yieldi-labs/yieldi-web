@@ -1,0 +1,24 @@
+{
+  "name": "frontend",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.8.0",
+  "scripts": {
+    "build": "turbo build",
+    "clean": "turbo clean",
+    "clean:all": "rm -rf ./out && turbo clean:all",
+    "dev": "turbo dev",
+    "lint": "FORCE_COLOR=1 turbo lint",
+    "lint:fix": "FORCE_COLOR=1 turbo lint:fix",
+    "lint:prettier": "FORCE_COLOR=1 turbo lint:prettier",
+    "lint:prettier:fix": "pnpm prettier --write '*.{md,json,yaml}' && FORCE_COLOR=1 turbo lint:prettier:fix",
+    "lint:tsc": "FORCE_COLOR=1 turbo lint:tsc",
+    "start": "turbo start",
+    "test": "turbo test"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3"
+  }
+}
