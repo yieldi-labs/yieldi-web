@@ -35,10 +35,6 @@ const Component: FC = () => {
     fetch();
   };
 
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
-
   return (
     isWalletDrawerOpen && (
       <>
