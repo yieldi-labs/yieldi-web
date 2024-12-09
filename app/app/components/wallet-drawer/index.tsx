@@ -1,5 +1,5 @@
 "use client";
-import { cloneElement, FC, useEffect } from "react";
+import { cloneElement, FC } from "react";
 import { formatNumber } from "@/app/utils";
 import Image from "next/image";
 import {
@@ -34,10 +34,6 @@ const Component: FC = () => {
   const handleWalletRefresh = () => {
     fetch();
   };
-
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
 
   return (
     isWalletDrawerOpen && (
