@@ -36,12 +36,15 @@ const Component: FC = () => {
   };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const { copy } = useCopyToClipboard()
 =======
   useEffect(() => {
     refreshBalances();
   }, [refreshBalances]);
 
+=======
+>>>>>>> c5420b3 (Remove unnecesary useEffect)
   const { copy } = useCopyToClipboard();
 >>>>>>> 87053da (Apply formater)
 
