@@ -49,7 +49,6 @@
     "@xchainjs/xchain-litecoin": "^1.0.7",
     "@xchainjs/xchain-thorchain": "^2.0.10",
     "@xchainjs/xchain-util": "^1.0.6",
-    "@xchainjs/xchain-utxo": "^1.0.7",
     "axios": "^1.7.7",
     "bignumber.js": "^9.1.2",
     "bitcoinjs-lib": "7.0.0-rc.0",
