@@ -80,6 +80,9 @@ importers:
       '@xchainjs/xchain-util':
         specifier: ^1.0.6
         version: 1.0.6
+      '@xchainjs/xchain-utxo':
+        specifier: ^1.0.7
+        version: 1.0.7
       axios:
         specifier: ^1.7.7
         version: 1.7.7
