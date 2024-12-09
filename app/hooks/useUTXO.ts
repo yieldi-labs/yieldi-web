@@ -4,7 +4,6 @@ import {
   defaultBTCParams,
 } from "@xchainjs/xchain-bitcoin";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
-import { Client as UxtoClient } from "@xchainjs/xchain-utxo";
 import {
   defaultLtcParams,
   Client as LitecoinClient,
