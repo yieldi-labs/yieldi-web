@@ -52,7 +52,7 @@ const Component: FC<ComponentProps> = ({ text }) => {
     }));
   };
 
-  useEffect(ellipsisDidUpdate, [ellipsis]);
+  useEffect(ellipsisDidUpdate, [counter, ellipsis, text]);
   useEffect(componentDidUpdate, [text]);
 
   return (
