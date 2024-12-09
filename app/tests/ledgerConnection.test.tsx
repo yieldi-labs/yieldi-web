@@ -4,6 +4,7 @@ import HardwareWallets from "@/app/components/modals/Wallet/HardwareWallets";
 import Eth from "@ledgerhq/hw-app-eth";
 import Btc from "@ledgerhq/hw-app-btc";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
+import { CHAINS } from "@/utils/wallet/constants";
 
 // Mock dependencies
 jest.mock("@ledgerhq/hw-transport-webusb");
@@ -23,7 +24,7 @@ describe("HardwareWallets Component", () => {
       <HardwareWallets
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
-        selectedChain="ethereum"
+        selectedChains={[CHAINS[5]]}
         isDisabled={false}
       />,
     );
@@ -37,7 +38,7 @@ describe("HardwareWallets Component", () => {
       <HardwareWallets
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
-        selectedChain="ethereum"
+        selectedChains={[CHAINS[5]]}
         isDisabled={false}
       />,
     );
@@ -58,7 +59,7 @@ describe("HardwareWallets Component", () => {
       <HardwareWallets
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
-        selectedChain="ethereum"
+        selectedChains={[CHAINS[5]]}
         isDisabled={false}
       />,
     );
@@ -87,7 +88,7 @@ describe("HardwareWallets Component", () => {
       <HardwareWallets
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
-        selectedChain="bitcoin"
+        selectedChains={[CHAINS[1]]}
         isDisabled={false}
       />,
     );
@@ -109,7 +110,7 @@ describe("HardwareWallets Component", () => {
       <HardwareWallets
         onBack={onBackMock}
         onWalletSelect={onWalletSelectMock}
-        selectedChain="ethereum"
+        selectedChains={[CHAINS[5]]}
         isDisabled={false}
       />,
     );
