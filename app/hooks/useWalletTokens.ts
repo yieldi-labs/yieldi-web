@@ -50,15 +50,24 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   );
 
   // TODO: Avoid duplication of this condition between useUTXO and this line (https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration#comment-d10c7c6f)
-  const { getBalance: getBalanceBtc } = useUTXO({chain: 'BTC',  wallet: walletsState['Bitcoin']})
-  const { getBalance: getBalanceLtc } = useUTXO({chain: 'LTC',  wallet: walletsState['Litecoin']})
-  const { getBalance: getBalanceDoge } = useUTXO({chain: 'DOGE',  wallet: walletsState['Dogecoin']})
+  const { getBalance: getBalanceBtc } = useUTXO({
+    chain: "BTC",
+    wallet: walletsState["Bitcoin"],
+  });
+  const { getBalance: getBalanceLtc } = useUTXO({
+    chain: "LTC",
+    wallet: walletsState["Litecoin"],
+  });
+  const { getBalance: getBalanceDoge } = useUTXO({
+    chain: "DOGE",
+    wallet: walletsState["Dogecoin"],
+  });
 
   const utxoBalancesHandlers = {
     [ChainKey.BITCOIN]: getBalanceBtc,
     [ChainKey.LITECOIN]: getBalanceLtc,
     [ChainKey.DOGECOIN]: getBalanceDoge,
-  }
+  };
 
   const getERC20TokenInfo = async (
     walletAddress: string,
@@ -343,11 +352,18 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     }
   };
 
-  const getUTXOInfo = async (chainKey: "Bitcoin" | "Dogecoin" | "Litecoin", walletAddress: string) => { // TODO: Remove once unify chains configurations (https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration#comment-d10c7c6f)
+  const getUTXOInfo = async (
+    chainKey: "Bitcoin" | "Dogecoin" | "Litecoin",
+    walletAddress: string,
+  ) => {
+    // TODO: Remove once unify chains configurations (https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration#comment-d10c7c6f)
     if (!walletsState) return;
     if (!walletsState[chainKey]?.provider) return null;
-    const balance = await utxoBalancesHandlers[chainKey](walletAddress)
-    return { balance: baseToAsset(balance.amount).amount().toNumber(), formattedBalance: baseToAsset(balance.amount).amount().toString() };
+    const balance = await utxoBalancesHandlers[chainKey](walletAddress);
+    return {
+      balance: baseToAsset(balance.amount).amount().toNumber(),
+      formattedBalance: baseToAsset(balance.amount).amount().toString(),
+    };
   };
 
   const getTokenBalances = async () => {
@@ -464,7 +480,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                 try {
                   const info = await getUTXOInfo(
                     key as "Bitcoin" | "Litecoin" | "Dogecoin",
-                    walletsState[key as ChainKey].address
+                    walletsState[key as ChainKey].address,
                   );
                   if (info) {
                     setWalletBalanceData((prevData) => {
