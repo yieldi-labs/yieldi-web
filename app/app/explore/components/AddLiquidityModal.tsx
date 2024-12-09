@@ -78,6 +78,7 @@ export default function AddLiquidityModal({
       btc: "BTC",
       doge: "DOGE",
       ltc: "LTC",
+      bch: "BCH",
     };
     return chainMap[pool.asset.split(".")[0].toLowerCase()] || null;
   }, [pool.asset]);
@@ -95,7 +96,7 @@ export default function AddLiquidityModal({
     loading: utxoLoading,
     error: utxoError,
   } = useUTXO({
-    chain: utxoChain as "BTC" | "DOGE" | "LTC",
+    chain: utxoChain as "BTC" | "DOGE" | "LTC" | "BCH",
     wallet: utxoChain ? selectedWallet : null,
   });
 

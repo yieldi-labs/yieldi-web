@@ -71,6 +71,7 @@ export function useLiquidityPosition({
       btc: "BTC",
       doge: "DOGE",
       ltc: "LTC",
+      bch: "BCH",
     };
     return chainMap[assetChain.toLowerCase()] || null;
   }, [assetChain]);
@@ -101,7 +102,7 @@ export function useLiquidityPosition({
     addLiquidity: addUTXOLiquidity,
     removeLiquidity: removeUTXOLiquidity,
   } = useUTXO({
-    chain: utxoChain as "BTC" | "DOGE" | "LTC", // Add Litecoin support
+    chain: utxoChain as "BTC" | "DOGE" | "LTC" | "BCH",
     wallet: utxoChain ? wallet : null,
   });
 
