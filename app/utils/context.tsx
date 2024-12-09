@@ -9,30 +9,31 @@ import React, {
   Dispatch,
   SetStateAction,
 } from "react";
-import {
-  ChainKey,
-  ProviderKey,
-  SUPPORTED_WALLETS,
-  WalletKey,
-} from "./wallet/constants";
+import { ProviderKey, SUPPORTED_WALLETS, WalletKey } from "./wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { connectEVMWallet, connectUTXOWallet } from "./wallet/walletConnect";
 
-import { ChainType, ConnectedWalletsState, WalletType } from "./interfaces";
+import {
+  ChainType,
+  ConnectedWalletsState,
+  WalletTokensData,
+  WalletType,
+} from "./interfaces";
+import { useWalletTokens } from "@/hooks/useWalletTokens";
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
   toggleWalletModal: () => void;
   walletsState: ConnectedWalletsState | null;
   setWalletsState: React.Dispatch<React.SetStateAction<ConnectedWalletsState>>;
-  getProviderTypeFromChain: (chain: string) => ProviderKey;
-  getChainKeyFromChain: (chain: string) => ChainKey;
   toggleWalletDrawer: () => void;
   isWalletDrawerOpen: boolean;
   selectedChains: ChainType[];
   setSelectedChains: Dispatch<SetStateAction<ChainType[]>>;
   selectedWallet: WalletType | undefined;
   setSelectedWallet: Dispatch<SetStateAction<WalletType | undefined>>;
+  balanceList: WalletTokensData;
+  refreshBalances: () => void;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -52,63 +53,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     setIsWalletDrawerOpen((prevState) => !prevState);
   };
 
-  const getProviderTypeFromChain = (chain: string): ProviderKey => {
-    switch (chain) {
-      case "AVAX":
-      case "BSC":
-      case "ETH": {
-        return ProviderKey.EVM;
-      }
-      case "BTC": {
-        return ProviderKey.BITCOIN;
-      }
-      case "DOGE": {
-        return ProviderKey.DOGECOIN;
-      }
-      case "THOR": {
-        return ProviderKey.THORCHAIN;
-      }
-      default: {
-        return ProviderKey.EVM;
-      }
-    }
-  };
-
-  const getChainKeyFromChain = (chain: string): ChainKey => {
-    chain = chain.toUpperCase();
-    switch (chain) {
-      case "AVAX": {
-        return ChainKey.AVALANCHE;
-      }
-      case "BSC": {
-        return ChainKey.BSCCHAIN;
-      }
-      case "ETH": {
-        return ChainKey.ETHEREUM;
-      }
-      case "BTC": {
-        return ChainKey.BITCOIN;
-      }
-      case "DOGE": {
-        return ChainKey.DOGECOIN;
-      }
-      case "LTC": {
-        return ChainKey.LITECOIN;
-      }
-      case "GAIA": {
-        return ChainKey.GAIACHAIN;
-      }
-      case "BCH": {
-        return ChainKey.BITCOINCASH;
-      }
-      case "THOR": {
-        return ChainKey.THORCHAIN;
-      }
-      default: {
-        return ChainKey.ETHEREUM;
-      }
-    }
-  };
+  const { refreshBalances, balanceList } = useWalletTokens(walletsState!);
 
   const checkAvailableWallets = (window: any) => {
     Object.keys(SUPPORTED_WALLETS).forEach((key) => {
@@ -283,14 +228,14 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         toggleWalletModal,
         walletsState,
         setWalletsState,
-        getProviderTypeFromChain,
-        getChainKeyFromChain,
         isWalletDrawerOpen,
         toggleWalletDrawer,
         selectedChains,
         selectedWallet,
         setSelectedChains,
         setSelectedWallet,
+        refreshBalances,
+        balanceList,
       }}
     >
       {children}

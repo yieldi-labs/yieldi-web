@@ -4,6 +4,7 @@ import {
   defaultBTCParams,
 } from "@xchainjs/xchain-bitcoin";
 import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
+import { Client as UxtoClient } from "@xchainjs/xchain-utxo";
 import {
   defaultLtcParams,
   Client as LitecoinClient,
@@ -92,7 +93,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   });
 
   // Initialize UTXO client with proper configuration
-  const client = useMemo(() => {
+  const client: UxtoClient | null = useMemo(() => {
     if (!wallet?.provider) return null;
 
     try {

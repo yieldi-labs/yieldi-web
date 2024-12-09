@@ -1,6 +1,7 @@
 // chainUtils.ts
 
 import { SupportedChain } from "@/app/utils";
+import { ChainKey, ProviderKey } from "./wallet/constants";
 
 /**
  * Interface for inbound address data from THORChain
@@ -175,4 +176,62 @@ export const parseAssetString = (asset: string): [string, string] => {
 
 export const isEVMAddress = (address: string): boolean => {
   return address.startsWith("0x") && address.length === 42;
+};
+
+export const getChainKeyFromChain = (chain: string): ChainKey => {
+  chain = chain.toUpperCase();
+  switch (chain) {
+    case "AVAX": {
+      return ChainKey.AVALANCHE;
+    }
+    case "BSC": {
+      return ChainKey.BSCCHAIN;
+    }
+    case "ETH": {
+      return ChainKey.ETHEREUM;
+    }
+    case "BTC": {
+      return ChainKey.BITCOIN;
+    }
+    case "DOGE": {
+      return ChainKey.DOGECOIN;
+    }
+    case "LTC": {
+      return ChainKey.LITECOIN;
+    }
+    case "GAIA": {
+      return ChainKey.GAIACHAIN;
+    }
+    case "BCH": {
+      return ChainKey.BITCOINCASH;
+    }
+    case "THOR": {
+      return ChainKey.THORCHAIN;
+    }
+    default: {
+      return ChainKey.ETHEREUM;
+    }
+  }
+};
+
+export const getProviderTypeFromChain = (chain: string): ProviderKey => {
+  switch (chain) {
+    case "AVAX":
+    case "BSC":
+    case "ETH": {
+      return ProviderKey.EVM;
+    }
+    case "BTC": {
+      return ProviderKey.BITCOIN;
+    }
+    case "DOGE": {
+      return ProviderKey.DOGECOIN;
+    }
+    case "THOR": {
+      return ProviderKey.THORCHAIN;
+    }
+    default: {
+      return ProviderKey.EVM;
+    }
+  }
 };
