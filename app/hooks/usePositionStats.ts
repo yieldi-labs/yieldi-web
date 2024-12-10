@@ -70,7 +70,11 @@ export function usePositionStats({
     setAddresses(addresses);
   }, [walletsState]);
 
-  const { isFetching: isPending, error } = useQuery({
+  const {
+    isFetching: isPending,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["position-stats", addresses],
     retry: false,
     enabled: addresses.length > 0,
@@ -115,6 +119,22 @@ export function usePositionStats({
     },
   });
 
+  useEffect(() => {
+    const hasPendingPositions = Object.values(
+      currentPositionsStats?.positions || {},
+    ).some((positions) =>
+      Object.values(positions).some(
+        (position) => position?.status === PositionStatus.LP_POSITION_PENDING,
+      ),
+    );
+
+    if (hasPendingPositions) {
+      setRefetchInterval(defaultRefetchInterval);
+    } else {
+      setRefetchInterval(defaultRefetchInterval);
+    }
+  }, [currentPositionsStats, defaultRefetchInterval]);
+
   const markPositionAsPending = useCallback(
     (pooldId: string, type: PositionType) => {
       setCurrentPositionsStats((prev) => {
@@ -135,11 +155,12 @@ export function usePositionStats({
             status: PositionStatus.LP_POSITION_PENDING,
           };
         }
-
+        setRefetchInterval(defaultRefetchInterval);
+        refetch();
         return updatedPositions as PositionsCache;
       });
     },
-    [],
+    [defaultRefetchInterval, refetch],
   );
 
   const updatePendingPositions = (
