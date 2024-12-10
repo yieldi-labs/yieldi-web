@@ -131,7 +131,7 @@ export function usePositionStats({
     if (hasPendingPositions) {
       setRefetchInterval(defaultRefetchInterval);
     } else {
-      setRefetchInterval(defaultRefetchInterval);
+      setRefetchInterval(undefined);
     }
   }, [currentPositionsStats, defaultRefetchInterval]);
 
