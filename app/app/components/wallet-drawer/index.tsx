@@ -35,22 +35,7 @@ const Component: FC = () => {
     refreshBalances();
   };
 
-<<<<<<< HEAD
   const { copy } = useCopyToClipboard()
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-  const { copy } = useCopyToClipboard()
-=======
-  useEffect(() => {
-    refreshBalances();
-  }, [refreshBalances]);
-
-=======
->>>>>>> c5420b3 (Remove unnecesary useEffect)
-  const { copy } = useCopyToClipboard();
->>>>>>> 87053da (Apply formater)
->>>>>>> f04c479 (Remove unnecesary useEffect)
 
   return (
     isWalletDrawerOpen && (
