@@ -8,7 +8,8 @@ const useCopyToClipboard = () => {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
+    } catch (error) {
+      console.error(error);
       setCopied(false);
     }
   };

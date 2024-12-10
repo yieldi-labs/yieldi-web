@@ -233,13 +233,6 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
                 <div className="flex items-center w-full">
                   <div className="px-3 whitespace-nowrap flex-1 w-1/3">
                     <div className="flex items-center">
-                      {/* <Image
-                        src={getLogoPath(pool.asset)}
-                        alt={`${getAssetSymbol(pool.asset)} logo`}
-                        width={28}
-                        height={28}
-                        className="rounded-full"
-                      /> */}
                       <TokenLogo assetId={pool.asset} />
                       <span className="ml-3 font-medium">
                         {getAssetSymbol(pool.asset)}

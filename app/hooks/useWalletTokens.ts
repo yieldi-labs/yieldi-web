@@ -11,7 +11,7 @@ import ERC20_ABI from "@/hooks/erc20.json";
 import { getBalance, getPools, PoolDetail } from "@/midgard";
 import * as viemChains from "viem/chains";
 import { getChainKeyFromChain } from "@/utils/chain";
-import { baseToAsset } from "@xchainjs/xchain-util";
+import { assetFromString, baseToAsset } from "@xchainjs/xchain-util";
 import { useUTXO } from "./useUTXO";
 
 const initialWalletTokensData: WalletTokensData = {
@@ -177,14 +177,18 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       };
 
       const fetchNativeTokens = async (pool: PoolDetail) => {
-        const chainKey = getChainKeyFromChain(pool.asset.split(".")[0]);
+        const asset = assetFromString(pool.asset)
+        if (!asset) {
+          throw Error (`Invalid asset ${pool.asset}`)
+        }
+        const chainKey = getChainKeyFromChain(asset.chain);
 
         const wallet = walletsState[chainKey as ChainKey];
         if (wallet?.address && wallet?.provider) {
           try {
             addTokenData(chainKey as ChainKey, {
               name: chainKey,
-              symbol: pool.asset.split(".")[0],
+              symbol: asset.symbol,
               decimals: Number(pool.nativeDecimal),
               balance: 0,
               asset: pool.asset,
@@ -208,10 +212,13 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
         if (!pools) return;
         const fetchPromises = pools.map(async (pool) => {
-          const assetType = pool.asset.split(".")[0].toLowerCase();
+          const asset = assetFromString(pool.asset)
+          if (!asset) {
+            throw Error (`Invalid asset ${pool.asset}`)
+          }
           if (isERC20(pool.asset)) {
             const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
-            const chainKey = getChainKeyFromChain(pool.asset.split(".")[0]);
+            const chainKey = getChainKeyFromChain(asset.chain);
             const tokenAddress = normalizeAddress(poolViemAddress!);
             if (tokenAddress) {
               addTokenData(chainKey, {
@@ -222,7 +229,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                 tokenAddress: tokenAddress,
               });
             }
-          } else if (walletsState[getChainKeyFromChain(assetType)]) {
+          } else if (walletsState[getChainKeyFromChain(asset.chain)]) {
             await fetchNativeTokens(pool);
           }
         });

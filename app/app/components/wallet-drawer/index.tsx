@@ -95,8 +95,8 @@ const Component: FC = () => {
                       <MiddleTruncate text={wallet.address} />
                     </span>
                     <span
-                      className={`cursor-pointer my-auto p-2 rounded-full transition-all transform 
-              hover:bg-blue-100 hover:scale-110 active:scale-95`}
+                      className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
+              hover:bg-blue-100 hover:scale-110 active:scale-95"
                       onClick={() => copy(wallet.address)}
                     >
                       <Copy strokeColor="#627eea" size={14} />
