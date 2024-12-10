@@ -17,7 +17,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAppState } from "@/utils/context";
 
 interface UsePositionStatsProps {
-  refetchInterval?: number;
+  defaultRefetchInterval?: number;
 }
 
 interface PositionsCache {
@@ -47,13 +47,14 @@ export function emptyPositionStats(): PositionStats {
 }
 
 export function usePositionStats({
-  refetchInterval = 15000,
+  defaultRefetchInterval = 15000,
 }: UsePositionStatsProps) {
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     PositionsCache | undefined
   >();
 
   const [addresses, setAddresses] = useState<string[]>([]);
+  const [currentRefetchInterval, setRefetchInterval] = useState<number | undefined>(defaultRefetchInterval)
   const { walletsState } = useAppState();
 
   useEffect(() => {
@@ -69,8 +70,9 @@ export function usePositionStats({
 
   const { isFetching: isPending, error } = useQuery({
     queryKey: ["position-stats", addresses],
+    retry: false,
     enabled: addresses.length > 0,
-    refetchInterval, // TODO: Dependant on pending positions (transaction pending and block confirmation times of pending chains)
+    refetchInterval: currentRefetchInterval, // TODO: Dependant on pending positions (transaction pending and block confirmation times of pending chains)
     queryFn: async () => {
       const resultPools = await getPools();
       const pools = resultPools.data;
@@ -79,6 +81,10 @@ export function usePositionStats({
           address: addresses.join(","),
         },
       });
+
+      if (result.response.status === 404) { // Midgard return 404 if user hasn't positions
+        setRefetchInterval(undefined)
+      }
 
       if (!result.data) {
         throw Error("No member details available");

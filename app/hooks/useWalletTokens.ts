@@ -157,7 +157,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
         return { name, symbol, decimals, balance };
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
