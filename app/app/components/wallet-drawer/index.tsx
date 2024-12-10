@@ -35,7 +35,7 @@ const Component: FC = () => {
     refreshBalances();
   };
 
-  const { copy } = useCopyToClipboard()
+  const { copy } = useCopyToClipboard();
 
   return (
     isWalletDrawerOpen && (
