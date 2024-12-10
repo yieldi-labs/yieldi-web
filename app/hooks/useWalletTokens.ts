@@ -177,9 +177,9 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       };
 
       const fetchNativeTokens = async (pool: PoolDetail) => {
-        const asset = assetFromString(pool.asset)
+        const asset = assetFromString(pool.asset);
         if (!asset) {
-          throw Error (`Invalid asset ${pool.asset}`)
+          throw Error(`Invalid asset ${pool.asset}`);
         }
         const chainKey = getChainKeyFromChain(asset.chain);
 
@@ -212,9 +212,9 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
         if (!pools) return;
         const fetchPromises = pools.map(async (pool) => {
-          const asset = assetFromString(pool.asset)
+          const asset = assetFromString(pool.asset);
           if (!asset) {
-            throw Error (`Invalid asset ${pool.asset}`)
+            throw Error(`Invalid asset ${pool.asset}`);
           }
           if (isERC20(pool.asset)) {
             const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
