@@ -63,7 +63,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.xfi) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () => await connectEVMWallet(window.xfi?.ethereum),
+              [ProviderKey.EVM]: async () =>
+                await connectEVMWallet(window.xfi?.ethereum),
 
               [ProviderKey.THORCHAIN]: async () =>
                 await connectUTXOWallet({
@@ -196,7 +197,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.vultisig) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () => await connectEVMWallet(window.vultisig?.ethereum),
+              [ProviderKey.EVM]: async () =>
+                await connectEVMWallet(window.vultisig?.ethereum),
               [ProviderKey.THORCHAIN]: async () =>
                 await connectUTXOWallet({
                   id: "vultisig-thorchain",

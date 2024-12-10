@@ -17,8 +17,13 @@ import { useAppState } from "@/utils/context";
 
 export function useWalletConnection() {
   const ethConnectors = useConnectors();
-  const { setWalletsState, toggleWalletModal, selectedChains, selectedWallet, walletsState } =
-    useAppState();
+  const {
+    setWalletsState,
+    toggleWalletModal,
+    selectedChains,
+    selectedWallet,
+    walletsState,
+  } = useAppState();
 
   const handleProviderConnection = async (
     wallet: WalletType,
@@ -118,7 +123,7 @@ export function useWalletConnection() {
 
       if (!selectedWallet) return;
 
-      let newWalletState = { ...walletsState }
+      let newWalletState = { ...walletsState };
 
       for (const chain of selectedChains) {
         const connection = await handleProviderConnection(
@@ -136,10 +141,10 @@ export function useWalletConnection() {
           connection.provider,
           connection.address,
           connection.chainId,
-        )
+        );
       }
 
-      setWalletsState(newWalletState)
+      setWalletsState(newWalletState);
       toggleWalletModal();
     } catch (error) {
       console.error(`Error connecting to ${wallet.id}:`, error);

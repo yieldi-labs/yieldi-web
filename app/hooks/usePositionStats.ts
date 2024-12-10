@@ -54,7 +54,9 @@ export function usePositionStats({
   >();
 
   const [addresses, setAddresses] = useState<string[]>([]);
-  const [currentRefetchInterval, setRefetchInterval] = useState<number | undefined>(defaultRefetchInterval)
+  const [currentRefetchInterval, setRefetchInterval] = useState<
+    number | undefined
+  >(defaultRefetchInterval);
   const { walletsState } = useAppState();
 
   useEffect(() => {
@@ -82,8 +84,9 @@ export function usePositionStats({
         },
       });
 
-      if (result.response.status === 404) { // Midgard return 404 if user hasn't positions
-        setRefetchInterval(undefined)
+      if (result.response.status === 404) {
+        // Midgard return 404 if user hasn't positions
+        setRefetchInterval(undefined);
       }
 
       if (!result.data) {
