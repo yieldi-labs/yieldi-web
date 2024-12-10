@@ -15,6 +15,7 @@ import {
   getMinAmountByChain,
   getLiquidityMemo,
   parseAssetString,
+  getChainKeyFromChain,
 } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
 
@@ -49,7 +50,7 @@ const feeBps = 0;
 export function useLiquidityPosition({
   pool: poolProp,
 }: UseLiquidityPositionProps) {
-  const { walletsState, getChainKeyFromChain } = useAppState();
+  const { walletsState } = useAppState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [positions, setPositions] = useState<MemberPool[] | null>(null);

@@ -16,7 +16,7 @@ import { useAppState } from "@/utils/context";
 import { ChainKey, SUPPORTED_WALLETS } from "@/utils/wallet/constants";
 import { getAssetSymbol, getLogoPath } from "@/app/utils";
 import { TokenData } from "@/utils/interfaces";
-import { useWalletTokens } from "@/hooks/useWalletTokens";
+import useCopyToClipboard from "@/hooks/useCopyToClipboard";
 
 const Component: FC = () => {
   const {
@@ -25,15 +25,17 @@ const Component: FC = () => {
     toggleWalletDrawer,
     toggleWalletModal,
   } = useAppState();
-  const { fetch, balanceList } = useWalletTokens(walletsState!);
+  const { refreshBalances, balanceList } = useAppState();
   const handleAddWallet = () => {
     toggleWalletModal();
     toggleWalletDrawer();
   };
 
   const handleWalletRefresh = () => {
-    fetch();
+    refreshBalances();
   };
+
+  const { copy } = useCopyToClipboard();
 
   return (
     isWalletDrawerOpen && (
@@ -81,7 +83,11 @@ const Component: FC = () => {
                     <span className="flex-1 leading-6 px-2">
                       <MiddleTruncate text={wallet.address} />
                     </span>
-                    <span className="cursor-pointer my-auto ">
+                    <span
+                      className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
+              hover:bg-blue-100 hover:scale-110 active:scale-95"
+                      onClick={() => copy(wallet.address)}
+                    >
                       <Copy strokeColor="#627eea" size={14} />
                     </span>
                     <span className="cursor-pointer my-auto ">
