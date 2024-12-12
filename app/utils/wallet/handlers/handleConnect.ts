@@ -11,27 +11,21 @@ export const connectWallet = async (wallet: any): Promise<any> => {
       case "vultisig-bch":
       case "vultisig-doge":
       case "vultisig-ltc":
-        accounts = await wallet.provider.request({
-          method: "request_accounts",
-        });
-        return {
-          provider: wallet.provider,
-          address: accounts,
-        };
       case "vultisig-cosmos":
-        try {
-          const accounts = await wallet.provider.request({
+        accounts = [];
+        accounts = await wallet.provider.request({
+          method: "get_accounts",
+        });
+        if (accounts.length <= 0) {
+          const connectedAcount = await wallet.provider.request({
             method: "request_accounts",
           });
-
-          return {
-            provider: wallet.provider,
-            address: accounts,
-          };
-        } catch (e) {
-          console.error("Cosmos connection error:", e);
-          throw e;
+          accounts.push(connectedAcount);
         }
+        return {
+          provider: wallet.provider,
+          address: accounts[0],
+        };
       case "xdefi-kujira":
       case "xdefi-cosmos":
         try {
@@ -156,7 +150,11 @@ export const connectEVMWallet = async (wallet: any): Promise<any> => {
     let address = "";
 
     if (!wallet.connect || wallet.isConnected()) {
-      const accounts = await wallet.request({ method: "eth_requestAccounts" });
+      let accounts = [];
+      accounts = await wallet.request({ method: "eth_accounts" });
+      if (accounts.length <= 0) {
+        accounts = await wallet.request({ method: "eth_requestAccounts" });
+      }
       address = accounts[0];
     } else {
       const { accounts } = await wallet.connect();

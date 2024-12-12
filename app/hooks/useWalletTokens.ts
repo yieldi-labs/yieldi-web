@@ -4,13 +4,17 @@ import {
   TokenData,
   ConnectedWalletsState,
 } from "@/utils/interfaces";
-import { ChainKey } from "@/utils/wallet/constants";
+import { ChainKey, CHAINS } from "@/utils/wallet/constants";
 import { getPools, PoolDetail } from "@/midgard";
 import { getChainKeyFromChain } from "@/utils/chain";
-import { assetFromString } from "@xchainjs/xchain-util";
+import {
+  assetFromString,
+  baseAmount,
+  baseToAsset,
+} from "@xchainjs/xchain-util";
 import { initialWalletTokensData } from "@/utils/wallet/balances";
 import { useQuery } from "@tanstack/react-query";
-import { chainHandlers } from "@/utils/wallet/handlers/handleBalance";
+import { getBalancePerChainAndAddress } from "@/ctrl/client";
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   const fetchWalletTokens = async () => {
@@ -127,26 +131,56 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       };
     };
 
-    // TODO: We need to parallelize this requests (The EMV switch chain must be taken into account)
-    for (const [chain, tokens] of Object.entries(walletTokensData)) {
-      if (!walletsState || !walletsState[chain as ChainKey]) continue;
+    const chainPromises = Object.entries(walletTokensData).map(
+      async ([chain, tokens]) => {
+        if (!walletsState || !walletsState[chain as ChainKey]) return;
 
-      const chainHandler = chainHandlers[chain as ChainKey];
-      if (!chainHandler) continue;
+        const address = walletsState[chain as ChainKey].address;
 
-      const provider = walletsState[chain as ChainKey].provider;
-      const address = walletsState[chain as ChainKey].address;
-
-      for (const [tokenKey, token] of Object.entries(tokens)) {
-        try {
-          const result = await chainHandler(address, provider, token);
-          updateTokenData(chain as ChainKey, tokenKey, result);
-        } catch (err) {
-          console.error(`Error fetching balance for ${tokenKey}:`, err);
-          updateTokenData(chain as ChainKey, tokenKey, {}, 0);
+        const chainInfo = CHAINS.find(
+          (chainDetail) => chainDetail.name === chain,
+        );
+        if (!chainInfo) {
+          throw new Error("Unknown chain");
         }
-      }
-    }
+
+        const balances = await getBalancePerChainAndAddress(
+          chainInfo.ctrlChainId,
+          address,
+        );
+
+        Object.entries(tokens).forEach(([tokenKey, token]) => {
+          try {
+            const asset = assetFromString(tokenKey);
+            const balance = balances.find((balance) => {
+              if (tokenKey.indexOf("-") === -1) {
+                // Is native
+                return balance.asset.contract === null;
+              }
+              return (
+                balance.asset.contract?.toLowerCase() ===
+                asset?.symbol.split("-")[1].toLowerCase()
+              );
+            });
+
+            const formattedAssetBalance = baseToAsset(
+              baseAmount(balance?.amount.value || 0, token.decimals),
+            )
+              .amount()
+              .toNumber();
+
+            updateTokenData(chain as ChainKey, tokenKey, {
+              balance: formattedAssetBalance,
+            });
+          } catch (err) {
+            console.error(`Error fetching balance for ${tokenKey}:`, err);
+            updateTokenData(chain as ChainKey, tokenKey, {}, 0);
+          }
+        });
+      },
+    );
+
+    await Promise.all(chainPromises);
 
     return newWalletTokensData;
   };
@@ -168,6 +202,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
     enabled: !!walletTokensData,
     retry: false,
+    staleTime: 25000,
   });
 
   return {
