@@ -25,7 +25,7 @@ const Wallet = ({
         ${
           isSupported && !disabled
             ? "opacity-100 cursor-pointer hover:border-primary"
-            : "opacity-50 cursor-not-allowed hover:border-transparent"
+            : "opacity-50 cursor-pointer hover:border-transparent"
         }
          ${className}
       `}
