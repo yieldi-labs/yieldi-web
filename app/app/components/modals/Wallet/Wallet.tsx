@@ -6,15 +6,15 @@ interface WalletProps {
   isSupported: boolean;
   disabled?: boolean;
   onSelect?: () => void;
-  className: string;
+  isSelected: boolean;
 }
 
 const Wallet = ({
   wallet,
   disabled = false,
   isSupported,
+  isSelected,
   onSelect,
-  className,
 }: WalletProps) => {
   return (
     <button
@@ -27,7 +27,11 @@ const Wallet = ({
             ? "opacity-100 cursor-pointer hover:border-primary"
             : "opacity-50 cursor-not-allowed hover:border-transparent"
         }
-         ${className}
+        ${
+          isSelected
+            ? "border-primary"
+            : "border-transparent"
+        } 
       `}
       onClick={() => isSupported && !disabled && onSelect && onSelect()}
     >

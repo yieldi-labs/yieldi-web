@@ -17,7 +17,6 @@ import {
   WalletKey,
 } from "../wallet/constants";
 import {
-  connectEVMWallet,
   connectWallet,
   connectWalletConnect,
 } from "../wallet/handlers/handleConnect";
@@ -31,6 +30,7 @@ import { useWalletTokens } from "@/hooks/useWalletTokens";
 import { createAppKit } from "@reown/appkit/react";
 import { mainnet, avalanche, bsc } from "@reown/appkit/networks";
 import UniversalProvider from "@walletconnect/universal-provider";
+import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
@@ -144,54 +144,50 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             SUPPORTED_WALLETS[walletKey].isAvailable = true; // TODO: Not modify a constant exported from other file. We are merging react state with static definitions
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.EVM]: async () =>
-                await connectEVMWallet(window.xfi?.ethereum),
+                await connectWallet({
+                  id: "xdefi-evm",
+                  provider: window?.xfi?.ethereum,
+                }),
 
               [ProviderKey.THORCHAIN]: async () =>
                 await connectWallet({
                   id: "xdefi-thorchain",
-                  name: "CTRL Wallet",
                   provider: window?.xfi?.thorchain,
                 }),
 
               [ProviderKey.LITECOIN]: async () =>
                 await connectWallet({
                   id: "xdefi-ltc",
-                  name: "CTRL Wallet",
                   provider: window?.xfi?.litecoin,
                 }),
 
               [ProviderKey.DOGECOIN]: async () =>
                 await connectWallet({
                   id: "xdefi-doge",
-                  name: "CTRL Wallet",
                   provider: window?.xfi?.dogecoin,
                 }),
 
               [ProviderKey.BITCOIN]: async () =>
                 await connectWallet({
                   id: "xdefi-utxo",
-                  name: "CTRL Wallet",
                   provider: window?.xfi?.bitcoin,
                 }),
 
               [ProviderKey.BITCOINCASH]: async () =>
                 await connectWallet({
                   id: "xdefi-bch",
-                  name: "CTRL Wallet",
                   provider: window?.xfi?.bitcoincash,
                 }),
 
               [ProviderKey.SOLANA]: async () =>
                 await connectWallet({
                   id: "xdefi-solana",
-                  name: "CTRL Wallet",
                   provider: window?.xfi?.solana,
                 }),
 
               [ProviderKey.COSMOS]: async () =>
                 await connectWallet({
                   id: "xdefi-cosmos",
-                  name: "CTRL Wallet",
                   provider: window?.xfi?.keplr,
                   subchain: "cosmoshub-4",
                 }),
@@ -211,9 +207,12 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () => {
-                return await connectEVMWallet(window.ethereum);
-              },
+              [ProviderKey.EVM]: async () => 
+                await connectWallet({
+                  id: "metamask-evm",
+                  provider: window.ethereum,
+                })
+              ,
             };
           } else {
             SUPPORTED_WALLETS[walletKey].isAvailable = false;
@@ -224,19 +223,20 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.okxwallet) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () => {
-                return await connectEVMWallet(window.okxwallet);
-              },
+              [ProviderKey.EVM]: async () => 
+                await connectWallet({
+                  id: "okx-evm",
+                  provider: window.okxwallet,
+                })
+              ,
               [ProviderKey.BITCOIN]: async () =>
                 await connectWallet({
                   id: "okx-utxo",
-                  name: "OKX Wallet",
                   provider: window.okxwallet.bitcoin,
                 }),
               [ProviderKey.COSMOS]: async () =>
                 await connectWallet({
                   id: "okx-cosmos",
-                  name: "OKX Wallet",
                   provider: window.okxwallet.keplr,
                   subchain: "cosmoshub-4",
                 }),
@@ -255,19 +255,20 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () => {
-                return await connectEVMWallet(window.phantom?.ethereum);
-              },
+              [ProviderKey.EVM]: async () => 
+                await connectWallet({
+                  id: "phantom-evm",
+                  provider: window.phantom?.ethereum,
+                })
+              ,
               [ProviderKey.BITCOIN]: async () =>
                 await connectWallet({
                   id: "phantom-utxo",
-                  name: "Phantom Wallet",
                   provider: window.phantom.bitcoin,
                 }),
               [ProviderKey.SOLANA]: async () =>
                 await connectWallet({
                   id: "phantom-solana",
-                  name: "Phantom Wallet",
                   provider: window.phantom.solana,
                 }),
             };
@@ -281,43 +282,40 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.vultisig) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () => {
-                return await connectEVMWallet(window.vultisig?.ethereum);
-              },
+              [ProviderKey.EVM]: async () => 
+                await connectWallet({
+                  id: "vultisig-evm",
+                  provider: window.vultisig?.ethereum,
+                })
+              ,
               [ProviderKey.THORCHAIN]: async () =>
                 await connectWallet({
                   id: "vultisig-thorchain",
-                  name: "Vultisig",
                   provider: window.thorchain || window.vultisig?.thorchain,
                 }),
               [ProviderKey.BITCOIN]: async () =>
                 await connectWallet({
                   id: "vultisig-utxo",
-                  name: "Vultisig",
                   provider: window.bitcoin || window.vultisig?.bitcoin,
                 }),
               [ProviderKey.BITCOINCASH]: async () =>
                 await connectWallet({
                   id: "vultisig-bch",
-                  name: "Vultisig",
                   provider: window.bitcoincash || window.vultisig?.bitcoincash,
                 }),
               [ProviderKey.LITECOIN]: async () =>
                 await connectWallet({
                   id: "vultisig-ltc",
-                  name: "Vultisig",
                   provider: window.litecoin || window.vultisig?.litecoin,
                 }),
               [ProviderKey.DOGECOIN]: async () =>
                 await connectWallet({
                   id: "vultisig-doge",
-                  name: "Vultisig",
                   provider: window.dogecoin || window.vultisig?.dogecoin,
                 }),
               [ProviderKey.COSMOS]: async () =>
                 await connectWallet({
                   id: "vultisig-cosmos",
-                  name: "Vultisig",
                   provider: window.vultisig?.cosmos,
                   subchain: "cosmoshub-4",
                 }),
@@ -330,9 +328,66 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         case WalletKey.WALLETCONNECT:
           SUPPORTED_WALLETS[walletKey].isAvailable = true;
           SUPPORTED_WALLETS[walletKey].chainConnect = {
+            [ProviderKey.EVM]: async () => 
+              await connectWallet({
+                id: "walletconnect-evm",
+                provider: modal,
+              })
+            ,
+          };
+          break;
+        case WalletKey.LEDGER:
+          SUPPORTED_WALLETS[walletKey].isAvailable = true;
+          SUPPORTED_WALLETS[walletKey].chainConnect = {
             [ProviderKey.EVM]: async () => {
-              connectWalletConnect(modal);
+              const transport = await TransportWebUSB.create();
+              return await connectWallet({
+                id: "ledger-evm", // TODO: Review this approach
+                provider: transport,
+              })
             },
+            [ProviderKey.BITCOIN]: async () => {
+              const transport = await TransportWebUSB.create();
+              return await connectWallet({
+                id: "ledger-btc",
+                provider: transport,
+              })
+            },
+            [ProviderKey.BITCOINCASH]: async () => {
+              const transport = await TransportWebUSB.create();
+              return await connectWallet({
+                id: "ledger-bch",
+                provider: transport
+              })
+            },
+            [ProviderKey.LITECOIN]: async () => {
+              const transport = await TransportWebUSB.create();
+              return await connectWallet({
+                id: "ledger-ltc",
+                provider: transport
+              })
+            },
+            [ProviderKey.DOGECOIN]: async () => {
+              const transport = await TransportWebUSB.create();
+              return await connectWallet({
+                id: "ledger-doge",
+                provider: transport
+              })
+            },
+            [ProviderKey.COSMOS]: async () => {
+              const transport = await TransportWebUSB.create();
+              return await connectWallet({
+                id: "ledger-cosmos",
+                provider: transport
+              })
+            },
+            [ProviderKey.THORCHAIN]: async () => {
+              const transport = await TransportWebUSB.create();
+              return await connectWallet({
+                id: "ledger-thorchain",
+                provider: transport
+              })
+            }
           };
           break;
       }
