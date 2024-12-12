@@ -2,12 +2,17 @@ import { EthereumProvider } from "@walletconnect/ethereum-provider";
 import { Web3Provider } from "@ethersproject/providers";
 
 export const connectUTXOWallet = async (wallet: any): Promise<any> => {
+  // TODO. Why UTXO ?
   try {
     let accounts: any;
     let address = "";
 
     switch (wallet.id) {
       case "vultisig-thorchain":
+      case "vultisig-utxo":
+      case "vultisig-bch":
+      case "vultisig-doge":
+      case "vultisig-ltc":
         accounts = await wallet.provider.request({
           method: "request_accounts",
         });
@@ -90,7 +95,7 @@ export const connectEVMWallet = async (wallet: any): Promise<any> => {
   try {
     let address = "";
 
-    if (!wallet.connect) {
+    if (wallet.isConnected() || !wallet.connect) {
       const accounts = await wallet.request({ method: "eth_requestAccounts" });
       address = accounts[0];
     } else {

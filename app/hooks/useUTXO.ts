@@ -18,6 +18,7 @@ import {
 } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
+import { tranferUTXO } from "@/utils/wallet/walletTransfer";
 
 // Define BTC, DOGE, and LTC assets
 const AssetBTC: Asset = {
@@ -202,27 +203,12 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           feeRate: fees,
         };
 
-        return new Promise<string>((resolve, reject) => {
-          wallet.provider.request(
-            {
-              method: "transfer",
-              params: [transferParams],
-            },
-            (error: any, result: any) => {
-              if (error) {
-                setError(error.message || "Transfer failed");
-                reject(error);
-              } else {
-                // Just return the txid/hash directly
-                setMetadata((prev) => ({
-                  ...prev,
-                  hash: result,
-                }));
-                resolve(result);
-              }
-            },
-          );
-        });
+        const result = await tranferUTXO(wallet, transferParams);
+        setMetadata((prev) => ({
+          ...prev,
+          hash: result,
+        }));
+        return result;
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : "Transfer failed";
         setError(errMsg);
@@ -270,7 +256,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         throw new Error(errMsg);
       }
     },
-    [wallet],
+    [getFees, transfer, wallet?.address],
   );
 
   // Remove liquidity from a pool using transfer

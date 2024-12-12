@@ -1,15 +1,16 @@
 import { useState, useCallback } from "react";
-import { useAccount, useBalance } from "wagmi";
 import {
   parseUnits,
   formatUnits,
   encodeFunctionData,
   Address,
-  decodeEventLog,
   decodeFunctionResult,
 } from "viem";
 import ERC20_ABI from "./erc20.json";
 import ROUTER_ABI from "./routerABI.json";
+import { useAppState } from "@/utils/context";
+import { assetFromString } from "@xchainjs/xchain-util";
+import { getChainKeyFromChain } from "@/utils/chain";
 
 const MAX_UINT256 = BigInt(
   "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
@@ -19,6 +20,7 @@ interface UseContractProps {
   tokenAddress?: Address;
   routerAddress?: Address;
   provider?: any;
+  assetId: string;
 }
 
 interface TokenMetadata {
@@ -40,7 +42,8 @@ async function waitForTransaction(
         });
 
         if (receipt) {
-          if (receipt.status === "0x1") {
+          if (receipt.status === "0x1" || receipt.status === 1) {
+            // TODO: Clarify this discrepancies between wallets (Crtl / Vulticonnect)
             resolve(txHash);
           }
         } else {
@@ -58,8 +61,8 @@ export function useContracts({
   tokenAddress,
   routerAddress,
   provider,
+  assetId,
 }: UseContractProps) {
-  const { address: walletAddress } = useAccount();
   const [error, setError] = useState<string>();
   const [tokenMetadata, setTokenMetadata] = useState<TokenMetadata>({
     name: undefined,
@@ -67,11 +70,16 @@ export function useContracts({
     decimals: undefined,
   });
 
-  // Get token balance
-  const { data: balance } = useBalance({
-    address: walletAddress,
-    token: tokenAddress,
-  });
+  const { walletsState, balanceList } = useAppState();
+
+  const asset = assetFromString(assetId);
+  if (!asset) {
+    throw Error("Invalid asset");
+  }
+
+  const chainKey = getChainKeyFromChain(asset?.chain);
+  const walletAddress = walletsState[chainKey].address;
+  const balance = balanceList[chainKey][assetId].balance;
 
   // Load token metadata
   const loadMetadata = useCallback(async () => {
