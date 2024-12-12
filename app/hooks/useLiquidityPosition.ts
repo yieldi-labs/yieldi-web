@@ -113,6 +113,7 @@ export function useLiquidityPosition({
         ? (tokenAddress as Address | undefined)
         : undefined,
       provider: !utxoChain ? wallet?.provider : undefined,
+      assetId: pool.asset,
     });
 
   const getMemberDetails = useCallback(
