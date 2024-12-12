@@ -78,7 +78,7 @@ export function usePositionStats({
     queryKey: ["position-stats", addresses],
     retry: false,
     enabled: addresses.length > 0,
-    refetchInterval: currentRefetchInterval, // TODO: Dependant on pending positions (transaction pending and block confirmation times of pending chains)
+    refetchInterval: currentRefetchInterval,
     queryFn: async () => {
       const resultPools = await getPools();
       const pools = resultPools.data;
