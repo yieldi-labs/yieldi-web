@@ -3,7 +3,7 @@ import { UIComponents } from "@shared/components";
 import { ChainType } from "@/utils/interfaces";
 import React from "react";
 import { useAppState } from "@/utils/context";
-import { useWalletList } from "@/hooks";
+import { isChainSupportedByWallet } from "@/utils/wallet/utils";
 
 interface ChainSelectorProps {
   chains: ChainType[];
@@ -12,8 +12,7 @@ interface ChainSelectorProps {
 }
 
 export function ChainSelector({ chains, onChainSelect }: ChainSelectorProps) {
-  const { selectedChains } = useAppState();
-  const { isChainSupportedByWallet } = useWalletList();
+  const { selectedChains, selectedWallet } = useAppState();
   const handleSelect = (chainKey: ChainType) => {
     if (selectedChains.includes(chainKey)) {
       onChainSelect(selectedChains.filter((chain) => chain !== chainKey));
@@ -37,13 +36,13 @@ export function ChainSelector({ chains, onChainSelect }: ChainSelectorProps) {
                 ? "border-primary"
                 : "border-transparent"
             }  ${
-              isChainSupportedByWallet(chain)
+              isChainSupportedByWallet(chain, selectedWallet)
                 ? "opacity-100 cursor-pointer"
                 : "opacity-50 cursor-not-allowed "
             }`}
             key={chain.name}
             onClick={() => handleSelect(chain)}
-            disabled={!isChainSupportedByWallet(chain)}
+            disabled={!isChainSupportedByWallet(chain, selectedWallet)}
           >
             <UIComponents.Tooltip text={chain.name}>
               {React.isValidElement(chain.icon)

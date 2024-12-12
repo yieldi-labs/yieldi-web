@@ -124,6 +124,7 @@ export const CHAINS: ChainType[] = [
   },
 ];
 
+// TODO: Duplicate info on CHAINs array. Remove this as part of https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration
 export const EVM_CHAINS: ChainType[] = [
   {
     icon: <ChainSvg.Avax />,
@@ -200,7 +201,7 @@ export const SUPPORTED_WALLETS = {
   [WalletKey.PHANTOM]: {
     id: WalletKey.PHANTOM,
     name: "Phantom",
-    chains: [ChainKey.BITCOIN, ChainKey.ETHEREUM, ChainKey.SOLANA],
+    chains: [ChainKey.ETHEREUM, ChainKey.SOLANA],
     downloadUrl: "https://phantom.app/",
     icon: <WalletSvg.Phantom />,
     isAvailable: false,

@@ -1,32 +1,27 @@
 import React from "react";
 import Loader from "../Loader";
-import {
-  ConnectedWalletsState,
-  TokenData,
-  WalletState,
-  WalletTokensData,
-} from "@/utils/interfaces";
+import { TokenData, WalletState, WalletTokensData } from "@/utils/interfaces";
 import WalletRow from "./WalletRow";
 import BalanceRow from "./BalanceRow";
 import { ChainKey } from "@/utils/wallet/constants";
+import { useAppState } from "@/utils/context";
 
 interface WalletDrawerProps {
   isLoadingTokenList: boolean;
   isLoadingBalance: boolean;
   isBalanceHidden: boolean;
-  walletsState: ConnectedWalletsState;
   onDisconnectWallet: (wallet: WalletState, id: string) => void;
   balanceList?: WalletTokensData;
 }
 
-export default function WalletDrawer({
+export default function WalletDrawerContent({
   isLoadingTokenList,
   isLoadingBalance,
   isBalanceHidden,
-  walletsState,
   onDisconnectWallet,
   balanceList,
 }: WalletDrawerProps) {
+  const { walletsState } = useAppState();
   if (isLoadingTokenList) {
     return (
       <div className="flex items-center justify-center my-4 h-32">

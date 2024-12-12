@@ -4,8 +4,8 @@ import { useAppState } from "@/utils/context";
 import { WalletState } from "@/utils/interfaces";
 import { useMobileDetection } from "@shared/hooks";
 import WalletDrawerHeader from "./WalletDrawerHeader";
-import WalletDrawer from "./WalletDrawer";
 import Modal from "@/app/modal";
+import WalletDrawerContent from "./WalletDrawerContent";
 
 const WalletDrawerContainer: FC = () => {
   const {
@@ -74,11 +74,10 @@ const WalletDrawerContainer: FC = () => {
               onDiconnect={handleDisconnectAllWallet}
             />
           </div>
-          <WalletDrawer
+          <WalletDrawerContent
             isLoadingTokenList={isLoadingTokenList}
             isLoadingBalance={isLoadingBalance}
             isBalanceHidden={isBalanceHidden}
-            walletsState={walletsState}
             balanceList={balanceList}
             onDisconnectWallet={handleDisconnectWallet}
           />
@@ -104,11 +103,10 @@ const WalletDrawerContainer: FC = () => {
             />
           </div>
           <div className="bg-transparent-radial backdrop-blur-[14px] overflow-y-auto overflow-x-hidden custom-scroll rounded-b-lg shadow-2xl max-h-[652px] py-2">
-            <WalletDrawer
+            <WalletDrawerContent
               isLoadingTokenList={isLoadingTokenList}
               isLoadingBalance={isLoadingBalance}
               isBalanceHidden={isBalanceHidden}
-              walletsState={walletsState}
               balanceList={balanceList}
               onDisconnectWallet={handleDisconnectWallet}
             />
