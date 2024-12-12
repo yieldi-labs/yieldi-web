@@ -17,7 +17,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAppState } from "@/utils/context";
 
 interface UsePositionStatsProps {
-  refetchInterval?: number;
+  defaultRefetchInterval?: number;
 }
 
 interface PositionsCache {
@@ -47,13 +47,16 @@ export function emptyPositionStats(): PositionStats {
 }
 
 export function usePositionStats({
-  refetchInterval = 15000,
+  defaultRefetchInterval = 15000,
 }: UsePositionStatsProps) {
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     PositionsCache | undefined
   >();
 
   const [addresses, setAddresses] = useState<string[]>([]);
+  const [currentRefetchInterval, setRefetchInterval] = useState<
+    number | undefined
+  >(defaultRefetchInterval);
   const { walletsState } = useAppState();
 
   useEffect(() => {
@@ -67,10 +70,15 @@ export function usePositionStats({
     setAddresses(addresses);
   }, [walletsState]);
 
-  const { isFetching: isPending, error } = useQuery({
+  const {
+    isFetching: isPending,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["position-stats", addresses],
+    retry: false,
     enabled: addresses.length > 0,
-    refetchInterval, // TODO: Dependant on pending positions (transaction pending and block confirmation times of pending chains)
+    refetchInterval: currentRefetchInterval,
     queryFn: async () => {
       const resultPools = await getPools();
       const pools = resultPools.data;
@@ -79,6 +87,11 @@ export function usePositionStats({
           address: addresses.join(","),
         },
       });
+
+      if (result.response.status === 404) {
+        // Midgard return 404 if user hasn't positions
+        setRefetchInterval(undefined);
+      }
 
       if (!result.data) {
         throw Error("No member details available");
@@ -106,6 +119,22 @@ export function usePositionStats({
     },
   });
 
+  useEffect(() => {
+    const hasPendingPositions = Object.values(
+      currentPositionsStats?.positions || {},
+    ).some((positions) =>
+      Object.values(positions).some(
+        (position) => position?.status === PositionStatus.LP_POSITION_PENDING,
+      ),
+    );
+
+    if (hasPendingPositions) {
+      setRefetchInterval(defaultRefetchInterval);
+    } else {
+      setRefetchInterval(undefined);
+    }
+  }, [currentPositionsStats, defaultRefetchInterval]);
+
   const markPositionAsPending = useCallback(
     (pooldId: string, type: PositionType) => {
       setCurrentPositionsStats((prev) => {
@@ -126,11 +155,12 @@ export function usePositionStats({
             status: PositionStatus.LP_POSITION_PENDING,
           };
         }
-
+        setRefetchInterval(defaultRefetchInterval);
+        refetch();
         return updatedPositions as PositionsCache;
       });
     },
-    [],
+    [defaultRefetchInterval, refetch],
   );
 
   const updatePendingPositions = (

@@ -24,7 +24,7 @@ import { useWalletTokens } from "@/hooks/useWalletTokens";
 interface AppStateContextType {
   isWalletModalOpen: boolean;
   toggleWalletModal: () => void;
-  walletsState: ConnectedWalletsState | null;
+  walletsState: ConnectedWalletsState;
   setWalletsState: React.Dispatch<React.SetStateAction<ConnectedWalletsState>>;
   toggleWalletDrawer: () => void;
   isWalletDrawerOpen: boolean;
@@ -63,9 +63,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.xfi) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType,
-              ) => await connectEVMWallet(window.xfi?.ethereum),
+              [ProviderKey.EVM]: async () =>
+                await connectEVMWallet(window.xfi?.ethereum),
 
               [ProviderKey.THORCHAIN]: async () =>
                 await connectUTXOWallet({
@@ -198,9 +197,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.vultisig) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType,
-              ) => await connectEVMWallet(window.vultisig?.ethereum),
+              [ProviderKey.EVM]: async () =>
+                await connectEVMWallet(window.vultisig?.ethereum),
               [ProviderKey.THORCHAIN]: async () =>
                 await connectUTXOWallet({
                   id: "vultisig-thorchain",
