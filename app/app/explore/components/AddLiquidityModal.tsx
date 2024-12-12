@@ -64,11 +64,11 @@ export default function AddLiquidityModal({
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
-  const runeBalance = balanceList[ChainKey.THORCHAIN]["THOR.RUNE"]
-    ? balanceList[ChainKey.THORCHAIN]["THOR.RUNE"].balance
+  const runeBalance = balanceList![ChainKey.THORCHAIN]["THOR.RUNE"]
+    ? balanceList![ChainKey.THORCHAIN]["THOR.RUNE"].balance
     : 0;
   const assetBalance =
-    balanceList[
+    balanceList![
       getChainKeyFromChain(assetFromString(pool.asset)?.chain as string)
     ][pool.asset].balance;
 
@@ -101,7 +101,7 @@ export default function AddLiquidityModal({
   };
 
   const handleRunePercentageClick = (percentage: number) => {
-    if (balanceList[ChainKey.THORCHAIN]["THOR.RUNE"].balance <= 0) return;
+    if (balanceList![ChainKey.THORCHAIN]["THOR.RUNE"].balance <= 0) return;
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;

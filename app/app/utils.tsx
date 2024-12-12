@@ -93,7 +93,7 @@ export function formatNumber(
   decimals = 8,
   decimalsShown = 4,
 ) {
-  if (!amount && amount != 0) return "-";
+  if (!amount && amount != 0) return "0";
   if (typeof amount !== "number") {
     amount = parseFloat(amount) / 10 ** decimals;
   }

@@ -17,6 +17,7 @@ import { ChainKey, SUPPORTED_WALLETS } from "@/utils/wallet/constants";
 import { getAssetSymbol, getLogoPath } from "@/app/utils";
 import { TokenData } from "@/utils/interfaces";
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
+import Loader from "../Loader";
 
 const Component: FC = () => {
   const {
@@ -25,7 +26,7 @@ const Component: FC = () => {
     toggleWalletDrawer,
     toggleWalletModal,
   } = useAppState();
-  const { refreshBalances, balanceList } = useAppState();
+  const { refreshBalances, balanceList, isLoadingBalance } = useAppState();
   const handleAddWallet = () => {
     toggleWalletModal();
     toggleWalletDrawer();
@@ -46,25 +47,30 @@ const Component: FC = () => {
         />
         <div className="bg-secondary border-b-4 border-l-4 border-t-4 border-white fixed h-full right-0 rounded-l-large top-0 w-[360px] z-20">
           <div className="border-b flex py-4">
-            <span className="flex-1 font-bold leading-6 px-4 text-2xl">
+            <span className="inline-flex items-center w-full font-bold leading-6 px-4 text-2xl">
               Wallet
             </span>
-            <span className="border-r cursor-pointer px-2">
+            <span
+              className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
+              hover:bg-blue-100 hover:scale-110 active:scale-95"
+            >
               <Eye strokeColor="#627eea" strokeWidth={1.5} />
             </span>
             <span
-              className="border-r cursor-pointer px-2"
+              className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
+              hover:bg-blue-100 hover:scale-110 active:scale-95"
               onClick={handleWalletRefresh}
             >
               <Synchronize strokeColor="#627eea" strokeWidth={1.5} />
             </span>
             <span
-              className="border-r cursor-pointer px-2"
+              className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
+              hover:bg-blue-100 hover:scale-110 active:scale-95"
               onClick={handleAddWallet}
             >
               <Plus strokeColor="#627eea" strokeWidth={1.5} />
             </span>
-            <span className="cursor-pointer px-2">
+            <span className="cursor-pointer my-auto p-2 rounded-full transition-all transform hover:scale-110 active:scale-95">
               <Exit strokeColor="#ff6656" strokeWidth={1.5} />
             </span>
           </div>
@@ -124,11 +130,15 @@ const Component: FC = () => {
                                   {token.chainName}
                                 </span>
                               </div>
-                              <span className="font-bold">
-                                {token.balance > 0
-                                  ? formatNumber(token.balance, 6)
-                                  : formatNumber(token.formattedBalance!, 6)}
-                              </span>
+                              {
+                                isLoadingBalance ?
+                                <Loader sizeInPixels={4}/> : 
+                                <span className="font-bold">
+                                  {token.balance > 0
+                                    ? formatNumber(token.balance, 6)
+                                    : formatNumber(token.formattedBalance!, 6)}
+                                </span>
+                              }
                             </div>
                           </div>
                         );
