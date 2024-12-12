@@ -36,16 +36,9 @@ export default function WalletModal() {
   );
   const handleWalletSelect = (wallet: WalletType): void => {
     const validChains = wallet.chains;
-    if (!selectedChains.length || selectedWallet) {
-      if (selectedWallet === wallet) {
-        setSelectedChains([]);
-        setSelectedWallet(undefined);
-      } else {
-        setSelectedChains(
-          CHAINS.filter(({ name }) => validChains.includes(name)),
-        );
-        setSelectedWallet(wallet);
-      }
+    if (selectedWallet === wallet) {
+      setSelectedChains([]);
+      setSelectedWallet(undefined);
     } else {
       setSelectedChains(
         selectedChains.filter(({ name }) => validChains.includes(name)),

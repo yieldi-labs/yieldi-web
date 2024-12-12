@@ -162,6 +162,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             onAdd={() => {}}
             onRemove={() => handleRemove(position)}
             hideAddButton={true}
+            hideStatus={true}
           />
         );
       });
@@ -202,11 +203,13 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           (positions[pool.asset].SLP || positions[pool.asset].DLP) && (
             <>
               <div className="flex items-center w-full px-3 py-2 text-sm text-center">
-                <div className="md:w-1/5 w-1/2"></div>
-                <div className="md:w-1/5 w-1/2">Gain (%)</div>
-                <div className="md:w-1/5 w-1/2">Deposit</div>
-                <div className="md:w-1/5 w-1/2">Gain</div>
-                <div className="md:w-2/5 w-1/2"></div>
+                <div className="py-3 md:w-1/5 w-1/2"></div>
+                <div className="flex md:w-4/5 w-1/2">
+                  <div className="md:w-1/5 px-3 w-1/2 flex">Gain (%)</div>
+                  <div className="md:w-1/5 px-3 w-1/2 flex">Deposit</div>
+                  <div className="md:w-1/5 px-3 w-1/2 flex">Gain</div>
+                  <div className="md:w-1/5 px-3 w-1/2 flex"></div>
+                </div>
               </div>
               {renderPositionsDetails()}
             </>

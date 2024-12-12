@@ -17,7 +17,7 @@ import { twMerge } from "tailwind-merge";
 import { useWalletConnection } from "@/hooks";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
-import { PositionType } from "@/hooks/dataTransformers/positionsTransformer";
+import { PositionStatus, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 
 import { parseAssetString } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
@@ -35,6 +35,9 @@ export default function AddLiquidityModal({
   runePriceUSD,
   onClose,
 }: AddLiquidityModalProps) {
+
+  console.log('runePriceUSD', runePriceUSD)
+
   const inputRef = useRef<HTMLInputElement>(null);
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
@@ -171,6 +174,7 @@ export default function AddLiquidityModal({
             getNetworkAddressFromLocalStorage(ChainKey.THORCHAIN) || undefined;
         } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
           const identifier = getChainKeyFromChain(pool.asset.split(".")[0]);
+          console.log('identifier', identifier)
           pairedAddress =
             getNetworkAddressFromLocalStorage(identifier) || undefined;
         }
@@ -187,7 +191,7 @@ export default function AddLiquidityModal({
         pairedAddress,
       });
 
-      markPositionAsPending(pool.asset, type);
+      markPositionAsPending(pool.asset, type, PositionStatus.LP_POSITION_DEPOSIT_PENDING);
 
       if (hash) {
         setTimeout(() => {

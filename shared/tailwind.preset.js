@@ -32,9 +32,14 @@ module.exports = {
         highlight: "#A1FD59",
         secondaryBtn: "#627EEA",
         red: "#ff6656",
+        blue: {
+          DEFAULT: "#627EEA",
+          100: "#627EEA26"
+        },
         border: {
           DEFAULT: "#524B48",
           light: "#6D655D",
+          blue: "#627EEA"
         },
         gray: {
           300: "#CED2D3",

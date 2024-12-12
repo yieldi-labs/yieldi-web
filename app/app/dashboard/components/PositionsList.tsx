@@ -108,7 +108,8 @@ export default function PositionsList({
               onSort={sortData}
             />
           </div>
-          <div className="hidden md:flex px-3 py-3 w-2/5">Actions</div>
+          <div className="hidden md:flex px-3 py-3 w-1/5">Status</div>
+          <div className="hidden md:flex px-3 py-3 w-1/5">Actions</div>
         </div>
       </div>
       <div className="space-y-1.5">
