@@ -120,7 +120,7 @@ export function usePositionStats({
       currentPositionsStats?.positions || {},
     ).some((positions) =>
       Object.values(positions).some(
-        (position) => position?.status === PositionStatus.LP_POSITION_PENDING,
+        (position) => position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING || position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
       ),
     );
 
@@ -132,7 +132,7 @@ export function usePositionStats({
   }, [currentPositionsStats, defaultRefetchInterval]);
 
   const markPositionAsPending = useCallback(
-    (pooldId: string, type: PositionType) => {
+    (pooldId: string, positionType: PositionType, status: PositionStatus) => {
       setCurrentPositionsStats((prev) => {
         const updatedPositions = { ...prev };
 
@@ -148,9 +148,9 @@ export function usePositionStats({
           updatedPositions.positions[pooldId][type] =
             emptyPositionStats(pooldId);
         } else {
-          updatedPositions.positions[pooldId][type] = {
-            ...updatedPositions.positions[pooldId][type],
-            status: PositionStatus.LP_POSITION_PENDING,
+          updatedPositions.positions[pooldId][positionType] = {
+            ...updatedPositions.positions[pooldId][positionType],
+            status: status,
           };
         }
         setRefetchInterval(defaultRefetchInterval);
@@ -179,7 +179,7 @@ export function usePositionStats({
     }
     Object.entries(previous.positions).forEach(([poolId, positions]) => {
       Object.entries(positions).forEach(([type, position]) => {
-        if (position?.status === PositionStatus.LP_POSITION_PENDING) {
+        if (position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING || position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING) {
           const positionType = type as PositionType;
           const previousData = previous.positions[poolId]?.[positionType];
           const currentData = newPayload.positions[poolId]?.[positionType];

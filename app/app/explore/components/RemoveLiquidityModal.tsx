@@ -16,7 +16,7 @@ import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
 import { getChainKeyFromChain, parseAssetString } from "@/utils/chain";
-import { PositionType } from "@/hooks/dataTransformers/positionsTransformer";
+import { PositionStatus, PositionType } from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/PositionsContext";
 
 interface RemoveLiquidityModalProps {
@@ -100,7 +100,7 @@ export default function RemoveLiquidityModal({
       });
 
       if (hash) {
-        markPositionAsPending(pool.asset, PositionType.SLP); // TODO: Update with support for SLP and DLP
+        markPositionAsPending(pool.asset, PositionType.SLP, PositionStatus.LP_POSITION_WITHDRAWAL_PENDING); // TODO: Update with support for SLP and DLP
         setTxHash(hash);
       }
     } catch (err) {
