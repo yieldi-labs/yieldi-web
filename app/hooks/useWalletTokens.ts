@@ -10,13 +10,16 @@ import { getBalance, getPools, PoolDetail } from "@/midgard";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { assetFromString, baseToAsset } from "@xchainjs/xchain-util";
 import { useUTXO } from "./useUTXO";
-import { checkAndSwitchChain, initialWalletTokensData } from "@/utils/wallet/balances";
+import {
+  checkAndSwitchChain,
+  initialWalletTokensData,
+} from "@/utils/wallet/balances";
 import { useQuery } from "@tanstack/react-query";
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   const [walletTokensData, setWalletTokensData] = useState<WalletTokensData>();
 
-  console.log('walletTokensData', walletTokensData)
+  console.log("walletTokensData", walletTokensData);
 
   // TODO: Avoid duplication of this condition between useUTXO and this line (https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration#comment-d10c7c6f)
   const { getBalance: getBalanceBtc } = useUTXO({
@@ -80,7 +83,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
             );
           }
         } else {
-          console.log('This is the case')
+          console.log("This is the case");
         }
       };
 
@@ -163,7 +166,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   };
 
   const getTokenBalances = async (walletTokensData: WalletTokensData) => {
-    let newWalletTokensData: WalletTokensData = { ...walletTokensData }
+    let newWalletTokensData: WalletTokensData = { ...walletTokensData };
     for (const key of Object.keys(walletTokensData)) {
       if (walletsState && walletsState[key]) {
         const list = walletTokensData[key as ChainKey];
@@ -183,31 +186,31 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                   );
                   if (info?.balance) {
                     newWalletTokensData = {
-                        ...newWalletTokensData,
-                        [key as ChainKey]: {
-                          ...newWalletTokensData[key as ChainKey],
-                          [tokenKey]: {
-                            ...newWalletTokensData[key as ChainKey][tokenKey],
-                            ...walletTokensData[key as ChainKey][tokenKey],
-                            ...info,
-                          },
-                        },
-                    };
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  newWalletTokensData =  {
                       ...newWalletTokensData,
                       [key as ChainKey]: {
                         ...newWalletTokensData[key as ChainKey],
                         [tokenKey]: {
                           ...newWalletTokensData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          formattedBlanace: 0,
-                          balance: 0,
+                          ...info,
                         },
                       },
                     };
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
+                  newWalletTokensData = {
+                    ...newWalletTokensData,
+                    [key as ChainKey]: {
+                      ...newWalletTokensData[key as ChainKey],
+                      [tokenKey]: {
+                        ...newWalletTokensData[key as ChainKey][tokenKey],
+                        ...walletTokensData[key as ChainKey][tokenKey],
+                        formattedBlanace: 0,
+                        balance: 0,
+                      },
+                    },
+                  };
                 }
               }
             }
@@ -222,39 +225,39 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                     walletsState[ChainKey.THORCHAIN].address,
                   );
                   if (info) {
-                    newWalletTokensData =  {
-                        ...newWalletTokensData,
-                        [key as ChainKey]: {
-                          ...newWalletTokensData[key as ChainKey],
-                          [tokenKey]: {
-                            ...newWalletTokensData[key as ChainKey][tokenKey],
-                            ...walletTokensData[key as ChainKey][tokenKey],
-                            balance: Number(
-                              formatNumber(
-                                info?.coins.find(
-                                  (coin) => coin.asset === "THOR.RUNE",
-                                )?.amount || 0,
-                                8,
-                              ),
-                            ),
-                          },
-                        },
-                      };
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  newWalletTokensData = {
+                    newWalletTokensData = {
                       ...newWalletTokensData,
                       [key as ChainKey]: {
                         ...newWalletTokensData[key as ChainKey],
                         [tokenKey]: {
                           ...newWalletTokensData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          formattedBlanace: 0,
-                          balance: 0,
+                          balance: Number(
+                            formatNumber(
+                              info?.coins.find(
+                                (coin) => coin.asset === "THOR.RUNE",
+                              )?.amount || 0,
+                              8,
+                            ),
+                          ),
                         },
                       },
                     };
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
+                  newWalletTokensData = {
+                    ...newWalletTokensData,
+                    [key as ChainKey]: {
+                      ...newWalletTokensData[key as ChainKey],
+                      [tokenKey]: {
+                        ...newWalletTokensData[key as ChainKey][tokenKey],
+                        ...walletTokensData[key as ChainKey][tokenKey],
+                        formattedBlanace: 0,
+                        balance: 0,
+                      },
+                    },
+                  };
                 }
               }
             }
@@ -273,31 +276,31 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                   );
                   if (info) {
                     newWalletTokensData = {
-                        ...newWalletTokensData,
-                        [key as ChainKey]: {
-                          ...newWalletTokensData[key as ChainKey],
-                          [tokenKey]: {
-                            ...newWalletTokensData[key as ChainKey][tokenKey],
-                            ...walletTokensData[key as ChainKey][tokenKey],
-                            ...info,
-                          },
-                        },
-                      };
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  newWalletTokensData = {
                       ...newWalletTokensData,
                       [key as ChainKey]: {
                         ...newWalletTokensData[key as ChainKey],
                         [tokenKey]: {
                           ...newWalletTokensData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          formattedBlanace: 0,
-                          balance: 0,
+                          ...info,
                         },
                       },
                     };
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
+                  newWalletTokensData = {
+                    ...newWalletTokensData,
+                    [key as ChainKey]: {
+                      ...newWalletTokensData[key as ChainKey],
+                      [tokenKey]: {
+                        ...newWalletTokensData[key as ChainKey][tokenKey],
+                        ...walletTokensData[key as ChainKey][tokenKey],
+                        formattedBlanace: 0,
+                        balance: 0,
+                      },
+                    },
+                  };
                 }
               }
             }
@@ -306,7 +309,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
         }
       }
     }
-    return newWalletTokensData
+    return newWalletTokensData;
   };
 
   useEffect(() => {
@@ -319,17 +322,21 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   //   getTokenBalances();
   // }, [walletTokensData]);
 
-  const { data: walletBalances, isFetching, refetch } = useQuery({
+  const {
+    data: walletBalances,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ["walletTokens", walletTokensData],
     queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
     enabled: !!walletTokensData,
   });
 
-  console.log('isLoading', isFetching)
+  console.log("isLoading", isFetching);
 
   return {
     refreshBalances: refetch, // TODO: Avoid refresh all at once
     balanceList: walletBalances,
-    isLoadingBalance: isFetching
+    isLoadingBalance: isFetching,
   };
 };

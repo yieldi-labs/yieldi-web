@@ -130,15 +130,15 @@ const Component: FC = () => {
                                   {token.chainName}
                                 </span>
                               </div>
-                              {
-                                isLoadingBalance ?
-                                <Loader sizeInPixels={4}/> : 
+                              {isLoadingBalance ? (
+                                <Loader sizeInPixels={4} />
+                              ) : (
                                 <span className="font-bold">
                                   {token.balance > 0
                                     ? formatNumber(token.balance, 6)
                                     : formatNumber(token.formattedBalance!, 6)}
                                 </span>
-                              }
+                              )}
                             </div>
                           </div>
                         );
