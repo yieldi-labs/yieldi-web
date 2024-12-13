@@ -125,7 +125,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
       await fetchPoolTokens();
 
-      return ({ ...updatedTokensData });
+      return { ...updatedTokensData };
     } catch (error) {
       console.error("Error fetching wallet balances:", error);
     }
@@ -305,14 +305,12 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     return newWalletTokensData;
   };
 
-  const {
-    data: walletTokensData,
-    isFetching: isFetchingWalletTokens,
-  } = useQuery({
-    queryKey: ["walletTokens", walletsState],
-    queryFn: () => fetchWalletTokens(),
-    enabled: Object.keys(walletsState).length > 0,
-  });
+  const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
+    useQuery({
+      queryKey: ["walletTokens", walletsState],
+      queryFn: () => fetchWalletTokens(),
+      enabled: Object.keys(walletsState).length > 0,
+    });
 
   const {
     data: walletBalances,
@@ -328,6 +326,6 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     refreshBalances: refetch, // TODO: Avoid refresh all at once
     balanceList: walletBalances,
     isLoadingBalance: isFetching,
-    isLoadingTokenList: isFetchingWalletTokens
+    isLoadingTokenList: isFetchingWalletTokens,
   };
 };

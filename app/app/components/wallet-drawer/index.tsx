@@ -81,12 +81,14 @@ const Component: FC = () => {
             <span
               className="cursor-pointer my-auto p-2 rounded-full transition-all transform hover:scale-110 active:scale-95"
               onClick={() => {
-                {Object.keys(walletsState!).map((key) => {
-                  const wallet = walletsState![key];
-                  wallet.provider.disconnect()
-                })}
-                setWalletsState({})
-                toggleWalletDrawer()
+                {
+                  Object.keys(walletsState!).map((key) => {
+                    const wallet = walletsState![key];
+                    wallet.provider.disconnect();
+                  });
+                }
+                setWalletsState({});
+                toggleWalletDrawer();
               }}
             >
               <Exit strokeColor="#ff6656" strokeWidth={1.5} />
@@ -95,7 +97,7 @@ const Component: FC = () => {
           <div className="overflow-auto max-h-[calc(100vh-6rem)] custom-scroll ">
             {isLoadingTokenList ? (
               <div className="flex items-center justify-center my-3 h-32">
-                  <Loader />
+                <Loader />
               </div>
             ) : (
               <>
@@ -109,7 +111,7 @@ const Component: FC = () => {
                             SUPPORTED_WALLETS[wallet.walletId].icon,
                             {
                               className: "icon",
-                            }
+                            },
                           )}
                         </span>
                         <span className="flex-3 font-bold leading-6">
@@ -136,7 +138,7 @@ const Component: FC = () => {
                           onClick={() => {
                             wallet.provider.disconnect();
                             if (Object.keys(walletsState).length === 1) {
-                              toggleWalletDrawer() 
+                              toggleWalletDrawer();
                             }
                             setWalletsState((prev) => {
                               // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -148,55 +150,56 @@ const Component: FC = () => {
                           <Exit strokeColor="#ff6656" size={14} />
                         </span>
                       </div>
-                      {balanceList ?
+                      {balanceList ? (
                         <>
-                          {
-                            Object.values(balanceList[key as ChainKey]).map(
-                              (token: TokenData) => {
-                                return (
-                                  <div
-                                    key={token.chainName + token.asset}
-                                    className="px-2 py-4"
-                                  >
-                                    <div className="flex gap-2 items-center">
-                                      <Image
-                                        src={getLogoPath(token.asset)}
-                                        alt={`${getAssetSymbol(token.asset)} logo`}
-                                        width={26}
-                                        height={26}
-                                        className="rounded-full"
-                                      />
-                                      <div className="flex flex-1 flex-col">
-                                        <span className="font-bold leading-5">
-                                          {token.symbol}
-                                        </span>
-                                        <span className="leading-4 text-gray-500">
-                                          {token.chainName}
-                                        </span>
-                                      </div>
-                                      {isLoadingBalance ? (
-                                        <Loader sizeInPixels={4} />
-                                      ) : isBalanceHidden ? (
-                                        <span className="font-bold">***</span>
-                                      ) : (
-                                        <span className="font-bold">
-                                          {token.balance > 0
-                                            ? formatNumber(token.balance, 6)
-                                            : formatNumber(
-                                                token.formattedBalance!,
-                                                6
-                                              )}
-                                        </span>
-                                      )}
+                          {Object.values(balanceList[key as ChainKey]).map(
+                            (token: TokenData) => {
+                              return (
+                                <div
+                                  key={token.chainName + token.asset}
+                                  className="px-2 py-4"
+                                >
+                                  <div className="flex gap-2 items-center">
+                                    <Image
+                                      src={getLogoPath(token.asset)}
+                                      alt={`${getAssetSymbol(token.asset)} logo`}
+                                      width={26}
+                                      height={26}
+                                      className="rounded-full"
+                                    />
+                                    <div className="flex flex-1 flex-col">
+                                      <span className="font-bold leading-5">
+                                        {token.symbol}
+                                      </span>
+                                      <span className="leading-4 text-gray-500">
+                                        {token.chainName}
+                                      </span>
                                     </div>
+                                    {isLoadingBalance ? (
+                                      <Loader sizeInPixels={4} />
+                                    ) : isBalanceHidden ? (
+                                      <span className="font-bold">***</span>
+                                    ) : (
+                                      <span className="font-bold">
+                                        {token.balance > 0
+                                          ? formatNumber(token.balance, 6)
+                                          : formatNumber(
+                                              token.formattedBalance!,
+                                              6,
+                                            )}
+                                      </span>
+                                    )}
                                   </div>
-                                );
-                              }
-                            )
-                          }
+                                </div>
+                              );
+                            },
+                          )}
                         </>
-                        : <div className="flex items-center justify-center mt-4"><Loader /></div>
-                      }
+                      ) : (
+                        <div className="flex items-center justify-center mt-4">
+                          <Loader />
+                        </div>
+                      )}
                     </div>
                   );
                 })}

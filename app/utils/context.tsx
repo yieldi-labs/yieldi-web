@@ -55,9 +55,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     setIsWalletDrawerOpen((prevState) => !prevState);
   };
 
-  const { refreshBalances, balanceList, isLoadingBalance,  isLoadingTokenList } = useWalletTokens(
-    walletsState!,
-  );
+  const { refreshBalances, balanceList, isLoadingBalance, isLoadingTokenList } =
+    useWalletTokens(walletsState!);
 
   const checkAvailableWallets = (window: any) => {
     Object.keys(SUPPORTED_WALLETS).forEach((key) => {
@@ -264,7 +263,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         refreshBalances,
         balanceList,
         isLoadingBalance,
-        isLoadingTokenList
+        isLoadingTokenList,
       }}
     >
       {children}
