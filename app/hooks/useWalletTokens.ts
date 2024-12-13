@@ -62,11 +62,16 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     chain: "DOGE",
     wallet: walletsState["Dogecoin"],
   });
+  const { getBalance: getBalanceBch } = useUTXO({
+    chain: "BCH",
+    wallet: walletsState["BitcoinCash"],
+  });
 
   const utxoBalancesHandlers = {
     [ChainKey.BITCOIN]: getBalanceBtc,
     [ChainKey.LITECOIN]: getBalanceLtc,
     [ChainKey.DOGECOIN]: getBalanceDoge,
+    [ChainKey.BITCOINCASH]: getBalanceBch,
   };
 
   const getERC20TokenInfo = async (
@@ -360,7 +365,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   };
 
   const getUTXOInfo = async (
-    chainKey: "Bitcoin" | "Dogecoin" | "Litecoin",
+    chainKey: "Bitcoin" | "Dogecoin" | "Litecoin" | "BitcoinCash",
     walletAddress: string,
   ) => {
     // TODO: Remove once unify chains configurations (https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration#comment-d10c7c6f)
@@ -480,7 +485,8 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
           }
           case ChainKey.DOGECOIN:
           case ChainKey.LITECOIN:
-          case ChainKey.BITCOIN: {
+          case ChainKey.BITCOIN:
+          case ChainKey.BITCOINCASH: {
             for (const tokenKey of Object.keys(list)) {
               const token = list[tokenKey];
               if (token.balance === 0) {

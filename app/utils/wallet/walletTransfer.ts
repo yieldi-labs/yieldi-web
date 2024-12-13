@@ -13,7 +13,7 @@ interface TransactionParams {
   feeRate: number;
 }
 
-export const tranferUTXO = async (
+export const transferUTXO = async (
   wallet: WalletState,
   transferParams: TransactionParams,
 ): Promise<any> => {

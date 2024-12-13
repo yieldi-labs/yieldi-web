@@ -111,7 +111,7 @@ export const getMinAmountByChain = (chain: SupportedChain): number => {
   switch (chain) {
     case SupportedChain.Bitcoin:
     case SupportedChain.Litecoin:
-      // case SupportedChain.BitcoinCash:
+    case SupportedChain.BitcoinCash:
       return 0.00010001;
     case SupportedChain.Dogecoin:
       return 1.00000001;
@@ -223,6 +223,12 @@ export const getProviderTypeFromChain = (chain: string): ProviderKey => {
     }
     case "BTC": {
       return ProviderKey.BITCOIN;
+    }
+    case "LTC": {
+      return ProviderKey.LITECOIN;
+    }
+    case "BCH": {
+      return ProviderKey.BITCOINCASH;
     }
     case "DOGE": {
       return ProviderKey.DOGECOIN;
