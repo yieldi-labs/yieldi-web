@@ -25,7 +25,7 @@ interface PositionsCache {
   pools: PoolDetails;
 }
 
-export function emptyPositionStats(asset = 'BTC.BTC'): PositionStats {
+export function emptyPositionStats(asset = "BTC.BTC"): PositionStats {
   return {
     assetId: asset,
     status: PositionStatus.LP_POSITION_COMPLETE,
@@ -136,18 +136,17 @@ export function usePositionStats({
       setCurrentPositionsStats((prev) => {
         const updatedPositions = { ...prev };
 
-        if (
-          !updatedPositions.positions
-        ) {
+        if (!updatedPositions.positions) {
           throw Error("Pool or positions does not exist");
         }
 
         if (!updatedPositions.positions[pooldId]) {
-          updatedPositions.positions[pooldId] = { DLP: null, SLP: null }
+          updatedPositions.positions[pooldId] = { DLP: null, SLP: null };
         }
 
         if (!updatedPositions.positions[pooldId][type]) {
-          updatedPositions.positions[pooldId][type] = emptyPositionStats(pooldId);
+          updatedPositions.positions[pooldId][type] =
+            emptyPositionStats(pooldId);
         } else {
           updatedPositions.positions[pooldId][type] = {
             ...updatedPositions.positions[pooldId][type],
