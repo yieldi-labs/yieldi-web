@@ -1,8 +1,17 @@
 import { EthereumProvider } from "@walletconnect/ethereum-provider";
 import { Web3Provider } from "@ethersproject/providers";
+import { Window as KeplrWindow } from "@keplr-wallet/types";
 
-export const connectUTXOWallet = async (wallet: any): Promise<any> => {
-  // TODO. Why UTXO ?
+declare global {
+  interface Window extends KeplrWindow {
+    xfi?: {
+      keplr?: KeplrWindow["keplr"];
+      // ... other xfi properties
+    };
+  }
+}
+
+export const connectWallet = async (wallet: any): Promise<any> => {
   try {
     let accounts: any;
     let address = "";
@@ -22,14 +31,33 @@ export const connectUTXOWallet = async (wallet: any): Promise<any> => {
         };
       case "xdefi-kujira":
       case "xdefi-cosmos":
-        await wallet.provider.enable(wallet.subchain);
-        const offlineSigner = wallet.provider.getOfflineSigner(wallet.subchain);
-        accounts = await offlineSigner.getAccounts();
+        try {
+          const chainId = wallet.subchain || "cosmoshub-4";
 
-        return {
-          provider: wallet.provider,
-          address: accounts[0].address,
-        };
+          if (!window.xfi?.keplr) {
+            throw new Error("XDEFI Keplr provider not found");
+          }
+
+          // Enable the chain
+          await window.xfi.keplr.enable(chainId);
+
+          // Get the offline signer
+          const offlineSigner = window.xfi.keplr.getOfflineSigner(chainId);
+          const accounts = await offlineSigner.getAccounts();
+
+          if (!accounts || accounts.length === 0) {
+            throw new Error("No Cosmos accounts found");
+          }
+
+          return {
+            provider: window.xfi.keplr,
+            address: accounts[0].address,
+            offlineSigner,
+          };
+        } catch (e) {
+          console.error("Cosmos connection error:", e);
+          throw e;
+        }
       case "xdefi-thorchain":
       case "xdefi-maya":
       case "xdefi-bch":
@@ -86,7 +114,7 @@ export const connectUTXOWallet = async (wallet: any): Promise<any> => {
         console.warn(`Unknown UTXO wallet: ${wallet.name}`);
     }
   } catch (error) {
-    console.error("Error connecting UTXO wallet:", error);
+    console.error("Error connecting wallet:", error);
     return "";
   }
 };

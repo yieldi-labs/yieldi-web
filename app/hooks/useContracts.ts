@@ -72,6 +72,24 @@ export function useContracts({
 
   const { walletsState, balanceList } = useAppState();
 
+  // Early return with default values if not an EVM chain or missing required props
+  if (!assetId) {
+    return {
+      tokenName: undefined,
+      tokenSymbol: undefined,
+      decimals: undefined,
+      balance: 0,
+      error: undefined,
+      loadMetadata: () => Promise.resolve(),
+      approveSpending: () => Promise.resolve(""),
+      getAllowance: () => Promise.resolve(BigInt(0)),
+      deposit: () => Promise.resolve(""),
+      depositWithExpiry: () => Promise.resolve(""),
+      formatAmount: () => "0",
+      parseAmount: () => BigInt(0),
+    };
+  }
+
   const asset = assetFromString(assetId);
   if (!asset) {
     throw Error("Invalid asset");

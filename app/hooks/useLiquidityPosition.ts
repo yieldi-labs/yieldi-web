@@ -77,6 +77,12 @@ export function useLiquidityPosition({
     return chainMap[assetChain.toLowerCase()] || null;
   }, [assetChain]);
 
+  // Determine if this is an EVM chain
+  const isEVMChain = useMemo(() => {
+    const evmChains = ["eth", "avax", "bsc"];
+    return evmChains.includes(assetChain.toLowerCase());
+  }, [assetChain]);
+
   // Check if it's a native asset
   const isNativeAsset = useMemo(
     () => assetIdentifier.indexOf("-") === -1,
@@ -107,14 +113,15 @@ export function useLiquidityPosition({
     wallet: utxoChain ? wallet : null,
   });
 
-  // Initialize contract hooks for EVM chains
+  // Initialize contract hooks for EVM chains only
   const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
     useContracts({
-      tokenAddress: !utxoChain
-        ? (tokenAddress as Address | undefined)
-        : undefined,
-      provider: !utxoChain ? wallet?.provider : undefined,
-      assetId: pool.asset,
+      tokenAddress:
+        isEVMChain && !utxoChain
+          ? (tokenAddress as Address | undefined)
+          : undefined,
+      provider: isEVMChain && !utxoChain ? wallet?.provider : undefined,
+      assetId: isEVMChain ? pool.asset : "",
     });
 
   const getMemberDetails = useCallback(
