@@ -18,7 +18,11 @@ import {
 } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
-import { tranferUTXO } from "@/utils/wallet/walletTransfer";
+import { transferUTXO } from "@/utils/wallet/walletTransfer";
+import {
+  Client as BitcoinCashClient,
+  defaultBchParams,
+} from "@xchainjs/xchain-bitcoincash";
 
 // Define BTC, DOGE, and LTC assets
 const AssetBTC: Asset = {
@@ -42,7 +46,14 @@ const AssetLTC: Asset = {
   type: AssetType.NATIVE,
 };
 
-type UTXOChain = "BTC" | "DOGE" | "LTC";
+const AssetBCH: Asset = {
+  chain: "BCH",
+  symbol: "BCH",
+  ticker: "BCH",
+  type: AssetType.NATIVE,
+};
+
+type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
 
 interface UseUTXOProps {
   chain: UTXOChain;
@@ -87,6 +98,10 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           return defaultLtcParams.explorerProviders[
             Network.Mainnet
           ].getExplorerUrl();
+        case "BCH":
+          return defaultBchParams.explorerProviders[
+            Network.Mainnet
+          ].getExplorerUrl();
         default:
           return "";
       }
@@ -117,6 +132,11 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         case "LTC":
           return new LitecoinClient({
             ...defaultLtcParams,
+            ...commonConfig,
+          });
+        case "BCH":
+          return new BitcoinCashClient({
+            ...defaultBchParams,
             ...commonConfig,
           });
         default:
@@ -185,6 +205,9 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           case "LTC":
             asset = AssetLTC;
             break;
+          case "BCH":
+            asset = AssetBCH;
+            break;
           default:
             throw new Error(`Unsupported UTXO chain: ${chain}`);
         }
@@ -203,7 +226,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           feeRate: fees,
         };
 
-        const result = await tranferUTXO(wallet, transferParams);
+        const result = await transferUTXO(wallet, transferParams);
         setMetadata((prev) => ({
           ...prev,
           hash: result,

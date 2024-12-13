@@ -26,7 +26,7 @@ export enum SupportedChain {
   // Base = "BASE",
   BinanceSmartChain = "BSC",
   Bitcoin = "BTC",
-  // BitcoinCash = "BCH",
+  BitcoinCash = "BCH",
   // Cosmos = "GAIA",
   // Dash = "DASH",
   Dogecoin = "DOGE",
@@ -408,6 +408,7 @@ export const calculateVolumeDepthRatio = (
 export const getAssetSymbol = (assetString: string): string => {
   // https://dev.thorchain.org/concepts/asset-notation.html#asset-notation
   const asset = assetFromString(assetString);
+  console.log({ assetString, asset });
   if (!asset) {
     throw new Error("Invalid asset");
   }

@@ -26,6 +26,9 @@ importers:
       '@ledgerhq/hw-transport-webusb':
         specifier: ^6.29.4
         version: 6.29.4
+      '@psf/bitcoincashjs-lib':
+        specifier: ^4.0.3
+        version: 4.0.3
       '@rainbow-me/rainbowkit':
         specifier: ^2.1.7
         version: 2.2.0(@tanstack/react-query@5.59.15(react@18.3.1))(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.30(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4))(wagmi@2.12.20(@tanstack/query-core@5.59.13)(@tanstack/react-query@5.59.15(react@18.3.1))(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.4(@babel/core@7.25.8)(@babel/preset-env@7.25.8(@babel/core@7.25.8))(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.30(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4))(zod@3.22.4))
@@ -62,6 +65,9 @@ importers:
       '@xchainjs/xchain-bitcoin':
         specifier: ^1.1.3
         version: 1.1.3
+      '@xchainjs/xchain-bitcoincash':
+        specifier: ^1.0.7
+        version: 1.0.7
       '@xchainjs/xchain-client':
         specifier: ^1.0.7
         version: 1.0.7
@@ -86,6 +92,9 @@ importers:
       axios:
         specifier: ^1.7.7
         version: 1.7.7
+      bchaddrjs:
+        specifier: ^0.5.2
+        version: 0.5.2
       bignumber.js:
         specifier: ^9.1.2
         version: 9.1.2
@@ -1752,6 +1761,16 @@ packages:
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
 
+  '@psf/bitcoincash-ops@2.0.0':
+    resolution: {integrity: sha512-M3PWqRpeJq6rli2NqWGbas76z9TrdGOmNuDFACBWBMctPucEAsFQY2AmyFHRSa7hEwythwvrPh9AG/n6ehmEog==}
+
+  '@psf/bitcoincashjs-lib@4.0.3':
+    resolution: {integrity: sha512-sJYi7jYUqR7S+Z8TjN3W/5Lcju7xcIBxYLhIEpnOF+jR9kMt0ftpVjQBt8vVsJZUD8ArL9bf59oDETjdOUcdGQ==}
+    engines: {node: '>=10.15.1'}
+
+  '@psf/pushdata-bitcoin@1.2.2':
+    resolution: {integrity: sha512-e1qkZLJFU6Ldg7TMBgSkiR5U1NfpRgSIr2ppk8BeED/Q9wUc9DEVAjXfPMD65xgXdqnlyFEtLbpPMWwyydMVUQ==}
+
   '@rainbow-me/rainbowkit@2.2.0':
     resolution: {integrity: sha512-N0wQ39UN6Soi6/ujk9lVy5KY2oY6me/dqMPe5BYWlZIKbpBc2De3cl9phSLPw+/rncL3Cp1r6kRZuMe0b+mP9Q==}
     engines: {node: '>=12.4'}
@@ -2943,6 +2962,9 @@ packages:
   '@xchainjs/xchain-bitcoin@1.1.3':
     resolution: {integrity: sha512-u3CAJyz7Bs7xJmjYJr9AHzU+ecZr06FjEZJupXHvt3G/qKa1JaUKt5mFhbrd1wKDznG4WsBqMyb3P0PUpHP97A==}
 
+  '@xchainjs/xchain-bitcoincash@1.0.7':
+    resolution: {integrity: sha512-XW0j2a0gEBFwBaj/mj1419fUVQv4Uv5y23I8Sev3zV2tJOsLN/b6qorTWBTgOKOZyvFI8qpDpI1tXWSQRL7TrQ==}
+
   '@xchainjs/xchain-client@1.0.7':
     resolution: {integrity: sha512-aDtPLV8h2DNXR4kKcuJRZDQBXOVySqNUChnUznVFg1h+VlhKWbyCAf1KwDcXrAEv61qZDe0us/+Fa/bec+ElvA==}
 
@@ -3352,6 +3374,9 @@ packages:
   big-integer@1.6.52:
     resolution: {integrity: sha512-QxD8cf2eVqJOOz63z6JIN9BzvVs/dlySa5HGSBH5xtR8dPteIRQnBxxKqkNTiT6jbDTF6jAfrd4oMcND9RGbQg==}
     engines: {node: '>=0.6'}
+
+  bigi@1.4.2:
+    resolution: {integrity: sha512-ddkU+dFIuEIW8lE7ZwdIAf2UPoM90eaprg5m3YXAVVTmKlqV/9BX4A2M8BOK2yOq6/VgZFVhK6QAxJebhlbhzw==}
 
   bigint-buffer@1.1.5:
     resolution: {integrity: sha512-trfYco6AoZ+rKhKnxA0hgX0HAbVP/s808/EuDSe2JDzUnCp/xAsli35Orvk67UrTEcwuxZqYZDmfA2RXJgxVvA==}
@@ -4140,6 +4165,9 @@ packages:
   ecpair@2.1.0:
     resolution: {integrity: sha512-cL/mh3MtJutFOvFc27GPZE2pWL3a3k4YvzUWEOvilnfZVlH3Jwgx/7d6tlD7/75tNk8TG2m+7Kgtz0SI1tWcqw==}
     engines: {node: '>=8.0.0'}
+
+  ecurve@1.0.6:
+    resolution: {integrity: sha512-/BzEjNfiSuB7jIWKcS/z8FK9jNjmEWvUV2YZ4RLSmcDtP7Lq0m6FvDuSnJpBlDpGRpfRQeTLGLBI8H+kEv0r+w==}
 
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
@@ -10555,6 +10583,30 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
+  '@psf/bitcoincash-ops@2.0.0': {}
+
+  '@psf/bitcoincashjs-lib@4.0.3':
+    dependencies:
+      '@psf/bitcoincash-ops': 2.0.0
+      '@psf/pushdata-bitcoin': 1.2.2
+      bech32: 1.1.4
+      bigi: 1.4.2
+      bip66: 1.1.5
+      bs58check: 2.1.2
+      create-hash: 1.2.0
+      create-hmac: 1.1.7
+      ecurve: 1.0.6
+      merkle-lib: 2.0.10
+      randombytes: 2.1.0
+      safe-buffer: 5.2.1
+      typeforce: 1.18.0
+      varuint-bitcoin: 1.1.2
+      wif: 2.0.6
+
+  '@psf/pushdata-bitcoin@1.2.2':
+    dependencies:
+      '@psf/bitcoincash-ops': 2.0.0
+
   '@rainbow-me/rainbowkit@2.2.0(@tanstack/react-query@5.59.15(react@18.3.1))(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(viem@2.21.30(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4))(wagmi@2.12.20(@tanstack/query-core@5.59.13)(@tanstack/react-query@5.59.15(react@18.3.1))(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react-dom@18.3.1(react@18.3.1))(react-native@0.75.4(@babel/core@7.25.8)(@babel/preset-env@7.25.8(@babel/core@7.25.8))(@types/react@18.3.11)(bufferutil@4.0.8)(encoding@0.1.13)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10))(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.21.30(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4))(zod@3.22.4))':
     dependencies:
       '@tanstack/react-query': 5.59.15(react@18.3.1)
@@ -13042,6 +13094,20 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
+  '@xchainjs/xchain-bitcoincash@1.0.7':
+    dependencies:
+      '@ledgerhq/hw-app-btc': 10.1.0
+      '@psf/bitcoincashjs-lib': 4.0.3
+      '@xchainjs/xchain-client': 1.0.7
+      '@xchainjs/xchain-crypto': 0.3.6
+      '@xchainjs/xchain-util': 1.0.6
+      '@xchainjs/xchain-utxo': 1.0.7
+      '@xchainjs/xchain-utxo-providers': 1.0.7
+      bchaddrjs: 0.5.2
+      coinselect: 3.1.12
+    transitivePeerDependencies:
+      - debug
+
   '@xchainjs/xchain-client@1.0.7':
     dependencies:
       '@xchainjs/xchain-crypto': 0.3.6
@@ -13589,6 +13655,8 @@ snapshots:
   big-integer@1.6.36: {}
 
   big-integer@1.6.52: {}
+
+  bigi@1.4.2: {}
 
   bigint-buffer@1.1.5:
     dependencies:
@@ -14468,6 +14536,11 @@ snapshots:
       randombytes: 2.1.0
       typeforce: 1.18.0
       wif: 2.0.6
+
+  ecurve@1.0.6:
+    dependencies:
+      bigi: 1.4.2
+      safe-buffer: 5.2.1
 
   ee-first@1.1.1: {}
 
