@@ -35,6 +35,7 @@ interface AppStateContextType {
   balanceList: WalletTokensData | undefined;
   refreshBalances: () => void;
   isLoadingBalance: boolean;
+  isLoadingTokenList: boolean;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -54,7 +55,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     setIsWalletDrawerOpen((prevState) => !prevState);
   };
 
-  const { refreshBalances, balanceList, isLoadingBalance } = useWalletTokens(
+  const { refreshBalances, balanceList, isLoadingBalance,  isLoadingTokenList } = useWalletTokens(
     walletsState!,
   );
 
@@ -263,6 +264,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         refreshBalances,
         balanceList,
         isLoadingBalance,
+        isLoadingTokenList
       }}
     >
       {children}

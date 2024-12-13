@@ -1,5 +1,5 @@
 "use client";
-import { cloneElement, FC } from "react";
+import { cloneElement, FC, useState } from "react";
 import { formatNumber } from "@/app/utils";
 import Image from "next/image";
 import {
@@ -26,7 +26,13 @@ const Component: FC = () => {
     toggleWalletDrawer,
     toggleWalletModal,
   } = useAppState();
-  const { refreshBalances, balanceList, isLoadingBalance } = useAppState();
+  const {
+    refreshBalances,
+    balanceList,
+    isLoadingBalance,
+    isLoadingTokenList,
+    setWalletsState,
+  } = useAppState();
   const handleAddWallet = () => {
     toggleWalletModal();
     toggleWalletDrawer();
@@ -35,6 +41,7 @@ const Component: FC = () => {
   const handleWalletRefresh = () => {
     refreshBalances();
   };
+  const [isBalanceHidden, setIsBalanceHidden] = useState(false);
 
   const { copy } = useCopyToClipboard();
 
@@ -51,6 +58,7 @@ const Component: FC = () => {
               Wallet
             </span>
             <span
+              onClick={() => setIsBalanceHidden(!isBalanceHidden)}
               className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
               hover:bg-blue-100 hover:scale-110 active:scale-95"
             >
@@ -70,83 +78,130 @@ const Component: FC = () => {
             >
               <Plus strokeColor="#627eea" strokeWidth={1.5} />
             </span>
-            <span className="cursor-pointer my-auto p-2 rounded-full transition-all transform hover:scale-110 active:scale-95">
+            <span
+              className="cursor-pointer my-auto p-2 rounded-full transition-all transform hover:scale-110 active:scale-95"
+              onClick={() => {
+                {Object.keys(walletsState!).map((key) => {
+                  const wallet = walletsState![key];
+                  wallet.provider.disconnect()
+                })}
+                setWalletsState({})
+                toggleWalletDrawer()
+              }}
+            >
               <Exit strokeColor="#ff6656" strokeWidth={1.5} />
             </span>
           </div>
           <div className="overflow-auto max-h-[calc(100vh-6rem)] custom-scroll ">
-            {Object.keys(walletsState!).map((key) => {
-              const wallet = walletsState![key];
-              return (
-                <div key={wallet.walletId + key} className="p-4">
-                  <div className="bg-white flex gap-2 rounded-lg p-4">
-                    <span className="leading-6">
-                      {cloneElement(SUPPORTED_WALLETS[wallet.walletId].icon, {
-                        className: "icon",
-                      })}
-                    </span>
-                    <span className="flex-3 font-bold leading-6">{key}</span>
-                    <span className="flex-1 leading-6 px-2">
-                      <MiddleTruncate text={wallet.address} />
-                    </span>
-                    <span
-                      className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
-              hover:bg-blue-100 hover:scale-110 active:scale-95"
-                      onClick={() => copy(wallet.address)}
-                    >
-                      <Copy strokeColor="#627eea" size={14} />
-                    </span>
-                    <span className="cursor-pointer my-auto ">
-                      <QRCode strokeColor="#627eea" size={14} />
-                    </span>
-                    <span className="cursor-pointer my-auto ">
-                      <LinkExternal strokeColor="#627eea" size={14} />
-                    </span>
-                    <span className="cursor-pointer my-auto -mr-1">
-                      <Exit strokeColor="#ff6656" size={14} />
-                    </span>
-                  </div>
-                  {balanceList &&
-                    Object.values(balanceList[key as ChainKey]).map(
-                      (token: TokenData) => {
-                        return (
-                          <div
-                            key={token.chainName + token.asset}
-                            className="px-2 py-4"
-                          >
-                            <div className="flex gap-2 items-center">
-                              <Image
-                                src={getLogoPath(token.asset)}
-                                alt={`${getAssetSymbol(token.asset)} logo`}
-                                width={26}
-                                height={26}
-                                className="rounded-full"
-                              />
-                              <div className="flex flex-1 flex-col">
-                                <span className="font-bold leading-5">
-                                  {token.symbol}
-                                </span>
-                                <span className="leading-4 text-gray-500">
-                                  {token.chainName}
-                                </span>
-                              </div>
-                              {isLoadingBalance ? (
-                                <Loader sizeInPixels={4} />
-                              ) : (
-                                <span className="font-bold">
-                                  {token.balance > 0
-                                    ? formatNumber(token.balance, 6)
-                                    : formatNumber(token.formattedBalance!, 6)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      },
-                    )}
-                </div>
-              );
-            })}
+            {isLoadingTokenList ? (
+              <div className="flex items-center justify-center my-3 h-32">
+                  <Loader />
+              </div>
+            ) : (
+              <>
+                {Object.keys(walletsState!).map((key) => {
+                  const wallet = walletsState![key];
+                  return (
+                    <div key={wallet.walletId + key} className="p-4">
+                      <div className="bg-white flex gap-2 rounded-lg p-4">
+                        <span className="leading-6">
+                          {cloneElement(
+                            SUPPORTED_WALLETS[wallet.walletId].icon,
+                            {
+                              className: "icon",
+                            }
+                          )}
+                        </span>
+                        <span className="flex-3 font-bold leading-6">
+                          {key}
+                        </span>
+                        <span className="flex-1 leading-6 px-2">
+                          <MiddleTruncate text={wallet.address} />
+                        </span>
+                        <span
+                          className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
+                          onClick={() => copy(wallet.address)}
+                        >
+                          <Copy strokeColor="#627eea" size={14} />
+                        </span>
+                        <span className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95">
+                          <QRCode strokeColor="#627eea" size={14} />
+                        </span>
+                        <span className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95">
+                          <LinkExternal strokeColor="#627eea" size={14} />
+                        </span>
+                        <span
+                          className="cursor-pointer my-auto rounded-full transition-all transform 
+                                hover:scale-110 active:scale-95"
+                          onClick={() => {
+                            wallet.provider.disconnect();
+                            if (Object.keys(walletsState).length === 1) {
+                              toggleWalletDrawer() 
+                            }
+                            setWalletsState((prev) => {
+                              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                              const { [key]: _, ...newState } = prev;
+                              return newState;
+                            });
+                          }}
+                        >
+                          <Exit strokeColor="#ff6656" size={14} />
+                        </span>
+                      </div>
+                      {balanceList ?
+                        <>
+                          {
+                            Object.values(balanceList[key as ChainKey]).map(
+                              (token: TokenData) => {
+                                return (
+                                  <div
+                                    key={token.chainName + token.asset}
+                                    className="px-2 py-4"
+                                  >
+                                    <div className="flex gap-2 items-center">
+                                      <Image
+                                        src={getLogoPath(token.asset)}
+                                        alt={`${getAssetSymbol(token.asset)} logo`}
+                                        width={26}
+                                        height={26}
+                                        className="rounded-full"
+                                      />
+                                      <div className="flex flex-1 flex-col">
+                                        <span className="font-bold leading-5">
+                                          {token.symbol}
+                                        </span>
+                                        <span className="leading-4 text-gray-500">
+                                          {token.chainName}
+                                        </span>
+                                      </div>
+                                      {isLoadingBalance ? (
+                                        <Loader sizeInPixels={4} />
+                                      ) : isBalanceHidden ? (
+                                        <span className="font-bold">***</span>
+                                      ) : (
+                                        <span className="font-bold">
+                                          {token.balance > 0
+                                            ? formatNumber(token.balance, 6)
+                                            : formatNumber(
+                                                token.formattedBalance!,
+                                                6
+                                              )}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )
+                          }
+                        </>
+                        : <div className="flex items-center justify-center mt-4"><Loader /></div>
+                      }
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </div>
         </div>
       </>

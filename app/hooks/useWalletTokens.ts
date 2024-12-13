@@ -5,7 +5,6 @@ import {
   ConnectedWalletsState,
 } from "@/utils/interfaces";
 import { ChainKey } from "@/utils/wallet/constants";
-import { useEffect, useState } from "react";
 import { getBalance, getPools, PoolDetail } from "@/midgard";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { assetFromString, baseToAsset } from "@xchainjs/xchain-util";
@@ -17,10 +16,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
-  const [walletTokensData, setWalletTokensData] = useState<WalletTokensData>();
-
-  console.log("walletTokensData", walletTokensData);
-
   // TODO: Avoid duplication of this condition between useUTXO and this line (https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration#comment-d10c7c6f)
   const { getBalance: getBalanceBtc } = useUTXO({
     chain: "BTC",
@@ -82,8 +77,6 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
               error,
             );
           }
-        } else {
-          console.log("This is the case");
         }
       };
 
@@ -132,7 +125,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
       await fetchPoolTokens();
 
-      setWalletTokensData({ ...updatedTokensData });
+      return ({ ...updatedTokensData });
     } catch (error) {
       console.error("Error fetching wallet balances:", error);
     }
@@ -312,31 +305,29 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     return newWalletTokensData;
   };
 
-  useEffect(() => {
-    if (Object.keys(walletsState).length > 0) {
-      fetchWalletTokens();
-    }
-  }, [walletsState]);
-
-  // useEffect(() => {
-  //   getTokenBalances();
-  // }, [walletTokensData]);
+  const {
+    data: walletTokensData,
+    isFetching: isFetchingWalletTokens,
+  } = useQuery({
+    queryKey: ["walletTokens", walletsState],
+    queryFn: () => fetchWalletTokens(),
+    enabled: Object.keys(walletsState).length > 0,
+  });
 
   const {
     data: walletBalances,
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: ["walletTokens", walletTokensData],
+    queryKey: ["walletBalances", walletTokensData],
     queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
     enabled: !!walletTokensData,
   });
-
-  console.log("isLoading", isFetching);
 
   return {
     refreshBalances: refetch, // TODO: Avoid refresh all at once
     balanceList: walletBalances,
     isLoadingBalance: isFetching,
+    isLoadingTokenList: isFetchingWalletTokens
   };
 };
