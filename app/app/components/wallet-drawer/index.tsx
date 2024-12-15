@@ -19,7 +19,7 @@ import { TokenData } from "@/utils/interfaces";
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
 import Loader from "../Loader";
 
-const Component: FC = () => {
+const WalletDrawer: FC = () => {
   const {
     walletsState,
     isWalletDrawerOpen,
@@ -48,55 +48,56 @@ const Component: FC = () => {
   return (
     isWalletDrawerOpen && (
       <>
-        <div
-          className="bg-[rgba(0,0,0,0.5)] fixed h-full inset-0 z-20"
-          onClick={toggleWalletDrawer}
-        />
-        <div className="bg-secondary border-b-4 border-l-4 border-t-4 border-white fixed h-full right-0 rounded-l-large top-0 w-[360px] z-20">
-          <div className="border-b flex py-4">
-            <span className="inline-flex items-center w-full font-bold leading-6 px-4 text-2xl">
-              Wallet
-            </span>
-            <span
-              onClick={() => setIsBalanceHidden(!isBalanceHidden)}
-              className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
-              hover:bg-blue-100 hover:scale-110 active:scale-95"
-            >
-              <Eye strokeColor="#627eea" strokeWidth={1.5} />
-            </span>
-            <span
-              className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
-              hover:bg-blue-100 hover:scale-110 active:scale-95"
-              onClick={handleWalletRefresh}
-            >
-              <Synchronize strokeColor="#627eea" strokeWidth={1.5} />
-            </span>
-            <span
-              className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
-              hover:bg-blue-100 hover:scale-110 active:scale-95"
-              onClick={handleAddWallet}
-            >
-              <Plus strokeColor="#627eea" strokeWidth={1.5} />
-            </span>
-            <span
-              className="cursor-pointer my-auto p-2 rounded-full transition-all transform hover:scale-110 active:scale-95"
-              onClick={() => {
-                {
-                  Object.keys(walletsState!).map((key) => {
-                    const wallet = walletsState![key];
-                    wallet.provider.disconnect();
-                  });
-                }
-                setWalletsState({});
-                toggleWalletDrawer();
-              }}
-            >
-              <Exit strokeColor="#ff6656" strokeWidth={1.5} />
-            </span>
+        <div className="fixed h-full right-0 w-[360px] z-10 mx-18">
+          <div 
+            className="bg-white-radial backdrop-blur-[15px] flex justify-between pt-4 rounded-t-lg"
+          >
+            <div className="flex">
+              <span className="inline-flex items-center w-full font-medium leading-6 px-4 text-2xl">
+                Wallet
+              </span>
+              <span
+                onClick={() => setIsBalanceHidden(!isBalanceHidden)}
+                className="cursor-pointer my-auto p- rounded-full transition-all transform hover:scale-110 active:scale-95"
+              >
+                <Eye strokeColor="#627eea" strokeWidth={1.5} />
+              </span>
+              <span
+                className="cursor-pointer my-auto p-2 rounded-full transition-all transform hover:scale-110 active:scale-95"
+                onClick={handleWalletRefresh}
+              >
+                <Synchronize strokeColor="#627eea" strokeWidth={1.5} />
+              </span>
+            </div>
+            <div className="flex mr-4">
+              <span
+                className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
+                onClick={handleAddWallet}
+              >
+                <Plus strokeColor="#627eea" strokeWidth={1.5} />
+              </span>
+              <span
+                className="cursor-pointer my-auto p-2 rounded-full transition-all transform hover:scale-110 active:scale-95"
+                onClick={() => {
+                  {
+                    Object.keys(walletsState!).map((key) => {
+                      const wallet = walletsState![key];
+                      if (wallet.provider.disconnect) {
+                        wallet.provider.disconnect()
+                      };
+                    });
+                  }
+                  setWalletsState({});
+                  toggleWalletDrawer();
+                }}
+              >
+                <Exit strokeColor="#ff6656" strokeWidth={1.5} />
+              </span>
+            </div>
           </div>
-          <div className="overflow-auto max-h-[calc(100vh-6rem)] custom-scroll ">
+          <div className="bg-transparent-radial backdrop-blur-[14px] overflow-y-auto overflow-x-hidden custom-scroll rounded-b-lg shadow-2xl max-h-[652px] py-2">
             {isLoadingTokenList ? (
-              <div className="flex items-center justify-center my-3 h-32">
+              <div className="flex items-center justify-center my-4 h-32">
                 <Loader />
               </div>
             ) : (
@@ -104,8 +105,8 @@ const Component: FC = () => {
                 {Object.keys(walletsState!).map((key) => {
                   const wallet = walletsState![key];
                   return (
-                    <div key={wallet.walletId + key} className="p-4">
-                      <div className="bg-white flex gap-2 rounded-lg p-4">
+                    <div key={wallet.walletId + key} className="px-4 pb-2">
+                      <div className="bg-white flex gap-1 rounded-lg p-4 text-sm">
                         <span className="leading-6">
                           {cloneElement(
                             SUPPORTED_WALLETS[wallet.walletId].icon,
@@ -117,26 +118,30 @@ const Component: FC = () => {
                         <span className="flex-3 font-bold leading-6">
                           {key}
                         </span>
-                        <span className="flex-1 leading-6 px-2">
-                          <MiddleTruncate text={wallet.address} />
+                        <span className="flex-1 leading-6 px-2 justify-items-end">
+                          <div className="w-20">
+                            <MiddleTruncate text={wallet.address} />
+                          </div>
                         </span>
                         <span
                           className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
                           onClick={() => copy(wallet.address)}
                         >
-                          <Copy strokeColor="#627eea" size={14} />
+                          <Copy strokeColor="#627eea" size={20} />
                         </span>
                         <span className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95">
-                          <QRCode strokeColor="#627eea" size={14} />
+                          <QRCode strokeColor="#627eea" size={20} />
                         </span>
                         <span className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95">
-                          <LinkExternal strokeColor="#627eea" size={14} />
+                          <LinkExternal strokeColor="#627eea" size={20} />
                         </span>
                         <span
                           className="cursor-pointer my-auto rounded-full transition-all transform 
                                 hover:scale-110 active:scale-95"
                           onClick={() => {
-                            wallet.provider.disconnect();
+                            if (wallet.provider.disconnect) {
+                              wallet.provider.disconnect()
+                            };
                             if (Object.keys(walletsState).length === 1) {
                               toggleWalletDrawer();
                             }
@@ -147,7 +152,7 @@ const Component: FC = () => {
                             });
                           }}
                         >
-                          <Exit strokeColor="#ff6656" size={14} />
+                          <Exit strokeColor="#ff6656" size={24} />
                         </span>
                       </div>
                       {balanceList ? (
@@ -212,4 +217,4 @@ const Component: FC = () => {
   );
 };
 
-export default Component;
+export default WalletDrawer;
