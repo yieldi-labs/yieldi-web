@@ -409,7 +409,7 @@ export const getAssetSymbol = (assetString: string): string => {
   // https://dev.thorchain.org/concepts/asset-notation.html#asset-notation
   const asset = assetFromString(assetString);
   if (!asset) {
-    throw new Error("Invalid asset");
+    throw new Error(`Invalid asset ${assetString}`);
   }
   return asset?.ticker;
 };
