@@ -2,13 +2,18 @@ import { Exit, Eye, Plus, Synchronize } from "@/svg/icons";
 import React from "react";
 
 interface WalletDrawerHeaderProps {
-    onHiddeBalance: () => void
-    onRefresh: () =>  void
-    onAddWallet: () => void
-    onDiconnect: () => void
+  onHiddeBalance: () => void;
+  onRefresh: () => void;
+  onAddWallet: () => void;
+  onDiconnect: () => void;
 }
 
-export default function WalletDrawerHeader({ onHiddeBalance, onRefresh, onAddWallet, onDiconnect }: WalletDrawerHeaderProps) {
+export default function WalletDrawerHeader({
+  onHiddeBalance,
+  onRefresh,
+  onAddWallet,
+  onDiconnect,
+}: WalletDrawerHeaderProps) {
   return (
     <div className="flex justify-between w-full md:mb-2">
       <div className="flex">

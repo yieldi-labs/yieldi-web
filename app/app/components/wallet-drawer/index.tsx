@@ -62,35 +62,38 @@ const WalletDrawerContainer: FC = () => {
 
   const isMobile = useMobileDetection();
 
-
   if (isMobile) {
     return (
       isWalletDrawerOpen && (
-      <Modal onClose={toggleWalletDrawer}>
-        <div className="mb-4">
-          <WalletDrawerHeader
-            onRefresh={handleWalletRefresh}
-            onAddWallet={handleAddWallet}
-            onHiddeBalance={() => setIsBalanceHidden(!isBalanceHidden)}
-            onDiconnect={handleDisconnectAllWallet}
+        <Modal onClose={toggleWalletDrawer}>
+          <div className="mb-4">
+            <WalletDrawerHeader
+              onRefresh={handleWalletRefresh}
+              onAddWallet={handleAddWallet}
+              onHiddeBalance={() => setIsBalanceHidden(!isBalanceHidden)}
+              onDiconnect={handleDisconnectAllWallet}
+            />
+          </div>
+          <WalletDrawer
+            isLoadingTokenList={isLoadingTokenList}
+            isLoadingBalance={isLoadingBalance}
+            isBalanceHidden={isBalanceHidden}
+            walletsState={walletsState}
+            balanceList={balanceList}
+            onDisconnectWallet={handleDisconnectWallet}
           />
-        </div>
-        <WalletDrawer
-          isLoadingTokenList={isLoadingTokenList}
-          isLoadingBalance={isLoadingBalance}
-          isBalanceHidden={isBalanceHidden}
-          walletsState={walletsState}
-          balanceList={balanceList}
-          onDisconnectWallet={handleDisconnectWallet}
-        />
-      </Modal>)
+        </Modal>
+      )
     );
   }
 
   return (
     isWalletDrawerOpen && (
       <>
-        <div className="fixed inset-0 h-screen z-10" onClick={toggleWalletDrawer}/>
+        <div
+          className="fixed inset-0 h-screen z-10"
+          onClick={toggleWalletDrawer}
+        />
         <div className="fixed right-0 w-[360px] z-20 mx-18">
           <div className="bg-transparent-radial backdrop-blur-[14px] flex justify-between pt-4 rounded-t-lg">
             <WalletDrawerHeader

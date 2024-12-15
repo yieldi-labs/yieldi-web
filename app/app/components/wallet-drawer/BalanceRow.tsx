@@ -5,12 +5,16 @@ import { formatNumber, getAssetSymbol, getLogoPath } from "@/app/utils";
 import Loader from "../Loader";
 
 interface BalanceRowProps {
-    token: TokenData,
-    isLoading: boolean,
-    isHidden: boolean
+  token: TokenData;
+  isLoading: boolean;
+  isHidden: boolean;
 }
 
-export default function BalanceRow({ token, isLoading, isHidden }: BalanceRowProps) {
+export default function BalanceRow({
+  token,
+  isLoading,
+  isHidden,
+}: BalanceRowProps) {
   return (
     <div className="px-2 py-4">
       <div className="flex gap-2 items-center">

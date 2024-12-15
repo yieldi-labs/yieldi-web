@@ -231,8 +231,7 @@ export const SUPPORTED_WALLETS = {
     icon: <WalletSvg.WalletConnect />,
     isAvailable: true,
     chainConnect: {
-      [ProviderKey.EVM]: async () =>
-        (await connectWalletConnect()) as any,
+      [ProviderKey.EVM]: async () => (await connectWalletConnect()) as any,
     },
   },
 };
