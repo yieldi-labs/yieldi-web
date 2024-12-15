@@ -37,7 +37,7 @@ export default function WalletDrawerHeader({ onHiddeBalance, onRefresh, onAddWal
         </span>
         <span
           className="cursor-pointer my-auto pl-2 md:pl-1 md:pr-4 rounded-full transition-all transform hover:scale-110 active:scale-95"
-          onClick={onAddWallet}
+          onClick={onDiconnect}
         >
           <Exit strokeColor="#ff6656" strokeWidth={1.5} />
         </span>

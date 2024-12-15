@@ -1,11 +1,7 @@
 "use client";
 import { FC, useState } from "react";
 import { useAppState } from "@/utils/context";
-import { ChainKey } from "@/utils/wallet/constants";
-import { TokenData, WalletState } from "@/utils/interfaces";
-import Loader from "../Loader";
-import WalletHeader from "./WalletRow";
-import BalanceRow from "./BalanceRow";
+import { WalletState } from "@/utils/interfaces";
 import { useMobileDetection } from "@shared/hooks";
 import WalletDrawerHeader from "./WalletDrawerHeader";
 import WalletDrawer from "./WalletDrawer";
@@ -66,6 +62,7 @@ const WalletDrawerContainer: FC = () => {
 
   const isMobile = useMobileDetection();
 
+
   if (isMobile) {
     return (
       isWalletDrawerOpen && (
@@ -93,7 +90,8 @@ const WalletDrawerContainer: FC = () => {
   return (
     isWalletDrawerOpen && (
       <>
-        <div className="fixed h-full right-0 w-[360px] z-10 mx-18">
+        <div className="fixed inset-0 h-screen z-10" onClick={toggleWalletDrawer}/>
+        <div className="fixed right-0 w-[360px] z-20 mx-18">
           <div className="bg-transparent-radial backdrop-blur-[14px] flex justify-between pt-4 rounded-t-lg">
             <WalletDrawerHeader
               onRefresh={handleWalletRefresh}

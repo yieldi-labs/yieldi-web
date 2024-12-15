@@ -79,4 +79,5 @@ export interface ChainType {
   chainId?: string;
   thorchainIdentifier: string;
   nativeAsset: string;
+  addressUrl: string;
 }

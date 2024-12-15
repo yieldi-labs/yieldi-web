@@ -1,10 +1,9 @@
 import { WalletState } from '@/utils/interfaces';
-import { SUPPORTED_WALLETS } from '@/utils/wallet/constants';
+import { CHAINS, SUPPORTED_WALLETS } from '@/utils/wallet/constants';
 import React, { cloneElement } from 'react'
 import MiddleTruncate from '../middle-truncate';
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
-import { Copy, Exit, LinkExternal, QRCode } from '@/svg/icons';
-
+import { Copy, Exit, LinkExternal } from '@/svg/icons';
 interface WalletHeaderProps {
   wallet: WalletState
   name: string
@@ -37,10 +36,21 @@ export default function WalletRow({ wallet, name, onDisconnect }: WalletHeaderPr
     >
       <Copy strokeColor="#627eea" size={20} />
     </span>
-    <span className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95">
-      <QRCode strokeColor="#627eea" size={20} />
-    </span>
-    <span className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95">
+    {/* <span 
+      className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
+      onClick={() => setQrOpen(true)}
+    >
+      <QRCodeIcon strokeColor="#627eea" size={20} />
+    </span> */}
+    <span 
+      className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
+      onClick={() => {
+        const url = CHAINS.find(chain => chain.name === name)?.addressUrl
+        if (url) {
+          window.open(url.replace('{wallet}', wallet.address), "_blank");
+        }
+      }}
+    >
       <LinkExternal strokeColor="#627eea" size={20} />
     </span>
     <span

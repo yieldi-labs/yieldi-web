@@ -1,3 +1,5 @@
+import ReactDOM from "react-dom";
+
 export default function Modal({
   title,
   children,
@@ -9,7 +11,14 @@ export default function Modal({
   onClose: () => void;
   style?: object;
 }) {
-  return (
+  const modalRoot = document.getElementById("modal-root");
+
+  if (!modalRoot) {
+    console.error("Can not find id 'modal-root' in DOM.");
+    return null;
+  }
+
+  const modalContent = (
     <div
       className="fixed z-30 inset-0 w-auto h-full overflow-y-auto bg-[rgb(0,0,0,0.5)] flex justify-center text-left pt-10 md:pt-0"
       onClick={onClose}
@@ -28,4 +37,6 @@ export default function Modal({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, modalRoot);
 }

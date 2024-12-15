@@ -33,6 +33,7 @@ export default function RootLayout({
           </AppStateProvider>
         </Providers>
         <CommonComponents.GradientCircles circles={lpGradientCircles} fixed />
+        <div id="modal-root" />
       </body>
     </html>
   );
