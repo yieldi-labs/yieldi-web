@@ -1,6 +1,5 @@
 import { ChainSvg, WalletSvg } from "@/svg";
 import { connectWalletConnect } from "./walletConnect";
-import { GetConnectorsReturnType } from "wagmi/actions";
 import { ChainType } from "../interfaces";
 
 export enum ChainKey {
@@ -55,6 +54,7 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "avax",
     nativeAsset: "avax",
     chainId: "0xa86a",
+    addressUrl: "https://snowtrace.dev/address/{wallet}",
   },
   {
     icon: <ChainSvg.Bitcoin />,
@@ -62,6 +62,7 @@ export const CHAINS: ChainType[] = [
     providerType: ProviderKey.BITCOIN,
     thorchainIdentifier: "btc",
     nativeAsset: "btc",
+    addressUrl: "https://www.blockchain.com/btc/address/{wallet}",
   },
   {
     icon: <ChainSvg.BitcoinCash />,
@@ -69,6 +70,7 @@ export const CHAINS: ChainType[] = [
     providerType: ProviderKey.BITCOINCASH,
     thorchainIdentifier: "bch",
     nativeAsset: "bch",
+    addressUrl: "https://www.blockchain.com/bch/address/{wallet}",
   },
   {
     icon: <ChainSvg.BSC />,
@@ -77,6 +79,7 @@ export const CHAINS: ChainType[] = [
     chainId: "0x38",
     thorchainIdentifier: "bsc",
     nativeAsset: "bnb",
+    addressUrl: "https://bscscan.com/address/{wallet}",
   },
   {
     icon: <ChainSvg.Dogechain />,
@@ -84,6 +87,7 @@ export const CHAINS: ChainType[] = [
     providerType: ProviderKey.DOGECOIN,
     thorchainIdentifier: "doge",
     nativeAsset: "doge",
+    addressUrl: "https://dogechain.info/address/{wallet}",
   },
   {
     icon: <ChainSvg.Ethereum />,
@@ -92,6 +96,7 @@ export const CHAINS: ChainType[] = [
     chainId: "0x1",
     thorchainIdentifier: "eth",
     nativeAsset: "eth",
+    addressUrl: "https://etherscan.io/address/{wallet}",
   },
   {
     icon: <ChainSvg.Litecoin />,
@@ -99,6 +104,7 @@ export const CHAINS: ChainType[] = [
     providerType: ProviderKey.LITECOIN,
     thorchainIdentifier: "ltc",
     nativeAsset: "ltc",
+    addressUrl: "https://ltc.bitaps.com/{wallet}",
   },
   {
     icon: <ChainSvg.Solana />,
@@ -106,6 +112,7 @@ export const CHAINS: ChainType[] = [
     providerType: ProviderKey.SOLANA,
     thorchainIdentifier: "sol",
     nativeAsset: "sol",
+    addressUrl: "https://solscan.io/account/{wallet}",
   },
   {
     icon: <ChainSvg.Thorchain />,
@@ -113,6 +120,7 @@ export const CHAINS: ChainType[] = [
     providerType: ProviderKey.THORCHAIN,
     thorchainIdentifier: "thor",
     nativeAsset: "rune",
+    addressUrl: "https://runescan.io/address/{wallet}",
   },
 ];
 
@@ -124,6 +132,7 @@ export const EVM_CHAINS: ChainType[] = [
     chainId: "0xa86a",
     thorchainIdentifier: "avax",
     nativeAsset: "avax",
+    addressUrl: "https://snowtrace.dev/address/{wallet}",
   },
   {
     icon: <ChainSvg.BSC />,
@@ -132,6 +141,7 @@ export const EVM_CHAINS: ChainType[] = [
     chainId: "0x38",
     thorchainIdentifier: "bsc",
     nativeAsset: "bnb",
+    addressUrl: "https://bscscan.com/address/{wallet}",
   },
   {
     icon: <ChainSvg.Ethereum />,
@@ -140,6 +150,7 @@ export const EVM_CHAINS: ChainType[] = [
     chainId: "0x1",
     thorchainIdentifier: "eth",
     nativeAsset: "eth",
+    addressUrl: "https://etherscan.io/address/{wallet}",
   },
 ];
 
@@ -220,8 +231,7 @@ export const SUPPORTED_WALLETS = {
     icon: <WalletSvg.WalletConnect />,
     isAvailable: true,
     chainConnect: {
-      [ProviderKey.EVM]: async (ethConnectors: GetConnectorsReturnType) =>
-        (await connectWalletConnect()) as any,
+      [ProviderKey.EVM]: async () => (await connectWalletConnect()) as any,
     },
   },
 };

@@ -32,8 +32,10 @@ interface AppStateContextType {
   setSelectedChains: Dispatch<SetStateAction<ChainType[]>>;
   selectedWallet: WalletType | undefined;
   setSelectedWallet: Dispatch<SetStateAction<WalletType | undefined>>;
-  balanceList: WalletTokensData;
+  balanceList: WalletTokensData | undefined;
   refreshBalances: () => void;
+  isLoadingBalance: boolean;
+  isLoadingTokenList: boolean;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -53,7 +55,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     setIsWalletDrawerOpen((prevState) => !prevState);
   };
 
-  const { refreshBalances, balanceList } = useWalletTokens(walletsState!);
+  const { refreshBalances, balanceList, isLoadingBalance, isLoadingTokenList } =
+    useWalletTokens(walletsState!);
 
   const checkAvailableWallets = (window: any) => {
     Object.keys(SUPPORTED_WALLETS).forEach((key) => {
@@ -259,6 +262,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         setSelectedWallet,
         refreshBalances,
         balanceList,
+        isLoadingBalance,
+        isLoadingTokenList,
       }}
     >
       {children}

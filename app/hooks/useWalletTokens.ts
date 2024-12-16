@@ -4,51 +4,18 @@ import {
   TokenData,
   ConnectedWalletsState,
 } from "@/utils/interfaces";
-import { ChainKey, EVM_CHAINS } from "@/utils/wallet/constants";
-import { useEffect, useState } from "react";
-import { formatUnits, encodeFunctionData, decodeFunctionResult } from "viem";
-import ERC20_ABI from "@/hooks/erc20.json";
+import { ChainKey } from "@/utils/wallet/constants";
 import { getBalance, getPools, PoolDetail } from "@/midgard";
-import * as viemChains from "viem/chains";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { assetFromString, baseToAsset } from "@xchainjs/xchain-util";
 import { useUTXO } from "./useUTXO";
-
-const initialWalletTokensData: WalletTokensData = {
-  [ChainKey.ARBITRUM]: {},
-  [ChainKey.AVALANCHE]: {},
-  [ChainKey.BASE]: {},
-  [ChainKey.BITCOIN]: {},
-  [ChainKey.BITCOINCASH]: {},
-  [ChainKey.BLAST]: {},
-  [ChainKey.BSCCHAIN]: {},
-  [ChainKey.CRONOSCHAIN]: {},
-  [ChainKey.DASH]: {},
-  [ChainKey.DOGECOIN]: {},
-  [ChainKey.DYDX]: {},
-  [ChainKey.ETHEREUM]: {},
-  [ChainKey.GAIACHAIN]: {},
-  [ChainKey.KUJIRA]: {},
-  [ChainKey.LITECOIN]: {},
-  [ChainKey.MAYACHAIN]: {},
-  [ChainKey.OPTIMISM]: {},
-  [ChainKey.POLKADOT]: {},
-  [ChainKey.POLYGON]: {},
-  [ChainKey.SOLANA]: {},
-  [ChainKey.SUI]: {},
-  [ChainKey.THORCHAIN]: {},
-  [ChainKey.TON]: {},
-  [ChainKey.ZKSYNC]: {},
-};
+import {
+  checkAndSwitchChain,
+  initialWalletTokensData,
+} from "@/utils/wallet/balances";
+import { useQuery } from "@tanstack/react-query";
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
-  const [walletTokensData, setWalletTokensData] = useState<WalletTokensData>(
-    initialWalletTokensData,
-  );
-  const [walletBalanceData, setWalletBalanceData] = useState<WalletTokensData>(
-    initialWalletTokensData,
-  );
-
   // TODO: Avoid duplication of this condition between useUTXO and this line (https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration#comment-d10c7c6f)
   const { getBalance: getBalanceBtc } = useUTXO({
     chain: "BTC",
@@ -72,98 +39,6 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     [ChainKey.LITECOIN]: getBalanceLtc,
     [ChainKey.DOGECOIN]: getBalanceDoge,
     [ChainKey.BITCOINCASH]: getBalanceBch,
-  };
-
-  const getERC20TokenInfo = async (
-    walletAddress: string,
-    provider: any,
-    tokenAddress?: `0x${string}`,
-  ) => {
-    try {
-      if (tokenAddress === "0x") {
-        // Native Balance
-        const balanceHex = await provider.request({
-          method: "eth_getBalance",
-          params: [walletAddress, "latest"],
-        });
-        const balanceBigInt = BigInt(balanceHex);
-        const balance = Number(formatUnits(balanceBigInt, 18));
-        return { balance };
-      } else {
-        // Encode function calls
-        const nameData = encodeFunctionData({
-          abi: ERC20_ABI,
-          functionName: "name",
-        });
-
-        const symbolData = encodeFunctionData({
-          abi: ERC20_ABI,
-          functionName: "symbol",
-        });
-
-        const decimalsData = encodeFunctionData({
-          abi: ERC20_ABI,
-          functionName: "decimals",
-        });
-
-        const balanceData = encodeFunctionData({
-          abi: ERC20_ABI,
-          functionName: "balanceOf",
-          args: [walletAddress],
-        });
-
-        // Make parallel RPC calls
-        const [nameHex, symbolHex, decimalsHex, balanceHex] = await Promise.all(
-          [
-            provider.request({
-              method: "eth_call",
-              params: [{ to: tokenAddress, data: nameData }, "latest"],
-            }),
-            provider.request({
-              method: "eth_call",
-              params: [{ to: tokenAddress, data: symbolData }, "latest"],
-            }),
-            provider.request({
-              method: "eth_call",
-              params: [{ to: tokenAddress, data: decimalsData }, "latest"],
-            }),
-            provider.request({
-              method: "eth_call",
-              params: [{ to: tokenAddress, data: balanceData }, "latest"],
-            }),
-          ],
-        );
-        // Decode results
-        const name = decodeFunctionResult({
-          abi: ERC20_ABI,
-          functionName: "name",
-          data: nameHex,
-        }) as string;
-
-        const symbol = decodeFunctionResult({
-          abi: ERC20_ABI,
-          functionName: "symbol",
-          data: symbolHex,
-        }) as string;
-
-        const decimals = decodeFunctionResult({
-          abi: ERC20_ABI,
-          functionName: "decimals",
-          data: decimalsHex,
-        }) as number;
-
-        const balanceBigInt = decodeFunctionResult({
-          abi: ERC20_ABI,
-          functionName: "balanceOf",
-          data: balanceHex,
-        }) as bigint;
-        const balance = Number(formatUnits(balanceBigInt, Number(decimals)));
-
-        return { name, symbol, decimals, balance };
-      }
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   const fetchWalletTokens = async () => {
@@ -255,100 +130,10 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
       await fetchPoolTokens();
 
-      setWalletTokensData({ ...updatedTokensData });
+      return { ...updatedTokensData };
     } catch (error) {
       console.error("Error fetching wallet balances:", error);
     }
-  };
-
-  const checkAndSwitchChain = async (
-    chainKey: ChainKey,
-    walletAddress: string,
-    provider: any,
-    tokenAddress?: `0x${string}`,
-  ): Promise<
-    | {
-        balance: number;
-        name?: undefined;
-        symbol?: undefined;
-        decimals?: undefined;
-      }
-    | {
-        name: string;
-        symbol: string;
-        decimals: number;
-        balance: number;
-      }
-  > => {
-    let providerChainId = await provider.request({
-      method: "eth_chainId",
-    });
-    const currentChain = EVM_CHAINS.find(
-      ({ chainId }) => chainId == providerChainId,
-    );
-    if (currentChain?.name !== chainKey) {
-      try {
-        providerChainId = await provider.request({
-          method: "wallet_switchEthereumChain",
-          params: [
-            {
-              chainId: EVM_CHAINS.find(({ name }) => name == chainKey)?.chainId,
-            },
-          ],
-        });
-        if (providerChainId) {
-          checkAndSwitchChain(chainKey, walletAddress, provider, tokenAddress);
-        }
-      } catch (err) {
-        // need to add chain
-
-        if ((err as { code: number }).code === 4902) {
-          const chainId = EVM_CHAINS.find(
-            ({ name }) => name == chainKey,
-          )?.chainId;
-          const config = getChainConfigById(chainId!);
-          const addRequest = {
-            chainId: chainId,
-            chainName: config?.name,
-            rpcUrls: config?.rpcUrls.default.http,
-            iconUrls: [],
-            nativeCurrency: config?.nativeCurrency,
-            blockExplorerUrls: config?.blockExplorers?.default.url,
-          };
-
-          if (chainId) {
-            providerChainId = await provider.request({
-              method: "wallet_addEthereumChain",
-              params: [addRequest],
-            });
-            if (providerChainId) {
-              checkAndSwitchChain(
-                chainKey,
-                walletAddress,
-                provider,
-                tokenAddress,
-              );
-            }
-          }
-        }
-      }
-    }
-
-    const tokenInfo = await getERC20TokenInfo(
-      walletAddress,
-      provider,
-      tokenAddress,
-    );
-    if (!tokenInfo) {
-      throw new Error("Failed to fetch token info");
-    }
-    return tokenInfo;
-  };
-
-  const getChainConfigById = (chainId: string) => {
-    return Object.values(viemChains).find(
-      (chain) => chain.id === Number(chainId),
-    );
   };
 
   const getRuneBalance = async (walletAddress: string) => {
@@ -378,7 +163,8 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     };
   };
 
-  const getTokenBalances = async () => {
+  const getTokenBalances = async (walletTokensData: WalletTokensData) => {
+    let newWalletTokensData: WalletTokensData = { ...walletTokensData };
     for (const key of Object.keys(walletTokensData)) {
       if (walletsState && walletsState[key]) {
         const list = walletTokensData[key as ChainKey];
@@ -397,36 +183,32 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                     token.tokenAddress as `0x${string}`,
                   );
                   if (info?.balance) {
-                    setWalletBalanceData((prevData) => {
-                      return {
-                        ...prevData,
-                        [key as ChainKey]: {
-                          ...prevData[key as ChainKey],
-                          [tokenKey]: {
-                            ...prevData[key as ChainKey][tokenKey],
-                            ...walletTokensData[key as ChainKey][tokenKey],
-                            ...info,
-                          },
-                        },
-                      };
-                    });
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  setWalletBalanceData((prevData) => {
-                    return {
-                      ...prevData,
+                    newWalletTokensData = {
+                      ...newWalletTokensData,
                       [key as ChainKey]: {
-                        ...prevData[key as ChainKey],
+                        ...newWalletTokensData[key as ChainKey],
                         [tokenKey]: {
-                          ...prevData[key as ChainKey][tokenKey],
+                          ...newWalletTokensData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          formattedBlanace: 0,
-                          balance: 0,
+                          ...info,
                         },
                       },
                     };
-                  });
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
+                  newWalletTokensData = {
+                    ...newWalletTokensData,
+                    [key as ChainKey]: {
+                      ...newWalletTokensData[key as ChainKey],
+                      [tokenKey]: {
+                        ...newWalletTokensData[key as ChainKey][tokenKey],
+                        ...walletTokensData[key as ChainKey][tokenKey],
+                        formattedBlanace: 0,
+                        balance: 0,
+                      },
+                    },
+                  };
                 }
               }
             }
@@ -441,43 +223,39 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                     walletsState[ChainKey.THORCHAIN].address,
                   );
                   if (info) {
-                    setWalletBalanceData((prevData) => {
-                      return {
-                        ...prevData,
-                        [key as ChainKey]: {
-                          ...prevData[key as ChainKey],
-                          [tokenKey]: {
-                            ...prevData[key as ChainKey][tokenKey],
-                            ...walletTokensData[key as ChainKey][tokenKey],
-                            balance: Number(
-                              formatNumber(
-                                info?.coins.find(
-                                  (coin) => coin.asset === "THOR.RUNE",
-                                )?.amount || 0,
-                                8,
-                              ),
-                            ),
-                          },
-                        },
-                      };
-                    });
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  setWalletBalanceData((prevData) => {
-                    return {
-                      ...prevData,
+                    newWalletTokensData = {
+                      ...newWalletTokensData,
                       [key as ChainKey]: {
-                        ...prevData[key as ChainKey],
+                        ...newWalletTokensData[key as ChainKey],
                         [tokenKey]: {
-                          ...prevData[key as ChainKey][tokenKey],
+                          ...newWalletTokensData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          formattedBlanace: 0,
-                          balance: 0,
+                          balance: Number(
+                            formatNumber(
+                              info?.coins.find(
+                                (coin) => coin.asset === "THOR.RUNE",
+                              )?.amount || 0,
+                              8,
+                            ),
+                          ),
                         },
                       },
                     };
-                  });
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
+                  newWalletTokensData = {
+                    ...newWalletTokensData,
+                    [key as ChainKey]: {
+                      ...newWalletTokensData[key as ChainKey],
+                      [tokenKey]: {
+                        ...newWalletTokensData[key as ChainKey][tokenKey],
+                        ...walletTokensData[key as ChainKey][tokenKey],
+                        formattedBlanace: 0,
+                        balance: 0,
+                      },
+                    },
+                  };
                 }
               }
             }
@@ -496,36 +274,32 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                     walletsState[key as ChainKey].address,
                   );
                   if (info) {
-                    setWalletBalanceData((prevData) => {
-                      return {
-                        ...prevData,
-                        [key as ChainKey]: {
-                          ...prevData[key as ChainKey],
-                          [tokenKey]: {
-                            ...prevData[key as ChainKey][tokenKey],
-                            ...walletTokensData[key as ChainKey][tokenKey],
-                            ...info,
-                          },
-                        },
-                      };
-                    });
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  setWalletBalanceData((prevData) => {
-                    return {
-                      ...prevData,
+                    newWalletTokensData = {
+                      ...newWalletTokensData,
                       [key as ChainKey]: {
-                        ...prevData[key as ChainKey],
+                        ...newWalletTokensData[key as ChainKey],
                         [tokenKey]: {
-                          ...prevData[key as ChainKey][tokenKey],
+                          ...newWalletTokensData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          formattedBlanace: 0,
-                          balance: 0,
+                          ...info,
                         },
                       },
                     };
-                  });
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
+                  newWalletTokensData = {
+                    ...newWalletTokensData,
+                    [key as ChainKey]: {
+                      ...newWalletTokensData[key as ChainKey],
+                      [tokenKey]: {
+                        ...newWalletTokensData[key as ChainKey][tokenKey],
+                        ...walletTokensData[key as ChainKey][tokenKey],
+                        formattedBlanace: 0,
+                        balance: 0,
+                      },
+                    },
+                  };
                 }
               }
             }
@@ -534,18 +308,30 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
         }
       }
     }
+    return newWalletTokensData;
   };
 
-  useEffect(() => {
-    fetchWalletTokens();
-  }, [walletsState]);
+  const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
+    useQuery({
+      queryKey: ["walletTokens", walletsState],
+      queryFn: () => fetchWalletTokens(),
+      enabled: Object.keys(walletsState).length > 0,
+    });
 
-  useEffect(() => {
-    getTokenBalances();
-  }, [walletTokensData]);
+  const {
+    data: walletBalances,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: ["walletBalances", walletTokensData],
+    queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
+    enabled: !!walletTokensData,
+  });
 
   return {
-    refreshBalances: fetchWalletTokens, // TODO: Avoid refresh all at once
-    balanceList: walletBalanceData,
+    refreshBalances: refetch, // TODO: Avoid refresh all at once
+    balanceList: walletBalances,
+    isLoadingBalance: isFetching,
+    isLoadingTokenList: isFetchingWalletTokens,
   };
 };

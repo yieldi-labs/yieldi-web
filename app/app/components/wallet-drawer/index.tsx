@@ -1,31 +1,27 @@
 "use client";
-import { cloneElement, FC } from "react";
-import { formatNumber } from "@/app/utils";
-import Image from "next/image";
-import {
-  Copy,
-  Exit,
-  Eye,
-  LinkExternal,
-  Plus,
-  QRCode,
-  Synchronize,
-} from "@/svg/icons";
-import MiddleTruncate from "@/app/components/middle-truncate";
+import { FC, useState } from "react";
 import { useAppState } from "@/utils/context";
-import { ChainKey, SUPPORTED_WALLETS } from "@/utils/wallet/constants";
-import { getAssetSymbol, getLogoPath } from "@/app/utils";
-import { TokenData } from "@/utils/interfaces";
-import useCopyToClipboard from "@/hooks/useCopyToClipboard";
+import { WalletState } from "@/utils/interfaces";
+import { useMobileDetection } from "@shared/hooks";
+import WalletDrawerHeader from "./WalletDrawerHeader";
+import WalletDrawer from "./WalletDrawer";
+import Modal from "@/app/modal";
 
-const Component: FC = () => {
+const WalletDrawerContainer: FC = () => {
   const {
     walletsState,
     isWalletDrawerOpen,
     toggleWalletDrawer,
     toggleWalletModal,
   } = useAppState();
-  const { refreshBalances, balanceList } = useAppState();
+  const {
+    refreshBalances,
+    balanceList,
+    isLoadingBalance,
+    isLoadingTokenList,
+    setWalletsState,
+  } = useAppState();
+
   const handleAddWallet = () => {
     toggleWalletModal();
     toggleWalletDrawer();
@@ -35,108 +31,87 @@ const Component: FC = () => {
     refreshBalances();
   };
 
-  const { copy } = useCopyToClipboard();
+  const handleDisconnectWallet = (wallet: WalletState, id: string) => {
+    if (wallet.provider.disconnect) {
+      wallet.provider.disconnect();
+    }
+    if (Object.keys(walletsState).length === 1) {
+      toggleWalletDrawer();
+    }
+    setWalletsState((prev) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _, ...newState } = prev;
+      return newState;
+    });
+  };
+
+  const handleDisconnectAllWallet = () => {
+    {
+      Object.keys(walletsState!).map((key) => {
+        const wallet = walletsState![key];
+        if (wallet.provider.disconnect) {
+          wallet.provider.disconnect();
+        }
+      });
+    }
+    setWalletsState({});
+    toggleWalletDrawer();
+  };
+
+  const [isBalanceHidden, setIsBalanceHidden] = useState(false);
+
+  const isMobile = useMobileDetection();
+
+  if (isMobile) {
+    return (
+      isWalletDrawerOpen && (
+        <Modal onClose={toggleWalletDrawer}>
+          <div className="mb-4">
+            <WalletDrawerHeader
+              onRefresh={handleWalletRefresh}
+              onAddWallet={handleAddWallet}
+              onHiddeBalance={() => setIsBalanceHidden(!isBalanceHidden)}
+              onDiconnect={handleDisconnectAllWallet}
+            />
+          </div>
+          <WalletDrawer
+            isLoadingTokenList={isLoadingTokenList}
+            isLoadingBalance={isLoadingBalance}
+            isBalanceHidden={isBalanceHidden}
+            walletsState={walletsState}
+            balanceList={balanceList}
+            onDisconnectWallet={handleDisconnectWallet}
+          />
+        </Modal>
+      )
+    );
+  }
 
   return (
     isWalletDrawerOpen && (
       <>
         <div
-          className="bg-[rgba(0,0,0,0.5)] fixed h-full inset-0 z-20"
+          className="fixed inset-0 h-screen z-10"
           onClick={toggleWalletDrawer}
         />
-        <div className="bg-secondary border-b-4 border-l-4 border-t-4 border-white fixed h-full right-0 rounded-l-large top-0 w-[360px] z-20">
-          <div className="border-b flex py-4">
-            <span className="flex-1 font-bold leading-6 px-4 text-2xl">
-              Wallet
-            </span>
-            <span className="border-r cursor-pointer px-2">
-              <Eye strokeColor="#627eea" strokeWidth={1.5} />
-            </span>
-            <span
-              className="border-r cursor-pointer px-2"
-              onClick={handleWalletRefresh}
-            >
-              <Synchronize strokeColor="#627eea" strokeWidth={1.5} />
-            </span>
-            <span
-              className="border-r cursor-pointer px-2"
-              onClick={handleAddWallet}
-            >
-              <Plus strokeColor="#627eea" strokeWidth={1.5} />
-            </span>
-            <span className="cursor-pointer px-2">
-              <Exit strokeColor="#ff6656" strokeWidth={1.5} />
-            </span>
+        <div className="fixed right-0 w-[360px] z-20 mx-18">
+          <div className="bg-transparent-radial backdrop-blur-[14px] flex justify-between pt-4 rounded-t-lg">
+            <WalletDrawerHeader
+              onRefresh={handleWalletRefresh}
+              onAddWallet={handleAddWallet}
+              onHiddeBalance={() => setIsBalanceHidden(!isBalanceHidden)}
+              onDiconnect={handleDisconnectAllWallet}
+            />
           </div>
-          <div className="overflow-auto max-h-[calc(100vh-6rem)] custom-scroll ">
-            {Object.keys(walletsState!).map((key) => {
-              const wallet = walletsState![key];
-              return (
-                <div key={wallet.walletId + key} className="p-4">
-                  <div className="bg-white flex gap-2 rounded-lg p-4">
-                    <span className="leading-6">
-                      {cloneElement(SUPPORTED_WALLETS[wallet.walletId].icon, {
-                        className: "icon",
-                      })}
-                    </span>
-                    <span className="flex-3 font-bold leading-6">{key}</span>
-                    <span className="flex-1 leading-6 px-2">
-                      <MiddleTruncate text={wallet.address} />
-                    </span>
-                    <span
-                      className="cursor-pointer my-auto p-2 rounded-full transition-all transform 
-              hover:bg-blue-100 hover:scale-110 active:scale-95"
-                      onClick={() => copy(wallet.address)}
-                    >
-                      <Copy strokeColor="#627eea" size={14} />
-                    </span>
-                    <span className="cursor-pointer my-auto ">
-                      <QRCode strokeColor="#627eea" size={14} />
-                    </span>
-                    <span className="cursor-pointer my-auto ">
-                      <LinkExternal strokeColor="#627eea" size={14} />
-                    </span>
-                    <span className="cursor-pointer my-auto -mr-1">
-                      <Exit strokeColor="#ff6656" size={14} />
-                    </span>
-                  </div>
-                  {balanceList &&
-                    Object.values(balanceList[key as ChainKey]).map(
-                      (token: TokenData) => {
-                        return (
-                          <div
-                            key={token.chainName + token.asset}
-                            className="px-2 py-4"
-                          >
-                            <div className="flex gap-2 items-center">
-                              <Image
-                                src={getLogoPath(token.asset)}
-                                alt={`${getAssetSymbol(token.asset)} logo`}
-                                width={26}
-                                height={26}
-                                className="rounded-full"
-                              />
-                              <div className="flex flex-1 flex-col">
-                                <span className="font-bold leading-5">
-                                  {token.symbol}
-                                </span>
-                                <span className="leading-4 text-gray-500">
-                                  {token.chainName}
-                                </span>
-                              </div>
-                              <span className="font-bold">
-                                {token.balance > 0
-                                  ? formatNumber(token.balance, 6)
-                                  : formatNumber(token.formattedBalance!, 6)}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      },
-                    )}
-                </div>
-              );
-            })}
+          <div className="bg-transparent-radial backdrop-blur-[14px] overflow-y-auto overflow-x-hidden custom-scroll rounded-b-lg shadow-2xl max-h-[652px] py-2">
+            <WalletDrawer
+              isLoadingTokenList={isLoadingTokenList}
+              isLoadingBalance={isLoadingBalance}
+              isBalanceHidden={isBalanceHidden}
+              walletsState={walletsState}
+              balanceList={balanceList}
+              onDisconnectWallet={handleDisconnectWallet}
+            />
           </div>
         </div>
       </>
@@ -144,4 +119,4 @@ const Component: FC = () => {
   );
 };
 
-export default Component;
+export default WalletDrawerContainer;
