@@ -174,6 +174,13 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   name: "OKX Wallet",
                   provider: window.okxwallet.bitcoin,
                 }),
+              [ProviderKey.COSMOS]: async () =>
+                await connectWallet({
+                  id: "okx-cosmos",
+                  name: "OKX Wallet",
+                  provider: window.okxwallet.keplr,
+                  subchain: "cosmoshub-4",
+                }),
             };
           } else {
             SUPPORTED_WALLETS[walletKey].isAvailable = false;

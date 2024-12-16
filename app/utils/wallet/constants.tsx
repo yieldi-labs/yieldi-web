@@ -202,6 +202,7 @@ export const SUPPORTED_WALLETS = {
       ChainKey.BITCOIN,
       ChainKey.BSCCHAIN,
       ChainKey.ETHEREUM,
+      ChainKey.GAIACHAIN, // Added Cosmos support
     ],
     downloadUrl: "https://www.okx.com/web3",
     icon: <WalletSvg.OKX />,
