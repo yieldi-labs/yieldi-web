@@ -11,4 +11,3 @@ export { default as Arbitrum } from "./Arbitrum";
 export { default as Thorchain } from "./Thorchain";
 export { default as Dogechain } from "./Dogechain";
 export { default as BitcoinCash } from "./BitcoinCash";
-export { default as Gaia } from "./Bitcoin";

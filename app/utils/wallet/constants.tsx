@@ -83,7 +83,7 @@ export const CHAINS: ChainType[] = [
     addressUrl: "https://bscscan.com/address/{wallet}",
   },
   {
-    icon: <ChainSvg.Gaia />,
+    icon: <ChainSvg.Cosmos />,
     name: ChainKey.GAIACHAIN,
     providerType: ProviderKey.COSMOS,
     thorchainIdentifier: "gaia",
