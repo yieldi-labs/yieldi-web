@@ -18,6 +18,7 @@ import {
   getChainKeyFromChain,
 } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
+import { useCosmos } from "./useCosmos";
 
 interface AddLiquidityParams {
   asset: string;
@@ -57,6 +58,9 @@ export function useLiquidityPosition({
   const [pool, setPool] = useState<PoolDetail>(poolProp);
   const thorChainClient = useThorchain({
     wallet: walletsState![ChainKey.THORCHAIN],
+  });
+  const { transfer: cosmosTransfer } = useCosmos({
+    wallet: walletsState![ChainKey.GAIACHAIN],
   });
 
   // Parse asset details
@@ -215,6 +219,7 @@ export function useLiquidityPosition({
           feeBps,
         );
 
+        // Handle Thorchain deposits
         if (wallet.chainType === ChainKey.THORCHAIN) {
           return await thorChainClient.deposit({
             pool,
@@ -222,6 +227,12 @@ export function useLiquidityPosition({
             amount: runeAmount || amount,
             memo: memo,
           });
+        }
+
+        // Handle Cosmos chain transactions
+        if (wallet.chainType === ChainKey.GAIACHAIN) {
+          const cosmosAmount = amount * 10 ** parseInt(pool.nativeDecimal);
+          return await cosmosTransfer(inbound.address, cosmosAmount, memo);
         }
 
         // Handle UTXO chain transactions
@@ -354,6 +365,15 @@ export function useLiquidityPosition({
             amount: getMinAmountByChain(supportedChain),
             memo: memo,
           });
+        }
+
+        // Handle Cosmos chain withdrawals
+        if (wallet.chainType === ChainKey.GAIACHAIN) {
+          return await cosmosTransfer(
+            inbound.address,
+            getMinAmountByChain(supportedChain) * 10 ** parseInt(pool.nativeDecimal),
+            memo,
+          );
         }
 
         // Handle UTXO chain withdrawals
