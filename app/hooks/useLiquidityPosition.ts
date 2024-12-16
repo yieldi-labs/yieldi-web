@@ -371,7 +371,8 @@ export function useLiquidityPosition({
         if (wallet.chainType === ChainKey.GAIACHAIN) {
           return await cosmosTransfer(
             inbound.address,
-            getMinAmountByChain(supportedChain) * 10 ** parseInt(pool.nativeDecimal),
+            getMinAmountByChain(supportedChain) *
+              10 ** parseInt(pool.nativeDecimal),
             memo,
           );
         }
