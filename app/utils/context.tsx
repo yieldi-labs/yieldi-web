@@ -261,6 +261,13 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   name: "Vultisig",
                   provider: window.dogecoin || window.vultisig?.dogecoin,
                 }),
+              [ProviderKey.COSMOS]: async () =>
+                await connectWallet({
+                  id: "vultisig-cosmos",
+                  name: "Vultisig",
+                  provider: window.vultisig?.keplr,
+                  subchain: "cosmoshub-4",
+                }),
             };
           } else {
             SUPPORTED_WALLETS[walletKey].isAvailable = false;

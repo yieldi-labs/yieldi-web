@@ -202,7 +202,7 @@ export const SUPPORTED_WALLETS = {
       ChainKey.BITCOIN,
       ChainKey.BSCCHAIN,
       ChainKey.ETHEREUM,
-      ChainKey.GAIACHAIN, // Added Cosmos support
+      ChainKey.GAIACHAIN,
     ],
     downloadUrl: "https://www.okx.com/web3",
     icon: <WalletSvg.OKX />,
@@ -230,6 +230,7 @@ export const SUPPORTED_WALLETS = {
       ChainKey.BITCOINCASH,
       ChainKey.DOGECOIN,
       ChainKey.LITECOIN,
+      ChainKey.GAIACHAIN,
     ],
     downloadUrl: "https://vultisig.com/",
     icon: <WalletSvg.Vultisig />,
