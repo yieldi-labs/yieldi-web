@@ -298,9 +298,6 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       if (!wallet?.address) {
         throw new Error("Wallet not initialized");
       }
-
-      console.log("Removing liquidity", pool, vault, amount, memo);
-
       try {
         const fees = await getFees();
         const result = await transfer({
