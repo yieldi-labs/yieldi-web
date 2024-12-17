@@ -32,11 +32,13 @@ export const connectWallet = async (wallet: any): Promise<any> => {
       case "vultisig-cosmos":
         try {
           if (!window.vultisig?.cosmos) {
-            throw new Error("Vultisig Keplr provider not found");
+            throw new Error("Vultisig Cosmos provider not found");
           }
 
-          // Get Accounts 
-          const accounts = await window.vultisig.cosmos.request({method: "get_accounts"});
+          // Get Accounts
+          const accounts = await window.vultisig.cosmos.request({
+            method: "get_accounts",
+          });
 
           return {
             provider: window.vultisig.cosmos,

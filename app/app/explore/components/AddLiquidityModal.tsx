@@ -64,9 +64,10 @@ export default function AddLiquidityModal({
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
-  const runeBalance = balanceList![ChainKey.THORCHAIN]["THOR.RUNE"]
+  const runeBalance = balanceList?.[ChainKey.THORCHAIN]?.["THOR.RUNE"] != null
     ? balanceList![ChainKey.THORCHAIN]["THOR.RUNE"].balance
     : 0;
+  console.log("balanceList", balanceList);
   const assetBalance =
     balanceList![
       getChainKeyFromChain(assetFromString(pool.asset)?.chain as string)

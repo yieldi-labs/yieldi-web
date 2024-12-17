@@ -117,17 +117,6 @@ export function useLiquidityPosition({
     wallet: utxoChain ? wallet : null,
   });
 
-  // Initialize contract hooks for EVM chains only
-  const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
-    useContracts({
-      tokenAddress:
-        isEVMChain && !utxoChain
-          ? (tokenAddress as Address | undefined)
-          : undefined,
-      provider: isEVMChain && !utxoChain ? wallet?.provider : undefined,
-      assetId: isEVMChain ? pool.asset : "",
-    });
-
   const getMemberDetails = useCallback(
     // TODO: Is this function really neccessary ?
     async (address: string, asset: string) => {
@@ -257,35 +246,50 @@ export function useLiquidityPosition({
 
         // Handle token or native asset deposit
         let txHash;
-        if (!isNativeAsset && tokenAddress) {
-          // Handle ERC20 token deposit
-          const parsedAmount = parseAmount(amount.toString());
 
-          // Check and handle allowance
-          const currentAllowance = await getAllowance(routerAddress);
-          if (currentAllowance < parsedAmount) {
-            await approveSpending(routerAddress, parsedAmount);
+        if (isEVMChain) {
+          const {
+            approveSpending,
+            getAllowance,
+            depositWithExpiry,
+            parseAmount,
+          } = useContracts({
+            tokenAddress: tokenAddress as Address | undefined,
+            provider: wallet?.provider,
+            assetId: pool.asset,
+          });
+
+          if (!isNativeAsset && tokenAddress) {
+            // Handle ERC20 token deposit
+
+            const parsedAmount = parseAmount(amount.toString());
+
+            // Check and handle allowance
+            const currentAllowance = await getAllowance(routerAddress);
+            if (currentAllowance < parsedAmount) {
+              await approveSpending(routerAddress, parsedAmount);
+            }
+
+            txHash = await depositWithExpiry(
+              routerAddress,
+              vaultAddress,
+              tokenAddress,
+              parsedAmount,
+              memo,
+              expiry,
+            );
+          } else {
+            // Handle native asset deposit
+            const parsedAmount = parseUnits(amount.toString(), 18);
+            txHash = await depositWithExpiry(
+              routerAddress,
+              vaultAddress,
+              "0x0000000000000000000000000000000000000000",
+              parsedAmount,
+              memo,
+              expiry,
+            );
           }
-
-          txHash = await depositWithExpiry(
-            routerAddress,
-            vaultAddress,
-            tokenAddress,
-            parsedAmount,
-            memo,
-            expiry,
-          );
-        } else {
-          // Handle native asset deposit
-          const parsedAmount = parseUnits(amount.toString(), 18);
-          txHash = await depositWithExpiry(
-            routerAddress,
-            vaultAddress,
-            "0x0000000000000000000000000000000000000000",
-            parsedAmount,
-            memo,
-            expiry,
-          );
         }
 
         await getMemberDetails(wallet.address, asset);
@@ -302,11 +306,7 @@ export function useLiquidityPosition({
     [
       wallet,
       getMemberDetails,
-      approveSpending,
-      depositWithExpiry,
-      parseAmount,
       tokenAddress,
-      getAllowance,
       isNativeAsset,
       utxoChain,
       addUTXOLiquidity,
@@ -388,6 +388,11 @@ export function useLiquidityPosition({
         }
 
         // Handle EVM chain withdrawals
+        const { depositWithExpiry } = useContracts({
+          tokenAddress: tokenAddress as Address | undefined,
+          provider: wallet?.provider,
+          assetId: pool.asset,
+        });
         await switchEvmChain(wallet.provider, assetChain);
 
         const routerAddress = inbound.router
@@ -424,7 +429,6 @@ export function useLiquidityPosition({
     [
       wallet,
       getMemberDetails,
-      depositWithExpiry,
       utxoChain,
       removeUTXOLiquidity,
       pool.nativeDecimal,

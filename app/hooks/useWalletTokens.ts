@@ -7,7 +7,11 @@ import {
 import { ChainKey } from "@/utils/wallet/constants";
 import { getBalance, getPools, PoolDetail } from "@/midgard";
 import { getChainKeyFromChain } from "@/utils/chain";
-import { assetFromString, baseToAsset } from "@xchainjs/xchain-util";
+import {
+  assetFromString,
+  baseAmount,
+  baseToAsset,
+} from "@xchainjs/xchain-util";
 import { useUTXO } from "./useUTXO";
 import {
   checkAndSwitchChain,
@@ -167,14 +171,16 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   const getCosmosBalance = async (walletAddress: string) => {
     try {
       const client = await SigningStargateClient.connect(
-        "https://rpc.cosmos.directory/cosmoshub",
+        process.env.NEXT_PUBLIC_COSMOS_DIRECTORY_URL || "",
       );
 
       const balance = await client.getBalance(walletAddress, "uatom");
-
+      const baseAssetAmount = baseToAsset(baseAmount(balance.amount, 6))
+        .amount()
+        .toNumber();
       return {
-        balance: Number(balance.amount) / 1e6, // Convert from uatom to ATOM
-        formattedBalance: formatNumber(Number(balance.amount) / 1e6, 6),
+        balance: baseAssetAmount,
+        formattedBalance: formatNumber(baseAssetAmount, 6),
       };
     } catch (err) {
       console.error("Error getting ATOM balance:", err);
@@ -329,11 +335,9 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
               const token = list[tokenKey];
               if (token.balance === 0) {
                 try {
-                  console.log("Getting balance for token", tokenKey);
                   const info = await getCosmosBalance(
                     walletsState[key].address,
                   );
-                  console.log("Got balance for token", tokenKey, info);
 
                   if (info) {
                     newWalletTokensData = {
@@ -375,7 +379,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
   const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
     useQuery({
-      queryKey: ["walletTokens", walletsState],
+      queryKey: ["walletTokens", Object.keys(walletsState)],
       queryFn: () => fetchWalletTokens(),
       enabled: Object.keys(walletsState).length > 0,
     });
@@ -385,7 +389,10 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: ["walletBalances", walletTokensData],
+    queryKey: [
+      "walletBalances",
+      walletTokensData ? Object.keys(walletTokensData) : [],
+    ],
     queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
     enabled: !!walletTokensData,
   });

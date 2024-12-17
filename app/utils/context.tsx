@@ -121,7 +121,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   id: "xdefi-cosmos",
                   name: "CTRL Wallet",
                   provider: window?.xfi?.keplr,
-                  subchain: "cosmoshub-4", // Add the mainnet chain ID
+                  subchain: "cosmoshub-4",
                 }),
             };
           } else {
@@ -265,7 +265,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 await connectWallet({
                   id: "vultisig-cosmos",
                   name: "Vultisig",
-                  provider: window.vultisig?.keplr,
+                  provider: window.vultisig?.cosmos,
                   subchain: "cosmoshub-4",
                 }),
             };
