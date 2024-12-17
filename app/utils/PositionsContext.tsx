@@ -10,7 +10,11 @@ import { PoolDetails } from "@/midgard";
 interface LiquidityPositionsContextType {
   positions: Positions | undefined;
   pools: PoolDetails | undefined;
-  markPositionAsPending: (pooldId: string, type: PositionType, status: PositionStatus) => void;
+  markPositionAsPending: (
+    pooldId: string,
+    type: PositionType,
+    status: PositionStatus,
+  ) => void;
   isPending: boolean;
   error: Error | null;
 }

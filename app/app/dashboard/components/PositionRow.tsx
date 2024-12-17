@@ -21,7 +21,7 @@ export default function PositionRow({
   onAdd,
   onRemove,
   hideAddButton = false,
-  hideStatus = false
+  hideStatus = false,
 }: PositionsRow) {
   return (
     <TranslucentCard className="rounded-xl mb-1.5 overflow-scroll overflow-y-hidden overflow-x-hidden">
@@ -50,12 +50,11 @@ export default function PositionRow({
           <div className="hidden md:flex md:px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
             {addDollarSignAndSuffix(position.gain.usd)}
           </div>
-          {
-            !hideStatus && 
+          {!hideStatus && (
             <div className="hidden md:flex md:px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
-              <StatusPosition position={position}/>
+              <StatusPosition position={position} />
             </div>
-          }
+          )}
           <div className="hidden md:flex px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
             {!hideAddButton && (
               <button

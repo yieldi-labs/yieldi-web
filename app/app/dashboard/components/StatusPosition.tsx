@@ -12,7 +12,7 @@ interface StatusPositionProps {
 
 export default function StatusPosition({ position }: StatusPositionProps) {
   const asset = assetFromString(position.assetId);
-  
+
   return (
     <span className="font-medium text-sm flex items-center space-x-2">
       {position.status === PositionStatus.LP_POSITION_INCOMPLETE && (
@@ -26,14 +26,14 @@ export default function StatusPosition({ position }: StatusPositionProps) {
       {position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING && (
         <span className="flex items-center bg-blue-100 text-blue px-2 py-1 rounded-md shadow-sm">
           <span className="mr-2">Withdrawal pending</span>
-          <Loader sizeInPixels={4} color='blue' />
+          <Loader sizeInPixels={4} color="blue" />
         </span>
       )}
 
       {position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING && (
         <span className="flex items-center bg-blue-100 text-blue px-2 py-1 rounded-md shadow-sm">
           <span className="mr-2">Deposit pending</span>
-          <Loader sizeInPixels={4} color='blue' />
+          <Loader sizeInPixels={4} color="blue" />
         </span>
       )}
 

@@ -42,7 +42,8 @@ export default function TransactionConfirmationModal({
     >
       <div className="p-6 flex flex-col items-center">
         {/* Success Icon */}
-        {position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING || position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING ? (
+        {position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
+        position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING ? (
           <div className="mb-3">
             <Loader />
           </div>
