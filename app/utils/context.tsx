@@ -8,6 +8,7 @@ import React, {
   ReactNode,
   Dispatch,
   SetStateAction,
+  useCallback,
 } from "react";
 import { ProviderKey, SUPPORTED_WALLETS, WalletKey } from "./wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
@@ -36,6 +37,8 @@ interface AppStateContextType {
   refreshBalances: () => void;
   isLoadingBalance: boolean;
   isLoadingTokenList: boolean;
+  detected: WalletType[];
+  undetected: WalletType[];
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -45,9 +48,11 @@ const AppStateContext = createContext<AppStateContextType | undefined>(
 export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   const [selectedChains, setSelectedChains] = useState<ChainType[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<WalletType>();
+  const [detected, setDetected] = useState<WalletType[]>([]);
+  const [undetected, setUndetected] = useState<WalletType[]>([]);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false);
-  const [walletsState, setWalletsState] = useState<ConnectedWalletsState>({});
+  const [walletsState, setWalletsState] = useState<ConnectedWalletsState>({}); // TODO: We should remove complex objects as wallet providers from provider state. It can not be passed as props
   const toggleWalletModal = () => {
     setIsWalletModalOpen((prevState) => !prevState);
   };
@@ -64,7 +69,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       switch (walletKey) {
         case WalletKey.CTRL: {
           if (window.xfi) {
-            SUPPORTED_WALLETS[walletKey].isAvailable = true;
+            SUPPORTED_WALLETS[walletKey].isAvailable = true; // TODO: Not modify a constant exported from other file. We are merging react state with static definitions
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.EVM]: async () =>
                 await connectEVMWallet(window.xfi?.ethereum),
@@ -118,7 +123,11 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           break;
         }
         case WalletKey.METAMASK: {
-          if (window.ethereum?.isMetaMask) {
+          if (
+            window.ethereum?.isMetaMask &&
+            !window.ethereum?.isVultisig &&
+            !window.ethereum?.isXDEFI
+          ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.EVM]: async (
@@ -164,7 +173,11 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           break;
         }
         case WalletKey.PHANTOM: {
-          if (window.phantom) {
+          if (
+            window.solana.isPhantom &&
+            !window.solana.isBraveWallet &&
+            !window.solana.isXDEFI
+          ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.EVM]: async (
@@ -243,9 +256,35 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const getDectectedAndUndetected = useCallback(() => {
+    const detected: WalletType[] = [];
+    const undetected: WalletType[] = [];
+    const processedWallets = new Set<WalletKey>();
+
+    const processWallet = (wallet: WalletType) => {
+      if (processedWallets.has(wallet.id)) return;
+      if (wallet.isAvailable) {
+        detected.push(wallet);
+      } else {
+        undetected.push(wallet);
+      }
+      processedWallets.add(wallet.id);
+    };
+
+    const walletList: WalletType[] = Object.values(
+      SUPPORTED_WALLETS,
+    ) as WalletType[];
+    walletList.forEach(processWallet);
+
+    return { detected, undetected };
+  }, []); // TODO: This status (detected, undetected) should be handle on a centralized state as part of wallet object. Take into account for https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration
+
   useEffect(() => {
     checkAvailableWallets(window);
-  }, []);
+    const { detected, undetected } = getDectectedAndUndetected();
+    setDetected(detected);
+    setUndetected(undetected);
+  }, [getDectectedAndUndetected]);
 
   return (
     <AppStateContext.Provider
@@ -264,6 +303,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         balanceList,
         isLoadingBalance,
         isLoadingTokenList,
+        detected,
+        undetected,
       }}
     >
       {children}

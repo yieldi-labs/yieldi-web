@@ -4,7 +4,7 @@ import Modal from "@/app/modal";
 import WalletList from "./WalletList";
 import { useAppState } from "@/utils/context";
 import { ChainSelector } from "./ChainSelector";
-import { useWalletList, useWalletConnection } from "@/hooks";
+import { useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
 import HardwareWallets from "./HardwareWallets";
@@ -14,6 +14,7 @@ import {
   WalletType,
 } from "@/utils/interfaces";
 import { ChainKey, CHAINS } from "@/utils/wallet/constants";
+import { isWalletValidForAllChains } from "@/utils/wallet/utils";
 
 export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
@@ -21,12 +22,14 @@ export default function WalletModal() {
     toggleWalletModal,
     isWalletModalOpen,
     setWalletsState,
-    selectedWallet,
     setSelectedWallet,
     setSelectedChains,
+    detected,
+    undetected,
+    selectedWallet,
+    selectedChains,
   } = useAppState();
-  const { selectedChains, handleConnect } = useWalletConnection();
-  const { detected, undetected, isWalletValidForChain } = useWalletList();
+  const { handleConnect } = useWalletConnection();
 
   const isHWDisabled = selectedChains.some((chain) =>
     [ChainKey.SOLANA, ChainKey.KUJIRA, ChainKey.BSCCHAIN].includes(chain.name),
@@ -44,6 +47,9 @@ export default function WalletModal() {
         setSelectedWallet(wallet);
       }
     } else {
+      setSelectedChains(
+        selectedChains.filter(({ name }) => validChains.includes(name)),
+      );
       setSelectedWallet(wallet);
     }
   };
@@ -76,7 +82,9 @@ export default function WalletModal() {
             <WalletList
               detected={detected}
               undetected={undetected}
-              isWalletValidForChain={isWalletValidForChain}
+              selectedWallet={selectedWallet}
+              selectedChains={selectedChains}
+              isWalletValidForChain={isWalletValidForAllChains}
               onWalletSelect={handleWalletSelect}
             />
             <div

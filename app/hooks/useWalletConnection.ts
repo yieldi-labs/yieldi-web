@@ -156,7 +156,6 @@ export function useWalletConnection() {
   };
 
   return {
-    selectedChains,
     handleConnect,
     getNetworkAddressFromLocalStorage,
     getAllNetworkAddressesFromLocalStorage,
