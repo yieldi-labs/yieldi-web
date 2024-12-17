@@ -38,8 +38,6 @@ export default function AddLiquidityModal({
   runePriceUSD,
   onClose,
 }: AddLiquidityModalProps) {
-  console.log("runePriceUSD", runePriceUSD);
-
   const inputRef = useRef<HTMLInputElement>(null);
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
@@ -176,7 +174,6 @@ export default function AddLiquidityModal({
             getNetworkAddressFromLocalStorage(ChainKey.THORCHAIN) || undefined;
         } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
           const identifier = getChainKeyFromChain(pool.asset.split(".")[0]);
-          console.log("identifier", identifier);
           pairedAddress =
             getNetworkAddressFromLocalStorage(identifier) || undefined;
         }
