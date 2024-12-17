@@ -16,7 +16,7 @@ export default function BalanceRow({
   isLoading,
   isHidden,
 }: BalanceRowProps) {
-  const asset = assetFromString(token.asset)
+  const asset = assetFromString(token.asset);
   return (
     <div className="px-2 py-4">
       <div className="flex gap-2 items-center">
