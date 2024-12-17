@@ -187,7 +187,7 @@ export function useLiquidityPosition({
         throw new Error("Wallet not connected");
       }
 
-      console.log('runeAmount addLiquidity', runeAmount)
+      console.log("runeAmount addLiquidity", runeAmount);
 
       try {
         setLoading(true);

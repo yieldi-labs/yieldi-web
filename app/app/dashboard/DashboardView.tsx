@@ -18,7 +18,7 @@ import { emptyPositionStats } from "@/hooks/usePositionStats";
 import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
 
 interface DashboardViewProps {
-  runePriceUSD: number
+  runePriceUSD: number;
 }
 
 export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
