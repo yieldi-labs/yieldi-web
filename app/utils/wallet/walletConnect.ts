@@ -31,28 +31,16 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         };
       case "vultisig-cosmos":
         try {
-          const chainId = wallet.subchain || "cosmoshub-4";
-
           if (!window.vultisig?.cosmos) {
             throw new Error("Vultisig Keplr provider not found");
           }
 
-          const keplr = window.vultisig?.cosmos;
-          // Enable the chain
-          await keplr.enable(chainId);
-
-          // Get the offline signer
-          const offlineSigner = keplr.getOfflineSigner(chainId);
-          const accounts = await offlineSigner.getAccounts();
-
-          if (!accounts || accounts.length === 0) {
-            throw new Error("No Cosmos accounts found");
-          }
+          // Get Accounts 
+          const accounts = await window.vultisig.cosmos.request({method: "get_accounts"});
 
           return {
-            provider: keplr,
-            address: accounts[0].address,
-            offlineSigner,
+            provider: window.vultisig.cosmos,
+            address: accounts[0],
           };
         } catch (e) {
           console.error("Cosmos connection error:", e);

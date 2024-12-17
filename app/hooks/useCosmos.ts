@@ -18,30 +18,45 @@ export function useCosmos({ wallet }: UseCosmosProps) {
       setError(null);
       setLoading(true);
       try {
-        await keplr.enable(chainId);
-        const offlineSigner = keplr.getOfflineSigner(chainId);
+        if (keplr.isVultisig) {
+          const txDetails = {
+            from: wallet!.address,
+            to,
+            amount: amount + "uatom",
+            memo,
+          }
 
-        const gasPrice = GasPrice.fromString("0.025uatom");
-        const cosmJS = await SigningStargateClient.connectWithSigner(
-          rpcUrl,
-          offlineSigner,
-          {
-            gasPrice,
-          },
-        );
-        const coin = {
-          denom: "uatom",
-          amount: amount + "",
-        };
+          const result = await keplr.request({
+            method: "send_transaction",
+            params: [txDetails],
+          })
+          console.log("Vultisig-Cosmos transaction result:", result);
+        } else {
+          await keplr.enable(chainId);
+          const offlineSigner = keplr.getOfflineSigner(chainId);
 
-        const result = await cosmJS.sendTokens(
-          wallet!.address,
-          to,
-          [coin],
-          "auto",
-          memo,
-        );
-        return result.transactionHash;
+          const gasPrice = GasPrice.fromString("0.025uatom");
+          const cosmJS = await SigningStargateClient.connectWithSigner(
+            rpcUrl,
+            offlineSigner,
+            {
+              gasPrice,
+            },
+          );
+          const coin = {
+            denom: "uatom",
+            amount: amount + "",
+          };
+
+          const result = await cosmJS.sendTokens(
+            wallet!.address,
+            to,
+            [coin],
+            "auto",
+            memo,
+          );
+          return result.transactionHash;
+        }
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Failed to perform transfer";
