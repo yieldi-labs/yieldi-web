@@ -175,7 +175,9 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       );
       const atomDecimals = 6;
       const balance = await client.getBalance(walletAddress, "uatom");
-      const baseAssetAmount = baseToAsset(baseAmount(balance.amount, atomDecimals))
+      const baseAssetAmount = baseToAsset(
+        baseAmount(balance.amount, atomDecimals),
+      )
         .amount()
         .toNumber();
       return {
