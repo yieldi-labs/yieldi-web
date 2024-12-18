@@ -30,7 +30,6 @@ export function useWalletConnection() {
     chain: ChainType,
     ethConnectors: GetConnectorsReturnType,
   ) => {
-    console.log({ wallet, chain });
     if (!wallet.chainConnect[chain.providerType])
       throw new Error(`Chain ${chain.name} Not Supported!`);
 

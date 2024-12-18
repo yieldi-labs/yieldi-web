@@ -173,14 +173,14 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       const client = await SigningStargateClient.connect(
         process.env.NEXT_PUBLIC_COSMOS_DIRECTORY_URL || "",
       );
-
+      const atomDecimals = 6;
       const balance = await client.getBalance(walletAddress, "uatom");
-      const baseAssetAmount = baseToAsset(baseAmount(balance.amount, 6))
+      const baseAssetAmount = baseToAsset(baseAmount(balance.amount, atomDecimals))
         .amount()
         .toNumber();
       return {
         balance: baseAssetAmount,
-        formattedBalance: formatNumber(baseAssetAmount, 6),
+        formattedBalance: formatNumber(baseAssetAmount, atomDecimals),
       };
     } catch (err) {
       console.error("Error getting ATOM balance:", err);

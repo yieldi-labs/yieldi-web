@@ -374,12 +374,15 @@ export function useLiquidityPosition({
 
         // Handle Cosmos chain withdrawals
         if (wallet.chainType === ChainKey.GAIACHAIN) {
-          return await cosmosTransfer(
-            inbound.address,
-            getMinAmountByChain(supportedChain) *
-              10 ** parseInt(pool.nativeDecimal),
-            memo,
-          );
+          const cosmosAmount = assetToBase(
+            assetAmount(
+              getMinAmountByChain(supportedChain),
+              parseInt(pool.nativeDecimal),
+            ),
+          )
+            .amount()
+            .toNumber();
+          return await cosmosTransfer(inbound.address, cosmosAmount, memo);
         }
 
         // Handle UTXO chain withdrawals
