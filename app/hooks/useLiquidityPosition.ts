@@ -19,6 +19,7 @@ import {
 } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
 import { useCosmos } from "./useCosmos";
+import { assetAmount, assetToBase, baseAmount } from "@xchainjs/xchain-util";
 
 interface AddLiquidityParams {
   asset: string;
@@ -220,7 +221,11 @@ export function useLiquidityPosition({
 
         // Handle Cosmos chain transactions
         if (wallet.chainType === ChainKey.GAIACHAIN) {
-          const cosmosAmount = amount * 10 ** parseInt(pool.nativeDecimal);
+          const cosmosAmount = assetToBase(
+            assetAmount(amount, parseInt(pool.nativeDecimal)),
+          )
+            .amount()
+            .toNumber();
           return await cosmosTransfer(inbound.address, cosmosAmount, memo);
         }
 

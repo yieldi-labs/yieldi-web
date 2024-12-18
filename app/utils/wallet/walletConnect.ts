@@ -21,7 +21,6 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         };
       case "vultisig-cosmos":
         try {
-
           const accounts = await wallet.provider.request({
             method: "request_accounts",
           });
