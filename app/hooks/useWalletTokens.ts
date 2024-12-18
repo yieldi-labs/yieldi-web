@@ -378,7 +378,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
   const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
     useQuery({
-      queryKey: ["walletTokens", walletsState],
+      queryKey: ["walletTokens", Object.keys(walletsState)],
       queryFn: () => fetchWalletTokens(),
       enabled: Object.keys(walletsState).length > 0,
     });
