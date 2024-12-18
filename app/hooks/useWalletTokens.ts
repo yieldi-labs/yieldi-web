@@ -338,7 +338,6 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                   const info = await getCosmosBalance(
                     walletsState[key].address,
                   );
-
                   if (info) {
                     newWalletTokensData = {
                       ...newWalletTokensData,
@@ -379,7 +378,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
   const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
     useQuery({
-      queryKey: ["walletTokens", Object.keys(walletsState)],
+      queryKey: ["walletTokens", walletsState],
       queryFn: () => fetchWalletTokens(),
       enabled: Object.keys(walletsState).length > 0,
     });
@@ -389,10 +388,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     isFetching,
     refetch,
   } = useQuery({
-    queryKey: [
-      "walletBalances",
-      walletTokensData ? Object.keys(walletTokensData) : [],
-    ],
+    queryKey: ["walletBalances", walletTokensData],
     queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
     enabled: !!walletTokensData,
   });

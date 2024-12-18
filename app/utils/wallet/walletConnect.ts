@@ -1,15 +1,5 @@
 import { EthereumProvider } from "@walletconnect/ethereum-provider";
 import { Web3Provider } from "@ethersproject/providers";
-import { Window as KeplrWindow } from "@keplr-wallet/types";
-
-declare global {
-  interface Window extends KeplrWindow {
-    xfi?: {
-      keplr?: KeplrWindow["keplr"];
-      // ... other xfi properties
-    };
-  }
-}
 
 export const connectWallet = async (wallet: any): Promise<any> => {
   try {
