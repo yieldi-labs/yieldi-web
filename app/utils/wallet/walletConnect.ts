@@ -21,18 +21,14 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         };
       case "vultisig-cosmos":
         try {
-          if (!window.vultisig?.cosmos) {
-            throw new Error("Vultisig Cosmos provider not found");
-          }
 
-          // Get Accounts
-          const accounts = await window.vultisig.cosmos.request({
-            method: "get_accounts",
+          const accounts = await wallet.provider.request({
+            method: "request_accounts",
           });
 
           return {
-            provider: window.vultisig.cosmos,
-            address: accounts[0],
+            provider: wallet.provider,
+            address: accounts,
           };
         } catch (e) {
           console.error("Cosmos connection error:", e);

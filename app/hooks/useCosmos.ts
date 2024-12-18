@@ -18,12 +18,12 @@ export function useCosmos({ wallet }: UseCosmosProps) {
       setError(null);
       setLoading(true);
       try {
-        if (keplr.isVultisig) {
+        if (keplr.isVultiConnect) {
           const txDetails = {
             from: wallet!.address,
             to,
-            amount: amount + "uatom",
-            memo,
+            value: amount,
+            data: memo,
           };
 
           console.log("Vultisig-Cosmos transaction details:", txDetails);
