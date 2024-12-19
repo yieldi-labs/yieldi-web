@@ -7,13 +7,18 @@ import {
 import { ChainKey } from "@/utils/wallet/constants";
 import { getBalance, getPools, PoolDetail } from "@/midgard";
 import { getChainKeyFromChain } from "@/utils/chain";
-import { assetFromString, baseToAsset } from "@xchainjs/xchain-util";
+import {
+  assetFromString,
+  baseAmount,
+  baseToAsset,
+} from "@xchainjs/xchain-util";
 import { useUTXO } from "./useUTXO";
 import {
   checkAndSwitchChain,
   initialWalletTokensData,
 } from "@/utils/wallet/balances";
 import { useQuery } from "@tanstack/react-query";
+import { SigningStargateClient } from "@cosmjs/stargate";
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   // TODO: Avoid duplication of this condition between useUTXO and this line (https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration#comment-d10c7c6f)
@@ -163,6 +168,28 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     };
   };
 
+  const getCosmosBalance = async (walletAddress: string) => {
+    try {
+      const client = await SigningStargateClient.connect(
+        process.env.NEXT_PUBLIC_COSMOS_DIRECTORY_URL || "",
+      );
+      const atomDecimals = 6;
+      const balance = await client.getBalance(walletAddress, "uatom");
+      const baseAssetAmount = baseToAsset(
+        baseAmount(balance.amount, atomDecimals),
+      )
+        .amount()
+        .toNumber();
+      return {
+        balance: baseAssetAmount,
+        formattedBalance: formatNumber(baseAssetAmount, atomDecimals),
+      };
+    } catch (err) {
+      console.error("Error getting ATOM balance:", err);
+      return null;
+    }
+  };
+
   const getTokenBalances = async (walletTokensData: WalletTokensData) => {
     let newWalletTokensData: WalletTokensData = { ...walletTokensData };
     for (const key of Object.keys(walletTokensData)) {
@@ -305,6 +332,46 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
             }
             break;
           }
+          case ChainKey.GAIACHAIN: {
+            for (const tokenKey of Object.keys(list)) {
+              const token = list[tokenKey];
+              if (token.balance === 0) {
+                try {
+                  const info = await getCosmosBalance(
+                    walletsState[key].address,
+                  );
+                  if (info) {
+                    newWalletTokensData = {
+                      ...newWalletTokensData,
+                      [key as ChainKey]: {
+                        ...newWalletTokensData[key as ChainKey],
+                        [tokenKey]: {
+                          ...newWalletTokensData[key as ChainKey][tokenKey],
+                          ...walletTokensData[key as ChainKey][tokenKey],
+                          ...info,
+                        },
+                      },
+                    };
+                  }
+                } catch (err) {
+                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
+                  newWalletTokensData = {
+                    ...newWalletTokensData,
+                    [key as ChainKey]: {
+                      ...newWalletTokensData[key as ChainKey],
+                      [tokenKey]: {
+                        ...newWalletTokensData[key as ChainKey][tokenKey],
+                        ...walletTokensData[key as ChainKey][tokenKey],
+                        formattedBlanace: 0,
+                        balance: 0,
+                      },
+                    },
+                  };
+                }
+              }
+            }
+            break;
+          }
         }
       }
     }
@@ -313,7 +380,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
   const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
     useQuery({
-      queryKey: ["walletTokens", walletsState],
+      queryKey: ["walletTokens", Object.keys(walletsState)],
       queryFn: () => fetchWalletTokens(),
       enabled: Object.keys(walletsState).length > 0,
     });

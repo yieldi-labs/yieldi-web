@@ -67,7 +67,7 @@ export interface WalletType {
   downloadUrl?: string;
   chainConnect: {
     [key in ProviderKey]?: (
-      ethConnectors?: GetConnectorsReturnType,
+      connectors?: GetConnectorsReturnType,
     ) => Promise<{ provider: any; address: string }>;
   };
 }

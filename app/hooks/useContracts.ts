@@ -71,7 +71,6 @@ export function useContracts({
   });
 
   const { walletsState, balanceList } = useAppState();
-
   const asset = assetFromString(assetId);
   if (!asset) {
     throw Error("Invalid asset");

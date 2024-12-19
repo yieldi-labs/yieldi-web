@@ -36,6 +36,7 @@ export enum ProviderKey {
   BITCOINCASH = "bitcoincash",
   SOLANA = "solana",
   THORCHAIN = "thorchain",
+  COSMOS = "cosmos",
 }
 export enum WalletKey {
   CTRL = "xdefi",
@@ -80,6 +81,14 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "bsc",
     nativeAsset: "bnb",
     addressUrl: "https://bscscan.com/address/{wallet}",
+  },
+  {
+    icon: <ChainSvg.Cosmos />,
+    name: ChainKey.GAIACHAIN,
+    providerType: ProviderKey.COSMOS,
+    thorchainIdentifier: "gaia",
+    nativeAsset: "atom",
+    addressUrl: "https://mintscan.io/cosmos/address/{wallet}",
   },
   {
     icon: <ChainSvg.Dogechain />,
@@ -169,6 +178,7 @@ export const SUPPORTED_WALLETS = {
       ChainKey.LITECOIN,
       ChainKey.SOLANA,
       ChainKey.THORCHAIN,
+      ChainKey.GAIACHAIN,
     ],
     downloadUrl: "https://ctrl.xyz/",
     icon: <WalletSvg.Ctrl />,
@@ -192,6 +202,7 @@ export const SUPPORTED_WALLETS = {
       ChainKey.BITCOIN,
       ChainKey.BSCCHAIN,
       ChainKey.ETHEREUM,
+      ChainKey.GAIACHAIN,
     ],
     downloadUrl: "https://www.okx.com/web3",
     icon: <WalletSvg.OKX />,
@@ -219,6 +230,7 @@ export const SUPPORTED_WALLETS = {
       ChainKey.BITCOINCASH,
       ChainKey.DOGECOIN,
       ChainKey.LITECOIN,
+      ChainKey.GAIACHAIN,
     ],
     downloadUrl: "https://vultisig.com/",
     icon: <WalletSvg.Vultisig />,

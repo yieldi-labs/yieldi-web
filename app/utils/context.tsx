@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { ProviderKey, SUPPORTED_WALLETS, WalletKey } from "./wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
-import { connectEVMWallet, connectUTXOWallet } from "./wallet/walletConnect";
+import { connectEVMWallet, connectWallet } from "./wallet/walletConnect";
 
 import {
   ChainType,
@@ -75,45 +75,53 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 await connectEVMWallet(window.xfi?.ethereum),
 
               [ProviderKey.THORCHAIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "xdefi-thorchain",
                   name: "CTRL Wallet",
                   provider: window?.xfi?.thorchain,
                 }),
 
               [ProviderKey.LITECOIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "xdefi-ltc",
                   name: "CTRL Wallet",
                   provider: window?.xfi?.litecoin,
                 }),
 
               [ProviderKey.DOGECOIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "xdefi-doge",
                   name: "CTRL Wallet",
                   provider: window?.xfi?.dogecoin,
                 }),
 
               [ProviderKey.BITCOIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "xdefi-utxo",
                   name: "CTRL Wallet",
                   provider: window?.xfi?.bitcoin,
                 }),
 
               [ProviderKey.BITCOINCASH]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "xdefi-bch",
                   name: "CTRL Wallet",
                   provider: window?.xfi?.bitcoincash,
                 }),
 
               [ProviderKey.SOLANA]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "xdefi-solana",
                   name: "CTRL Wallet",
                   provider: window?.xfi?.solana,
+                }),
+
+              [ProviderKey.COSMOS]: async () =>
+                await connectWallet({
+                  id: "xdefi-cosmos",
+                  name: "CTRL Wallet",
+                  provider: window?.xfi?.keplr,
+                  subchain: "cosmoshub-4",
                 }),
             };
           } else {
@@ -161,10 +169,17 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 return await connectEVMWallet(window.ethereum);
               },
               [ProviderKey.BITCOIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "okx-utxo",
                   name: "OKX Wallet",
                   provider: window.okxwallet.bitcoin,
+                }),
+              [ProviderKey.COSMOS]: async () =>
+                await connectWallet({
+                  id: "okx-cosmos",
+                  name: "OKX Wallet",
+                  provider: window.okxwallet.keplr,
+                  subchain: "cosmoshub-4",
                 }),
             };
           } else {
@@ -191,13 +206,13 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 return await connectEVMWallet(window.phantom?.ethereum);
               },
               [ProviderKey.BITCOIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "phantom-utxo",
                   name: "Phantom Wallet",
                   provider: window.phantom.bitcoin,
                 }),
               [ProviderKey.SOLANA]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "phantom-solana",
                   name: "Phantom Wallet",
                   provider: window.phantom.solana,
@@ -217,34 +232,41 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 return await connectEVMWallet(window.vultisig?.ethereum);
               },
               [ProviderKey.THORCHAIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "vultisig-thorchain",
                   name: "Vultisig",
                   provider: window.thorchain || window.vultisig?.thorchain,
                 }),
               [ProviderKey.BITCOIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "vultisig-utxo",
                   name: "Vultisig",
                   provider: window.bitcoin || window.vultisig?.bitcoin,
                 }),
               [ProviderKey.BITCOINCASH]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "vultisig-bch",
                   name: "Vultisig",
                   provider: window.bitcoincash || window.vultisig?.bitcoincash,
                 }),
               [ProviderKey.LITECOIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "vultisig-ltc",
                   name: "Vultisig",
                   provider: window.litecoin || window.vultisig?.litecoin,
                 }),
               [ProviderKey.DOGECOIN]: async () =>
-                await connectUTXOWallet({
+                await connectWallet({
                   id: "vultisig-doge",
                   name: "Vultisig",
                   provider: window.dogecoin || window.vultisig?.dogecoin,
+                }),
+              [ProviderKey.COSMOS]: async () =>
+                await connectWallet({
+                  id: "vultisig-cosmos",
+                  name: "Vultisig",
+                  provider: window.vultisig?.cosmos,
+                  subchain: "cosmoshub-4",
                 }),
             };
           } else {
