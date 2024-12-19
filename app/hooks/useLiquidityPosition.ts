@@ -186,7 +186,6 @@ export function useLiquidityPosition({
       if (!wallet?.address) {
         throw new Error("Wallet not connected");
       }
-
       try {
         setLoading(true);
         setError(null);

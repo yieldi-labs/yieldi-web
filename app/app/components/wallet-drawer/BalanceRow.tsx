@@ -3,6 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { formatNumber, getAssetSymbol, getLogoPath } from "@/app/utils";
 import Loader from "../Loader";
+import { assetFromString } from "@xchainjs/xchain-util";
 
 interface BalanceRowProps {
   token: TokenData;
@@ -15,6 +16,7 @@ export default function BalanceRow({
   isLoading,
   isHidden,
 }: BalanceRowProps) {
+  const asset = assetFromString(token.asset);
   return (
     <div className="px-2 py-4">
       <div className="flex gap-2 items-center">
@@ -26,8 +28,8 @@ export default function BalanceRow({
           className="rounded-full"
         />
         <div className="flex flex-1 flex-col">
-          <span className="font-bold leading-5">{token.symbol}</span>
-          <span className="leading-4 text-gray-500">{token.chainName}</span>
+          <span className="font-bold leading-5">{asset?.ticker}</span>
+          <span className="leading-4 text-gray-500">{asset?.chain}</span>
         </div>
         {isLoading ? (
           <Loader sizeInPixels={4} />
