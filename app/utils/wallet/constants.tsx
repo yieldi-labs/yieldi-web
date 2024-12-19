@@ -1,5 +1,4 @@
 import { ChainSvg, WalletSvg } from "@/svg";
-import { connectWalletConnect } from "./walletConnect";
 import { ChainType } from "../interfaces";
 
 export enum ChainKey {
@@ -243,8 +242,6 @@ export const SUPPORTED_WALLETS = {
     chains: [ChainKey.AVALANCHE, ChainKey.BSCCHAIN, ChainKey.ETHEREUM],
     icon: <WalletSvg.WalletConnect />,
     isAvailable: true,
-    chainConnect: {
-      [ProviderKey.EVM]: async () => (await connectWalletConnect()) as any,
-    },
+    chainConnect: {},
   },
 };

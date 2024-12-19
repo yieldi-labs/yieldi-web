@@ -10,25 +10,20 @@ import {
   ConnectedWalletsState,
   WalletType,
 } from "@/utils/interfaces";
-import { GetConnectorsReturnType } from "wagmi/actions";
-import { useConnectors } from "wagmi";
 import { useCallback } from "react";
 import { useAppState } from "@/utils/context";
 
 export function useWalletConnection() {
-  const ethConnectors = useConnectors();
   const {
     setWalletsState,
     toggleWalletModal,
     selectedChains,
-    selectedWallet,
     walletsState,
   } = useAppState();
 
   const handleProviderConnection = async (
     wallet: WalletType,
     chain: ChainType,
-    ethConnectors: GetConnectorsReturnType,
   ) => {
     if (!wallet.chainConnect[chain.providerType])
       throw new Error(`Chain ${chain.name} Not Supported!`);
@@ -37,7 +32,7 @@ export function useWalletConnection() {
     switch (chain.providerType) {
       case ProviderKey.EVM:
         connectedWallet =
-          await wallet.chainConnect[ProviderKey.EVM]!(ethConnectors);
+          await wallet.chainConnect[ProviderKey.EVM]!();
         break;
       case ProviderKey.COSMOS:
         connectedWallet = await wallet.chainConnect[ProviderKey.COSMOS]!();
@@ -52,9 +47,9 @@ export function useWalletConnection() {
 
     // Only fetch chainId for EVM chains
     if (chain.providerType === ProviderKey.EVM) {
-      chainId = await connectedWallet.provider.request({
-        method: "eth_chainId",
-      });
+        chainId = await connectedWallet.provider.request({
+          method: "eth_chainId",
+        });
     }
 
     return {
@@ -130,12 +125,6 @@ export function useWalletConnection() {
     }
 
     try {
-      if (!wallet.isAvailable) {
-        window.open(wallet.downloadUrl, "_blank");
-        return;
-      }
-
-      if (!selectedWallet) return;
 
       let newWalletState = { ...walletsState };
 
@@ -147,13 +136,12 @@ export function useWalletConnection() {
         const connection = await handleProviderConnection(
           wallet,
           chain,
-          ethConnectors,
         );
         if (!connection) continue;
         saveNetworkAddressToLocalStorage(chain.name, connection.address);
         newWalletState = updateWalletState(
           newWalletState,
-          selectedWallet.id,
+          wallet.id,
           chain.providerType,
           chain.name,
           connection.provider,
