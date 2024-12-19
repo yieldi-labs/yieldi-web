@@ -1,6 +1,5 @@
 import { Asset } from "@xchainjs/xchain-util";
 import { WalletState } from "../interfaces";
-import { ProviderKey } from "./constants";
 
 interface TransactionParams {
   from: string;
@@ -13,40 +12,6 @@ interface TransactionParams {
   memo: string;
   feeRate: number;
 }
-
-export const transferCosmos = async (
-  wallet: WalletState,
-  transferParams: TransactionParams,
-): Promise<any> => {
-  try {
-    if (wallet.providerType !== ProviderKey.COSMOS) {
-      throw new Error("Not a Cosmos chain");
-    }
-
-    const msg = {
-      type: "cosmos-sdk/MsgSend",
-      value: {
-        from_address: transferParams.from,
-        to_address: transferParams.recipient,
-        amount: [
-          {
-            denom: "uatom",
-            amount: String(transferParams.amount.amount),
-          },
-        ],
-        memo: transferParams.memo,
-      },
-    };
-
-    return wallet.provider.request({
-      method: "cosmos_sendTransaction",
-      params: [msg],
-    });
-  } catch (error) {
-    console.error("Error transfer Cosmos wallet:", error);
-    return "";
-  }
-};
 
 export const transferUTXO = async (
   wallet: WalletState,
