@@ -62,7 +62,6 @@ export const getEthOrERC20TokenBalance = async (
         functionName: "balanceOf",
         data: balanceHex,
       }) as bigint;
-
       return { balance: balanceBigInt };
     }
   } catch (err) {
