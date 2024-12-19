@@ -3,13 +3,18 @@ import React, { createContext, ReactNode, useContext } from "react";
 import { usePositionStats } from "@/hooks/usePositionStats";
 import {
   Positions,
+  PositionStatus,
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
 import { PoolDetails } from "@/midgard";
 interface LiquidityPositionsContextType {
   positions: Positions | undefined;
   pools: PoolDetails | undefined;
-  markPositionAsPending: (pooldId: string, type: PositionType) => void;
+  markPositionAsPending: (
+    pooldId: string,
+    type: PositionType,
+    status: PositionStatus,
+  ) => void;
   isPending: boolean;
   error: Error | null;
 }

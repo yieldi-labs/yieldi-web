@@ -17,7 +17,11 @@ import { useAppState } from "@/utils/context";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
 import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
 
-export default function DashboardView() {
+interface DashboardViewProps {
+  runePriceUSD: number;
+}
+
+export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
   const [selectedPool, setSelectedPool] = useState<PoolDetail | null>(null);
   const [selectedPosition, setSelectedPosition] =
     useState<PositionStats | null>(null);
@@ -110,7 +114,7 @@ export default function DashboardView() {
       {showAddLiquidityModal && selectedPool && (
         <AddLiquidityModal
           pool={selectedPool}
-          runePriceUSD={0}
+          runePriceUSD={runePriceUSD}
           onClose={() => {
             setSelectedPool(null);
             setShowAddLiquidityModal(false);
