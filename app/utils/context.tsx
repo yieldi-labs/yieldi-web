@@ -10,10 +10,8 @@ import React, {
   SetStateAction,
   useCallback,
 } from "react";
-import { ProviderKey, SUPPORTED_WALLETS, WalletKey } from "./wallet/constants";
-import { GetConnectorsReturnType } from "wagmi/actions";
-import { connectEVMWallet, connectWallet } from "./wallet/walletConnect";
-
+import { CHAINS, ProviderKey, SUPPORTED_WALLETS, WalletKey } from "./wallet/constants";
+import { connectEVMWallet, connectWallet, connectWalletConnect } from "./wallet/walletConnect";
 import {
   ChainType,
   ConnectedWalletsState,
@@ -21,6 +19,9 @@ import {
   WalletType,
 } from "./interfaces";
 import { useWalletTokens } from "@/hooks/useWalletTokens";
+import { createAppKit } from '@reown/appkit/react'
+import { mainnet, avalanche, bsc } from '@reown/appkit/networks'
+import UniversalProvider from '@walletconnect/universal-provider';
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
@@ -45,6 +46,25 @@ const AppStateContext = createContext<AppStateContextType | undefined>(
   undefined,
 );
 
+const metadata = {
+  name: 'Yieldi',
+  description: '-',
+  url: 'https://app.yieldi.xyz',
+  icons: [],
+}
+
+const modal = createAppKit({
+  adapters: [],
+  features: {
+    email: true, // default to true
+    emailShowWallets: true, // default to true
+    connectMethodsOrder: ['wallet', 'email', 'social']
+  },
+  metadata,
+  networks: [mainnet, avalanche, bsc],
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECTID as string,
+})
+
 export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   const [selectedChains, setSelectedChains] = useState<ChainType[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<WalletType>();
@@ -62,6 +82,35 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
 
   const { refreshBalances, balanceList, isLoadingBalance, isLoadingTokenList } =
     useWalletTokens(walletsState!);
+
+  useEffect(() => {
+    modal.subscribeProviders((data) => {
+      if (data.eip155) {
+        const connectedChains = (data.eip155 as UniversalProvider).session?.namespaces.eip155.chains?.map((chainStr) => `0x${Number(chainStr.replace('eip155:', '')).toString(16)}`)
+        const chainsInfo = CHAINS.filter((chain) => connectedChains?.includes(chain.chainId || ''))
+        const newState: Record<any, any> = {}
+
+        chainsInfo.forEach(chain => {
+          const parsedAccounts = (data.eip155 as UniversalProvider).session?.namespaces.eip155.accounts.map(account => account.split(':'))
+          const filteredAccount = parsedAccounts?.find(account => `0x${Number(account[1]).toString(16)}` === chain.chainId)
+          const addressFilteredAccount = filteredAccount?.[2]
+          newState[chain.name] = {
+            provider: data.eip155,
+            walletId: WalletKey.WALLETCONNECT,
+            address: addressFilteredAccount,
+            chainType: chain.name,
+            providerType: ProviderKey.EVM,
+            chainId: chain.chainId,
+          } 
+        })
+
+        setWalletsState(prev => ({
+          ...prev,
+          ...newState
+        }))
+      }
+    })
+    }, []);
 
   const checkAvailableWallets = (window: any) => {
     Object.keys(SUPPORTED_WALLETS).forEach((key) => {
@@ -138,14 +187,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType,
-              ) => {
-                if (!ethConnectors) return;
-                const connector = ethConnectors.find(
-                  (c) => c.id === WalletKey.METAMASK,
-                );
-                if (!connector) return;
+              [ProviderKey.EVM]: async () => {
                 return await connectEVMWallet(window.ethereum);
               },
             };
@@ -158,15 +200,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.okxwallet) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType,
-              ) => {
-                if (!ethConnectors) return;
-                const connector = ethConnectors.find(
-                  (c) => c.id === WalletKey.OKX,
-                );
-                if (!connector) return;
-                return await connectEVMWallet(window.ethereum);
+              [ProviderKey.EVM]: async () => {
+                return await connectEVMWallet(window.okxwallet);
               },
               [ProviderKey.BITCOIN]: async () =>
                 await connectWallet({
@@ -195,14 +230,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async (
-                ethConnectors: GetConnectorsReturnType,
-              ) => {
-                if (!ethConnectors) return;
-                const connector = ethConnectors.find(
-                  (c) => c.id === WalletKey.PHANTOM,
-                );
-                if (!connector) return;
+              [ProviderKey.EVM]: async () => {
                 return await connectEVMWallet(window.phantom?.ethereum);
               },
               [ProviderKey.BITCOIN]: async () =>
@@ -274,6 +302,14 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           }
           break;
         }
+        case WalletKey.WALLETCONNECT: 
+          SUPPORTED_WALLETS[walletKey].isAvailable = true;
+          SUPPORTED_WALLETS[walletKey].chainConnect = {
+            [ProviderKey.EVM]: async () => {
+              connectWalletConnect(modal)
+            },
+          }
+          break;
       }
     });
   };

@@ -1,5 +1,4 @@
-import { EthereumProvider } from "@walletconnect/ethereum-provider";
-import { Web3Provider } from "@ethersproject/providers";
+import { AppKit } from "@reown/appkit/react";
 
 export const connectWallet = async (wallet: any): Promise<any> => {
   try {
@@ -156,7 +155,7 @@ export const connectEVMWallet = async (wallet: any): Promise<any> => {
   try {
     let address = "";
 
-    if (wallet.isConnected() || !wallet.connect) {
+    if (!wallet.connect || wallet.isConnected()) {
       const accounts = await wallet.request({ method: "eth_requestAccounts" });
       address = accounts[0];
     } else {
@@ -173,24 +172,10 @@ export const connectEVMWallet = async (wallet: any): Promise<any> => {
   }
 };
 
-export const connectWalletConnect = async () => {
+export const connectWalletConnect = async (modal: AppKit) => {
   try {
-    const provider = await EthereumProvider.init({
-      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECTID as string,
-      chains: [1, 42161, 43114, 56],
-      showQrModal: true,
-    });
-
-    await provider.enable();
-
-    const web3Provider = new Web3Provider(provider);
-    const signer = web3Provider.getSigner();
-    const address = await signer.getAddress();
-
-    return {
-      provider: web3Provider,
-      address,
-    };
+    await modal.open({ view: 'Connect' })
+    return {};
   } catch (error) {
     console.error("Error connecting with WalletConnect:", error);
     return "";

@@ -32,7 +32,7 @@ const LinkWithHoverEffect = ({
             {href.startsWith("#") ? (
               <a
                 href={href}
-                className="relative z-10"
+                className="relative"
                 onClick={(e) => {
                   scrollToElement(e);
                   toggleMenu && toggleMenu();
@@ -41,7 +41,7 @@ const LinkWithHoverEffect = ({
                 {label}
               </a>
             ) : (
-              <Link href={href} className="relative z-10">
+              <Link href={href} className="relative">
                 {label}
               </Link>
             )}

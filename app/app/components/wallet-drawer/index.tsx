@@ -93,7 +93,7 @@ const WalletDrawerContainer: FC = () => {
           className="fixed inset-0 h-screen z-10"
           onClick={toggleWalletDrawer}
         />
-        <div className="fixed right-0 w-[360px] z-20 mx-18">
+        <div className="fixed right-0 w-[360px] z-20 mx-18 mt-32">
           <div className="bg-transparent-radial backdrop-blur-[14px] flex justify-between pt-4 rounded-t-lg">
             <WalletDrawerHeader
               onRefresh={handleWalletRefresh}
