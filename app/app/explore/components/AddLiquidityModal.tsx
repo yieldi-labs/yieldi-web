@@ -24,7 +24,6 @@ import {
 
 import { parseAssetString } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
-import { assetFromString } from "@xchainjs/xchain-util";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -67,13 +66,19 @@ export default function AddLiquidityModal({
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
-  const runeBalance = balanceList![ChainKey.THORCHAIN]["THOR.RUNE"]
-    ? balanceList![ChainKey.THORCHAIN]["THOR.RUNE"].balance
-    : 0;
-  const assetBalance =
-    balanceList![
-      getChainKeyFromChain(assetFromString(pool.asset)?.chain as string)
-    ][pool.asset]?.balance;
+  const runeBalance = useMemo(() => {
+    if (!balanceList) return 0;
+    return balanceList[ChainKey.THORCHAIN]["THOR.RUNE"].balance;
+  }, [balanceList]);
+  const assetBalance = useMemo(() => {
+    if (!balanceList || !pool.asset) return 0;
+    const chainKey = getChainKeyFromChain(pool.asset.split(".")[0]);
+    return balanceList[chainKey][pool.asset].balance;
+  }, [balanceList, pool.asset]);
+
+  if (!selectedWallet?.provider) {
+    throw new Error("Wallet provider not found, please connect your wallet.");
+  }
 
   useEffect(() => {
     inputRef.current?.focus();

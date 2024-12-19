@@ -17,6 +17,7 @@ declare global {
     vultisig?: {
       ethereum?: any;
       thorchain?: any;
+      cosmos?: any;
     };
     thorchain?: any;
   }

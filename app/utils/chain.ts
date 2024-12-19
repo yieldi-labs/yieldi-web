@@ -123,9 +123,9 @@ export const getMinAmountByChain = (chain: SupportedChain): number => {
     // case SupportedChain.THORChain:
     // case SupportedChain.Maya:
     //   return 0;
-    // case SupportedChain.Cosmos:
     // case SupportedChain.Kujira:
-    //   return 0.000001;
+    case SupportedChain.Cosmos:
+      return 0.000001;
     default:
       return 0.00000001;
   }

@@ -27,7 +27,7 @@ export enum SupportedChain {
   BinanceSmartChain = "BSC",
   Bitcoin = "BTC",
   BitcoinCash = "BCH",
-  // Cosmos = "GAIA",
+  Cosmos = "GAIA",
   // Dash = "DASH",
   Dogecoin = "DOGE",
   Ethereum = "ETH",
