@@ -14,15 +14,12 @@ import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
-import { useWalletConnection } from "@/hooks";
-import { getChainKeyFromChain } from "@/utils/chain";
+import { getChainKeyFromChain, parseAssetString } from "@/utils/chain";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import {
   PositionStatus,
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
-
-import { parseAssetString } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
 
 interface AddLiquidityModalProps {
@@ -42,9 +39,8 @@ export default function AddLiquidityModal({
   const { error: liquidityError, addLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState, balanceList } = useAppState();
-  const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } =
-    useWalletConnection();
+  const { toggleWalletModal, walletsState, balanceList, isWalletConnected } =
+    useAppState();
 
   // Parse asset details
   const [assetChain] = useMemo(
@@ -52,8 +48,7 @@ export default function AddLiquidityModal({
     [pool.asset],
   );
   const chainKey = getChainKeyFromChain(assetChain);
-  const selectedWallet =
-    walletsState && walletsState[chainKey] ? walletsState[chainKey] : null;
+  const selectedWallet = walletsState[chainKey] || null;
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -75,10 +70,6 @@ export default function AddLiquidityModal({
     const chainKey = getChainKeyFromChain(pool.asset.split(".")[0]);
     return balanceList[chainKey][pool.asset].balance;
   }, [balanceList, pool.asset]);
-
-  if (!selectedWallet?.provider) {
-    throw new Error("Wallet provider not found, please connect your wallet.");
-  }
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -126,8 +117,6 @@ export default function AddLiquidityModal({
       const runeMaxAllowed =
         runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
       const isRuneAmountValid = runeAmt > 0 && runeAmt <= runeMaxAllowed;
-      // return isAssetAmountValid && isRuneAmountValid;
-      // TODO: remove temp condition atfer Mutichain Wallet connection.
       return isAssetAmountValid || isRuneAmountValid;
     }
 
@@ -165,22 +154,15 @@ export default function AddLiquidityModal({
     try {
       setIsSubmitting(true);
 
-      // If dual-sided, check if paired address is available on local storage
-      // in the future this will be replaced by multi-chain wallet connection.
-      let pairedAddress = undefined;
-      if (isDualSided) {
-        if (parsedRuneAmount === 0 || Number.isNaN(parsedRuneAmount)) {
-          pairedAddress =
-            getNetworkAddressFromLocalStorage(ChainKey.THORCHAIN) || undefined;
-        } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
-          const identifier = getChainKeyFromChain(pool.asset.split(".")[0]);
-          pairedAddress =
-            getNetworkAddressFromLocalStorage(identifier) || undefined;
-        }
-      }
+      // If dual-sided, check if paired address is available in connected wallets
+      let pairedAddress: string | undefined;
 
-      if (isDualSided && !pairedAddress) {
-        throw new Error("Paired address not found.");
+      if (isDualSided) {
+        if (walletsState[ChainKey.THORCHAIN]) {
+          pairedAddress = walletsState[ChainKey.THORCHAIN].address;
+        } else {
+          throw new Error("No paired wallet found.");
+        }
       }
 
       const hash = await addLiquidity({
@@ -267,7 +249,7 @@ export default function AddLiquidityModal({
         {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
         {/* Toggle between Single-sided and Dual-sided */}
-        {hasThorAddressInLocalStorage() && (
+        {isWalletConnected(ChainKey.THORCHAIN) && (
           <div className="flex gap-4 mb-4">
             <div className="flex justify-between items-center flex-1 rounded-3xl border-2 border-neutral-50">
               <button
