@@ -1,10 +1,5 @@
 "use client";
-import {
-  ChainKey,
-  CHAINS,
-  ProviderKey,
-  WalletKey,
-} from "@/utils/wallet/constants";
+import { ChainKey, ProviderKey, WalletKey } from "@/utils/wallet/constants";
 import {
   ChainType,
   ConnectedWalletsState,
@@ -12,7 +7,6 @@ import {
 } from "@/utils/interfaces";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { useConnectors } from "wagmi";
-import { useCallback } from "react";
 import { useAppState } from "@/utils/context";
 
 export function useWalletConnection() {
@@ -23,6 +17,7 @@ export function useWalletConnection() {
     selectedChains,
     selectedWallet,
     walletsState,
+    isWalletConnected,
   } = useAppState();
 
   const handleProviderConnection = async (
@@ -86,43 +81,6 @@ export function useWalletConnection() {
     };
   };
 
-  const saveNetworkAddressToLocalStorage = (
-    chainKey: ChainKey,
-    address: string,
-  ) => {
-    if (typeof window !== "undefined" && localStorage) {
-      localStorage.setItem(`wallet-${chainKey}-address`, address);
-    }
-  };
-
-  const getNetworkAddressFromLocalStorage = (chainKey: ChainKey) => {
-    if (typeof window !== "undefined" && localStorage) {
-      return localStorage.getItem(`wallet-${chainKey}-address`);
-    }
-    return null;
-  };
-
-  const getAllNetworkAddressesFromLocalStorage = useCallback((): string[] => {
-    const addresses: string[] = [];
-    if (typeof window !== "undefined" && localStorage) {
-      for (const config of CHAINS) {
-        const address = localStorage.getItem(
-          `wallet-${config.thorchainIdentifier}-address`,
-        );
-        if (!address) continue;
-        addresses.push(address);
-      }
-    }
-    return addresses;
-  }, []);
-
-  const hasThorAddressInLocalStorage = () => {
-    if (typeof window !== "undefined" && localStorage) {
-      return !!localStorage.getItem(`wallet-${ChainKey.THORCHAIN}-address`);
-    }
-    return false;
-  };
-
   const handleConnect = async (wallet: WalletType) => {
     if (!selectedChains.length) {
       console.error("No chains selected.");
@@ -150,7 +108,6 @@ export function useWalletConnection() {
           ethConnectors,
         );
         if (!connection) continue;
-        saveNetworkAddressToLocalStorage(chain.name, connection.address);
         newWalletState = updateWalletState(
           newWalletState,
           selectedWallet.id,
@@ -171,8 +128,6 @@ export function useWalletConnection() {
 
   return {
     handleConnect,
-    getNetworkAddressFromLocalStorage,
-    getAllNetworkAddressesFromLocalStorage,
-    hasThorAddressInLocalStorage,
+    isWalletConnected,
   };
 }

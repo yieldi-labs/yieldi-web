@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   parseUnits,
   formatUnits,
@@ -78,7 +78,9 @@ export function useContracts({
 
   const chainKey = getChainKeyFromChain(asset?.chain);
   const walletAddress = walletsState[chainKey]?.address;
-  const balance = balanceList![chainKey][assetId]?.balance;
+  const balance = useMemo(() => {
+    balanceList![chainKey][assetId]?.balance;
+  }, [balanceList, chainKey, assetId]);
 
   // Load token metadata
   const loadMetadata = useCallback(async () => {

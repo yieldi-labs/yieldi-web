@@ -10,7 +10,12 @@ import React, {
   SetStateAction,
   useCallback,
 } from "react";
-import { ProviderKey, SUPPORTED_WALLETS, WalletKey } from "./wallet/constants";
+import {
+  ChainKey,
+  ProviderKey,
+  SUPPORTED_WALLETS,
+  WalletKey,
+} from "./wallet/constants";
 import { GetConnectorsReturnType } from "wagmi/actions";
 import { connectEVMWallet, connectWallet } from "./wallet/walletConnect";
 
@@ -39,6 +44,7 @@ interface AppStateContextType {
   isLoadingTokenList: boolean;
   detected: WalletType[];
   undetected: WalletType[];
+  isWalletConnected: (chainKey: ChainKey) => boolean;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -308,6 +314,10 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     setUndetected(undetected);
   }, [getDectectedAndUndetected]);
 
+  const isWalletConnected = (chainKey: ChainKey) => {
+    return !!walletsState[chainKey]?.address;
+  };
+
   return (
     <AppStateContext.Provider
       value={{
@@ -327,6 +337,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         isLoadingTokenList,
         detected,
         undetected,
+        isWalletConnected,
       }}
     >
       {children}
