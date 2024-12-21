@@ -42,9 +42,9 @@ export function useWalletConnection() {
 
     // Only fetch chainId for EVM chains
     if (chain.providerType === ProviderKey.EVM) {
-        chainId = await connectedWallet.provider.request({
-          method: "eth_chainId",
-        });
+      chainId = await connectedWallet.provider.request({
+        method: "eth_chainId",
+      });
     }
 
     return {
