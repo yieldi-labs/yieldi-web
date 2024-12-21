@@ -174,7 +174,7 @@ export const connectEVMWallet = async (wallet: any): Promise<any> => {
 
 export const connectWalletConnect = async (modal: AppKit) => {
   try {
-    await modal.open({ view: 'Connect' })
+    await modal.open({ view: "Connect" });
     return {};
   } catch (error) {
     console.error("Error connecting with WalletConnect:", error);

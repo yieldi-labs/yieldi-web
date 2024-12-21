@@ -80,67 +80,70 @@ export function useContracts({
   const balance = balanceList![chainKey][assetId]?.balance;
 
   // Load token metadata
-  const loadMetadata = useCallback(async (provider: any) => {
-    if (!tokenAddress || !provider) return;
+  const loadMetadata = useCallback(
+    async (provider: any) => {
+      if (!tokenAddress || !provider) return;
 
-    try {
-      // Name
-      const nameData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "name",
-      });
+      try {
+        // Name
+        const nameData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "name",
+        });
 
-      // Symbol
-      const symbolData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "symbol",
-      });
+        // Symbol
+        const symbolData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "symbol",
+        });
 
-      // Decimals
-      const decimalsData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "decimals",
-      });
+        // Decimals
+        const decimalsData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "decimals",
+        });
 
-      const [nameHex, symbolHex, decimalsHex] = await Promise.all([
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: nameData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: symbolData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: decimalsData }, "latest"],
-        }),
-      ]);
+        const [nameHex, symbolHex, decimalsHex] = await Promise.all([
+          provider.request({
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: nameData }, "latest"],
+          }),
+          provider.request({
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: symbolData }, "latest"],
+          }),
+          provider.request({
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: decimalsData }, "latest"],
+          }),
+        ]);
 
-      const name = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "name",
-        data: nameHex,
-      }) as string | undefined;
+        const name = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "name",
+          data: nameHex,
+        }) as string | undefined;
 
-      const symbol = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "symbol",
-        data: symbolHex,
-      }) as string | undefined;
+        const symbol = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "symbol",
+          data: symbolHex,
+        }) as string | undefined;
 
-      const decimals = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "decimals",
-        data: decimalsHex,
-      }) as number | undefined;
+        const decimals = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "decimals",
+          data: decimalsHex,
+        }) as number | undefined;
 
-      setTokenMetadata({ name, symbol, decimals });
-    } catch (err) {
-      console.error("Error loading token metadata:", err);
-      setError("Failed to load token metadata");
-    }
-  }, [tokenAddress]);
+        setTokenMetadata({ name, symbol, decimals });
+      } catch (err) {
+        console.error("Error loading token metadata:", err);
+        setError("Failed to load token metadata");
+      }
+    },
+    [tokenAddress],
+  );
 
   // ERC20 Functions
   const getAllowance = useCallback(
@@ -217,7 +220,13 @@ export function useContracts({
 
   // Router Functions
   const deposit = useCallback(
-    async (provider: any, vault: Address, asset: Address, amount: bigint, memo: string) => {
+    async (
+      provider: any,
+      vault: Address,
+      asset: Address,
+      amount: bigint,
+      memo: string,
+    ) => {
       if (!routerAddress || !walletAddress || !provider) {
         throw new Error("Router address, wallet or provider not available");
       }

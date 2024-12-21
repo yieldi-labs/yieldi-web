@@ -6,7 +6,7 @@ interface WalletDrawerHeaderProps {
   onRefresh: () => void;
   onAddWallet: () => void;
   onDiconnect: () => void;
-  enableAddConnection: boolean
+  enableAddConnection: boolean;
 }
 
 export default function WalletDrawerHeader({
@@ -14,7 +14,7 @@ export default function WalletDrawerHeader({
   onRefresh,
   onAddWallet,
   onDiconnect,
-  enableAddConnection
+  enableAddConnection,
 }: WalletDrawerHeaderProps) {
   return (
     <div className="flex justify-between w-full md:mb-2">
@@ -36,15 +36,14 @@ export default function WalletDrawerHeader({
         </span>
       </div>
       <div className="flex">
-        {
-          enableAddConnection && 
+        {enableAddConnection && (
           <span
             className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
             onClick={onAddWallet}
           >
             <Plus strokeColor="#627eea" strokeWidth={1.5} />
           </span>
-        }
+        )}
         <span
           className="cursor-pointer my-auto pl-2 md:pl-1 md:pr-4 rounded-full transition-all transform hover:scale-110 active:scale-95"
           onClick={onDiconnect}

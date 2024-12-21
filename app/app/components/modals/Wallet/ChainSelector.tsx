@@ -12,7 +12,11 @@ interface ChainSelectorProps {
   blockUnselect: boolean;
 }
 
-export function ChainSelector({ chains, onChainSelect, blockUnselect = false }: ChainSelectorProps) {
+export function ChainSelector({
+  chains,
+  onChainSelect,
+  blockUnselect = false,
+}: ChainSelectorProps) {
   const { selectedChains, selectedWallet } = useAppState();
   const handleSelect = (chainKey: ChainType) => {
     if (selectedChains.includes(chainKey)) {
@@ -42,8 +46,14 @@ export function ChainSelector({ chains, onChainSelect, blockUnselect = false }: 
                 : "opacity-50 cursor-not-allowed "
             }`}
             key={chain.name}
-            onClick={() => isChainSupportedByWallet(chain, selectedWallet) && !blockUnselect && handleSelect(chain)}
-            disabled={!isChainSupportedByWallet(chain, selectedWallet) && !blockUnselect}
+            onClick={() =>
+              isChainSupportedByWallet(chain, selectedWallet) &&
+              !blockUnselect &&
+              handleSelect(chain)
+            }
+            disabled={
+              !isChainSupportedByWallet(chain, selectedWallet) && !blockUnselect
+            }
           >
             <UIComponents.Tooltip text={chain.name}>
               {React.isValidElement(chain.icon)

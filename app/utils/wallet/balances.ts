@@ -55,14 +55,14 @@ export const getEthOrERC20TokenBalance = async (
       const balanceHex = await provider.request({
         method: "eth_call",
         params: [{ to: tokenAddress, data: balanceData }, "latest"],
-      })
+      });
 
       const balanceBigInt = decodeFunctionResult({
         abi: ERC20_ABI,
         functionName: "balanceOf",
         data: balanceHex,
       }) as bigint;
-      
+
       return { balance: balanceBigInt };
     }
   } catch (err) {

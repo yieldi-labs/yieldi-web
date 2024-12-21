@@ -109,16 +109,12 @@ export function useLiquidityPosition({
     }
   }, [assetIdentifier, isNativeAsset]);
 
-  const {
-    approveSpending,
-    getAllowance,
-    depositWithExpiry,
-    parseAmount
-  } = useContracts({
-    tokenAddress: tokenAddress as Address | undefined,
-    provider: wallet?.provider,
-    assetId: pool.asset,
-  });
+  const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
+    useContracts({
+      tokenAddress: tokenAddress as Address | undefined,
+      provider: wallet?.provider,
+      assetId: pool.asset,
+    });
 
   // Initialize UTXO hooks if needed
   const {
@@ -269,9 +265,16 @@ export function useLiquidityPosition({
             const parsedAmount = parseAmount(amount.toString());
 
             // Check and handle allowance
-            const currentAllowance = await getAllowance(wallet.provider, routerAddress);
+            const currentAllowance = await getAllowance(
+              wallet.provider,
+              routerAddress,
+            );
             if (currentAllowance < parsedAmount) {
-              await approveSpending(wallet.provider, routerAddress, parsedAmount);
+              await approveSpending(
+                wallet.provider,
+                routerAddress,
+                parsedAmount,
+              );
             }
 
             txHash = await depositWithExpiry(
@@ -284,12 +287,11 @@ export function useLiquidityPosition({
               expiry,
             );
           } else {
-
             const idBeforeDeposit = await wallet.provider.request({
               method: "eth_chainId",
             });
 
-            console.log('idBeforeDeposit', idBeforeDeposit)
+            console.log("idBeforeDeposit", idBeforeDeposit);
 
             // Handle native asset deposit
             const parsedAmount = parseUnits(amount.toString(), 18);
@@ -405,7 +407,7 @@ export function useLiquidityPosition({
 
         await switchEvmChain(wallet.provider, assetChain);
 
-        await delay(5000)
+        await delay(5000);
 
         const routerAddress = inbound.router
           ? normalizeAddress(inbound.router)

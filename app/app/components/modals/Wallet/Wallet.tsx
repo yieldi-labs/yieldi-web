@@ -9,7 +9,13 @@ interface WalletProps {
   className: string;
 }
 
-const Wallet = ({ wallet, disabled = false, isSupported, onSelect, className }: WalletProps) => {
+const Wallet = ({
+  wallet,
+  disabled = false,
+  isSupported,
+  onSelect,
+  className,
+}: WalletProps) => {
   return (
     <button
       className={`

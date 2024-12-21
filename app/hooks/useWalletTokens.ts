@@ -201,7 +201,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
           case ChainKey.ETHEREUM: {
             for (const tokenKey of Object.keys(list)) {
               const token = list[tokenKey];
-              const provider = walletsState[key].provider
+              const provider = walletsState[key].provider;
               if (token.balance === 0) {
                 try {
                   const info = await checkAndSwitchChain(
@@ -210,11 +210,17 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                     provider,
                     token.tokenAddress as `0x${string}`,
                   );
-                  const selectedPool = pools?.find(pool => pool.asset === token.asset)
-                  const decimals = Number(selectedPool?.nativeDecimal)
-                  const symbol = assetFromString(token.asset)?.ticker
+                  const selectedPool = pools?.find(
+                    (pool) => pool.asset === token.asset,
+                  );
+                  const decimals = Number(selectedPool?.nativeDecimal);
+                  const symbol = assetFromString(token.asset)?.ticker;
                   if (info?.balance) {
-                    const balance = baseToAsset(baseAmount(info.balance.toString(), decimals)).amount().toNumber()
+                    const balance = baseToAsset(
+                      baseAmount(info.balance.toString(), decimals),
+                    )
+                      .amount()
+                      .toNumber();
                     newWalletTokensData = {
                       ...newWalletTokensData,
                       [key as ChainKey]: {
@@ -224,7 +230,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                           ...walletTokensData[key as ChainKey][tokenKey],
                           balance: balance,
                           decimals: decimals,
-                          symbol: symbol
+                          symbol: symbol,
                         },
                       },
                     };
@@ -392,10 +398,10 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
         query: {
           status: "available",
         },
-      })
-      return pools.data
-    }
-  })
+      });
+      return pools.data;
+    },
+  });
 
   const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
     useQuery({

@@ -14,12 +14,8 @@ import { useCallback } from "react";
 import { useAppState } from "@/utils/context";
 
 export function useWalletConnection() {
-  const {
-    setWalletsState,
-    toggleWalletModal,
-    selectedChains,
-    walletsState,
-  } = useAppState();
+  const { setWalletsState, toggleWalletModal, selectedChains, walletsState } =
+    useAppState();
 
   const handleProviderConnection = async (
     wallet: WalletType,
@@ -31,8 +27,7 @@ export function useWalletConnection() {
     let connectedWallet;
     switch (chain.providerType) {
       case ProviderKey.EVM:
-        connectedWallet =
-          await wallet.chainConnect[ProviderKey.EVM]!();
+        connectedWallet = await wallet.chainConnect[ProviderKey.EVM]!();
         break;
       case ProviderKey.COSMOS:
         connectedWallet = await wallet.chainConnect[ProviderKey.COSMOS]!();
@@ -47,9 +42,9 @@ export function useWalletConnection() {
 
     // Only fetch chainId for EVM chains
     if (chain.providerType === ProviderKey.EVM) {
-        chainId = await connectedWallet.provider.request({
-          method: "eth_chainId",
-        });
+      chainId = await connectedWallet.provider.request({
+        method: "eth_chainId",
+      });
     }
 
     return {
@@ -125,7 +120,6 @@ export function useWalletConnection() {
     }
 
     try {
-
       let newWalletState = { ...walletsState };
 
       for (const chain of selectedChains) {
@@ -133,10 +127,7 @@ export function useWalletConnection() {
           // Already connected
           continue;
         }
-        const connection = await handleProviderConnection(
-          wallet,
-          chain,
-        );
+        const connection = await handleProviderConnection(wallet, chain);
         if (!connection) continue;
         saveNetworkAddressToLocalStorage(chain.name, connection.address);
         newWalletState = updateWalletState(

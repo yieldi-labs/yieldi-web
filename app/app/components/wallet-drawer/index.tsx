@@ -19,7 +19,7 @@ const WalletDrawerContainer: FC = () => {
     isLoadingBalance,
     isLoadingTokenList,
     setWalletsState,
-    selectedWallet
+    selectedWallet,
   } = useAppState();
 
   const handleAddWallet = () => {
@@ -68,7 +68,12 @@ const WalletDrawerContainer: FC = () => {
         <Modal onClose={toggleWalletDrawer}>
           <div className="mb-4">
             <WalletDrawerHeader
-              enableAddConnection={selectedWallet ? SUPPORTED_WALLETS[selectedWallet.id].hasSupportToAddConectionToExistingConnection : false}
+              enableAddConnection={
+                selectedWallet
+                  ? SUPPORTED_WALLETS[selectedWallet.id]
+                      .hasSupportToAddConectionToExistingConnection
+                  : false
+              }
               onRefresh={handleWalletRefresh}
               onAddWallet={handleAddWallet}
               onHiddeBalance={() => setIsBalanceHidden(!isBalanceHidden)}
@@ -97,7 +102,12 @@ const WalletDrawerContainer: FC = () => {
         <div className="fixed right-0 w-[360px] z-20 mx-18 mt-32">
           <div className="bg-transparent-radial backdrop-blur-[14px] flex justify-between pt-4 rounded-t-lg">
             <WalletDrawerHeader
-              enableAddConnection={selectedWallet ? SUPPORTED_WALLETS[selectedWallet.id].hasSupportToAddConectionToExistingConnection : false}
+              enableAddConnection={
+                selectedWallet
+                  ? SUPPORTED_WALLETS[selectedWallet.id]
+                      .hasSupportToAddConectionToExistingConnection
+                  : false
+              }
               onRefresh={handleWalletRefresh}
               onAddWallet={handleAddWallet}
               onHiddeBalance={() => setIsBalanceHidden(!isBalanceHidden)}

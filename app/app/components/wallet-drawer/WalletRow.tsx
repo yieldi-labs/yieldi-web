@@ -52,8 +52,7 @@ export default function WalletRow({
       >
         <LinkExternal strokeColor="#627eea" size={20} />
       </span>
-      {
-        wallet.walletId !== WalletKey.WALLETCONNECT && // WalletConnect close session for all chains at once
+      {wallet.walletId !== WalletKey.WALLETCONNECT && ( // WalletConnect close session for all chains at once
         <span
           className="cursor-pointer my-auto rounded-full transition-all transform 
               hover:scale-110 active:scale-95"
@@ -61,7 +60,7 @@ export default function WalletRow({
         >
           <Exit strokeColor="#ff6656" size={20} />
         </span>
-      }
+      )}
     </div>
   );
 }

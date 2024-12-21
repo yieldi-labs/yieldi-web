@@ -38,9 +38,11 @@ export default function WalletModal() {
     const validChains = wallet.chains;
     if (selectedWallet === wallet && selectedChains.length > 0) {
       setSelectedWallet(undefined);
-      setSelectedChains([])
+      setSelectedChains([]);
     } else if (selectedChains.length <= 0) {
-      setSelectedChains(CHAINS.filter(({ name }) => validChains.includes(name)))
+      setSelectedChains(
+        CHAINS.filter(({ name }) => validChains.includes(name)),
+      );
       setSelectedWallet(wallet);
     } else {
       setSelectedWallet(wallet);
@@ -66,7 +68,11 @@ export default function WalletModal() {
     <Modal onClose={toggleWalletModal} title="Connect Wallet">
       <div className="flex flex-col gap-4">
         <ChainSelector
-          blockUnselect={selectedWallet ? !SUPPORTED_WALLETS[selectedWallet?.id].hasSupportToSelectChains : false}
+          blockUnselect={
+            selectedWallet
+              ? !SUPPORTED_WALLETS[selectedWallet?.id].hasSupportToSelectChains
+              : false
+          }
           chains={CHAINS}
           selectedChains={selectedChains}
           onChainSelect={setSelectedChains}
