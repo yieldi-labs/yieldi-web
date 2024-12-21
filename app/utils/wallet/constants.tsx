@@ -182,6 +182,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://ctrl.xyz/",
     icon: <WalletSvg.Ctrl />,
     isAvailable: false,
+    hasSupportToAddConectionToExistingConnection: true,
+    hasSupportToSelectChains: true,
     chainConnect: {},
   },
   [WalletKey.METAMASK]: {
@@ -191,6 +193,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://metamask.io/",
     icon: <WalletSvg.Metamask />,
     isAvailable: false,
+    hasSupportToAddConectionToExistingConnection: true,
+    hasSupportToSelectChains: true,
     chainConnect: {},
   },
   [WalletKey.OKX]: {
@@ -206,6 +210,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://www.okx.com/web3",
     icon: <WalletSvg.OKX />,
     isAvailable: false,
+    hasSupportToAddConectionToExistingConnection: true,
+    hasSupportToSelectChains: true,
     chainConnect: {},
   },
   [WalletKey.PHANTOM]: {
@@ -215,6 +221,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://phantom.app/",
     icon: <WalletSvg.Phantom />,
     isAvailable: false,
+    hasSupportToAddConectionToExistingConnection: true,
+    hasSupportToSelectChains: true,
     chainConnect: {},
   },
   [WalletKey.VULTISIG]: {
@@ -234,6 +242,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://vultisig.com/",
     icon: <WalletSvg.Vultisig />,
     isAvailable: false,
+    hasSupportToAddConectionToExistingConnection: true,
+    hasSupportToSelectChains: true,
     chainConnect: {},
   },
   [WalletKey.WALLETCONNECT]: {
@@ -242,6 +252,8 @@ export const SUPPORTED_WALLETS = {
     chains: [ChainKey.AVALANCHE, ChainKey.BSCCHAIN, ChainKey.ETHEREUM],
     icon: <WalletSvg.WalletConnect />,
     isAvailable: true,
+    hasSupportToAddConectionToExistingConnection: false,
+    hasSupportToSelectChains: false,
     chainConnect: {},
   },
 };

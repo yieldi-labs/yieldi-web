@@ -49,7 +49,7 @@ const AppStateContext = createContext<AppStateContextType | undefined>(
 const metadata = {
   name: 'Yieldi',
   description: '-',
-  url: 'https://app.yieldi.xyz',
+  url: 'http://localhost:3000',
   icons: [],
 }
 
@@ -343,6 +343,13 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     setDetected(detected);
     setUndetected(undetected);
   }, [getDectectedAndUndetected]);
+
+  useEffect(() => {
+    const connectedChains = CHAINS.filter(
+      (chain) => Object.keys(walletsState).includes(chain.name),
+    ); 
+    setSelectedChains(connectedChains)
+  }, [walletsState])
 
   return (
     <AppStateContext.Provider

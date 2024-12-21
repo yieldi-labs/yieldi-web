@@ -1,5 +1,5 @@
 import { WalletState } from "@/utils/interfaces";
-import { CHAINS, SUPPORTED_WALLETS } from "@/utils/wallet/constants";
+import { CHAINS, SUPPORTED_WALLETS, WalletKey } from "@/utils/wallet/constants";
 import React, { cloneElement } from "react";
 import MiddleTruncate from "../middle-truncate";
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
@@ -52,13 +52,16 @@ export default function WalletRow({
       >
         <LinkExternal strokeColor="#627eea" size={20} />
       </span>
-      <span
-        className="cursor-pointer my-auto rounded-full transition-all transform 
-            hover:scale-110 active:scale-95"
-        onClick={() => onDisconnect(wallet)}
-      >
-        <Exit strokeColor="#ff6656" size={20} />
-      </span>
+      {
+        wallet.walletId !== WalletKey.WALLETCONNECT && // WalletConnect close session for all chains at once
+        <span
+          className="cursor-pointer my-auto rounded-full transition-all transform 
+              hover:scale-110 active:scale-95"
+          onClick={() => onDisconnect(wallet)}
+        >
+          <Exit strokeColor="#ff6656" size={20} />
+        </span>
+      }
     </div>
   );
 }

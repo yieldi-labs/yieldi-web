@@ -45,7 +45,7 @@ const WalletList = ({
       wallets={
         undetected.sort((a, b) => a.id.localeCompare(b.id)) as WalletType[]
       }
-      isWalletValidForChain={isWalletValidForChain}
+      isWalletValidForChain={() => true}
       onWalletSelect={onWalletSelect}
     />
   </div>

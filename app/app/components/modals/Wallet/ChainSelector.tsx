@@ -9,9 +9,10 @@ interface ChainSelectorProps {
   chains: ChainType[];
   selectedChains: ChainType[];
   onChainSelect: (chains: ChainType[]) => void;
+  blockUnselect: boolean;
 }
 
-export function ChainSelector({ chains, onChainSelect }: ChainSelectorProps) {
+export function ChainSelector({ chains, onChainSelect, blockUnselect = false }: ChainSelectorProps) {
   const { selectedChains, selectedWallet } = useAppState();
   const handleSelect = (chainKey: ChainType) => {
     if (selectedChains.includes(chainKey)) {
@@ -36,13 +37,13 @@ export function ChainSelector({ chains, onChainSelect }: ChainSelectorProps) {
                 ? "border-primary"
                 : "border-transparent"
             }  ${
-              isChainSupportedByWallet(chain, selectedWallet)
+              isChainSupportedByWallet(chain, selectedWallet) && !blockUnselect
                 ? "opacity-100 cursor-pointer"
                 : "opacity-50 cursor-not-allowed "
             }`}
             key={chain.name}
-            onClick={() => handleSelect(chain)}
-            disabled={!isChainSupportedByWallet(chain, selectedWallet)}
+            onClick={() => isChainSupportedByWallet(chain, selectedWallet) && !blockUnselect && handleSelect(chain)}
+            disabled={!isChainSupportedByWallet(chain, selectedWallet) && !blockUnselect}
           >
             <UIComponents.Tooltip text={chain.name}>
               {React.isValidElement(chain.icon)
