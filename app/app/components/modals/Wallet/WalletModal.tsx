@@ -45,9 +45,6 @@ export default function WalletModal() {
       );
       setSelectedWallet(wallet);
     } else {
-      setSelectedChains(
-        selectedChains.filter(({ name }) => validChains.includes(name)),
-      );
       setSelectedWallet(wallet);
     }
   };
