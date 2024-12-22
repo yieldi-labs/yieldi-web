@@ -36,7 +36,7 @@ export default function AddLiquidityModal({
   onClose,
 }: AddLiquidityModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { error: liquidityError, addLiquidity } = useLiquidityPosition({
+  const { error: liquidityError, addLiquidity, getAssetWallet } = useLiquidityPosition({
     pool,
   });
   const { toggleWalletModal, walletsState, balanceList, isWalletConnected } =
@@ -165,24 +165,56 @@ export default function AddLiquidityModal({
         }
       }
 
-      const hash = await addLiquidity({
-        asset: pool.asset,
-        amount: parsedAssetAmount,
-        runeAmount: parsedRuneAmount,
-        pairedAddress,
-      });
+      let assetTxHash;
+      if (!isDualSided || parsedAssetAmount > 0) {
+        assetTxHash = await addLiquidity({
+          asset: pool.asset,
+          amount: parsedAssetAmount,
+          runeAmount: parsedRuneAmount,
+          pairedAddress,
+        });
+      }
+      
+      if (isDualSided && parsedRuneAmount) {
+        pairedAddress = getAssetWallet(pool.asset).address;
+        console.log("pairedAddress", pairedAddress);
+        const runeTxHash = await addLiquidity({
+          asset: "THOR.RUNE",
+          amount: 0,
+          pairedAddress,
+          runeAmount: parsedRuneAmount,
+        });
 
-      markPositionAsPending(
-        pool.asset,
-        type,
-        PositionStatus.LP_POSITION_DEPOSIT_PENDING,
-      );
+        markPositionAsPending(
+          pool.asset,
+          type,
+          PositionStatus.LP_POSITION_DEPOSIT_PENDING,
+        );
 
-      if (hash) {
-        setTimeout(() => {
-          setTxHash(hash);
-          setShowConfirmation(true);
-        }, 0);
+        if (assetTxHash && runeTxHash) {
+          setTimeout(() => {
+            setTxHash(`${assetTxHash},${runeTxHash}`);
+            setShowConfirmation(true);
+          }, 0);
+        } else if (runeTxHash) {
+          setTimeout(() => {
+            setTxHash(runeTxHash);
+            setShowConfirmation(true);
+          }, 0);
+        }
+      } else {
+        markPositionAsPending(
+          pool.asset,
+          type,
+          PositionStatus.LP_POSITION_DEPOSIT_PENDING,
+        );
+
+        if (assetTxHash) {
+          setTimeout(() => {
+            setTxHash(assetTxHash);
+            setShowConfirmation(true);
+          }, 0);
+        }
       }
     } catch (err) {
       console.error("Failed to add liquidity:", err);
@@ -231,10 +263,12 @@ export default function AddLiquidityModal({
 
   const type = isDualSided ? PositionType.DLP : PositionType.SLP;
   if (showConfirmation && txHash && positions && positions[pool.asset][type]) {
+    const txHashes = txHash.split(",");
+    const position = positions[pool.asset][type];
     return (
       <TransactionConfirmationModal
-        position={positions[pool.asset][type]}
-        txHash={txHash || ""}
+        position={position}
+        txHash={txHashes.join(", ")}
         onClose={() => {
           setShowConfirmation(false);
           setTxHash(null);
