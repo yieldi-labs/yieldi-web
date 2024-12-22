@@ -16,8 +16,9 @@ export default function TransactionConfirmationModal({
   txHash,
   onClose,
 }: TransactionConfirmationModalProps) {
-  const thorchainUrl = `https://thorchain.net/tx/${txHash}`;
-  const runescanUrl = `https://runescan.io/tx/${txHash}`;
+  const txHashes = txHash.split(",");
+  const thorchainUrl = `https://thorchain.net/tx/${txHashes[0]}`;
+  const runescanUrl = txHashes[1] ? `https://runescan.io/tx/${txHashes[1]}` : null;
 
   const ExternalLinkIcon = () => (
     <svg
@@ -79,20 +80,22 @@ export default function TransactionConfirmationModal({
             <ExternalLinkIcon />
           </a>
 
-          <a
-            href={runescanUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
-          >
-            <span className="mr-2">View on Runescan</span>
-            <ExternalLinkIcon />
-          </a>
+          {runescanUrl && (
+            <a
+              href={runescanUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
+            >
+              <span className="mr-2">View on Runescan</span>
+              <ExternalLinkIcon />
+            </a>
+          )}
         </div>
 
         {/* Hash Preview */}
         <div className="mt-4 text-sm text-gray-500 truncate max-w-full">
-          Hash: {txHash}
+          Hash: {txHashes.join(", ")}
         </div>
       </div>
     </Modal>
