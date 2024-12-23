@@ -7,18 +7,21 @@ import {
 
 interface TransactionConfirmationModalProps {
   position: PositionStats | null;
-  txHash: string;
+  assetHash: string | null;
+  runeHash: string | null;
   onClose: () => void;
 }
 
 export default function TransactionConfirmationModal({
   position,
-  txHash,
+  assetHash,
+  runeHash,
   onClose,
 }: TransactionConfirmationModalProps) {
-  const txHashes = txHash.split(",");
-  const thorchainUrl = `https://thorchain.net/tx/${txHashes[0]}`;
-  const runescanUrl = txHashes[1] ? `https://runescan.io/tx/${txHashes[1]}` : null;
+  const assetHashThorchainUrl = `https://thorchain.net/tx/${assetHash}`;
+  const runeHashThorchainUrl = runeHash ? `https://thorchain.net/tx/${runeHash}` : null;
+  const assetHashRunescanUrl = `https://runescan.io/tx/${assetHash}`;
+  const runeHashRunescanUrl = runeHash ? `https://runescan.io/tx/${runeHash}` : null;
 
   const ExternalLinkIcon = () => (
     <svg
@@ -71,7 +74,7 @@ export default function TransactionConfirmationModal({
         {/* Explorer Links */}
         <div className="w-full space-y-3">
           <a
-            href={thorchainUrl}
+            href={assetHashThorchainUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
@@ -80,22 +83,45 @@ export default function TransactionConfirmationModal({
             <ExternalLinkIcon />
           </a>
 
-          {runescanUrl && (
-            <a
-              href={runescanUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
-            >
-              <span className="mr-2">View on Runescan</span>
-              <ExternalLinkIcon />
-            </a>
+          <a
+            href={assetHashRunescanUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
+          >
+            <span className="mr-2">View on Runescan</span>
+            <ExternalLinkIcon />
+          </a>
+
+          {runeHash && (
+            <>
+              <a
+                href={runeHashThorchainUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
+              >
+                <span className="mr-2">View Rune on THORChain.net</span>
+                <ExternalLinkIcon />
+              </a>
+
+              <a
+                href={runeHashRunescanUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
+              >
+                <span className="mr-2">View Rune on Runescan</span>
+                <ExternalLinkIcon />
+              </a>
+            </>
           )}
         </div>
 
         {/* Hash Preview */}
         <div className="mt-4 text-sm text-gray-500 truncate max-w-full">
-          Hash: {txHashes.join(", ")}
+          Asset Transaction Hash: {assetHash}
+          {runeHash && `Rune Transaction Hash: ${runeHash}`}
         </div>
       </div>
     </Modal>
