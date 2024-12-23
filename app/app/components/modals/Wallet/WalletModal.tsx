@@ -32,7 +32,7 @@ export default function WalletModal() {
   const { handleConnect } = useWalletConnection();
 
   const isHWDisabled = selectedChains.some((chain) =>
-    [ChainKey.SOLANA, ChainKey.KUJIRA, ChainKey.BSCCHAIN].includes(chain.name),
+    [ChainKey.BSCCHAIN].includes(chain.name),
   );
   const handleWalletSelect = (wallet: WalletType): void => {
     const validChains = wallet.chains;

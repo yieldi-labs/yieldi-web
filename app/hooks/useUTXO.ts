@@ -1,20 +1,19 @@
 import { useMemo, useCallback, useState } from "react";
 import {
+  AssetBTC,
   Client as BitcoinClient,
   defaultBTCParams,
 } from "@xchainjs/xchain-bitcoin";
-import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
-import { Client as UxtoClient } from "@xchainjs/xchain-utxo";
+import { AssetDOGE, Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
 import {
+  AssetLTC,
   defaultLtcParams,
   Client as LitecoinClient,
 } from "@xchainjs/xchain-litecoin";
 import { Network } from "@xchainjs/xchain-client";
 import {
   assetToBase,
-  Asset,
   assetAmount,
-  AssetType,
 } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
@@ -22,37 +21,9 @@ import { transferUTXO } from "@/utils/wallet/walletTransfer";
 import {
   Client as BitcoinCashClient,
   defaultBchParams,
+  AssetBCH
 } from "@xchainjs/xchain-bitcoincash";
-
-// Define BTC, DOGE, and LTC assets
-const AssetBTC: Asset = {
-  chain: "BTC",
-  symbol: "BTC",
-  ticker: "BTC",
-  type: AssetType.NATIVE,
-};
-
-const AssetDOGE: Asset = {
-  chain: "DOGE",
-  symbol: "DOGE",
-  ticker: "DOGE",
-  type: AssetType.NATIVE,
-};
-
-const AssetLTC: Asset = {
-  chain: "LTC",
-  symbol: "LTC",
-  ticker: "LTC",
-  type: AssetType.NATIVE,
-};
-
-const AssetBCH: Asset = {
-  chain: "BCH",
-  symbol: "BCH",
-  ticker: "BCH",
-  type: AssetType.NATIVE,
-};
-
+import { BitgoProviders, BlockcypherDataProviders } from "@/utils/wallet/providers";
 type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
 
 interface UseUTXOProps {
@@ -109,7 +80,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   });
 
   // Initialize UTXO client with proper configuration
-  const client: UxtoClient | null = useMemo(() => {
+  const client: BitcoinClient | DogeClient | LitecoinClient | BitcoinCashClient | null = useMemo(() => {
     if (!wallet?.provider) return null;
 
     try {
@@ -123,6 +94,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           return new BitcoinClient({
             ...defaultBTCParams,
             ...commonConfig,
+            dataProviders: [BitgoProviders, BlockcypherDataProviders],
           });
         case "DOGE":
           return new DogeClient({
@@ -193,19 +165,19 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       setError(null);
 
       try {
-        const fees = feeRate || (await getFees()).fast;
+        const fees = feeRate || (await getFees()).fastest;
         let asset;
         switch (chain) {
-          case "BTC":
+          case AssetBTC.chain:
             asset = AssetBTC;
             break;
-          case "DOGE":
+          case AssetDOGE.chain:
             asset = AssetDOGE;
             break;
-          case "LTC":
+          case AssetLTC.chain:
             asset = AssetLTC;
             break;
-          case "BCH":
+          case AssetBCH.chain:
             asset = AssetBCH;
             break;
           default:
@@ -226,7 +198,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           feeRate: fees,
         };
 
-        const result = await transferUTXO(wallet, transferParams);
+        const result = await transferUTXO(wallet, transferParams, client as any);
         setMetadata((prev) => ({
           ...prev,
           hash: result,

@@ -47,98 +47,91 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   };
 
   const fetchWalletTokens = async () => {
-    if (!walletsState) return;
+    const updatedTokensData: WalletTokensData = {
+      ...initialWalletTokensData,
+    };
 
-    try {
-      const updatedTokensData: WalletTokensData = {
-        ...initialWalletTokensData,
+    const addTokenData = (chainKey: ChainKey, tokenData: TokenData) => {
+      updatedTokensData[chainKey] = {
+        ...(updatedTokensData[chainKey] || {}),
+        [tokenData.asset]: tokenData,
       };
+    };
 
-      const addTokenData = (chainKey: ChainKey, tokenData: TokenData) => {
-        updatedTokensData[chainKey] = {
-          ...(updatedTokensData[chainKey] || {}),
-          [tokenData.asset]: tokenData,
-        };
-      };
+    const fetchNativeTokens = (pool: PoolDetail) => {
+      const asset = assetFromString(pool.asset);
+      if (!asset) {
+        throw Error(`Invalid asset ${pool.asset}`);
+      }
+      const chainKey = getChainKeyFromChain(asset.chain);
 
-      const fetchNativeTokens = async (pool: PoolDetail) => {
+      const wallet = walletsState[chainKey as ChainKey];
+      if (wallet?.address && wallet?.provider) {
+        try {
+          addTokenData(chainKey as ChainKey, {
+            name: chainKey,
+            symbol: asset.symbol,
+            decimals: Number(pool.nativeDecimal),
+            balance: 0,
+            asset: pool.asset,
+            chainName: "Native",
+            chainKey: chainKey,
+            tokenAddress: "0x",
+          });
+        } catch (error) {
+          console.error(
+            `Error fetching native balance for ${chainKey}:`,
+            error,
+          );
+        }
+      }
+    };
+
+    const fetchPoolTokens = async () => {
+      const { data: pools } = await getPools({
+        query: { period: "30d", status: "available" },
+      });
+
+      if (!pools) return;
+      
+      pools.map((pool) => {
         const asset = assetFromString(pool.asset);
         if (!asset) {
           throw Error(`Invalid asset ${pool.asset}`);
         }
-        const chainKey = getChainKeyFromChain(asset.chain);
-
-        const wallet = walletsState[chainKey as ChainKey];
-        if (wallet?.address && wallet?.provider) {
-          try {
-            addTokenData(chainKey as ChainKey, {
-              name: chainKey,
-              symbol: asset.symbol,
-              decimals: Number(pool.nativeDecimal),
-              balance: 0,
+        if (isERC20(pool.asset)) {
+          const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
+          const chainKey = getChainKeyFromChain(asset.chain);
+          const tokenAddress = normalizeAddress(poolViemAddress!);
+          if (tokenAddress) {
+            addTokenData(chainKey, {
               asset: pool.asset,
-              chainName: "Native",
+              balance: 0,
+              chainName: pool.asset.split(".")[0],
               chainKey: chainKey,
-              tokenAddress: "0x",
+              tokenAddress: tokenAddress,
             });
-          } catch (error) {
-            console.error(
-              `Error fetching native balance for ${chainKey}:`,
-              error,
-            );
           }
+        } else if (walletsState[getChainKeyFromChain(asset.chain)]) {
+          fetchNativeTokens(pool);
         }
-      };
-
-      const fetchPoolTokens = async () => {
-        const { data: pools } = await getPools({
-          query: { period: "30d", status: "available" },
-        });
-
-        if (!pools) return;
-        const fetchPromises = pools.map(async (pool) => {
-          const asset = assetFromString(pool.asset);
-          if (!asset) {
-            throw Error(`Invalid asset ${pool.asset}`);
-          }
-          if (isERC20(pool.asset)) {
-            const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
-            const chainKey = getChainKeyFromChain(asset.chain);
-            const tokenAddress = normalizeAddress(poolViemAddress!);
-            if (tokenAddress) {
-              addTokenData(chainKey, {
-                asset: pool.asset,
-                balance: 0,
-                chainName: pool.asset.split(".")[0],
-                chainKey: chainKey,
-                tokenAddress: tokenAddress,
-              });
-            }
-          } else if (walletsState[getChainKeyFromChain(asset.chain)]) {
-            await fetchNativeTokens(pool);
-          }
-        });
-
-        await Promise.all(fetchPromises);
-      };
-
-      addTokenData(ChainKey.THORCHAIN, {
-        name: ChainKey.THORCHAIN,
-        symbol: "RUNE",
-        decimals: 8,
-        balance: 0,
-        asset: "THOR.RUNE",
-        chainName: "Native",
-        chainKey: ChainKey.THORCHAIN,
-        tokenAddress: "",
       });
+    };
 
-      await fetchPoolTokens();
+    addTokenData(ChainKey.THORCHAIN, {
+      name: ChainKey.THORCHAIN,
+      symbol: "RUNE",
+      decimals: 8,
+      balance: 0,
+      asset: "THOR.RUNE",
+      chainName: "Native",
+      chainKey: ChainKey.THORCHAIN,
+      tokenAddress: "",
+    });
 
-      return { ...updatedTokensData };
-    } catch (error) {
-      console.error("Error fetching wallet balances:", error);
-    }
+    await fetchPoolTokens();
+
+    return { ...updatedTokensData };
   };
 
   const getRuneBalance = async (walletAddress: string) => {
@@ -190,234 +183,124 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     }
   };
 
-  const getTokenBalances = async (walletTokensData: WalletTokensData) => {
+  const getTokenBalances = async (walletTokensData: WalletTokensData): Promise<WalletTokensData> => {
     let newWalletTokensData: WalletTokensData = { ...walletTokensData };
-    for (const key of Object.keys(walletTokensData)) {
-      if (walletsState && walletsState[key]) {
-        const list = walletTokensData[key as ChainKey];
-        switch (key as ChainKey) {
-          case ChainKey.AVALANCHE:
-          case ChainKey.BSCCHAIN:
-          case ChainKey.ETHEREUM: {
-            for (const tokenKey of Object.keys(list)) {
-              const token = list[tokenKey];
-              const provider = walletsState[key].provider;
-              if (token.balance === 0) {
-                try {
-                  const info = await checkAndSwitchChain(
-                    key as ChainKey,
-                    walletsState[key].address,
-                    provider,
-                    token.tokenAddress as `0x${string}`,
-                  );
-                  const selectedPool = pools?.find(
-                    (pool) => pool.asset === token.asset,
-                  );
-                  const decimals = Number(selectedPool?.nativeDecimal);
-                  const symbol = assetFromString(token.asset)?.ticker;
-                  if (info?.balance) {
-                    const balance = baseToAsset(
-                      baseAmount(info.balance.toString(), decimals),
-                    )
-                      .amount()
-                      .toNumber();
-                    newWalletTokensData = {
-                      ...newWalletTokensData,
-                      [key as ChainKey]: {
-                        ...newWalletTokensData[key as ChainKey],
-                        [tokenKey]: {
-                          ...newWalletTokensData[key as ChainKey][tokenKey],
-                          ...walletTokensData[key as ChainKey][tokenKey],
-                          balance: balance,
-                          decimals: decimals,
-                          symbol: symbol,
-                        },
-                      },
-                    };
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  newWalletTokensData = {
-                    ...newWalletTokensData,
-                    [key as ChainKey]: {
-                      ...newWalletTokensData[key as ChainKey],
-                      [tokenKey]: {
-                        ...newWalletTokensData[key as ChainKey][tokenKey],
-                        ...walletTokensData[key as ChainKey][tokenKey],
-                        formattedBlanace: 0,
-                        balance: 0,
-                      },
-                    },
-                  };
-                }
-              }
-            }
-            break;
-          }
-          case ChainKey.THORCHAIN: {
-            for (const tokenKey of Object.keys(list)) {
-              const token = list[tokenKey];
-              if (token.balance === 0) {
-                try {
-                  const info = await getRuneBalance(
-                    walletsState[ChainKey.THORCHAIN].address,
-                  );
-                  if (info) {
-                    newWalletTokensData = {
-                      ...newWalletTokensData,
-                      [key as ChainKey]: {
-                        ...newWalletTokensData[key as ChainKey],
-                        [tokenKey]: {
-                          ...newWalletTokensData[key as ChainKey][tokenKey],
-                          ...walletTokensData[key as ChainKey][tokenKey],
-                          balance: Number(
-                            formatNumber(
-                              info?.coins.find(
-                                (coin) => coin.asset === "THOR.RUNE",
-                              )?.amount || 0,
-                              8,
-                            ),
-                          ),
-                        },
-                      },
-                    };
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  newWalletTokensData = {
-                    ...newWalletTokensData,
-                    [key as ChainKey]: {
-                      ...newWalletTokensData[key as ChainKey],
-                      [tokenKey]: {
-                        ...newWalletTokensData[key as ChainKey][tokenKey],
-                        ...walletTokensData[key as ChainKey][tokenKey],
-                        formattedBlanace: 0,
-                        balance: 0,
-                      },
-                    },
-                  };
-                }
-              }
-            }
-            break;
-          }
-          case ChainKey.DOGECOIN:
-          case ChainKey.LITECOIN:
-          case ChainKey.BITCOIN:
-          case ChainKey.BITCOINCASH: {
-            for (const tokenKey of Object.keys(list)) {
-              const token = list[tokenKey];
-              if (token.balance === 0) {
-                try {
-                  const info = await getUTXOInfo(
-                    key as "Bitcoin" | "Litecoin" | "Dogecoin",
-                    walletsState[key as ChainKey].address,
-                  );
-                  if (info) {
-                    newWalletTokensData = {
-                      ...newWalletTokensData,
-                      [key as ChainKey]: {
-                        ...newWalletTokensData[key as ChainKey],
-                        [tokenKey]: {
-                          ...newWalletTokensData[key as ChainKey][tokenKey],
-                          ...walletTokensData[key as ChainKey][tokenKey],
-                          ...info,
-                        },
-                      },
-                    };
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  newWalletTokensData = {
-                    ...newWalletTokensData,
-                    [key as ChainKey]: {
-                      ...newWalletTokensData[key as ChainKey],
-                      [tokenKey]: {
-                        ...newWalletTokensData[key as ChainKey][tokenKey],
-                        ...walletTokensData[key as ChainKey][tokenKey],
-                        formattedBlanace: 0,
-                        balance: 0,
-                      },
-                    },
-                  };
-                }
-              }
-            }
-            break;
-          }
-          case ChainKey.GAIACHAIN: {
-            for (const tokenKey of Object.keys(list)) {
-              const token = list[tokenKey];
-              if (token.balance === 0) {
-                try {
-                  const info = await getCosmosBalance(
-                    walletsState[key].address,
-                  );
-                  if (info) {
-                    newWalletTokensData = {
-                      ...newWalletTokensData,
-                      [key as ChainKey]: {
-                        ...newWalletTokensData[key as ChainKey],
-                        [tokenKey]: {
-                          ...newWalletTokensData[key as ChainKey][tokenKey],
-                          ...walletTokensData[key as ChainKey][tokenKey],
-                          ...info,
-                        },
-                      },
-                    };
-                  }
-                } catch (err) {
-                  console.error(`Error getting balance of ${tokenKey}: ${err}`);
-                  newWalletTokensData = {
-                    ...newWalletTokensData,
-                    [key as ChainKey]: {
-                      ...newWalletTokensData[key as ChainKey],
-                      [tokenKey]: {
-                        ...newWalletTokensData[key as ChainKey][tokenKey],
-                        ...walletTokensData[key as ChainKey][tokenKey],
-                        formattedBlanace: 0,
-                        balance: 0,
-                      },
-                    },
-                  };
-                }
-              }
-            }
-            break;
-          }
+  
+    const updateTokenData = (
+      chain: ChainKey,
+      tokenKey: string,
+      updates: Partial<TokenData>,
+      fallbackBalance = 0,
+    ) => {
+      newWalletTokensData = {
+        ...newWalletTokensData,
+        [chain]: {
+          ...newWalletTokensData[chain],
+          [tokenKey]: {
+            ...newWalletTokensData[chain][tokenKey],
+            ...walletTokensData[chain][tokenKey],
+            ...updates,
+            balance: updates.balance ?? fallbackBalance,
+          },
+        },
+      };
+    };
+  
+    const chainHandlers: Record<any, any> = {
+      [ChainKey.AVALANCHE]: async (address: string, provider: any, token: TokenData) => {
+        const info = await checkAndSwitchChain(
+          ChainKey.AVALANCHE,
+          address,
+          provider,
+          token.tokenAddress as `0x${string}`,
+        );
+        return { balance: baseToAsset(baseAmount(info?.balance.toString() || 0, 18)).amount().toNumber() };
+      },
+      [ChainKey.BSCCHAIN]: async (address: string, provider: any, token: TokenData) => {
+        const info = await checkAndSwitchChain(
+          ChainKey.BSCCHAIN,
+          address,
+          provider,
+          token.tokenAddress as `0x${string}`,
+        );
+        return { balance: baseToAsset(baseAmount(info?.balance.toString() || 0, 18)).amount().toNumber() };
+      },
+      [ChainKey.ETHEREUM]: async (address: string, provider: any, token: TokenData) => {
+        const info = await checkAndSwitchChain(
+          ChainKey.ETHEREUM,
+          address,
+          provider,
+          token.tokenAddress as `0x${string}`,
+        );
+        return { balance: baseToAsset(baseAmount(info?.balance.toString() || 0, 18)).amount().toNumber() };
+      },
+      [ChainKey.THORCHAIN]: async (address: string) => {
+        const info = await getRuneBalance(address);
+        const balance = info?.coins.find((coin) => coin.asset === "THOR.RUNE")?.amount || 0;
+        return { balance: Number(formatNumber(balance, 8)) };
+      },
+      [ChainKey.BITCOIN]: async (address: string) => {
+        const info = await getUTXOInfo(ChainKey.BITCOIN, address);
+        return { balance: info?.balance || 0 };
+      },
+      [ChainKey.LITECOIN]: async (address: string) => {
+        const info = await getUTXOInfo(ChainKey.LITECOIN, address);
+        return { balance: info?.balance || 0 };
+      },
+      [ChainKey.BITCOINCASH]: async (address: string) => {
+        const info = await getUTXOInfo(ChainKey.BITCOINCASH, address);
+        return { balance: info?.balance || 0 };
+      },
+      [ChainKey.DOGECOIN]: async (address: string) => {
+        const info = await getUTXOInfo(ChainKey.DOGECOIN, address);
+        return { balance: info?.balance || 0 };
+      },
+      [ChainKey.GAIACHAIN]: async (address: string) => {
+        const info = await getCosmosBalance(address);
+        return { balance: info?.balance || 0 };
+      },
+    };
+  
+    for (const [chain, tokens] of Object.entries(walletTokensData)) {
+      if (!walletsState || !walletsState[chain as ChainKey]) continue
+    
+      const chainHandler = chainHandlers[chain as ChainKey];
+      if (!chainHandler) continue
+    
+      const provider = walletsState[chain as ChainKey].provider;
+      const address = walletsState[chain as ChainKey].address;
+    
+      for (const [tokenKey, token] of Object.entries(tokens)) {
+        try {
+          const result = await chainHandler(address, provider, token);
+          updateTokenData(chain as ChainKey, tokenKey, result);
+        } catch (err) {
+          console.error(`Error fetching balance for ${tokenKey}:`, err);
+          updateTokenData(chain as ChainKey, tokenKey, {}, 0);
         }
       }
     }
+    
     return newWalletTokensData;
   };
-
-  const { data: pools } = useQuery({
-    queryKey: ["pools"],
-    queryFn: async () => {
-      const pools = await getPools({
-        query: {
-          status: "available",
-        },
-      });
-      return pools.data;
-    },
-  });
-
+  
   const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
     useQuery({
       queryKey: ["walletTokens", Object.keys(walletsState).length],
       queryFn: () => fetchWalletTokens(),
       enabled: Object.keys(walletsState).length > 0,
+      retry: false
     });
 
   const {
     data: walletBalances,
     isFetching,
-    refetch,
+    refetch
   } = useQuery({
     queryKey: ["walletBalances", walletTokensData],
     queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
-    enabled: !!walletTokensData && !!pools,
+    enabled: !!walletTokensData,
+    retry: false
   });
 
   return {
