@@ -21,6 +21,7 @@ import {
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
 import { ChainKey } from "@/utils/wallet/constants";
+import { baseAmount } from "@xchainjs/xchain-util";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -42,16 +43,19 @@ export default function AddLiquidityModal({
   const { toggleWalletModal, walletsState, balanceList, isWalletConnected } =
     useAppState();
 
-  // Parse asset details
   const [assetChain] = useMemo(
     () => parseAssetString(pool.asset),
     [pool.asset],
   );
-  const chainKey = getChainKeyFromChain(assetChain);
+  const chainKey = useMemo(
+    () => getChainKeyFromChain(assetChain),
+    [assetChain],
+  );
   const selectedWallet = walletsState[chainKey] || null;
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
-  const [txHash, setTxHash] = useState<string | null>(null);
+  const [assetTxHash, setAssetTxHash] = useState<string | null>(null);
+  const [runeTxHash, setRuneTxHash] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDualSided, setIsDualSided] = useState(false);
@@ -60,6 +64,11 @@ export default function AddLiquidityModal({
 
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
+  const baseAssetMinimalUnit = baseAmount(1, poolNativeDecimal).amount().toNumber();
+  console.log({
+    assetMinimalUnit,
+    baseAssetMinimalUnit,
+  })
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
   const runeBalance = useMemo(() => {
     if (!balanceList) return 0;
@@ -165,56 +174,43 @@ export default function AddLiquidityModal({
         }
       }
 
-      let assetTxHash;
-      if (!isDualSided || parsedAssetAmount > 0) {
-        assetTxHash = await addLiquidity({
+      if (parsedAssetAmount > 0) {
+        const result = await addLiquidity({
           asset: pool.asset,
           amount: parsedAssetAmount,
           runeAmount: parsedRuneAmount,
           pairedAddress,
         });
+        if (result) {
+          setAssetTxHash(result);
+        } else {
+          throw new Error("Failed to add asset liquidity.");
+        }
       }
       
       if (isDualSided && parsedRuneAmount) {
         pairedAddress = getAssetWallet(pool.asset).address;
-        console.log("pairedAddress", pairedAddress);
-        const runeTxHash = await addLiquidity({
+        const result = await addLiquidity({
           asset: "THOR.RUNE",
           amount: 0,
           pairedAddress,
           runeAmount: parsedRuneAmount,
         });
-
-        markPositionAsPending(
-          pool.asset,
-          type,
-          PositionStatus.LP_POSITION_DEPOSIT_PENDING,
-        );
-
-        if (assetTxHash && runeTxHash) {
-          setTimeout(() => {
-            setTxHash(`${assetTxHash},${runeTxHash}`);
-            setShowConfirmation(true);
-          }, 0);
-        } else if (runeTxHash) {
-          setTimeout(() => {
-            setTxHash(runeTxHash);
-            setShowConfirmation(true);
-          }, 0);
+        if (result) {
+          setRuneTxHash(result);
+        } else {
+          throw new Error("Failed to add Rune liquidity.");
         }
-      } else {
-        markPositionAsPending(
-          pool.asset,
-          type,
-          PositionStatus.LP_POSITION_DEPOSIT_PENDING,
-        );
+      }
 
-        if (assetTxHash) {
-          setTimeout(() => {
-            setTxHash(assetTxHash);
-            setShowConfirmation(true);
-          }, 0);
-        }
+      markPositionAsPending(
+        pool.asset,
+        type,
+        PositionStatus.LP_POSITION_DEPOSIT_PENDING,
+      );
+
+      if (assetTxHash || runeTxHash) {
+        setShowConfirmation(true);
       }
     } catch (err) {
       console.error("Failed to add liquidity:", err);
@@ -262,16 +258,17 @@ export default function AddLiquidityModal({
   };
 
   const type = isDualSided ? PositionType.DLP : PositionType.SLP;
-  if (showConfirmation && txHash && positions && positions[pool.asset][type]) {
-    const txHashes = txHash.split(",");
+  if (showConfirmation && assetTxHash && positions && positions[pool.asset][type]) {
     const position = positions[pool.asset][type];
     return (
       <TransactionConfirmationModal
         position={position}
-        txHash={txHashes.join(", ")}
+        assetHash={assetTxHash}
+        runeHash={runeTxHash}
         onClose={() => {
           setShowConfirmation(false);
-          setTxHash(null);
+          setAssetTxHash(null);
+          setRuneTxHash(null);
           onClose(true);
         }}
       />
