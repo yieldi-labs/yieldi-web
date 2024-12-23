@@ -1,14 +1,12 @@
 import { useMemo, useCallback, useState } from "react";
 import {
   AssetBTC,
-  Client as BitcoinClient,
   defaultBTCParams,
 } from "@xchainjs/xchain-bitcoin";
-import { AssetDOGE, Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
+import { AssetDOGE, defaultDogeParams } from "@xchainjs/xchain-doge";
 import {
   AssetLTC,
   defaultLtcParams,
-  Client as LitecoinClient,
 } from "@xchainjs/xchain-litecoin";
 import { Network } from "@xchainjs/xchain-client";
 import {
@@ -17,13 +15,12 @@ import {
 } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
-import { transferUTXO } from "@/utils/wallet/walletTransfer";
+import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
 import {
-  Client as BitcoinCashClient,
   defaultBchParams,
   AssetBCH
 } from "@xchainjs/xchain-bitcoincash";
-import { BitgoProviders, BlockcypherDataProviders } from "@/utils/wallet/providers";
+import { getClient } from "@/utils/wallet/utxoClients/clients";
 type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
 
 interface UseUTXOProps {
@@ -79,62 +76,12 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
     })(),
   });
 
-  // Initialize UTXO client with proper configuration
-  const client: BitcoinClient | DogeClient | LitecoinClient | BitcoinCashClient | null = useMemo(() => {
-    if (!wallet?.provider) return null;
-
-    try {
-      const commonConfig = {
-        network: Network.Mainnet,
-        phrase: "", // We don't need phrase since we're using wallet provider
-      };
-
-      switch (chain) {
-        case "BTC":
-          return new BitcoinClient({
-            ...defaultBTCParams,
-            ...commonConfig,
-            dataProviders: [BitgoProviders, BlockcypherDataProviders],
-          });
-        case "DOGE":
-          return new DogeClient({
-            ...defaultDogeParams,
-            ...commonConfig,
-          });
-        case "LTC":
-          return new LitecoinClient({
-            ...defaultLtcParams,
-            ...commonConfig,
-          });
-        case "BCH":
-          return new BitcoinCashClient({
-            ...defaultBchParams,
-            ...commonConfig,
-          });
-        default:
-          throw new Error(`Unsupported UTXO chain: ${chain}`);
-      }
-    } catch (err) {
-      console.error(`Error initializing ${chain} client:`, err);
-      return null;
+  const client = useMemo(() => {
+    if (chain) {
+      return getClient(chain)
     }
-  }, [wallet?.provider, chain]);
-
-  // Get balance
-  const getBalance = useCallback(
-    async (address: string) => {
-      if (!client) throw new Error(`${chain} client not initialized`);
-
-      try {
-        const balance = await client.getBalance(address);
-        return balance[0];
-      } catch (err) {
-        console.error(`Error getting ${chain} balance:`, err);
-        throw err;
-      }
-    },
-    [client, chain],
-  );
+    return null
+  }, [chain]);
 
   // Get network fees
   const getFees = useCallback(async () => {
@@ -212,7 +159,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         setLoading(false);
       }
     },
-    [wallet, getFees, chain],
+    [wallet, getFees, chain, client],
   );
 
   // Add liquidity to a pool using transfer
@@ -295,7 +242,6 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
     loading,
     error,
     metadata,
-    getBalance,
     getFees,
     transfer,
     addLiquidity,

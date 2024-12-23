@@ -11,7 +11,7 @@ import {
   PositionStats,
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
-import { useLiquidityPositions } from "@/utils/PositionsContext";
+import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import Loader from "../components/Loader";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
 import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";

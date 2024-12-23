@@ -107,6 +107,7 @@ export const isSupportedChain = (assetChain: string): boolean => {
 
 /**
  * Get minimum amount by chain
+ * TODO: Get from inbound endpoint
  */
 export const getMinAmountByChain = (chain: SupportedChain): number => {
   switch (chain) {

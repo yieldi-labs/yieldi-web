@@ -7,7 +7,7 @@ import {
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
 import PositionsPlaceholder from "./PositionsPlaceholder";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 
 interface PositionsList {
   positions: PositionStats[];
