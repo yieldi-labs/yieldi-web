@@ -11,6 +11,7 @@ import React, {
   useCallback,
 } from "react";
 import {
+  ChainKey,
   CHAINS,
   ProviderKey,
   SUPPORTED_WALLETS,
@@ -49,6 +50,7 @@ interface AppStateContextType {
   isLoadingTokenList: boolean;
   detected: WalletType[];
   undetected: WalletType[];
+  isWalletConnected: (chainKey: ChainKey) => boolean;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -374,6 +376,10 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     setSelectedChains(connectedChains);
   }, [walletsState]);
 
+  const isWalletConnected = (chainKey: ChainKey) => {
+    return Boolean(walletsState[chainKey]?.address);
+  };
+
   return (
     <AppStateContext.Provider
       value={{
@@ -393,6 +399,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         isLoadingTokenList,
         detected,
         undetected,
+        isWalletConnected,
       }}
     >
       {children}
