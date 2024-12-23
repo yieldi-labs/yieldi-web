@@ -1,5 +1,5 @@
 "use client";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { Button } from "@shared/components/ui";
 import { formatAddress } from "./utils";
 

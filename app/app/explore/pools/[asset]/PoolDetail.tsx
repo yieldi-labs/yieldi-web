@@ -15,7 +15,7 @@ import { BackArrow } from "@shared/components/svg";
 import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
 import RemoveLiquidityModal from "@/app/explore/components/RemoveLiquidityModal";
 import { TopCard } from "@/app/components/TopCard";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import {
   getChainKeyFromChain,
   isSupportedChain,
@@ -28,7 +28,7 @@ import {
   PositionStats,
   PositionStatus,
 } from "@/hooks/dataTransformers/positionsTransformer";
-import { useLiquidityPositions } from "@/utils/PositionsContext";
+import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 
 interface PoolDetailProps {
   pool: IPoolDetail;

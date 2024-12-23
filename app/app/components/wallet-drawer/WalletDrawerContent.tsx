@@ -4,7 +4,7 @@ import { TokenData, WalletState, WalletTokensData } from "@/utils/interfaces";
 import WalletRow from "./WalletRow";
 import BalanceRow from "./BalanceRow";
 import { ChainKey } from "@/utils/wallet/constants";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 
 interface WalletDrawerProps {
   isLoadingTokenList: boolean;

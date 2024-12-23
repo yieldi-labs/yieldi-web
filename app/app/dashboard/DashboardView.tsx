@@ -5,15 +5,14 @@ import { addDollarSignAndSuffix } from "../utils";
 import DashboardHighlightsCard from "./components/DashboardHighlightsCards";
 import PositionsList from "./components/PositionsList";
 import { PoolDetail } from "@/midgard";
-import PositionsPlaceholder from "./components/PositionsPlaceholder";
 import AddLiquidityModal from "../explore/components/AddLiquidityModal";
 import {
+  Positions,
   PositionStats,
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
-import { useLiquidityPositions } from "@/utils/PositionsContext";
+import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import Loader from "../components/Loader";
-import { useAppState } from "@/utils/context";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
 import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
 
@@ -30,8 +29,7 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
   const { positions, pools, isPending } = useLiquidityPositions();
-  const { walletsState } = useAppState();
-  const numberConnectedWallets = Object.keys(walletsState || {}).length;
+
   const allPositionsArray = (positions &&
     Object.entries(positions).reduce((pools: PositionStats[], [, types]) => {
       const chainPools = Object.entries(types)
@@ -84,31 +82,27 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
         <div className="w-2/3 text-neutral-800 text-sm font-normal leading-tight mb-7">
           Manage your active positions and track your earnings.
         </div>
-        {positions && numberConnectedWallets > 0 ? (
-          isPending && !positions ? (
-            <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl md:mx-16">
-              <Loader />
-            </div>
-          ) : (
-            <PositionsList
-              positions={allPositionsArray}
-              onAdd={(poolId) => {
-                setSelectedPool(
-                  pools?.find((pool) => pool.asset === poolId) || null,
-                );
-                setShowAddLiquidityModal(true);
-              }}
-              onRemove={(poolId: string, type: PositionType) => {
-                setSelectedPool(
-                  pools?.find((pool) => pool.asset === poolId) || null,
-                );
-                setSelectedPosition(positions[poolId][type]);
-                setShowRemoveLiquidityModal(true);
-              }}
-            />
-          )
+        {isPending && !positions ? (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl md:mx-16">
+            <Loader />
+          </div>
         ) : (
-          <PositionsPlaceholder />
+          <PositionsList
+            positions={allPositionsArray}
+            onAdd={(poolId) => {
+              setSelectedPool(
+                pools?.find((pool) => pool.asset === poolId) || null,
+              );
+              setShowAddLiquidityModal(true);
+            }}
+            onRemove={(poolId: string, type: PositionType) => {
+              setSelectedPool(
+                pools?.find((pool) => pool.asset === poolId) || null,
+              );
+              setSelectedPosition((positions as Positions)[poolId][type]);
+              setShowRemoveLiquidityModal(true);
+            }}
+          />
         )}
       </div>
       {showAddLiquidityModal && selectedPool && (

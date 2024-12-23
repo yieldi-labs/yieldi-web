@@ -2,7 +2,7 @@ import { cloneElement } from "react";
 import { UIComponents } from "@shared/components";
 import { ChainType } from "@/utils/interfaces";
 import React from "react";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { isChainSupportedByWallet } from "@/utils/wallet/utils";
 
 interface ChainSelectorProps {
