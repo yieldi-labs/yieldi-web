@@ -6,6 +6,8 @@ import {
   PositionStats,
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
+import PositionsPlaceholder from "./PositionsPlaceholder";
+import { useAppState } from "@/utils/context";
 
 interface PositionsList {
   positions: PositionStats[];
@@ -29,6 +31,10 @@ export default function PositionsList({
   onAdd,
   onRemove,
 }: PositionsList) {
+
+  const { walletsState } = useAppState();
+  const numberConnectedWallets = Object.keys(walletsState || {}).length;
+
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: PoolSortKey.PRINCIPAL,
     direction: SortDirection.DESC,
@@ -75,6 +81,10 @@ export default function PositionsList({
       }));
     }
   };
+
+  if (Object.entries(positions).length <= 0 || (!positions || numberConnectedWallets <= 0)) {
+    return <PositionsPlaceholder />
+  }
 
   return (
     <>

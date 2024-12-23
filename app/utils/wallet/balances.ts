@@ -1,33 +1,19 @@
-import { formatUnits, encodeFunctionData, decodeFunctionResult } from "viem";
+import { encodeFunctionData, decodeFunctionResult } from "viem";
 import ERC20_ABI from "@/hooks/erc20.json";
 import { ChainKey, EVM_CHAINS } from "./constants";
 import { WalletTokensData } from "../interfaces";
 import * as viemChains from "viem/chains";
 
 export const initialWalletTokensData: WalletTokensData = {
-  [ChainKey.ARBITRUM]: {},
   [ChainKey.AVALANCHE]: {},
-  [ChainKey.BASE]: {},
   [ChainKey.BITCOIN]: {},
   [ChainKey.BITCOINCASH]: {},
-  [ChainKey.BLAST]: {},
   [ChainKey.BSCCHAIN]: {},
-  [ChainKey.CRONOSCHAIN]: {},
-  [ChainKey.DASH]: {},
   [ChainKey.DOGECOIN]: {},
-  [ChainKey.DYDX]: {},
   [ChainKey.ETHEREUM]: {},
   [ChainKey.GAIACHAIN]: {},
-  [ChainKey.KUJIRA]: {},
   [ChainKey.LITECOIN]: {},
-  [ChainKey.MAYACHAIN]: {},
-  [ChainKey.OPTIMISM]: {},
-  [ChainKey.POLKADOT]: {},
-  [ChainKey.POLYGON]: {},
-  [ChainKey.SOLANA]: {},
-  [ChainKey.SUI]: {},
   [ChainKey.THORCHAIN]: {},
-  [ChainKey.TON]: {},
   [ChainKey.ZKSYNC]: {},
 };
 

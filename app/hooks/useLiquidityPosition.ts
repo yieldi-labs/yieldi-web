@@ -287,11 +287,9 @@ export function useLiquidityPosition({
               expiry,
             );
           } else {
-            const idBeforeDeposit = await wallet.provider.request({
+            await wallet.provider.request({
               method: "eth_chainId",
             });
-
-            console.log("idBeforeDeposit", idBeforeDeposit);
 
             // Handle native asset deposit
             const parsedAmount = parseUnits(amount.toString(), 18);

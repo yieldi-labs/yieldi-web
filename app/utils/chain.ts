@@ -77,15 +77,10 @@ export const switchEvmChain = async (
   }
 
   if (parseInt(currentChainId, 16) !== targetChainId) {
-    const providerChainId = await provider.request({
+    await provider.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: `0x${targetChainId.toString(16)}` }],
     });
-    const newId = await provider.request({
-      method: "eth_chainId",
-    });
-    console.log("newId", newId);
-    console.log("providerChainId", providerChainId);
   }
 };
 
