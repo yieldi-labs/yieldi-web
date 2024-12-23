@@ -109,6 +109,11 @@ export function useLiquidityPosition({
     }
   }, [assetIdentifier, isNativeAsset]);
 
+  const getAssetWallet = useCallback((asset: string) => {
+    const [chain, _] = parseAssetString(asset);
+    return walletsState![getChainKeyFromChain(chain)];
+  }, []);
+
   const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
     useContracts({
       tokenAddress: tokenAddress as Address | undefined,
@@ -122,7 +127,7 @@ export function useLiquidityPosition({
     removeLiquidity: removeUTXOLiquidity,
   } = useUTXO({
     chain: utxoChain as "BTC" | "DOGE" | "LTC" | "BCH",
-    wallet: utxoChain ? wallet : null,
+    wallet: utxoChain ? getAssetWallet(pool.asset) : null,
   });
 
   const getMemberDetails = useCallback(
@@ -190,7 +195,7 @@ export function useLiquidityPosition({
       pairedAddress,
       runeAmount,
     }: AddLiquidityParams) => {
-      if (!wallet?.address) {
+      if (!getAssetWallet(asset)?.address) {
         throw new Error("Wallet not connected");
       }
       try {
@@ -216,7 +221,7 @@ export function useLiquidityPosition({
         );
 
         // Handle Thorchain deposits
-        if (wallet.chainType === ChainKey.THORCHAIN) {
+        if (getAssetWallet(asset).chainType === ChainKey.THORCHAIN) {
           return await thorChainClient.deposit({
             pool,
             recipient: "",
@@ -305,7 +310,7 @@ export function useLiquidityPosition({
           }
         }
 
-        await getMemberDetails(wallet.address, asset);
+        await getMemberDetails(getAssetWallet(asset).address, asset);
         return txHash;
       } catch (err) {
         const errorMessage =
@@ -457,5 +462,6 @@ export function useLiquidityPosition({
     getMemberDetails,
     addLiquidity,
     removeLiquidity,
+    getAssetWallet,
   };
 }
