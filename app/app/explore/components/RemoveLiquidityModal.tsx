@@ -130,7 +130,7 @@ export default function RemoveLiquidityModal({
     return (
       <TransactionConfirmationModal
         position={positions[pool.asset][PositionType.SLP]} // TODO: Update with support for SLP and DLP
-        txHash={txHash}
+        assetHash={txHash}
         onClose={() => {
           setTxHash(null);
           onClose(true);

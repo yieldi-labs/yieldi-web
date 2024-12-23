@@ -8,7 +8,7 @@ import {
 interface TransactionConfirmationModalProps {
   position: PositionStats | null;
   assetHash: string | null;
-  runeHash: string | null;
+  runeHash?: string | null;
   onClose: () => void;
 }
 
@@ -19,9 +19,9 @@ export default function TransactionConfirmationModal({
   onClose,
 }: TransactionConfirmationModalProps) {
   const assetHashThorchainUrl = `https://thorchain.net/tx/${assetHash}`;
-  const runeHashThorchainUrl = runeHash ? `https://thorchain.net/tx/${runeHash}` : null;
+  const runeHashThorchainUrl = runeHash ? `https://thorchain.net/tx/${runeHash}` : undefined;
   const assetHashRunescanUrl = `https://runescan.io/tx/${assetHash}`;
-  const runeHashRunescanUrl = runeHash ? `https://runescan.io/tx/${runeHash}` : null;
+  const runeHashRunescanUrl = runeHash ? `https://runescan.io/tx/${runeHash}` : undefined;
 
   const ExternalLinkIcon = () => (
     <svg
