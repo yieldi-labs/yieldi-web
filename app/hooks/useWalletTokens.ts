@@ -7,12 +7,8 @@ import {
 import { ChainKey } from "@/utils/wallet/constants";
 import { getPools, PoolDetail } from "@/midgard";
 import { getChainKeyFromChain } from "@/utils/chain";
-import {
-  assetFromString,
-} from "@xchainjs/xchain-util";
-import {
-  initialWalletTokensData,
-} from "@/utils/wallet/balances";
+import { assetFromString } from "@xchainjs/xchain-util";
+import { initialWalletTokensData } from "@/utils/wallet/balances";
 import { useQuery } from "@tanstack/react-query";
 import { chainHandlers } from "@/utils/wallet/handlers/handleBalance";
 
@@ -64,7 +60,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       });
 
       if (!pools) return;
-      
+
       pools.map((pool) => {
         const asset = assetFromString(pool.asset);
         if (!asset) {
@@ -105,9 +101,11 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     return { ...updatedTokensData };
   };
 
-  const getTokenBalances = async (walletTokensData: WalletTokensData): Promise<WalletTokensData> => {
+  const getTokenBalances = async (
+    walletTokensData: WalletTokensData,
+  ): Promise<WalletTokensData> => {
     let newWalletTokensData: WalletTokensData = { ...walletTokensData };
-  
+
     const updateTokenData = (
       chain: ChainKey,
       tokenKey: string,
@@ -127,17 +125,17 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
         },
       };
     };
-  
+
     // TODO: We need to parallelize this requests (The EMV switch chain must be taken into account)
     for (const [chain, tokens] of Object.entries(walletTokensData)) {
-      if (!walletsState || !walletsState[chain as ChainKey]) continue
-    
+      if (!walletsState || !walletsState[chain as ChainKey]) continue;
+
       const chainHandler = chainHandlers[chain as ChainKey];
-      if (!chainHandler) continue
-    
+      if (!chainHandler) continue;
+
       const provider = walletsState[chain as ChainKey].provider;
       const address = walletsState[chain as ChainKey].address;
-    
+
       for (const [tokenKey, token] of Object.entries(tokens)) {
         try {
           const result = await chainHandler(address, provider, token);
@@ -148,27 +146,27 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
         }
       }
     }
-    
+
     return newWalletTokensData;
   };
-  
+
   const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
     useQuery({
       queryKey: ["walletTokens", Object.keys(walletsState).length],
       queryFn: () => fetchWalletTokens(),
       enabled: Object.keys(walletsState).length > 0,
-      retry: false
+      retry: false,
     });
 
   const {
     data: walletBalances,
     isFetching,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ["walletBalances", walletTokensData],
     queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
     enabled: !!walletTokensData,
-    retry: false
+    retry: false,
   });
 
   return {

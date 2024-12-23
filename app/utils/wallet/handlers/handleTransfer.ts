@@ -1,7 +1,7 @@
 import { Asset, baseAmount, baseToAsset } from "@xchainjs/xchain-util";
 import { WalletState } from "../../interfaces";
 import { Client as BitcoinClient } from "@xchainjs/xchain-bitcoin";
-import * as Bitcoin from 'bitcoinjs-lib'
+import * as Bitcoin from "bitcoinjs-lib";
 
 interface TransactionParams {
   from: string;
@@ -18,7 +18,7 @@ interface TransactionParams {
 export const transferUTXO = async (
   wallet: WalletState,
   transferParams: TransactionParams,
-  clientBuilder?: BitcoinClient
+  clientBuilder?: BitcoinClient,
 ): Promise<any> => {
   try {
     switch (wallet.walletId) {
@@ -42,48 +42,62 @@ export const transferUTXO = async (
         });
       case "phantom":
         if (!clientBuilder) {
-          throw Error('')
+          throw Error("");
         }
         const { rawUnsignedTx, inputs } = await clientBuilder.prepareTx({
           sender: transferParams.from,
-          amount: baseAmount(transferParams.amount.amount, transferParams.amount.decimals),
+          amount: baseAmount(
+            transferParams.amount.amount,
+            transferParams.amount.decimals,
+          ),
           recipient: transferParams.recipient,
           feeRate: transferParams.feeRate,
-          memo: transferParams.memo
-        })
+          memo: transferParams.memo,
+        });
         const fromHexString = (hexString: any) =>
-          Uint8Array.from(hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16)));
-        const psbtUnsigned = Bitcoin.Psbt.fromBase64(rawUnsignedTx)
+          Uint8Array.from(
+            hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16)),
+          );
+        const psbtUnsigned = Bitcoin.Psbt.fromBase64(rawUnsignedTx);
         const signedPSBTBytes: Uint8Array = await wallet.provider.signPSBT(
           fromHexString(psbtUnsigned.toHex()),
           {
-            inputsToSign: [{
-              address: transferParams.from,
-              signingIndexes: inputs.map(input => input.index),
-            }]
-          }
+            inputsToSign: [
+              {
+                address: transferParams.from,
+                signingIndexes: inputs.map((input) => input.index),
+              },
+            ],
+          },
         );
 
-        const psbtSigned = Bitcoin.Psbt.fromBuffer(signedPSBTBytes)
-        psbtSigned.finalizeAllInputs()
+        const psbtSigned = Bitcoin.Psbt.fromBuffer(signedPSBTBytes);
+        psbtSigned.finalizeAllInputs();
 
-        const txHex = psbtSigned.extractTransaction().toHex()
+        const txHex = psbtSigned.extractTransaction().toHex();
 
-        psbtSigned.extractTransaction().getId()
+        psbtSigned.extractTransaction().getId();
 
-        const hash = clientBuilder.broadcastTx(txHex)
-        return hash
+        const hash = clientBuilder.broadcastTx(txHex);
+        return hash;
       case "okx":
-        const value = baseToAsset(baseAmount(transferParams.amount.amount, transferParams.amount.decimals)).amount().toString()
-        const { txHash } = await wallet.provider.send({ 
-          from: transferParams.from, 
-          to: transferParams.recipient, 
-          value: value, 
+        const value = baseToAsset(
+          baseAmount(
+            transferParams.amount.amount,
+            transferParams.amount.decimals,
+          ),
+        )
+          .amount()
+          .toString();
+        const { txHash } = await wallet.provider.send({
+          from: transferParams.from,
+          to: transferParams.recipient,
+          value: value,
           memo: transferParams.memo,
           memoPos: 0,
-          satBytes: transferParams.feeRate
-        })
-        return txHash
+          satBytes: transferParams.feeRate,
+        });
+        return txHash;
       default:
         console.warn(`Unknown walletId UTXO transfer: ${wallet.walletId}`);
     }
