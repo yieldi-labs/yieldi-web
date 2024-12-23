@@ -201,15 +201,26 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
           case ChainKey.ETHEREUM: {
             for (const tokenKey of Object.keys(list)) {
               const token = list[tokenKey];
+              const provider = walletsState[key].provider;
               if (token.balance === 0) {
                 try {
                   const info = await checkAndSwitchChain(
                     key as ChainKey,
                     walletsState[key].address,
-                    walletsState[key].provider,
+                    provider,
                     token.tokenAddress as `0x${string}`,
                   );
+                  const selectedPool = pools?.find(
+                    (pool) => pool.asset === token.asset,
+                  );
+                  const decimals = Number(selectedPool?.nativeDecimal);
+                  const symbol = assetFromString(token.asset)?.ticker;
                   if (info?.balance) {
+                    const balance = baseToAsset(
+                      baseAmount(info.balance.toString(), decimals),
+                    )
+                      .amount()
+                      .toNumber();
                     newWalletTokensData = {
                       ...newWalletTokensData,
                       [key as ChainKey]: {
@@ -217,7 +228,9 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
                         [tokenKey]: {
                           ...newWalletTokensData[key as ChainKey][tokenKey],
                           ...walletTokensData[key as ChainKey][tokenKey],
-                          ...info,
+                          balance: balance,
+                          decimals: decimals,
+                          symbol: symbol,
                         },
                       },
                     };
@@ -378,9 +391,21 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     return newWalletTokensData;
   };
 
+  const { data: pools } = useQuery({
+    queryKey: ["pools"],
+    queryFn: async () => {
+      const pools = await getPools({
+        query: {
+          status: "available",
+        },
+      });
+      return pools.data;
+    },
+  });
+
   const { data: walletTokensData, isFetching: isFetchingWalletTokens } =
     useQuery({
-      queryKey: ["walletTokens", Object.keys(walletsState)],
+      queryKey: ["walletTokens", Object.keys(walletsState).length],
       queryFn: () => fetchWalletTokens(),
       enabled: Object.keys(walletsState).length > 0,
     });
@@ -392,7 +417,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   } = useQuery({
     queryKey: ["walletBalances", walletTokensData],
     queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
-    enabled: !!walletTokensData,
+    enabled: !!walletTokensData && !!pools,
   });
 
   return {

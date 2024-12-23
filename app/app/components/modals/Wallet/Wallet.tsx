@@ -4,11 +4,18 @@ import { cloneElement } from "react";
 interface WalletProps {
   wallet: WalletType;
   isSupported: boolean;
+  disabled?: boolean;
   onSelect?: () => void;
   className: string;
 }
 
-const Wallet = ({ wallet, isSupported, onSelect, className }: WalletProps) => {
+const Wallet = ({
+  wallet,
+  disabled = false,
+  isSupported,
+  onSelect,
+  className,
+}: WalletProps) => {
   return (
     <button
       className={`
@@ -16,13 +23,13 @@ const Wallet = ({ wallet, isSupported, onSelect, className }: WalletProps) => {
         transition-all duration-75 min-h-[58px]
           
         ${
-          isSupported
+          isSupported && !disabled
             ? "opacity-100 cursor-pointer hover:border-primary"
-            : "opacity-50 cursor-pointer hover:border-transparent"
+            : "opacity-50 cursor-not-allowed hover:border-transparent"
         }
          ${className}
       `}
-      onClick={onSelect}
+      onClick={() => isSupported && !disabled && onSelect && onSelect()}
     >
       {cloneElement(wallet.icon, {
         className: "w-[30px]",

@@ -19,7 +19,7 @@ import {
 } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
 import { useCosmos } from "./useCosmos";
-import { assetAmount, assetToBase, baseAmount } from "@xchainjs/xchain-util";
+import { assetAmount, assetToBase, delay } from "@xchainjs/xchain-util";
 
 interface AddLiquidityParams {
   asset: string;
@@ -108,6 +108,13 @@ export function useLiquidityPosition({
       return undefined;
     }
   }, [assetIdentifier, isNativeAsset]);
+
+  const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
+    useContracts({
+      tokenAddress: tokenAddress as Address | undefined,
+      provider: wallet?.provider,
+      assetId: pool.asset,
+    });
 
   // Initialize UTXO hooks if needed
   const {
@@ -252,29 +259,26 @@ export function useLiquidityPosition({
         let txHash;
 
         if (isEVMChain) {
-          const {
-            approveSpending,
-            getAllowance,
-            depositWithExpiry,
-            parseAmount,
-          } = useContracts({
-            tokenAddress: tokenAddress as Address | undefined,
-            provider: wallet?.provider,
-            assetId: pool.asset,
-          });
-
           if (!isNativeAsset && tokenAddress) {
             // Handle ERC20 token deposit
 
             const parsedAmount = parseAmount(amount.toString());
 
             // Check and handle allowance
-            const currentAllowance = await getAllowance(routerAddress);
+            const currentAllowance = await getAllowance(
+              wallet.provider,
+              routerAddress,
+            );
             if (currentAllowance < parsedAmount) {
-              await approveSpending(routerAddress, parsedAmount);
+              await approveSpending(
+                wallet.provider,
+                routerAddress,
+                parsedAmount,
+              );
             }
 
             txHash = await depositWithExpiry(
+              wallet.provider,
               routerAddress,
               vaultAddress,
               tokenAddress,
@@ -283,9 +287,16 @@ export function useLiquidityPosition({
               expiry,
             );
           } else {
+            const idBeforeDeposit = await wallet.provider.request({
+              method: "eth_chainId",
+            });
+
+            console.log("idBeforeDeposit", idBeforeDeposit);
+
             // Handle native asset deposit
             const parsedAmount = parseUnits(amount.toString(), 18);
             txHash = await depositWithExpiry(
+              wallet.provider,
               routerAddress,
               vaultAddress,
               "0x0000000000000000000000000000000000000000",
@@ -394,13 +405,9 @@ export function useLiquidityPosition({
           });
         }
 
-        // Handle EVM chain withdrawals
-        const { depositWithExpiry } = useContracts({
-          tokenAddress: tokenAddress as Address | undefined,
-          provider: wallet?.provider,
-          assetId: pool.asset,
-        });
         await switchEvmChain(wallet.provider, assetChain);
+
+        await delay(5000);
 
         const routerAddress = inbound.router
           ? normalizeAddress(inbound.router)
@@ -414,6 +421,7 @@ export function useLiquidityPosition({
         const minAmountByChain =
           getMinAmountByChain(supportedChain) * 10 ** decimals;
         const txHash = await depositWithExpiry(
+          wallet.provider,
           routerAddress,
           vaultAddress,
           "0x0000000000000000000000000000000000000000",

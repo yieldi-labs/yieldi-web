@@ -60,7 +60,6 @@ async function waitForTransaction(
 export function useContracts({
   tokenAddress,
   routerAddress,
-  provider,
   assetId,
 }: UseContractProps) {
   const [error, setError] = useState<string>();
@@ -81,71 +80,74 @@ export function useContracts({
   const balance = balanceList![chainKey][assetId]?.balance;
 
   // Load token metadata
-  const loadMetadata = useCallback(async () => {
-    if (!tokenAddress || !provider) return;
+  const loadMetadata = useCallback(
+    async (provider: any) => {
+      if (!tokenAddress || !provider) return;
 
-    try {
-      // Name
-      const nameData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "name",
-      });
+      try {
+        // Name
+        const nameData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "name",
+        });
 
-      // Symbol
-      const symbolData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "symbol",
-      });
+        // Symbol
+        const symbolData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "symbol",
+        });
 
-      // Decimals
-      const decimalsData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "decimals",
-      });
+        // Decimals
+        const decimalsData = encodeFunctionData({
+          abi: ERC20_ABI,
+          functionName: "decimals",
+        });
 
-      const [nameHex, symbolHex, decimalsHex] = await Promise.all([
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: nameData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: symbolData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: decimalsData }, "latest"],
-        }),
-      ]);
+        const [nameHex, symbolHex, decimalsHex] = await Promise.all([
+          provider.request({
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: nameData }, "latest"],
+          }),
+          provider.request({
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: symbolData }, "latest"],
+          }),
+          provider.request({
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: decimalsData }, "latest"],
+          }),
+        ]);
 
-      const name = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "name",
-        data: nameHex,
-      }) as string | undefined;
+        const name = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "name",
+          data: nameHex,
+        }) as string | undefined;
 
-      const symbol = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "symbol",
-        data: symbolHex,
-      }) as string | undefined;
+        const symbol = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "symbol",
+          data: symbolHex,
+        }) as string | undefined;
 
-      const decimals = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "decimals",
-        data: decimalsHex,
-      }) as number | undefined;
+        const decimals = decodeFunctionResult({
+          abi: ERC20_ABI,
+          functionName: "decimals",
+          data: decimalsHex,
+        }) as number | undefined;
 
-      setTokenMetadata({ name, symbol, decimals });
-    } catch (err) {
-      console.error("Error loading token metadata:", err);
-      setError("Failed to load token metadata");
-    }
-  }, [tokenAddress, provider]);
+        setTokenMetadata({ name, symbol, decimals });
+      } catch (err) {
+        console.error("Error loading token metadata:", err);
+        setError("Failed to load token metadata");
+      }
+    },
+    [tokenAddress],
+  );
 
   // ERC20 Functions
   const getAllowance = useCallback(
-    async (spender: Address): Promise<bigint> => {
+    async (provider: any, spender: Address): Promise<bigint> => {
       if (!tokenAddress || !walletAddress || !provider) return BigInt(0);
 
       try {
@@ -178,12 +180,12 @@ export function useContracts({
         return BigInt(0);
       }
     },
-    [tokenAddress, walletAddress, provider],
+    [tokenAddress, walletAddress],
   );
 
   const approveSpending = useCallback(
-    async (spender: Address, amount: bigint = MAX_UINT256) => {
-      if (!tokenAddress || !walletAddress || !provider) {
+    async (provider: any, spender: Address, amount: bigint = MAX_UINT256) => {
+      if (!tokenAddress || !walletAddress) {
         throw new Error("Token address, wallet or provider not available");
       }
 
@@ -213,12 +215,18 @@ export function useContracts({
         throw new Error(message);
       }
     },
-    [tokenAddress, walletAddress, provider],
+    [tokenAddress, walletAddress],
   );
 
   // Router Functions
   const deposit = useCallback(
-    async (vault: Address, asset: Address, amount: bigint, memo: string) => {
+    async (
+      provider: any,
+      vault: Address,
+      asset: Address,
+      amount: bigint,
+      memo: string,
+    ) => {
       if (!routerAddress || !walletAddress || !provider) {
         throw new Error("Router address, wallet or provider not available");
       }
@@ -253,11 +261,12 @@ export function useContracts({
         throw new Error(message);
       }
     },
-    [routerAddress, walletAddress, provider],
+    [routerAddress, walletAddress],
   );
 
   const depositWithExpiry = useCallback(
     async (
+      provider: any,
       router: Address,
       vault: Address,
       asset: Address,
@@ -300,7 +309,7 @@ export function useContracts({
         throw new Error(message);
       }
     },
-    [walletAddress, provider],
+    [walletAddress],
   );
 
   // Utility functions

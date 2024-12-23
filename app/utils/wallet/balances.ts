@@ -31,7 +31,7 @@ export const initialWalletTokensData: WalletTokensData = {
   [ChainKey.ZKSYNC]: {},
 };
 
-export const getERC20TokenInfo = async (
+export const getEthOrERC20TokenBalance = async (
   walletAddress: string,
   provider: any,
   tokenAddress?: `0x${string}`,
@@ -44,77 +44,26 @@ export const getERC20TokenInfo = async (
         params: [walletAddress, "latest"],
       });
       const balanceBigInt = BigInt(balanceHex);
-      const balance = Number(formatUnits(balanceBigInt, 18));
-      return { balance };
+      return { balance: balanceBigInt };
     } else {
-      // Encode function calls
-      const nameData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "name",
-      });
-
-      const symbolData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "symbol",
-      });
-
-      const decimalsData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: "decimals",
-      });
-
       const balanceData = encodeFunctionData({
         abi: ERC20_ABI,
         functionName: "balanceOf",
         args: [walletAddress],
       });
 
-      // Make parallel RPC calls
-      const [nameHex, symbolHex, decimalsHex, balanceHex] = await Promise.all([
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: nameData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: symbolData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: decimalsData }, "latest"],
-        }),
-        provider.request({
-          method: "eth_call",
-          params: [{ to: tokenAddress, data: balanceData }, "latest"],
-        }),
-      ]);
-      // Decode results
-      const name = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "name",
-        data: nameHex,
-      }) as string;
-
-      const symbol = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "symbol",
-        data: symbolHex,
-      }) as string;
-
-      const decimals = decodeFunctionResult({
-        abi: ERC20_ABI,
-        functionName: "decimals",
-        data: decimalsHex,
-      }) as number;
+      const balanceHex = await provider.request({
+        method: "eth_call",
+        params: [{ to: tokenAddress, data: balanceData }, "latest"],
+      });
 
       const balanceBigInt = decodeFunctionResult({
         abi: ERC20_ABI,
         functionName: "balanceOf",
         data: balanceHex,
       }) as bigint;
-      const balance = Number(formatUnits(balanceBigInt, Number(decimals)));
 
-      return { name, symbol, decimals, balance };
+      return { balance: balanceBigInt };
     }
   } catch (err) {
     console.error(err);
@@ -126,20 +75,7 @@ export const checkAndSwitchChain = async (
   walletAddress: string,
   provider: any,
   tokenAddress?: `0x${string}`,
-): Promise<
-  | {
-      balance: number;
-      name?: undefined;
-      symbol?: undefined;
-      decimals?: undefined;
-    }
-  | {
-      name: string;
-      symbol: string;
-      decimals: number;
-      balance: number;
-    }
-> => {
+): Promise<{ balance: bigint }> => {
   let providerChainId = await provider.request({
     method: "eth_chainId",
   });
@@ -194,7 +130,7 @@ export const checkAndSwitchChain = async (
     }
   }
 
-  const tokenInfo = await getERC20TokenInfo(
+  const tokenInfo = await getEthOrERC20TokenBalance(
     walletAddress,
     provider,
     tokenAddress,

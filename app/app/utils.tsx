@@ -2,10 +2,6 @@ import { useState, useEffect } from "react";
 import { hex, base64 } from "@scure/base";
 import * as btc from "@scure/btc-signer";
 import SatsConnect, { AddressPurpose } from "sats-connect";
-import * as viem from "viem";
-import { mainnet } from "viem/chains";
-import { getAccount } from "wagmi/actions";
-import { wagmiConfig } from "@/utils/wallet/wagmiConfig";
 import { getPool, MemberPool, PoolDetail } from "@/midgard";
 import { liquidityProvider } from "@/thornode";
 import { CHAINS } from "@/utils/wallet/constants";
@@ -51,22 +47,6 @@ export const atomWallet = newAtom<AtomWallet>({});
 
 if (typeof window !== "undefined") {
   (window as any).atomWallet = atomWallet;
-}
-
-export async function ethereumGetWalletClient() {
-  const account = getAccount(wagmiConfig);
-  if (!account.address) return null;
-
-  return {
-    chain: "ethereum",
-    symbol: "ETH",
-    address: account.address,
-    getBalance: async () => {
-      if (!account.address) throw new Error("Account address is undefined");
-      const b = await publicClient.getBalance({ address: account.address });
-      return parseFloat(viem.formatUnits(b, 18));
-    },
-  };
 }
 
 export const BITCOIN_NETWORK = {
@@ -158,53 +138,9 @@ export function onAtom<V>(a: Atom<V>, fn: (v: V) => void) {
   return () => a.l.splice(a.l.indexOf(h), 1);
 }
 
-export const publicClient = viem.createPublicClient({
-  chain: mainnet,
-  transport: viem.http(),
-  batch: { multicall: true },
-});
-
 declare global {
   interface Window {
     atomWallet?: Atom<AtomWallet>;
-  }
-}
-
-export const walletClient = viem.createWalletClient({
-  chain: mainnet,
-  transport: viem.custom(
-    typeof window === "undefined" || !window.ethereum
-      ? { request: async () => undefined }
-      : window.ethereum,
-  ),
-});
-
-export async function ethereumConnectInjected() {
-  try {
-    if (!window.ethereum) throw new Error("No web wallet installed");
-    const accounts = await window.ethereum!.request({
-      method: "eth_requestAccounts",
-    });
-    const address = accounts[0];
-    const chainId = await window.ethereum!.request({ method: "eth_chainId" });
-    if (chainId != "0x1") {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0x1" }],
-      });
-    }
-    return {
-      chain: "ethereum",
-      symbol: "ETH",
-      address: address,
-      getBalance: async () => {
-        const b = await publicClient.getBalance({ address });
-        return parseFloat(viem.formatUnits(b, 18));
-      },
-    };
-  } catch (e: Error | any) {
-    console.error(e);
-    alert("Error connecting wallet: " + e?.message);
   }
 }
 

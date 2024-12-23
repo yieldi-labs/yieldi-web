@@ -37,6 +37,7 @@ export function WalletSection({
           <Wallet
             key={wallet.id}
             wallet={wallet}
+            disabled={selectedWallet && selectedWallet.id !== wallet.id}
             isSupported={isWalletValidForChain(wallet, selectedChains)}
             onSelect={() => handleWalletSelect(wallet)}
             className={`${

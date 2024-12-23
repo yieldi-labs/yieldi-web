@@ -1,5 +1,4 @@
 import { ChainKey, ProviderKey, WalletKey } from "@/utils/wallet/constants";
-import { GetConnectorsReturnType } from "@wagmi/core";
 import { SVGProps } from "react";
 
 export type TokenData = {
@@ -66,9 +65,7 @@ export interface WalletType {
   isAvailable: boolean;
   downloadUrl?: string;
   chainConnect: {
-    [key in ProviderKey]?: (
-      connectors?: GetConnectorsReturnType,
-    ) => Promise<{ provider: any; address: string }>;
+    [key in ProviderKey]?: () => Promise<{ provider: any; address: string }>;
   };
 }
 

@@ -26,6 +26,7 @@ export interface InboundAddress {
  * Chain ID mapping for EVM chains
  */
 export const CHAIN_ID_MAP: Record<string, number> = {
+  // TODO: This info is also in constants. Unify with issue: https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration
   eth: 1,
   avax: 43114,
   bsc: 56,
@@ -76,10 +77,15 @@ export const switchEvmChain = async (
   }
 
   if (parseInt(currentChainId, 16) !== targetChainId) {
-    await provider.request({
+    const providerChainId = await provider.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: `0x${targetChainId.toString(16)}` }],
     });
+    const newId = await provider.request({
+      method: "eth_chainId",
+    });
+    console.log("newId", newId);
+    console.log("providerChainId", providerChainId);
   }
 };
 

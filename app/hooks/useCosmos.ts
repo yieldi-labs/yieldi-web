@@ -25,14 +25,10 @@ export function useCosmos({ wallet }: UseCosmosProps) {
             value: amount,
             data: memo,
           };
-
-          console.log("Vultisig-Cosmos transaction details:", txDetails);
-
-          const result = await keplr.request({
+          await keplr.request({
             method: "send_transaction",
             params: [txDetails],
           });
-          console.log("Vultisig-Cosmos transaction result:", result);
         } else {
           await keplr.enable(chainId);
           const offlineSigner = keplr.getOfflineSigner(chainId);
