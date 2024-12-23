@@ -1,25 +1,13 @@
 import { useMemo, useCallback, useState } from "react";
-import {
-  AssetBTC,
-  defaultBTCParams,
-} from "@xchainjs/xchain-bitcoin";
+import { AssetBTC, defaultBTCParams } from "@xchainjs/xchain-bitcoin";
 import { AssetDOGE, defaultDogeParams } from "@xchainjs/xchain-doge";
-import {
-  AssetLTC,
-  defaultLtcParams,
-} from "@xchainjs/xchain-litecoin";
+import { AssetLTC, defaultLtcParams } from "@xchainjs/xchain-litecoin";
 import { Network } from "@xchainjs/xchain-client";
-import {
-  assetToBase,
-  assetAmount,
-} from "@xchainjs/xchain-util";
+import { assetToBase, assetAmount } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
 import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
-import {
-  defaultBchParams,
-  AssetBCH
-} from "@xchainjs/xchain-bitcoincash";
+import { defaultBchParams, AssetBCH } from "@xchainjs/xchain-bitcoincash";
 import { getClient } from "@/utils/wallet/utxoClients/clients";
 type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
 
@@ -78,9 +66,9 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
 
   const client = useMemo(() => {
     if (chain) {
-      return getClient(chain)
+      return getClient(chain);
     }
-    return null
+    return null;
   }, [chain]);
 
   // Get network fees
@@ -145,7 +133,11 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           feeRate: fees,
         };
 
-        const result = await transferUTXO(wallet, transferParams, client as any);
+        const result = await transferUTXO(
+          wallet,
+          transferParams,
+          client as any,
+        );
         setMetadata((prev) => ({
           ...prev,
           hash: result,

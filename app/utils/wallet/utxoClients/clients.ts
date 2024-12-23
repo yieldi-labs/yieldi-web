@@ -45,13 +45,13 @@ export type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
 export const getClient = (chain: UTXOChain) => {
   switch (chain) {
     case "BTC":
-      return clientBtc
+      return clientBtc;
     case "DOGE":
-      return clientDoge
+      return clientDoge;
     case "LTC":
-      return clientLtc
+      return clientLtc;
     case "BCH":
-      return clientBch
+      return clientBch;
     default:
       throw new Error(`Unsupported UTXO chain: ${chain}`);
   }

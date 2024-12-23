@@ -77,7 +77,7 @@ export function useContracts({
 
   const chainKey = getChainKeyFromChain(asset?.chain);
   const walletAddress = walletsState[chainKey]?.address;
-  const balance = balanceList?.[chainKey]?.[assetId]?.balance || 0;
+  const balance = balanceList?.[chainKey]?.[assetId]?.balance || 0;
 
   // Load token metadata
   const loadMetadata = useCallback(

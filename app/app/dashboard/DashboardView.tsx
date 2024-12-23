@@ -82,30 +82,28 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
         <div className="w-2/3 text-neutral-800 text-sm font-normal leading-tight mb-7">
           Manage your active positions and track your earnings.
         </div>
-        {
-          isPending && !positions ? (
-            <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl md:mx-16">
-              <Loader />
-            </div>
-          ) : (
-            <PositionsList
-              positions={allPositionsArray}
-              onAdd={(poolId) => {
-                setSelectedPool(
-                  pools?.find((pool) => pool.asset === poolId) || null,
-                );
-                setShowAddLiquidityModal(true);
-              }}
-              onRemove={(poolId: string, type: PositionType) => {
-                setSelectedPool(
-                  pools?.find((pool) => pool.asset === poolId) || null,
-                );
-                setSelectedPosition((positions as Positions)[poolId][type]);
-                setShowRemoveLiquidityModal(true);
-              }}
-            />
-          )
-        }
+        {isPending && !positions ? (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl md:mx-16">
+            <Loader />
+          </div>
+        ) : (
+          <PositionsList
+            positions={allPositionsArray}
+            onAdd={(poolId) => {
+              setSelectedPool(
+                pools?.find((pool) => pool.asset === poolId) || null,
+              );
+              setShowAddLiquidityModal(true);
+            }}
+            onRemove={(poolId: string, type: PositionType) => {
+              setSelectedPool(
+                pools?.find((pool) => pool.asset === poolId) || null,
+              );
+              setSelectedPosition((positions as Positions)[poolId][type]);
+              setShowRemoveLiquidityModal(true);
+            }}
+          />
+        )}
       </div>
       {showAddLiquidityModal && selectedPool && (
         <AddLiquidityModal

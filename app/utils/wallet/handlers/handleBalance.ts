@@ -11,13 +11,13 @@ export const chainHandlers: Record<any, any> = {
   [ChainKey.AVALANCHE]: async (
     address: string,
     provider: any,
-    token: TokenData
+    token: TokenData,
   ) => {
     const info = await checkAndSwitchChain(
       ChainKey.AVALANCHE,
       address,
       provider,
-      token.tokenAddress as `0x${string}`
+      token.tokenAddress as `0x${string}`,
     );
     return {
       balance: baseToAsset(baseAmount(info?.balance.toString() || 0, 18))
@@ -28,13 +28,13 @@ export const chainHandlers: Record<any, any> = {
   [ChainKey.BSCCHAIN]: async (
     address: string,
     provider: any,
-    token: TokenData
+    token: TokenData,
   ) => {
     const info = await checkAndSwitchChain(
       ChainKey.BSCCHAIN,
       address,
       provider,
-      token.tokenAddress as `0x${string}`
+      token.tokenAddress as `0x${string}`,
     );
     return {
       balance: baseToAsset(baseAmount(info?.balance.toString() || 0, 18))
@@ -45,13 +45,13 @@ export const chainHandlers: Record<any, any> = {
   [ChainKey.ETHEREUM]: async (
     address: string,
     provider: any,
-    token: TokenData
+    token: TokenData,
   ) => {
     const info = await checkAndSwitchChain(
       ChainKey.ETHEREUM,
       address,
       provider,
-      token.tokenAddress as `0x${string}`
+      token.tokenAddress as `0x${string}`,
     );
     return {
       balance: baseToAsset(baseAmount(info?.balance.toString() || 0, 18))
@@ -66,19 +66,19 @@ export const chainHandlers: Record<any, any> = {
     return { balance: Number(formatNumber(balance, 8)) };
   },
   [ChainKey.BITCOIN]: async (address: string) => {
-    const info = await getUTXOInfo('BTC', address);
+    const info = await getUTXOInfo("BTC", address);
     return { balance: info?.balance || 0 };
   },
   [ChainKey.LITECOIN]: async (address: string) => {
-    const info = await getUTXOInfo('LTC', address);
+    const info = await getUTXOInfo("LTC", address);
     return { balance: info?.balance || 0 };
   },
   [ChainKey.BITCOINCASH]: async (address: string) => {
-    const info = await getUTXOInfo('BCH', address);
+    const info = await getUTXOInfo("BCH", address);
     return { balance: info?.balance || 0 };
   },
   [ChainKey.DOGECOIN]: async (address: string) => {
-    const info = await getUTXOInfo('DOGE', address);
+    const info = await getUTXOInfo("DOGE", address);
     return { balance: info?.balance || 0 };
   },
   [ChainKey.GAIACHAIN]: async (address: string) => {
@@ -87,10 +87,7 @@ export const chainHandlers: Record<any, any> = {
   },
 };
 
-const getUTXOInfo = async (
-  chainKey: UTXOChain,
-  walletAddress: string
-) => {
+const getUTXOInfo = async (chainKey: UTXOChain, walletAddress: string) => {
   const balance = await getClient(chainKey).getBalance(walletAddress);
   return {
     balance: baseToAsset(balance[0].amount).amount().toNumber(),
@@ -101,12 +98,12 @@ const getUTXOInfo = async (
 const getCosmosBalance = async (walletAddress: string) => {
   try {
     const client = await SigningStargateClient.connect(
-      process.env.NEXT_PUBLIC_COSMOS_DIRECTORY_URL || ""
+      process.env.NEXT_PUBLIC_COSMOS_DIRECTORY_URL || "",
     );
     const atomDecimals = 6;
     const balance = await client.getBalance(walletAddress, "uatom");
     const baseAssetAmount = baseToAsset(
-      baseAmount(balance.amount, atomDecimals)
+      baseAmount(balance.amount, atomDecimals),
     )
       .amount()
       .toNumber();

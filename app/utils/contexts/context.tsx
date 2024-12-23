@@ -206,7 +206,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (
             window.ethereum?.isMetaMask &&
             !window.ethereum?.isVultisig &&
-            !window.ethereum?.isXDEFI && 
+            !window.ethereum?.isXDEFI &&
             !window.ethereum?.isPhanthom
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
@@ -250,7 +250,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (
             window.solana.isPhantom &&
             !window.solana.isBraveWallet &&
-            !window.solana.isXDEFI && 
+            !window.solana.isXDEFI &&
             !window.solana.isOkxWallet
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
