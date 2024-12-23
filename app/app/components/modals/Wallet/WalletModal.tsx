@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Modal from "@/app/modal";
 import WalletList from "./WalletList";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { ChainSelector } from "./ChainSelector";
 import { useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";

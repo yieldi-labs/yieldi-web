@@ -15,18 +15,18 @@ import {
   ProviderKey,
   SUPPORTED_WALLETS,
   WalletKey,
-} from "./wallet/constants";
+} from "../wallet/constants";
 import {
   connectEVMWallet,
   connectWallet,
   connectWalletConnect,
-} from "./wallet/walletConnect";
+} from "../wallet/handlers/handleConnect";
 import {
   ChainType,
   ConnectedWalletsState,
   WalletTokensData,
   WalletType,
-} from "./interfaces";
+} from "../interfaces";
 import { useWalletTokens } from "@/hooks/useWalletTokens";
 import { createAppKit } from "@reown/appkit/react";
 import { mainnet, avalanche, bsc } from "@reown/appkit/networks";

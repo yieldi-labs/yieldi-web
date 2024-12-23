@@ -8,7 +8,7 @@ import {
 } from "viem";
 import ERC20_ABI from "./erc20.json";
 import ROUTER_ABI from "./routerABI.json";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { getChainKeyFromChain } from "@/utils/chain";
 
@@ -77,7 +77,7 @@ export function useContracts({
 
   const chainKey = getChainKeyFromChain(asset?.chain);
   const walletAddress = walletsState[chainKey]?.address;
-  const balance = balanceList![chainKey][assetId]?.balance;
+  const balance = balanceList?.[chainKey]?.[assetId]?.balance || 0;
 
   // Load token metadata
   const loadMetadata = useCallback(

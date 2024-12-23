@@ -3,11 +3,11 @@ import { Providers } from "./providers";
 import WalletButton from "./WalletButton";
 import { lpGradientCircles } from "@shared/utils";
 import { UIComponents, CommonComponents } from "@shared/components";
-import { AppStateProvider } from "@/utils/context";
+import { AppStateProvider } from "@/utils/contexts/context";
 import WalletModal from "./components/modals/Wallet/WalletModal";
 
 import "./styles/globals.css";
-import { LiquidityPositionsProvider } from "@/utils/PositionsContext";
+import { LiquidityPositionsProvider } from "@/utils/contexts/PositionsContext";
 import WalletDrawer from "./components/wallet-drawer";
 
 export default function RootLayout({

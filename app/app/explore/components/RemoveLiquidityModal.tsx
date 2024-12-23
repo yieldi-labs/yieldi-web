@@ -11,7 +11,7 @@ import {
   formatNumber,
   getPositionDetails,
 } from "@/app/utils";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
@@ -20,7 +20,7 @@ import {
   PositionStatus,
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
-import { useLiquidityPositions } from "@/utils/PositionsContext";
+import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;

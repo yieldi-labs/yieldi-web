@@ -1,6 +1,6 @@
 "use client";
 import { FC, useState } from "react";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { WalletState } from "@/utils/interfaces";
 import { useMobileDetection } from "@shared/hooks";
 import WalletDrawerHeader from "./WalletDrawerHeader";

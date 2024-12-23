@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { client, getMemberDetail, getPool } from "@/midgard";
 import type { MemberPool, PoolDetail } from "@/midgard";
 import { normalizeAddress } from "@/app/utils";
