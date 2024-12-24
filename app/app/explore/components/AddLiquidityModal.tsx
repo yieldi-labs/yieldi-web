@@ -37,7 +37,11 @@ export default function AddLiquidityModal({
   onClose,
 }: AddLiquidityModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { error: liquidityError, addLiquidity, getAssetWallet } = useLiquidityPosition({
+  const {
+    error: liquidityError,
+    addLiquidity,
+    getAssetWallet,
+  } = useLiquidityPosition({
     pool,
   });
   const { toggleWalletModal, walletsState, balanceList, isWalletConnected } =
@@ -64,11 +68,13 @@ export default function AddLiquidityModal({
 
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
-  const baseAssetMinimalUnit = baseAmount(1, poolNativeDecimal).amount().toNumber();
+  const baseAssetMinimalUnit = baseAmount(1, poolNativeDecimal)
+    .amount()
+    .toNumber();
   console.log({
     assetMinimalUnit,
     baseAssetMinimalUnit,
-  })
+  });
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
   const runeBalance = useMemo(() => {
     if (!balanceList) return 0;
@@ -187,7 +193,7 @@ export default function AddLiquidityModal({
           throw new Error("Failed to add asset liquidity.");
         }
       }
-      
+
       if (isDualSided && parsedRuneAmount) {
         pairedAddress = getAssetWallet(pool.asset).address;
         const result = await addLiquidity({
@@ -258,7 +264,12 @@ export default function AddLiquidityModal({
   };
 
   const type = isDualSided ? PositionType.DLP : PositionType.SLP;
-  if (showConfirmation && assetTxHash && positions && positions[pool.asset][type]) {
+  if (
+    showConfirmation &&
+    assetTxHash &&
+    positions &&
+    positions[pool.asset][type]
+  ) {
     const position = positions[pool.asset][type];
     return (
       <TransactionConfirmationModal

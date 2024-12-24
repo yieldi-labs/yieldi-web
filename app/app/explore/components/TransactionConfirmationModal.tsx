@@ -19,9 +19,13 @@ export default function TransactionConfirmationModal({
   onClose,
 }: TransactionConfirmationModalProps) {
   const assetHashThorchainUrl = `https://thorchain.net/tx/${assetHash}`;
-  const runeHashThorchainUrl = runeHash ? `https://thorchain.net/tx/${runeHash}` : undefined;
+  const runeHashThorchainUrl = runeHash
+    ? `https://thorchain.net/tx/${runeHash}`
+    : undefined;
   const assetHashRunescanUrl = `https://runescan.io/tx/${assetHash}`;
-  const runeHashRunescanUrl = runeHash ? `https://runescan.io/tx/${runeHash}` : undefined;
+  const runeHashRunescanUrl = runeHash
+    ? `https://runescan.io/tx/${runeHash}`
+    : undefined;
 
   const ExternalLinkIcon = () => (
     <svg
