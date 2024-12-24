@@ -55,7 +55,6 @@ export function useLiquidityPosition({
   const { walletsState } = useAppState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [positions, setPositions] = useState<MemberPool[] | null>(null);
   const [pool, setPool] = useState<PoolDetail>(poolProp);
   const thorChainClient = useThorchain({
     wallet: walletsState![ChainKey.THORCHAIN],
@@ -70,7 +69,6 @@ export function useLiquidityPosition({
     [pool.asset],
   );
 
-  const wallet = walletsState![getChainKeyFromChain(assetChain)];
   // Determine if this is a UTXO chain and which one
   const utxoChain = useMemo(() => {
     const chainMap: Record<string, string> = {
@@ -117,7 +115,7 @@ export function useLiquidityPosition({
   const { approveSpending, getAllowance, depositWithExpiry, parseAmount } =
     useContracts({
       tokenAddress: tokenAddress as Address | undefined,
-      provider: wallet?.provider,
+      provider: getAssetWallet(pool.asset).provider,
       assetId: pool.asset,
     });
 
@@ -129,64 +127,6 @@ export function useLiquidityPosition({
     chain: utxoChain as "BTC" | "DOGE" | "LTC" | "BCH",
     wallet: utxoChain ? getAssetWallet(pool.asset) : null,
   });
-
-  const getMemberDetails = useCallback(
-    // TODO: Is this function really neccessary ?
-    async (address: string, asset: string) => {
-      if (!address || !asset) {
-        setError("Address and asset are required");
-        return null;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        const [memberResponse, poolResponse] = await Promise.all([
-          getMemberDetail({
-            client: client,
-            path: { address },
-          }) as Promise<MidgardResponse<{ pools: MemberPool[] }>>,
-          getPool({
-            client: client,
-            path: { asset },
-          }) as Promise<MidgardResponse<PoolDetail>>,
-        ]);
-
-        if (!memberResponse.data) {
-          return null;
-        }
-
-        const poolPositions = memberResponse.data.pools.filter(
-          (p) => p.pool === asset,
-        );
-
-        if (poolPositions) {
-          setPositions(poolPositions);
-        }
-
-        if (poolResponse.data) {
-          setPool(poolResponse.data);
-        }
-
-        return {
-          positions: poolPositions,
-          pool: poolResponse.data,
-          memberDetails: memberResponse.data,
-        };
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to fetch position details",
-        );
-        return null;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [],
-  );
 
   const addLiquidity = useCallback(
     async ({
@@ -201,6 +141,7 @@ export function useLiquidityPosition({
       try {
         setLoading(true);
         setError(null);
+        const wallet = getAssetWallet(asset);
 
         const inboundAddresses = await getInboundAddresses();
         const [assetChain] = parseAssetString(asset);
@@ -221,7 +162,7 @@ export function useLiquidityPosition({
         );
 
         // Handle Thorchain deposits
-        if (getAssetWallet(asset).chainType === ChainKey.THORCHAIN) {
+        if (wallet.chainType === ChainKey.THORCHAIN) {
           return await thorChainClient.deposit({
             pool,
             recipient: "",
@@ -310,7 +251,6 @@ export function useLiquidityPosition({
           }
         }
 
-        await getMemberDetails(getAssetWallet(asset).address, asset);
         return txHash;
       } catch (err) {
         const errorMessage =
@@ -321,15 +261,7 @@ export function useLiquidityPosition({
         setLoading(false);
       }
     },
-    [
-      wallet,
-      getMemberDetails,
-      tokenAddress,
-      isNativeAsset,
-      utxoChain,
-      addUTXOLiquidity,
-      thorChainClient,
-    ],
+    [tokenAddress, isNativeAsset, utxoChain, addUTXOLiquidity, thorChainClient],
   );
 
   const removeLiquidity = useCallback(
@@ -339,6 +271,7 @@ export function useLiquidityPosition({
       address,
       withdrawAsset,
     }: RemoveLiquidityParams) => {
+      const wallet = getAssetWallet(asset);
       if (!wallet?.address) {
         throw new Error("Wallet not connected");
       }
@@ -433,7 +366,6 @@ export function useLiquidityPosition({
           expiry,
         );
 
-        await getMemberDetails(address, asset);
         return txHash;
       } catch (err) {
         const errorMessage =
@@ -444,22 +376,13 @@ export function useLiquidityPosition({
         setLoading(false);
       }
     },
-    [
-      wallet,
-      getMemberDetails,
-      utxoChain,
-      removeUTXOLiquidity,
-      pool.nativeDecimal,
-      thorChainClient,
-    ],
+    [utxoChain, removeUTXOLiquidity, pool.nativeDecimal, thorChainClient],
   );
 
   return {
     loading,
     error,
-    positions,
     pool,
-    getMemberDetails,
     addLiquidity,
     removeLiquidity,
     getAssetWallet,
