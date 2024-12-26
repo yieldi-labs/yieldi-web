@@ -33,28 +33,29 @@ async function waitForTransaction(
   provider: any,
   txHash: string,
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const checkReceipt = async () => {
-      try {
-        const receipt = await provider.request({
-          method: "eth_getTransactionReceipt",
-          params: [txHash],
-        });
+  while (true) {
+    try {
+      const receipt = await provider.request({
+        method: "eth_getTransactionReceipt",
+        params: [txHash],
+      });
 
-        if (receipt) {
-          if (receipt.status === "0x1" || receipt.status === 1) {
-            // TODO: Clarify this discrepancies between wallets (Crtl / Vulticonnect)
-            resolve(txHash);
-          }
+      console.log("receipt", receipt);
+
+      if (receipt) {
+        if (receipt.status === "0x1" || receipt.status === 1) {
+          return txHash;
         } else {
-          setTimeout(checkReceipt, 1000);
+          throw new Error("Transaction failed");
         }
-      } catch (error) {
-        reject(error);
       }
-    };
-    checkReceipt();
-  });
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    } catch (error) {
+      console.log("error", error);
+      throw error;
+    }
+  }
 }
 
 export function useContracts({
@@ -253,7 +254,7 @@ export function useContracts({
           ],
         });
 
-        return await waitForTransaction(provider, txHash);
+        await waitForTransaction(provider, txHash);
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Failed to deposit";
@@ -300,7 +301,7 @@ export function useContracts({
           ],
         });
 
-        return await waitForTransaction(provider, txHash);
+        await waitForTransaction(provider, txHash);
       } catch (err) {
         console.error("Deposit with expiry error:", err);
         const message =
