@@ -20,7 +20,9 @@ export const chainHandlers: Record<any, any> = {
       token.tokenAddress as `0x${string}`,
     );
     return {
-      balance: baseToAsset(baseAmount(info?.balance.toString() || 0, 18))
+      balance: baseToAsset(
+        baseAmount(info?.balance.toString() || 0, token.decimals),
+      )
         .amount()
         .toNumber(),
     };
@@ -37,7 +39,9 @@ export const chainHandlers: Record<any, any> = {
       token.tokenAddress as `0x${string}`,
     );
     return {
-      balance: baseToAsset(baseAmount(info?.balance.toString() || 0, 18))
+      balance: baseToAsset(
+        baseAmount(info?.balance.toString() || 0, token.decimals),
+      )
         .amount()
         .toNumber(),
     };
@@ -54,7 +58,9 @@ export const chainHandlers: Record<any, any> = {
       token.tokenAddress as `0x${string}`,
     );
     return {
-      balance: baseToAsset(baseAmount(info?.balance.toString() || 0, 18))
+      balance: baseToAsset(
+        baseAmount(info?.balance.toString() || 0, token.decimals),
+      )
         .amount()
         .toNumber(),
     };

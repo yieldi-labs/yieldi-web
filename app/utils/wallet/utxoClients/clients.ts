@@ -12,7 +12,14 @@ import {
   Client as BitcoinCashClient,
   defaultBchParams,
 } from "@xchainjs/xchain-bitcoincash";
-import { BitgoProviders, BlockcypherDataProviders } from "./providers";
+import {
+  BitgoBtcProviders,
+  BlockcypherBtcDataProviders,
+  BitgoDogeProviders,
+  blockcypherDogeDataProviders,
+  BitgoLtcProviders,
+  BlockcypherLtcDataProviders,
+} from "./providers";
 
 const commonConfig = {
   network: Network.Mainnet,
@@ -22,17 +29,19 @@ const commonConfig = {
 const clientBtc = new BitcoinClient({
   ...defaultBTCParams,
   ...commonConfig,
-  dataProviders: [BitgoProviders, BlockcypherDataProviders],
+  dataProviders: [BitgoBtcProviders, BlockcypherBtcDataProviders],
 });
 
 const clientDoge = new DogeClient({
   ...defaultDogeParams,
   ...commonConfig,
+  dataProviders: [BitgoDogeProviders, blockcypherDogeDataProviders],
 });
 
 const clientLtc = new LitecoinClient({
   ...defaultLtcParams,
   ...commonConfig,
+  dataProviders: [BitgoLtcProviders, BlockcypherLtcDataProviders],
 });
 
 const clientBch = new BitcoinCashClient({

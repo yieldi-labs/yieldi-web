@@ -77,6 +77,7 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
               chainName: pool.asset.split(".")[0],
               chainKey: chainKey,
               tokenAddress: tokenAddress,
+              decimals: Number(pool.nativeDecimal),
             });
           }
         } else if (walletsState[getChainKeyFromChain(asset.chain)]) {
