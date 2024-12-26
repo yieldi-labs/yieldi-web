@@ -3,7 +3,12 @@ import { AssetBTC, defaultBTCParams } from "@xchainjs/xchain-bitcoin";
 import { AssetDOGE, defaultDogeParams } from "@xchainjs/xchain-doge";
 import { AssetLTC, defaultLtcParams } from "@xchainjs/xchain-litecoin";
 import { Network } from "@xchainjs/xchain-client";
-import { assetToBase, assetAmount } from "@xchainjs/xchain-util";
+import {
+  assetToBase,
+  assetAmount,
+  assetFromString,
+  Asset,
+} from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
 import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
@@ -101,29 +106,16 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
 
       try {
         const fees = feeRate || (await getFees()).fastest;
-        let asset;
-        switch (chain) {
-          case AssetBTC.chain:
-            asset = AssetBTC;
-            break;
-          case AssetDOGE.chain:
-            asset = AssetDOGE;
-            break;
-          case AssetLTC.chain:
-            asset = AssetLTC;
-            break;
-          case AssetBCH.chain:
-            asset = AssetBCH;
-            break;
-          default:
-            throw new Error(`Unsupported UTXO chain: ${chain}`);
-        }
         const from = wallet.address;
         const nativeDecimal = parseInt(pool.nativeDecimal);
         const finalAmount = assetToBase(assetAmount(amount, nativeDecimal));
+        const asset = assetFromString(pool.asset);
+        if (!asset) {
+          throw Error("Invalid asset");
+        }
         const transferParams = {
           from,
-          asset,
+          asset: asset as Asset,
           recipient,
           amount: {
             amount: finalAmount.amount().toNumber(),
@@ -173,16 +165,14 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
 
       try {
         const fees = await getFees();
-        return new Promise<string>(async (resolve) => {
-          const txHash = await transfer({
-            pool,
-            recipient: vault,
-            amount,
-            memo,
-            feeRate: fees.fast,
-          });
-          resolve(txHash);
+        const txHash = await transfer({
+          pool,
+          recipient: vault,
+          amount,
+          memo,
+          feeRate: fees.fast,
         });
+        return txHash;
       } catch (err) {
         const errMsg =
           err instanceof Error ? err.message : "Failed to add liquidity";

@@ -78,7 +78,7 @@ export const transferUTXO = async (
 
         psbtSigned.extractTransaction().getId();
 
-        const hash = clientBuilder.broadcastTx(txHex);
+        const hash = await clientBuilder.broadcastTx(txHex);
         return hash;
       case "okx":
         const value = baseToAsset(
@@ -103,6 +103,6 @@ export const transferUTXO = async (
     }
   } catch (error) {
     console.error("Error transfer UTXO wallet:", error);
-    return "";
+    throw error;
   }
 };
