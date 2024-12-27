@@ -189,6 +189,7 @@ export default function AddLiquidityModal({
         });
         if (result) {
           setAssetTxHash(result);
+          setShowConfirmation(true);
         } else {
           throw new Error("Failed to add asset liquidity.");
         }
@@ -197,13 +198,14 @@ export default function AddLiquidityModal({
       if (isDualSided && parsedRuneAmount) {
         pairedAddress = getAssetWallet(pool.asset).address;
         const result = await addLiquidity({
-          asset: "THOR.RUNE",
+          asset: pool.asset,
           amount: 0,
           pairedAddress,
           runeAmount: parsedRuneAmount,
         });
         if (result) {
           setRuneTxHash(result);
+          setShowConfirmation(true);
         } else {
           throw new Error("Failed to add Rune liquidity.");
         }
@@ -214,10 +216,6 @@ export default function AddLiquidityModal({
         type,
         PositionStatus.LP_POSITION_DEPOSIT_PENDING,
       );
-
-      if (assetTxHash || runeTxHash) {
-        setShowConfirmation(true);
-      }
     } catch (err) {
       console.error("Failed to add liquidity:", err);
     } finally {
@@ -266,7 +264,7 @@ export default function AddLiquidityModal({
   const type = isDualSided ? PositionType.DLP : PositionType.SLP;
   if (
     showConfirmation &&
-    assetTxHash &&
+    (assetTxHash || runeTxHash) && // Changed condition
     positions &&
     positions[pool.asset][type]
   ) {

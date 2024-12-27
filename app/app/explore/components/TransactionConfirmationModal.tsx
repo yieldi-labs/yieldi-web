@@ -4,6 +4,7 @@ import {
   PositionStats,
   PositionStatus,
 } from "@/hooks/dataTransformers/positionsTransformer";
+import { useMemo } from "react";
 
 interface TransactionConfirmationModalProps {
   position: PositionStats | null;
@@ -26,6 +27,16 @@ export default function TransactionConfirmationModal({
   const runeHashRunescanUrl = runeHash
     ? `https://runescan.io/tx/${runeHash}`
     : undefined;
+
+  const getChainNameFromPosition = (position: PositionStats | null) => {
+    if (!position) return "";
+    const poolName = position.pool.asset;
+    return poolName.split(".")[0];
+  };
+  const chainName = useMemo(
+    () => getChainNameFromPosition(position),
+    [position],
+  );
 
   const ExternalLinkIcon = () => (
     <svg
@@ -77,25 +88,33 @@ export default function TransactionConfirmationModal({
 
         {/* Explorer Links */}
         <div className="w-full space-y-3">
-          <a
-            href={assetHashThorchainUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
-          >
-            <span className="mr-2">View on THORChain.net</span>
-            <ExternalLinkIcon />
-          </a>
+          {assetHash && (
+            <>
+              <a
+                href={assetHashThorchainUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
+              >
+                <span className="mr-2">
+                  View {chainName} transaction on THORChain.net
+                </span>
+                <ExternalLinkIcon />
+              </a>
 
-          <a
-            href={assetHashRunescanUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
-          >
-            <span className="mr-2">View on Runescan</span>
-            <ExternalLinkIcon />
-          </a>
+              <a
+                href={assetHashRunescanUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
+              >
+                <span className="mr-2">
+                  View {chainName} transaction on Runescan
+                </span>
+                <ExternalLinkIcon />
+              </a>
+            </>
+          )}
 
           {runeHash && (
             <>
@@ -105,7 +124,9 @@ export default function TransactionConfirmationModal({
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
               >
-                <span className="mr-2">View Rune on THORChain.net</span>
+                <span className="mr-2">
+                  View Rune transaction on THORChain.net
+                </span>
                 <ExternalLinkIcon />
               </a>
 
@@ -115,7 +136,7 @@ export default function TransactionConfirmationModal({
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
               >
-                <span className="mr-2">View Rune on Runescan</span>
+                <span className="mr-2">View Rune transaction on Runescan</span>
                 <ExternalLinkIcon />
               </a>
             </>
@@ -124,8 +145,8 @@ export default function TransactionConfirmationModal({
 
         {/* Hash Preview */}
         <div className="mt-4 text-sm text-gray-500 truncate max-w-full">
-          Asset Transaction Hash: {assetHash}
-          {runeHash && `Rune Transaction Hash: ${runeHash}`}
+          {assetHash && <p>{`${chainName} Transaction Hash: ${assetHash}`}</p>}
+          {runeHash && <p>{`Rune Transaction Hash: ${runeHash}</p>`}</p>}
         </div>
       </div>
     </Modal>
