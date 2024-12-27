@@ -33,29 +33,28 @@ async function waitForTransaction(
   provider: any,
   txHash: string,
 ): Promise<string> {
-  while (true) {
-    try {
-      const receipt = await provider.request({
-        method: "eth_getTransactionReceipt",
-        params: [txHash],
-      });
+  return new Promise((resolve, reject) => {
+    const checkReceipt = async () => {
+      try {
+        const receipt = await provider.request({
+          method: "eth_getTransactionReceipt",
+          params: [txHash],
+        });
 
-      console.log("receipt", receipt);
-
-      if (receipt) {
-        if (receipt.status === "0x1" || receipt.status === 1) {
-          return txHash;
+        if (receipt) {
+          if (receipt.status === "0x1" || receipt.status === 1) {
+            // TODO: Clarify this discrepancies between wallets (Crtl / Vulticonnect)
+            resolve(txHash);
+          }
         } else {
-          throw new Error("Transaction failed");
+          setTimeout(checkReceipt, 1000);
         }
+      } catch (error) {
+        reject(error);
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    } catch (error) {
-      console.log("error", error);
-      throw error;
-    }
-  }
+    };
+    checkReceipt();
+  });
 }
 
 export function useContracts({
