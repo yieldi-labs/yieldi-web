@@ -253,7 +253,7 @@ export function useContracts({
           ],
         });
 
-        await waitForTransaction(provider, txHash);
+        return await waitForTransaction(provider, txHash);
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Failed to deposit";
@@ -300,7 +300,7 @@ export function useContracts({
           ],
         });
 
-        await waitForTransaction(provider, txHash);
+        return await waitForTransaction(provider, txHash);
       } catch (err) {
         console.error("Deposit with expiry error:", err);
         const message =
