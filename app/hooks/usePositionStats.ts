@@ -14,7 +14,7 @@ import {
   PositionType,
 } from "./dataTransformers/positionsTransformer";
 import { useCallback, useEffect, useState } from "react";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 
 interface UsePositionStatsProps {
   defaultRefetchInterval?: number;

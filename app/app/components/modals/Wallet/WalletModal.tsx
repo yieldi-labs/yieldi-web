@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Modal from "@/app/modal";
 import WalletList from "./WalletList";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { ChainSelector } from "./ChainSelector";
 import { useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
@@ -32,7 +32,7 @@ export default function WalletModal() {
   const { handleConnect } = useWalletConnection();
 
   const isHWDisabled = selectedChains.some((chain) =>
-    [ChainKey.SOLANA, ChainKey.KUJIRA, ChainKey.BSCCHAIN].includes(chain.name),
+    [ChainKey.BSCCHAIN].includes(chain.name),
   );
   const handleWalletSelect = (wallet: WalletType): void => {
     const validChains = wallet.chains;

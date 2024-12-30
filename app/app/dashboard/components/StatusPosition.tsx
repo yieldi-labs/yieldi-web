@@ -12,7 +12,6 @@ interface StatusPositionProps {
 
 export default function StatusPosition({ position }: StatusPositionProps) {
   const asset = assetFromString(position.assetId);
-
   return (
     <span className="font-medium text-sm flex items-center space-x-2">
       {position.status === PositionStatus.LP_POSITION_INCOMPLETE && (

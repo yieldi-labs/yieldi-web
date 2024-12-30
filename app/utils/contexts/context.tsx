@@ -15,18 +15,18 @@ import {
   ProviderKey,
   SUPPORTED_WALLETS,
   WalletKey,
-} from "./wallet/constants";
+} from "../wallet/constants";
 import {
   connectEVMWallet,
   connectWallet,
   connectWalletConnect,
-} from "./wallet/walletConnect";
+} from "../wallet/handlers/handleConnect";
 import {
   ChainType,
   ConnectedWalletsState,
   WalletTokensData,
   WalletType,
-} from "./interfaces";
+} from "../interfaces";
 import { useWalletTokens } from "@/hooks/useWalletTokens";
 import { createAppKit } from "@reown/appkit/react";
 import { mainnet, avalanche, bsc } from "@reown/appkit/networks";
@@ -65,8 +65,8 @@ const metadata = {
 const modal = createAppKit({
   adapters: [],
   features: {
-    email: true, // default to true
-    emailShowWallets: true, // default to true
+    email: true,
+    emailShowWallets: true,
     connectMethodsOrder: ["wallet", "email", "social"],
   },
   metadata,
@@ -206,7 +206,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (
             window.ethereum?.isMetaMask &&
             !window.ethereum?.isVultisig &&
-            !window.ethereum?.isXDEFI
+            !window.ethereum?.isXDEFI &&
+            !window.ethereum?.isPhanthom
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
@@ -249,7 +250,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (
             window.solana.isPhantom &&
             !window.solana.isBraveWallet &&
-            !window.solana.isXDEFI
+            !window.solana.isXDEFI &&
+            !window.solana.isOkxWallet
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {

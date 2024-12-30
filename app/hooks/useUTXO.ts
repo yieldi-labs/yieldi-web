@@ -1,58 +1,19 @@
 import { useMemo, useCallback, useState } from "react";
-import {
-  Client as BitcoinClient,
-  defaultBTCParams,
-} from "@xchainjs/xchain-bitcoin";
-import { Client as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
-import { Client as UxtoClient } from "@xchainjs/xchain-utxo";
-import {
-  defaultLtcParams,
-  Client as LitecoinClient,
-} from "@xchainjs/xchain-litecoin";
+import { AssetBTC, defaultBTCParams } from "@xchainjs/xchain-bitcoin";
+import { AssetDOGE, defaultDogeParams } from "@xchainjs/xchain-doge";
+import { AssetLTC, defaultLtcParams } from "@xchainjs/xchain-litecoin";
 import { Network } from "@xchainjs/xchain-client";
 import {
   assetToBase,
-  Asset,
   assetAmount,
-  AssetType,
+  assetFromString,
+  Asset,
 } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
-import { transferUTXO } from "@/utils/wallet/walletTransfer";
-import {
-  Client as BitcoinCashClient,
-  defaultBchParams,
-} from "@xchainjs/xchain-bitcoincash";
-
-// Define BTC, DOGE, and LTC assets
-const AssetBTC: Asset = {
-  chain: "BTC",
-  symbol: "BTC",
-  ticker: "BTC",
-  type: AssetType.NATIVE,
-};
-
-const AssetDOGE: Asset = {
-  chain: "DOGE",
-  symbol: "DOGE",
-  ticker: "DOGE",
-  type: AssetType.NATIVE,
-};
-
-const AssetLTC: Asset = {
-  chain: "LTC",
-  symbol: "LTC",
-  ticker: "LTC",
-  type: AssetType.NATIVE,
-};
-
-const AssetBCH: Asset = {
-  chain: "BCH",
-  symbol: "BCH",
-  ticker: "BCH",
-  type: AssetType.NATIVE,
-};
-
+import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
+import { defaultBchParams, AssetBCH } from "@xchainjs/xchain-bitcoincash";
+import { getClient } from "@/utils/wallet/utxoClients/clients";
 type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
 
 interface UseUTXOProps {
@@ -108,61 +69,12 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
     })(),
   });
 
-  // Initialize UTXO client with proper configuration
-  const client: UxtoClient | null = useMemo(() => {
-    if (!wallet?.provider) return null;
-
-    try {
-      const commonConfig = {
-        network: Network.Mainnet,
-        phrase: "", // We don't need phrase since we're using wallet provider
-      };
-
-      switch (chain) {
-        case "BTC":
-          return new BitcoinClient({
-            ...defaultBTCParams,
-            ...commonConfig,
-          });
-        case "DOGE":
-          return new DogeClient({
-            ...defaultDogeParams,
-            ...commonConfig,
-          });
-        case "LTC":
-          return new LitecoinClient({
-            ...defaultLtcParams,
-            ...commonConfig,
-          });
-        case "BCH":
-          return new BitcoinCashClient({
-            ...defaultBchParams,
-            ...commonConfig,
-          });
-        default:
-          throw new Error(`Unsupported UTXO chain: ${chain}`);
-      }
-    } catch (err) {
-      console.error(`Error initializing ${chain} client:`, err);
-      return null;
+  const client = useMemo(() => {
+    if (chain) {
+      return getClient(chain);
     }
-  }, [wallet?.provider, chain]);
-
-  // Get balance
-  const getBalance = useCallback(
-    async (address: string) => {
-      if (!client) throw new Error(`${chain} client not initialized`);
-
-      try {
-        const balance = await client.getBalance(address);
-        return balance[0];
-      } catch (err) {
-        console.error(`Error getting ${chain} balance:`, err);
-        throw err;
-      }
-    },
-    [client, chain],
-  );
+    return null;
+  }, [chain]);
 
   // Get network fees
   const getFees = useCallback(async () => {
@@ -193,30 +105,17 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       setError(null);
 
       try {
-        const fees = feeRate || (await getFees()).fast;
-        let asset;
-        switch (chain) {
-          case "BTC":
-            asset = AssetBTC;
-            break;
-          case "DOGE":
-            asset = AssetDOGE;
-            break;
-          case "LTC":
-            asset = AssetLTC;
-            break;
-          case "BCH":
-            asset = AssetBCH;
-            break;
-          default:
-            throw new Error(`Unsupported UTXO chain: ${chain}`);
-        }
+        const fees = feeRate || (await getFees()).fastest;
         const from = wallet.address;
         const nativeDecimal = parseInt(pool.nativeDecimal);
         const finalAmount = assetToBase(assetAmount(amount, nativeDecimal));
+        const asset = assetFromString(pool.asset);
+        if (!asset) {
+          throw Error("Invalid asset");
+        }
         const transferParams = {
           from,
-          asset,
+          asset: asset as Asset,
           recipient,
           amount: {
             amount: finalAmount.amount().toNumber(),
@@ -226,7 +125,11 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           feeRate: fees,
         };
 
-        const result = await transferUTXO(wallet, transferParams);
+        const result = await transferUTXO(
+          wallet,
+          transferParams,
+          client as any,
+        );
         setMetadata((prev) => ({
           ...prev,
           hash: result,
@@ -240,7 +143,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         setLoading(false);
       }
     },
-    [wallet, getFees, chain],
+    [wallet, getFees, chain, client],
   );
 
   // Add liquidity to a pool using transfer
@@ -262,16 +165,14 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
 
       try {
         const fees = await getFees();
-        return new Promise<string>(async (resolve) => {
-          const txHash = await transfer({
-            pool,
-            recipient: vault,
-            amount,
-            memo,
-            feeRate: fees.fast,
-          });
-          resolve(txHash);
+        const txHash = await transfer({
+          pool,
+          recipient: vault,
+          amount,
+          memo,
+          feeRate: fees.fast,
         });
+        return txHash;
       } catch (err) {
         const errMsg =
           err instanceof Error ? err.message : "Failed to add liquidity";
@@ -323,7 +224,6 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
     loading,
     error,
     metadata,
-    getBalance,
     getFees,
     transfer,
     addLiquidity,

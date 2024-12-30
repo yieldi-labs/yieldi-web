@@ -1,5 +1,5 @@
 import TranslucentCard from "@/app/TranslucentCard";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import React from "react";
 
 export default function PositionsPlaceholder() {

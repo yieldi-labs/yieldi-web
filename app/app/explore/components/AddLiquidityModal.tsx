@@ -10,13 +10,13 @@ import {
   DECIMALS,
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
 import { useWalletConnection } from "@/hooks";
 import { getChainKeyFromChain } from "@/utils/chain";
-import { useLiquidityPositions } from "@/utils/PositionsContext";
+import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import {
   PositionStatus,
   PositionType,

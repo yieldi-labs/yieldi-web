@@ -4,7 +4,7 @@ import Btc from "@ledgerhq/hw-app-btc";
 import Cosmos from "@ledgerhq/hw-app-cosmos";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { IconSvg, WalletSvg } from "@/svg";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 import { ChainType } from "@/utils/interfaces";
 import { ChainKey } from "@/utils/wallet/constants";
 

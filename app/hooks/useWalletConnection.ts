@@ -11,7 +11,7 @@ import {
   WalletType,
 } from "@/utils/interfaces";
 import { useCallback } from "react";
-import { useAppState } from "@/utils/context";
+import { useAppState } from "@/utils/contexts/context";
 
 export function useWalletConnection() {
   const { setWalletsState, toggleWalletModal, selectedChains, walletsState } =
