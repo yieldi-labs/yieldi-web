@@ -135,6 +135,7 @@ export function useLiquidityPosition({
       try {
         setLoading(true);
         setError(null);
+
         let wallet = getAssetWallet(asset);
         const memo = getLiquidityMemo(
           "add",
