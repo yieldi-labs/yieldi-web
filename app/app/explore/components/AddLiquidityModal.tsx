@@ -21,7 +21,6 @@ import {
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
 import { ChainKey } from "@/utils/wallet/constants";
-import { baseAmount } from "@xchainjs/xchain-util";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -47,14 +46,8 @@ export default function AddLiquidityModal({
   const { toggleWalletModal, walletsState, balanceList, isWalletConnected } =
     useAppState();
 
-  const [assetChain] = useMemo(
-    () => parseAssetString(pool.asset),
-    [pool.asset],
-  );
-  const chainKey = useMemo(
-    () => getChainKeyFromChain(assetChain),
-    [assetChain],
-  );
+  const [assetChain] = parseAssetString(pool.asset);
+  const chainKey = getChainKeyFromChain(assetChain);
   const selectedWallet = walletsState[chainKey] || null;
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
@@ -68,13 +61,6 @@ export default function AddLiquidityModal({
 
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
-  const baseAssetMinimalUnit = baseAmount(1, poolNativeDecimal)
-    .amount()
-    .toNumber();
-  console.log({
-    assetMinimalUnit,
-    baseAssetMinimalUnit,
-  });
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
   const runeBalance = useMemo(() => {
     if (!balanceList) return 0;
@@ -198,7 +184,7 @@ export default function AddLiquidityModal({
       if (isDualSided && parsedRuneAmount) {
         pairedAddress = getAssetWallet(pool.asset).address;
         const result = await addLiquidity({
-          asset: pool.asset,
+          asset: "THOR.RUNE",
           amount: 0,
           pairedAddress,
           runeAmount: parsedRuneAmount,

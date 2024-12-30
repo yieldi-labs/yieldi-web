@@ -4,7 +4,6 @@ import {
   PositionStats,
   PositionStatus,
 } from "@/hooks/dataTransformers/positionsTransformer";
-import { useMemo } from "react";
 
 interface TransactionConfirmationModalProps {
   position: PositionStats | null;
@@ -27,16 +26,7 @@ export default function TransactionConfirmationModal({
   const runeHashRunescanUrl = runeHash
     ? `https://runescan.io/tx/${runeHash}`
     : undefined;
-
-  const getChainNameFromPosition = (position: PositionStats | null) => {
-    if (!position) return "";
-    const poolName = position.pool.asset;
-    return poolName.split(".")[0];
-  };
-  const chainName = useMemo(
-    () => getChainNameFromPosition(position),
-    [position],
-  );
+  const chainName = position ? position.pool.asset.split(".")[0] : "";
 
   const ExternalLinkIcon = () => (
     <svg
@@ -146,7 +136,7 @@ export default function TransactionConfirmationModal({
         {/* Hash Preview */}
         <div className="mt-4 text-sm text-gray-500 truncate max-w-full">
           {assetHash && <p>{`${chainName} Transaction Hash: ${assetHash}`}</p>}
-          {runeHash && <p>{`Rune Transaction Hash: ${runeHash}</p>`}</p>}
+          {runeHash && <p>{`Rune Transaction Hash: ${runeHash}`}</p>}
         </div>
       </div>
     </Modal>

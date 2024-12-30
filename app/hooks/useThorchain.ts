@@ -105,7 +105,6 @@ export function useThorchain({ wallet }: UseThorchainProps) {
                 setError(error.message);
                 reject(error);
               } else {
-                console.log("Deposit result:", result);
                 resolve(result || "");
               }
             },
