@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { useAppState } from "@/utils/contexts/context";
-import { client, getMemberDetail, getPool } from "@/midgard";
-import type { MemberPool, PoolDetail } from "@/midgard";
+import type { PoolDetail } from "@/midgard";
 import { normalizeAddress } from "@/app/utils";
 import { Address, parseUnits } from "viem";
 import { useContracts } from "./useContracts";
@@ -39,11 +38,6 @@ interface RemoveLiquidityParams {
 
 interface UseLiquidityPositionProps {
   pool: PoolDetail;
-}
-
-interface MidgardResponse<T> {
-  data?: T;
-  error?: string;
 }
 
 const affiliate = "yi";
@@ -141,19 +135,7 @@ export function useLiquidityPosition({
       try {
         setLoading(true);
         setError(null);
-        const wallet = getAssetWallet(asset);
-
-        const inboundAddresses = await getInboundAddresses();
-        const [assetChain] = parseAssetString(asset);
-        const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase(),
-        );
-        if (!inbound && !(wallet.chainType === ChainKey.THORCHAIN)) {
-          throw new Error(`No inbound address found for ${assetChain}`);
-        } else if (inbound) {
-          validateInboundAddress(inbound);
-        }
-
+        let wallet = getAssetWallet(asset);
         const memo = getLiquidityMemo(
           "add",
           pool.asset,
@@ -163,15 +145,27 @@ export function useLiquidityPosition({
         );
 
         // Handle Thorchain deposits
-        if (amount === 0 && runeAmount && runeAmount > 0) {
-          const result = await thorChainClient.deposit({
-            pool,
-            recipient: "",
-            amount: runeAmount,
-            memo: memo,
-          });
-          console.log("Thorchain deposit result", result);
-          return result;
+        if (wallet.chainType === ChainKey.THORCHAIN) {
+          if (amount === 0 && runeAmount && runeAmount > 0) {
+            const result = await thorChainClient.deposit({
+              pool,
+              recipient: "",
+              amount: runeAmount,
+              memo: memo,
+            });
+            return result;
+          }
+        }
+
+        const inboundAddresses = await getInboundAddresses();
+        const [assetChain] = parseAssetString(asset);
+        const inbound = inboundAddresses?.find(
+          (i) => i.chain === assetChain.toUpperCase(),
+        );
+        if (!inbound) {
+          throw new Error(`No inbound address found for ${assetChain}`);
+        } else if (inbound) {
+          validateInboundAddress(inbound);
         }
 
         // Handle Cosmos chain transactions
@@ -181,14 +175,14 @@ export function useLiquidityPosition({
           )
             .amount()
             .toNumber();
-          return await cosmosTransfer(inbound!.address, cosmosAmount, memo);
+          return await cosmosTransfer(inbound.address, cosmosAmount, memo);
         }
 
         // Handle UTXO chain transactions
         if (utxoChain) {
           return await addUTXOLiquidity({
             pool,
-            vault: inbound!.address,
+            vault: inbound.address,
             amount: amount,
             memo: memo,
           });
@@ -197,11 +191,11 @@ export function useLiquidityPosition({
         // Handle EVM chain transactions
         await switchEvmChain(wallet.provider, assetChain);
 
-        const routerAddress = inbound!.router
-          ? normalizeAddress(inbound!.router)
+        const routerAddress = inbound.router
+          ? normalizeAddress(inbound.router)
           : undefined;
         if (!routerAddress) throw new Error("Router address not found");
-        const vaultAddress = normalizeAddress(inbound!.address);
+        const vaultAddress = normalizeAddress(inbound.address);
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes
 
         // Handle token or native asset deposit
@@ -291,16 +285,6 @@ export function useLiquidityPosition({
           throw new Error(`Chain not supported: ${assetChain}`);
         }
 
-        const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase(),
-        );
-
-        if (!inbound && !(wallet.chainType === ChainKey.THORCHAIN)) {
-          throw new Error(`No inbound address found for ${assetChain}`);
-        } else if (inbound) {
-          validateInboundAddress(inbound);
-        }
-
         const memo = getLiquidityMemo(
           "remove",
           asset,
@@ -321,6 +305,15 @@ export function useLiquidityPosition({
           });
         }
 
+        const inbound = inboundAddresses?.find(
+          (i) => i.chain === assetChain.toUpperCase(),
+        );
+        if (!inbound) {
+          throw new Error(`No inbound address found for ${assetChain}`);
+        } else if (inbound) {
+          validateInboundAddress(inbound);
+        }
+
         // Handle Cosmos chain withdrawals
         if (wallet.chainType === ChainKey.GAIACHAIN) {
           const cosmosAmount = assetToBase(
@@ -331,14 +324,15 @@ export function useLiquidityPosition({
           )
             .amount()
             .toNumber();
-          return await cosmosTransfer(inbound!.address, cosmosAmount, memo);
+
+          return await cosmosTransfer(inbound.address, cosmosAmount, memo);
         }
 
         // Handle UTXO chain withdrawals
         if (utxoChain) {
           return await removeUTXOLiquidity({
             pool,
-            vault: inbound!.address,
+            vault: inbound.address,
             amount: getMinAmountByChain(supportedChain),
             memo: memo,
           });
@@ -348,11 +342,11 @@ export function useLiquidityPosition({
 
         await delay(5000);
 
-        const routerAddress = inbound!.router
-          ? normalizeAddress(inbound!.router)
+        const routerAddress = inbound.router
+          ? normalizeAddress(inbound.router)
           : undefined;
         if (!routerAddress) throw new Error("Router address not found");
-        const vaultAddress = normalizeAddress(inbound!.address);
+        const vaultAddress = normalizeAddress(inbound.address);
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300);
 
         // Use base unit amount for withdrawal transaction
