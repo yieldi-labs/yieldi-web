@@ -100,12 +100,12 @@ export function useThorchain({ wallet }: UseThorchainProps) {
               method: "deposit",
               params: [depositParams],
             },
-            (error: Error | null, result: TxResult | null) => {
+            (error: Error | null, result: string | null) => {
               if (error) {
                 setError(error.message);
                 reject(error);
               } else {
-                resolve(result?.hash || "");
+                resolve(result || "");
               }
             },
           );
