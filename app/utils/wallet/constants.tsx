@@ -41,6 +41,7 @@ export const CHAINS: ChainType[] = [
     nativeAsset: "avax",
     chainId: "0xa86a",
     addressUrl: "https://snowtrace.dev/address/{wallet}",
+    ctrlChainId: "avalanche",
   },
   {
     icon: <ChainSvg.Bitcoin />,
@@ -49,6 +50,7 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "btc",
     nativeAsset: "btc",
     addressUrl: "https://www.blockchain.com/btc/address/{wallet}",
+    ctrlChainId: "bitcoin",
   },
   {
     icon: <ChainSvg.BitcoinCash />,
@@ -57,6 +59,7 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "bch",
     nativeAsset: "bch",
     addressUrl: "https://www.blockchain.com/bch/address/{wallet}",
+    ctrlChainId: "bitcoincash",
   },
   {
     icon: <ChainSvg.BSC />,
@@ -66,6 +69,7 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "bsc",
     nativeAsset: "bnb",
     addressUrl: "https://bscscan.com/address/{wallet}",
+    ctrlChainId: "binanceSmartChain",
   },
   {
     icon: <ChainSvg.Cosmos />,
@@ -74,6 +78,7 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "gaia",
     nativeAsset: "atom",
     addressUrl: "https://mintscan.io/cosmos/address/{wallet}",
+    ctrlChainId: "cosmos",
   },
   {
     icon: <ChainSvg.Dogechain />,
@@ -82,6 +87,7 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "doge",
     nativeAsset: "doge",
     addressUrl: "https://dogechain.info/address/{wallet}",
+    ctrlChainId: "dogecoin",
   },
   {
     icon: <ChainSvg.Ethereum />,
@@ -91,6 +97,7 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "eth",
     nativeAsset: "eth",
     addressUrl: "https://etherscan.io/address/{wallet}",
+    ctrlChainId: "ethereum",
   },
   {
     icon: <ChainSvg.Litecoin />,
@@ -99,6 +106,7 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "ltc",
     nativeAsset: "ltc",
     addressUrl: "https://ltc.bitaps.com/{wallet}",
+    ctrlChainId: "litecoin",
   },
   // {
   //   icon: <ChainSvg.Solana />,
@@ -115,6 +123,7 @@ export const CHAINS: ChainType[] = [
     thorchainIdentifier: "thor",
     nativeAsset: "rune",
     addressUrl: "https://runescan.io/address/{wallet}",
+    ctrlChainId: "thorchain",
   },
 ];
 
@@ -128,6 +137,7 @@ export const EVM_CHAINS: ChainType[] = [
     thorchainIdentifier: "avax",
     nativeAsset: "avax",
     addressUrl: "https://snowtrace.dev/address/{wallet}",
+    ctrlChainId: "avalanche",
   },
   {
     icon: <ChainSvg.BSC />,
@@ -137,6 +147,7 @@ export const EVM_CHAINS: ChainType[] = [
     thorchainIdentifier: "bsc",
     nativeAsset: "bnb",
     addressUrl: "https://bscscan.com/address/{wallet}",
+    ctrlChainId: "binanceSmartChain",
   },
   {
     icon: <ChainSvg.Ethereum />,
@@ -146,6 +157,7 @@ export const EVM_CHAINS: ChainType[] = [
     thorchainIdentifier: "eth",
     nativeAsset: "eth",
     addressUrl: "https://etherscan.io/address/{wallet}",
+    ctrlChainId: "ethereum",
   },
 ];
 
