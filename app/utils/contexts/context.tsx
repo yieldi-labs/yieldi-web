@@ -18,7 +18,6 @@ import {
 } from "../wallet/constants";
 import {
   connectWallet,
-  connectWalletConnect,
 } from "../wallet/handlers/handleConnect";
 import {
   ChainType,

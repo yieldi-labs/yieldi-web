@@ -1,10 +1,4 @@
-import { useState } from "react";
-import Eth from "@ledgerhq/hw-app-eth";
-import Btc from "@ledgerhq/hw-app-btc";
-import Cosmos from "@ledgerhq/hw-app-cosmos";
-import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
-import { IconSvg, WalletSvg } from "@/svg";
-import { useAppState } from "@/utils/contexts/context";
+import { IconSvg } from "@/svg";
 import { ChainType } from "@/utils/interfaces";
 import { SUPPORTED_WALLETS, WalletKey } from "@/utils/wallet/constants";
 import Wallet from "./Wallet";

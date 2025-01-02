@@ -7,11 +7,15 @@ import {
 import { ChainKey, CHAINS } from "@/utils/wallet/constants";
 import { getPools, PoolDetail } from "@/midgard";
 import { getChainKeyFromChain } from "@/utils/chain";
+<<<<<<< HEAD
 import {
   assetFromString,
   baseAmount,
   baseToAsset,
 } from "@xchainjs/xchain-util";
+=======
+import { assetFromString, baseAmount, baseToAsset } from "@xchainjs/xchain-util";
+>>>>>>> a2fdf8d (Disable wallets instead of hide them)
 import { initialWalletTokensData } from "@/utils/wallet/balances";
 import { useQuery } from "@tanstack/react-query";
 import { getBalancePerChainAndAddress } from "@/ctrl/client";
@@ -131,57 +135,42 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       };
     };
 
-    const chainPromises = Object.entries(walletTokensData).map(
-      async ([chain, tokens]) => {
-        if (!walletsState || !walletsState[chain as ChainKey]) return;
-
-        const address = walletsState[chain as ChainKey].address;
-
-        const chainInfo = CHAINS.find(
-          (chainDetail) => chainDetail.name === chain,
-        );
-        if (!chainInfo) {
-          throw new Error("Unknown chain");
+    const chainPromises = Object.entries(walletTokensData).map(async ([chain, tokens]) => {
+      if (!walletsState || !walletsState[chain as ChainKey]) return;
+    
+      const address = walletsState[chain as ChainKey].address;
+    
+      const chainInfo = CHAINS.find(chainDetail => chainDetail.name === chain);
+      if (!chainInfo) {
+        throw new Error('Unknown chain');
+      }
+    
+      const balances = await getBalancePerChainAndAddress(chainInfo.ctrlChainId, address);
+    
+      Object.entries(tokens).forEach(([tokenKey, token]) => {
+        try {
+          const asset = assetFromString(tokenKey);
+          const balance = balances.find(balance => {
+            if (tokenKey.indexOf('-') === -1) { // Is native
+              return balance.asset.contract === null;
+            }
+            return balance.asset.contract?.toLowerCase() === asset?.symbol.split('-')[1].toLowerCase();
+          });
+    
+          const formattedAssetBalance = baseToAsset(
+            baseAmount(balance?.amount.value || 0, token.decimals)
+          ).amount().toNumber();
+    
+          updateTokenData(chain as ChainKey, tokenKey, { balance: formattedAssetBalance });
+        } catch (err) {
+          console.error(`Error fetching balance for ${tokenKey}:`, err);
+          updateTokenData(chain as ChainKey, tokenKey, {}, 0);
         }
-
-        const balances = await getBalancePerChainAndAddress(
-          chainInfo.ctrlChainId,
-          address,
-        );
-
-        Object.entries(tokens).forEach(([tokenKey, token]) => {
-          try {
-            const asset = assetFromString(tokenKey);
-            const balance = balances.find((balance) => {
-              if (tokenKey.indexOf("-") === -1) {
-                // Is native
-                return balance.asset.contract === null;
-              }
-              return (
-                balance.asset.contract?.toLowerCase() ===
-                asset?.symbol.split("-")[1].toLowerCase()
-              );
-            });
-
-            const formattedAssetBalance = baseToAsset(
-              baseAmount(balance?.amount.value || 0, token.decimals),
-            )
-              .amount()
-              .toNumber();
-
-            updateTokenData(chain as ChainKey, tokenKey, {
-              balance: formattedAssetBalance,
-            });
-          } catch (err) {
-            console.error(`Error fetching balance for ${tokenKey}:`, err);
-            updateTokenData(chain as ChainKey, tokenKey, {}, 0);
-          }
-        });
-      },
-    );
-
+      });
+    });
+    
     await Promise.all(chainPromises);
-
+    
     return newWalletTokensData;
   };
 
@@ -202,7 +191,11 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     queryFn: () => getTokenBalances(walletTokensData as WalletTokensData),
     enabled: !!walletTokensData,
     retry: false,
+<<<<<<< HEAD
     staleTime: 25000,
+=======
+    staleTime: 25000
+>>>>>>> a2fdf8d (Disable wallets instead of hide them)
   });
 
   return {
