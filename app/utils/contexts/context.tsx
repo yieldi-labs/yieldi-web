@@ -243,10 +243,10 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         }
         case WalletKey.PHANTOM: {
           if (
-            window.solana.isPhantom &&
-            !window.solana.isBraveWallet &&
-            !window.solana.isXDEFI &&
-            !window.solana.isOkxWallet
+            window.solana?.isPhantom &&
+            !window.solana?.isBraveWallet &&
+            !window.solana?.isXDEFI &&
+            !window.solana?.isOkxWallet
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {

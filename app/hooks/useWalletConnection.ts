@@ -119,33 +119,29 @@ export function useWalletConnection() {
       return;
     }
 
-    try {
-      let newWalletState = { ...walletsState };
+    let newWalletState = { ...walletsState };
 
-      for (const chain of selectedChains) {
-        if (walletsState[chain.name] && walletsState[chain.name].address) {
-          // Already connected
-          continue;
-        }
-        const connection = await handleProviderConnection(wallet, chain);
-        if (!connection) continue;
-        saveNetworkAddressToLocalStorage(chain.name, connection.address);
-        newWalletState = updateWalletState(
-          newWalletState,
-          wallet.id,
-          chain.providerType,
-          chain.name,
-          connection.provider,
-          connection.address,
-          connection.chainId,
-        );
+    for (const chain of selectedChains) {
+      if (walletsState[chain.name] && walletsState[chain.name].address) {
+        // Already connected
+        continue;
       }
-
-      setWalletsState(newWalletState);
-      toggleWalletModal();
-    } catch (error) {
-      console.error(`Error connecting to ${wallet.id}:`, error);
+      const connection = await handleProviderConnection(wallet, chain);
+      if (!connection) continue;
+      saveNetworkAddressToLocalStorage(chain.name, connection.address);
+      newWalletState = updateWalletState(
+        newWalletState,
+        wallet.id,
+        chain.providerType,
+        chain.name,
+        connection.provider,
+        connection.address,
+        connection.chainId,
+      );
     }
+
+    setWalletsState(newWalletState);
+    toggleWalletModal();
   };
 
   return {
