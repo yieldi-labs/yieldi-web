@@ -8,10 +8,13 @@ import { useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
 import HardwareWallets from "./HardwareWallets";
+import { WalletType } from "@/utils/interfaces";
 import {
-  WalletType,
-} from "@/utils/interfaces";
-import { ChainKey, CHAINS, SUPPORTED_WALLETS, WalletKey } from "@/utils/wallet/constants";
+  ChainKey,
+  CHAINS,
+  SUPPORTED_WALLETS,
+  WalletKey,
+} from "@/utils/wallet/constants";
 import { isWalletValidForAllChains } from "@/utils/wallet/utils";
 
 export default function WalletModal() {
@@ -77,8 +80,8 @@ export default function WalletModal() {
             />
             <div
               onClick={() => {
-                handleWalletSelect(SUPPORTED_WALLETS[WalletKey.LEDGER])
-                setShowHardwareWallets(true)
+                handleWalletSelect(SUPPORTED_WALLETS[WalletKey.LEDGER]);
+                setShowHardwareWallets(true);
               }}
               className={twMerge(
                 "flex items-center justify-between",

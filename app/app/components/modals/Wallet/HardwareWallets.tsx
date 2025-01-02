@@ -9,11 +9,8 @@ interface HardwareWalletsProps {
   isDisabled: boolean;
 }
 
-export default function HardwareWallets({
-  onBack,
-}: HardwareWalletsProps) {
-
-  const wallet = SUPPORTED_WALLETS[WalletKey.LEDGER]
+export default function HardwareWallets({ onBack }: HardwareWalletsProps) {
+  const wallet = SUPPORTED_WALLETS[WalletKey.LEDGER];
 
   return (
     <div className="flex flex-col gap-4">
@@ -26,12 +23,7 @@ export default function HardwareWallets({
       </button>
 
       <div className="grid grid-cols-2 gap-4">
-        <Wallet
-          key={wallet.id}
-          wallet={wallet}
-          isSupported
-          isSelected
-        />
+        <Wallet key={wallet.id} wallet={wallet} isSupported isSelected />
       </div>
     </div>
   );

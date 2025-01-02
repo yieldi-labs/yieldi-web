@@ -31,29 +31,29 @@ export const connectWallet = async (wallet: any): Promise<any> => {
       case "xdefi-kujira":
       case "xdefi-cosmos":
       case "okx-cosmos": {
-          const chainId = wallet.subchain || "cosmoshub-4";
+        const chainId = wallet.subchain || "cosmoshub-4";
 
-          if (!wallet.provider) {
-            throw new Error("XDEFI Keplr provider not found");
-          }
-
-          // Enable the chain
-          await wallet.provider.enable(chainId);
-
-          // Get the offline signer
-          const offlineSigner = wallet.provider.getOfflineSigner(chainId);
-          const accounts = await offlineSigner.getAccounts();
-
-          if (!accounts || accounts.length === 0) {
-            throw new Error("No Cosmos accounts found");
-          }
-
-          return {
-            provider: wallet.provider,
-            address: accounts[0].address,
-            offlineSigner,
-          };
+        if (!wallet.provider) {
+          throw new Error("XDEFI Keplr provider not found");
         }
+
+        // Enable the chain
+        await wallet.provider.enable(chainId);
+
+        // Get the offline signer
+        const offlineSigner = wallet.provider.getOfflineSigner(chainId);
+        const accounts = await offlineSigner.getAccounts();
+
+        if (!accounts || accounts.length === 0) {
+          throw new Error("No Cosmos accounts found");
+        }
+
+        return {
+          provider: wallet.provider,
+          address: accounts[0].address,
+          offlineSigner,
+        };
+      }
       case "xdefi-thorchain":
       case "xdefi-maya":
       case "xdefi-bch":
@@ -79,7 +79,7 @@ export const connectWallet = async (wallet: any): Promise<any> => {
           provider: wallet.provider,
           address: address[0],
         };
-      case "xdefi-solana": 
+      case "xdefi-solana":
       case "phantom-solana": {
         const resp = await wallet.provider.connect();
 
@@ -111,64 +111,83 @@ export const connectWallet = async (wallet: any): Promise<any> => {
           let accounts = [];
           accounts = await wallet.provider.request({ method: "eth_accounts" });
           if (accounts.length <= 0) {
-            accounts = await wallet.provider.request({ method: "eth_requestAccounts" });
+            accounts = await wallet.provider.request({
+              method: "eth_requestAccounts",
+            });
           }
           address = accounts[0];
         } else {
           const { accounts } = await wallet.provider.connect();
           address = accounts[0];
         }
-    
+
         return {
           provider: wallet.provider,
           address,
         };
-      case "walletconnect-evm": 
+      case "walletconnect-evm":
         await wallet.provider.open({ view: "Connect" });
         return {
           provider: wallet.provider,
-          address: ""
+          address: "",
         };
-      case "ledger-evm": 
+      case "ledger-evm":
         const eth = new Eth(wallet.provider);
         const result = await eth.getAddress("44'/60'/0'/0/0"); // TODO: Use chain ID
         return {
           provider: wallet.provider,
-          address: result.address
+          address: result.address,
         };
-      case "ledger-btc": 
+      case "ledger-btc":
         const btc = new Btc({ transport: wallet.provider });
-        const { bitcoinAddress } =
-        await btc.getWalletPublicKey("84'/0'/0'/0/1", { format: 'bech32', verify: true });
+        const { bitcoinAddress } = await btc.getWalletPublicKey(
+          "84'/0'/0'/0/1",
+          { format: "bech32", verify: true },
+        );
         return {
           provider: wallet.provider,
-          address: bitcoinAddress
+          address: bitcoinAddress,
         };
-      case "ledger-bch": 
-        const bch = new Btc({ transport: wallet.provider, currency: 'bitcoin_cash' });
-        const { bitcoinAddress: bchAddress } =
-        await bch.getWalletPublicKey("44'/145'/0'/0/0", { verify: true });
+      case "ledger-bch":
+        const bch = new Btc({
+          transport: wallet.provider,
+          currency: "bitcoin_cash",
+        });
+        const { bitcoinAddress: bchAddress } = await bch.getWalletPublicKey(
+          "44'/145'/0'/0/0",
+          { verify: true },
+        );
         return {
           provider: wallet.provider,
-          address: bchAddress
+          address: bchAddress,
         };
-      case "ledger-doge": 
-        const doge = new Btc({ transport: wallet.provider, currency: 'dogecoin' });
-        const { bitcoinAddress: dogeAddress } =
-        await doge.getWalletPublicKey("44'/3'/0'/0/0", { verify: true });
+      case "ledger-doge":
+        const doge = new Btc({
+          transport: wallet.provider,
+          currency: "dogecoin",
+        });
+        const { bitcoinAddress: dogeAddress } = await doge.getWalletPublicKey(
+          "44'/3'/0'/0/0",
+          { verify: true },
+        );
         return {
           provider: wallet.provider,
-          address: dogeAddress
+          address: dogeAddress,
         };
-      case "ledger-ltc": 
-        const ltc = new Btc({ transport: wallet.provider, currency: 'litecoin' });
-        const { bitcoinAddress: ltcAddress } =
-        await ltc.getWalletPublicKey("44'/2'/0'/0/0", { verify: true });
+      case "ledger-ltc":
+        const ltc = new Btc({
+          transport: wallet.provider,
+          currency: "litecoin",
+        });
+        const { bitcoinAddress: ltcAddress } = await ltc.getWalletPublicKey(
+          "44'/2'/0'/0/0",
+          { verify: true },
+        );
         return {
           provider: wallet.provider,
-          address: ltcAddress
+          address: ltcAddress,
         };
-      case "ledger-thorchain": 
+      case "ledger-thorchain":
         const cosmos = new Cosmos(wallet.provider);
         const { address: thorchainAddress } = await cosmos.getAddress(
           "44'/931'/0'/0/0",
@@ -177,7 +196,7 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         address = thorchainAddress;
         return {
           provider: wallet.provider,
-          address: thorchainAddress
+          address: thorchainAddress,
         };
       default:
         console.warn(`Unknown UTXO wallet: ${wallet.id}`);

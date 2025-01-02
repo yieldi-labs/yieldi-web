@@ -27,11 +27,7 @@ const Wallet = ({
             ? "opacity-100 cursor-pointer hover:border-primary"
             : "opacity-50 cursor-not-allowed hover:border-transparent"
         }
-        ${
-          isSelected
-            ? "border-primary"
-            : "border-transparent"
-        } 
+        ${isSelected ? "border-primary" : "border-transparent"} 
       `}
       onClick={() => isSupported && !disabled && onSelect && onSelect()}
     >
