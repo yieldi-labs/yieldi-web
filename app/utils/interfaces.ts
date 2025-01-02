@@ -64,6 +64,7 @@ export interface WalletType {
   icon: JSX.Element;
   isAvailable: boolean;
   isHardware: boolean;
+  hasSupportMultichain: boolean;
   hasSupportToAddConectionToExistingConnection: boolean;
   hasSupportToSelectChains: boolean;
   downloadUrl: string;

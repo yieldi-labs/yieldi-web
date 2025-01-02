@@ -41,7 +41,7 @@ export function useWalletConnection() {
     let chainId = null;
 
     // Only fetch chainId for EVM chains
-    if (chain.providerType === ProviderKey.EVM) {
+    if (chain.providerType === ProviderKey.EVM && wallet.id !== WalletKey.LEDGER) {
       chainId = await connectedWallet.provider.request({
         method: "eth_chainId",
       });

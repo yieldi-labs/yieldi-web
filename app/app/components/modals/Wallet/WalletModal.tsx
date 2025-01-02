@@ -39,7 +39,7 @@ export default function WalletModal() {
     if (selectedWallet === wallet && selectedChains.length > 0) {
       setSelectedWallet(undefined);
       setSelectedChains([]);
-    } else if (selectedChains.length <= 0) {
+    } else if (selectedChains.length <= 0 && wallet.hasSupportMultichain) {
       setSelectedChains(
         CHAINS.filter(({ name }) => validChains.includes(name)),
       );
@@ -67,6 +67,7 @@ export default function WalletModal() {
           chains={CHAINS}
           selectedChains={selectedChains}
           onChainSelect={setSelectedChains}
+          enableMultiselect={selectedWallet ? SUPPORTED_WALLETS[selectedWallet?.id].hasSupportMultichain : true}
         />
         {!showHardwareWallets ? (
           <>

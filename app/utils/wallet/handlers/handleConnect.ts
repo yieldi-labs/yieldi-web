@@ -154,6 +154,7 @@ export const connectWallet = async (wallet: any): Promise<any> => {
       });
       const { bitcoinAddress: bchAddress } = await bch.getWalletPublicKey(
         "44'/145'/0'/0/0",
+        { format: 'cashaddr' }
       );
       return {
         provider: wallet.provider,
@@ -177,23 +178,30 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         currency: "litecoin",
       });
       const { bitcoinAddress: ltcAddress } = await ltc.getWalletPublicKey(
-        "44'/2'/0'/0/0",
+        "84'/2'/0'/0/0",
+        { format: "bech32" },
       );
       return {
         provider: wallet.provider,
         address: ltcAddress,
       };
     case "ledger-thorchain":
-      const cosmos = new Cosmos(wallet.provider);
-      const { address: thorchainAddress } = await cosmos.getAddress(
+      const thor = new Cosmos(wallet.provider);
+      const { address: thorchainAddress } = await thor.getAddress(
         "44'/931'/0'/0/0",
         "thor",
       );
-      address = thorchainAddress;
       return {
         provider: wallet.provider,
         address: thorchainAddress,
       };
+    case "ledger-cosmos":
+        const cosmos = new Cosmos(wallet.provider);
+        const { address: cosmosAddress } = await cosmos.getAddress("44'/118'/0'/0", "cosmos")
+        return {
+          provider: wallet.provider,
+          address: cosmosAddress,
+        };
     default:
       console.warn(`Unknown UTXO wallet: ${wallet.id}`);
   }
