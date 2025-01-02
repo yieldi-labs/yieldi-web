@@ -1,5 +1,5 @@
 import { ChainSvg, WalletSvg } from "@/svg";
-import { ChainType } from "../interfaces";
+import { ChainType, WalletType } from "../interfaces";
 
 export enum ChainKey {
   AVALANCHE = "Avalanche",
@@ -30,6 +30,7 @@ export enum WalletKey {
   PHANTOM = "phantom",
   VULTISIG = "vultisig",
   WALLETCONNECT = "walletConnect",
+  LEDGER = "ledger",
 }
 
 export const CHAINS: ChainType[] = [
@@ -161,7 +162,7 @@ export const EVM_CHAINS: ChainType[] = [
   },
 ];
 
-export const SUPPORTED_WALLETS = {
+export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
   [WalletKey.CTRL]: {
     id: WalletKey.CTRL,
     name: "CTRL",
@@ -179,6 +180,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://ctrl.xyz/",
     icon: <WalletSvg.Ctrl />,
     isAvailable: false,
+    isHardware: false,
+    hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
     chainConnect: {},
@@ -190,6 +193,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://metamask.io/",
     icon: <WalletSvg.Metamask />,
     isAvailable: false,
+    isHardware: false,
+    hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
     chainConnect: {},
@@ -207,6 +212,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://www.okx.com/web3",
     icon: <WalletSvg.OKX />,
     isAvailable: false,
+    isHardware: false,
+    hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
     chainConnect: {},
@@ -218,6 +225,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://phantom.app/",
     icon: <WalletSvg.Phantom />,
     isAvailable: false,
+    isHardware: false,
+    hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
     chainConnect: {},
@@ -239,6 +248,8 @@ export const SUPPORTED_WALLETS = {
     downloadUrl: "https://vultisig.com/",
     icon: <WalletSvg.Vultisig />,
     isAvailable: false,
+    isHardware: false,
+    hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
     chainConnect: {},
@@ -248,9 +259,35 @@ export const SUPPORTED_WALLETS = {
     name: "WalletConnect",
     chains: [ChainKey.AVALANCHE, ChainKey.BSCCHAIN, ChainKey.ETHEREUM],
     icon: <WalletSvg.WalletConnect />,
+    downloadUrl: "https://walletconnect.network/",
     isAvailable: true,
+    isHardware: false,
+    hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: false,
     hasSupportToSelectChains: false,
+    chainConnect: {},
+  },
+  [WalletKey.LEDGER]: {
+    id: WalletKey.LEDGER,
+    name: "Ledger",
+    chains: [
+      ChainKey.AVALANCHE,
+      ChainKey.BITCOIN,
+      ChainKey.BITCOINCASH,
+      ChainKey.BSCCHAIN,
+      ChainKey.DOGECOIN,
+      ChainKey.ETHEREUM,
+      ChainKey.LITECOIN,
+      ChainKey.THORCHAIN,
+      ChainKey.GAIACHAIN,
+    ],
+    downloadUrl: "https://www.ledger.com/",
+    icon: <WalletSvg.Ledger />,
+    isAvailable: false,
+    isHardware: true,
+    hasSupportMultichain: false,
+    hasSupportToAddConectionToExistingConnection: true,
+    hasSupportToSelectChains: true,
     chainConnect: {},
   },
 };

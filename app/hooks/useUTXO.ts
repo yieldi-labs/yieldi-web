@@ -1,7 +1,7 @@
 import { useMemo, useCallback, useState } from "react";
-import { AssetBTC, defaultBTCParams } from "@xchainjs/xchain-bitcoin";
-import { AssetDOGE, defaultDogeParams } from "@xchainjs/xchain-doge";
-import { AssetLTC, defaultLtcParams } from "@xchainjs/xchain-litecoin";
+import { defaultBTCParams } from "@xchainjs/xchain-bitcoin";
+import { defaultDogeParams } from "@xchainjs/xchain-doge";
+import { defaultLtcParams } from "@xchainjs/xchain-litecoin";
 import { Network } from "@xchainjs/xchain-client";
 import {
   assetToBase,
@@ -12,7 +12,7 @@ import {
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
 import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
-import { defaultBchParams, AssetBCH } from "@xchainjs/xchain-bitcoincash";
+import { defaultBchParams } from "@xchainjs/xchain-bitcoincash";
 import { getClient } from "@/utils/wallet/utxoClients/clients";
 type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
 
