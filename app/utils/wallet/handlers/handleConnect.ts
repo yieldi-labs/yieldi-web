@@ -1,6 +1,7 @@
-import Btc from "@ledgerhq/hw-app-btc/lib-es/Btc";
 import Eth from "@ledgerhq/hw-app-eth";
 import Cosmos from "@ledgerhq/hw-app-cosmos";
+import { getLedgerClient } from "../utxoClients/ledgerClients";
+import { ChainKey } from "../constants";
 
 export const connectWallet = async (wallet: any): Promise<any> => {
   let accounts: any;
@@ -64,7 +65,7 @@ export const connectWallet = async (wallet: any): Promise<any> => {
           (error: any, accounts: string[]) => {
             if (error) reject(error);
             else resolve(accounts[0]);
-          },
+          }
         );
       });
 
@@ -138,70 +139,53 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         address: result.address,
       };
     case "ledger-btc":
-      const btc = new Btc({ transport: wallet.provider });
-      const { bitcoinAddress } = await btc.getWalletPublicKey(
-        "84'/0'/0'/0/1",
-        { format: "bech32" },
-      );
+      const clientBtc = getLedgerClient(ChainKey.BITCOIN, wallet.provider);
+      const addressBtc = await clientBtc.getAddressAsync();
       return {
         provider: wallet.provider,
-        address: bitcoinAddress,
+        address: addressBtc,
       };
     case "ledger-bch":
-      const bch = new Btc({
-        transport: wallet.provider,
-        currency: "bitcoin_cash",
-      });
-      const { bitcoinAddress: bchAddress } = await bch.getWalletPublicKey(
-        "44'/145'/0'/0/0",
-        { format: 'cashaddr' }
-      );
+      const clientBch = getLedgerClient(ChainKey.BITCOINCASH, wallet.provider);
+      const addressBch = await clientBch.getAddressAsync();
       return {
         provider: wallet.provider,
-        address: bchAddress,
+        address: addressBch,
       };
     case "ledger-doge":
-      const doge = new Btc({
-        transport: wallet.provider,
-        currency: "dogecoin",
-      });
-      const { bitcoinAddress: dogeAddress } = await doge.getWalletPublicKey(
-        "44'/3'/0'/0/0",
-      );
+      const clientDoge = getLedgerClient(ChainKey.DOGECOIN, wallet.provider);
+      const addressDoge = await clientDoge.getAddressAsync();
       return {
         provider: wallet.provider,
-        address: dogeAddress,
+        address: addressDoge,
       };
     case "ledger-ltc":
-      const ltc = new Btc({
-        transport: wallet.provider,
-        currency: "litecoin",
-      });
-      const { bitcoinAddress: ltcAddress } = await ltc.getWalletPublicKey(
-        "84'/2'/0'/0/0",
-        { format: "bech32" },
-      );
+      const clientLtc = getLedgerClient(ChainKey.LITECOIN, wallet.provider);
+      const addressLtc = await clientLtc.getAddressAsync();
       return {
         provider: wallet.provider,
-        address: ltcAddress,
+        address: addressLtc,
       };
     case "ledger-thorchain":
       const thor = new Cosmos(wallet.provider);
       const { address: thorchainAddress } = await thor.getAddress(
         "44'/931'/0'/0/0",
-        "thor",
+        "thor"
       );
       return {
         provider: wallet.provider,
         address: thorchainAddress,
       };
     case "ledger-cosmos":
-        const cosmos = new Cosmos(wallet.provider);
-        const { address: cosmosAddress } = await cosmos.getAddress("44'/118'/0'/0", "cosmos")
-        return {
-          provider: wallet.provider,
-          address: cosmosAddress,
-        };
+      const cosmos = new Cosmos(wallet.provider);
+      const { address: cosmosAddress } = await cosmos.getAddress(
+        "44'/118'/0'/0",
+        "cosmos"
+      );
+      return {
+        provider: wallet.provider,
+        address: cosmosAddress,
+      };
     default:
       console.warn(`Unknown UTXO wallet: ${wallet.id}`);
   }
