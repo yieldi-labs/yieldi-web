@@ -65,7 +65,7 @@ export const connectWallet = async (wallet: any): Promise<any> => {
           (error: any, accounts: string[]) => {
             if (error) reject(error);
             else resolve(accounts[0]);
-          }
+          },
         );
       });
 
@@ -170,7 +170,7 @@ export const connectWallet = async (wallet: any): Promise<any> => {
       const thor = new Cosmos(wallet.provider);
       const { address: thorchainAddress } = await thor.getAddress(
         "44'/931'/0'/0/0",
-        "thor"
+        "thor",
       );
       return {
         provider: wallet.provider,
