@@ -23,7 +23,6 @@ describe("HardwareWallets Component", () => {
     render(
       <HardwareWallets
         onBack={onBackMock}
-        onWalletSelect={onWalletSelectMock}
         selectedChains={[CHAINS[5]]}
         isDisabled={false}
       />,
@@ -37,7 +36,6 @@ describe("HardwareWallets Component", () => {
     render(
       <HardwareWallets
         onBack={onBackMock}
-        onWalletSelect={onWalletSelectMock}
         selectedChains={[CHAINS[5]]}
         isDisabled={false}
       />,
@@ -58,7 +56,6 @@ describe("HardwareWallets Component", () => {
     render(
       <HardwareWallets
         onBack={onBackMock}
-        onWalletSelect={onWalletSelectMock}
         selectedChains={[CHAINS[5]]}
         isDisabled={false}
       />,
@@ -87,7 +84,6 @@ describe("HardwareWallets Component", () => {
     render(
       <HardwareWallets
         onBack={onBackMock}
-        onWalletSelect={onWalletSelectMock}
         selectedChains={[CHAINS[1]]}
         isDisabled={false}
       />,
@@ -109,7 +105,6 @@ describe("HardwareWallets Component", () => {
     render(
       <HardwareWallets
         onBack={onBackMock}
-        onWalletSelect={onWalletSelectMock}
         selectedChains={[CHAINS[5]]}
         isDisabled={false}
       />,

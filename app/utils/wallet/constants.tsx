@@ -226,6 +226,7 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
     icon: <WalletSvg.Phantom />,
     isAvailable: false,
     isHardware: false,
+    hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
     chainConnect: {},
