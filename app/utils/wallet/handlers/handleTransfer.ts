@@ -99,15 +99,21 @@ export const transferUTXO = async (
           satBytes: transferParams.feeRate,
         });
         return txHash;
-      case "ledger": 
-        const ledgerClient = getLedgerClient(wallet.chainType as UTXOChain, wallet.provider)
+      case "ledger":
+        const ledgerClient = getLedgerClient(
+          wallet.chainType as UTXOChain,
+          wallet.provider,
+        );
         const btcHash = await ledgerClient.transfer({
-          amount: baseAmount(transferParams.amount.amount, transferParams.amount.decimals),
+          amount: baseAmount(
+            transferParams.amount.amount,
+            transferParams.amount.decimals,
+          ),
           recipient: transferParams.recipient,
           memo: transferParams.memo,
-          feeRate: transferParams.feeRate
-        })
-        return btcHash
+          feeRate: transferParams.feeRate,
+        });
+        return btcHash;
       default:
         console.warn(`Unknown walletId UTXO transfer: ${wallet.walletId}`);
     }

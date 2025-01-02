@@ -17,12 +17,12 @@ export function ChainSelector({
   chains,
   onChainSelect,
   blockUnselect = false,
-  enableMultiselect = true
+  enableMultiselect = true,
 }: ChainSelectorProps) {
   const { selectedChains, selectedWallet } = useAppState();
   const handleSelect = (chainKey: ChainType) => {
     if (!enableMultiselect) {
-      onChainSelect([chainKey])
+      onChainSelect([chainKey]);
     } else {
       if (selectedChains.includes(chainKey)) {
         onChainSelect(selectedChains.filter((chain) => chain !== chainKey));

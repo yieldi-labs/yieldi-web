@@ -67,7 +67,11 @@ export default function WalletModal() {
           chains={CHAINS}
           selectedChains={selectedChains}
           onChainSelect={setSelectedChains}
-          enableMultiselect={selectedWallet ? SUPPORTED_WALLETS[selectedWallet?.id].hasSupportMultichain : true}
+          enableMultiselect={
+            selectedWallet
+              ? SUPPORTED_WALLETS[selectedWallet?.id].hasSupportMultichain
+              : true
+          }
         />
         {!showHardwareWallets ? (
           <>

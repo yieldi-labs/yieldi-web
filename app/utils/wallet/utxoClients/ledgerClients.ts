@@ -13,7 +13,10 @@ import {
   defaultLtcParams,
   ClientLedger as LitecoinClient,
 } from "@xchainjs/xchain-litecoin";
-import { ClientLedger as DogeClient, defaultDogeParams } from "@xchainjs/xchain-doge";
+import {
+  ClientLedger as DogeClient,
+  defaultDogeParams,
+} from "@xchainjs/xchain-doge";
 import {
   BitgoBtcProviders,
   BitgoDogeProviders,
@@ -28,7 +31,11 @@ const commonConfig = {
   network: Network.Mainnet,
 };
 
-export type UTXOChain = ChainKey.BITCOIN | ChainKey.DOGECOIN | ChainKey.LITECOIN | ChainKey.BITCOINCASH;
+export type UTXOChain =
+  | ChainKey.BITCOIN
+  | ChainKey.DOGECOIN
+  | ChainKey.LITECOIN
+  | ChainKey.BITCOINCASH;
 
 export const getLedgerClient = (chain: UTXOChain, transport: Transport) => {
   switch (chain) {
@@ -38,7 +45,7 @@ export const getLedgerClient = (chain: UTXOChain, transport: Transport) => {
         ...commonConfig,
         dataProviders: [BitgoBtcProviders, BlockcypherBtcDataProviders],
         transport,
-        addressFormat: AddressFormat.P2WPKH
+        addressFormat: AddressFormat.P2WPKH,
       });
     case ChainKey.BITCOINCASH:
       return new BitcoinCashClient({
