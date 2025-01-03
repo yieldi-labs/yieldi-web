@@ -3,8 +3,9 @@ import { WalletState } from "../../interfaces";
 import { Client as BitcoinClient } from "@xchainjs/xchain-bitcoin";
 import * as Bitcoin from "bitcoinjs-lib";
 import { getLedgerClient, UTXOChain } from "../utxoClients/ledgerClients";
-import { WalletKey } from "../constants";
+import { ChainKey, WalletKey } from "../constants";
 import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
+import { getBftLedgerClient } from "../bftClients/ledgerClients";
 
 interface TransactionParams {
   from: string;
@@ -197,6 +198,13 @@ export const transferCosmos = async (
         params: [txDetails],
       });
     case WalletKey.LEDGER:
+      const client = getBftLedgerClient(ChainKey.GAIACHAIN, wallet.provider)
+      const hash = await client.transfer({
+        recipient: transferParams.recipient,
+        amount: baseAmount(transferParams.amount.amount, transferParams.amount.decimals),
+        memo: transferParams.memo,
+      })
+      return hash
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }
