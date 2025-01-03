@@ -1,7 +1,7 @@
 // chainUtils.ts
 
 import { SupportedChain } from "@/app/utils";
-import { ChainKey, ProviderKey } from "./wallet/constants";
+import { ChainKey } from "./wallet/constants";
 
 /**
  * Interface for inbound address data from THORChain
@@ -212,34 +212,6 @@ export const getChainKeyFromChain = (chain: string): ChainKey => {
     }
     default: {
       return ChainKey.ETHEREUM;
-    }
-  }
-};
-
-export const getProviderTypeFromChain = (chain: string): ProviderKey => {
-  switch (chain) {
-    case "AVAX":
-    case "BSC":
-    case "ETH": {
-      return ProviderKey.EVM;
-    }
-    case "BTC": {
-      return ProviderKey.BITCOIN;
-    }
-    case "LTC": {
-      return ProviderKey.LITECOIN;
-    }
-    case "BCH": {
-      return ProviderKey.BITCOINCASH;
-    }
-    case "DOGE": {
-      return ProviderKey.DOGECOIN;
-    }
-    case "THOR": {
-      return ProviderKey.THORCHAIN;
-    }
-    default: {
-      return ProviderKey.EVM;
     }
   }
 };

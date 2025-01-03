@@ -38,12 +38,18 @@ importers:
       '@walletconnect/universal-provider':
         specifier: ^2.17.3
         version: 2.17.3(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-avax':
+        specifier: ^1.0.12
+        version: 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@xchainjs/xchain-bitcoin':
         specifier: ^1.2.0
         version: 1.2.0
       '@xchainjs/xchain-bitcoincash':
         specifier: ^1.0.7
         version: 1.0.7
+      '@xchainjs/xchain-bsc':
+        specifier: ^1.0.12
+        version: 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@xchainjs/xchain-client':
         specifier: ^1.0.7
         version: 1.0.7
@@ -56,6 +62,9 @@ importers:
       '@xchainjs/xchain-doge':
         specifier: ^1.0.7
         version: 1.0.7
+      '@xchainjs/xchain-ethereum':
+        specifier: ^1.0.12
+        version: 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@xchainjs/xchain-litecoin':
         specifier: ^1.0.7
         version: 1.0.7
@@ -783,6 +792,9 @@ packages:
   '@ledgerhq/cryptoassets-evm-signatures@13.5.1':
     resolution: {integrity: sha512-ktyMb4nx6WGzHZPezfiITwZ5NJDa4twRoeGY81Xb/8JQqOtJprfpL89niJZk1teUT5rcwehGRoJJBl4B94Ea8Q==}
 
+  '@ledgerhq/cryptoassets@12.1.0':
+    resolution: {integrity: sha512-KF9J0X5qmEpHyAy9FphAmDsuodQN/UA3xmjqBhmBSELt/8tAUHHWNOeEV4TfuJLmk2HzXF730aH+61lvVvIUVw==}
+
   '@ledgerhq/devices@5.51.1':
     resolution: {integrity: sha512-4w+P0VkbjzEXC7kv8T1GJ/9AVaP9I6uasMZ/JcdwZBS3qwvKo5A5z9uGhP5c7TvItzcmPb44b5Mw2kT+WjUuAA==}
 
@@ -812,6 +824,9 @@ packages:
 
   '@ledgerhq/hw-app-cosmos@6.30.4':
     resolution: {integrity: sha512-YyX2zKHvCbT8aehLQPE0dNyT1Bl9ZmN0WabpE+RaKvBgmrid6Kp5CypvOTVRrKyv06E3yKlX06yM2EESlILlzA==}
+
+  '@ledgerhq/hw-app-eth@6.36.0':
+    resolution: {integrity: sha512-PnIUicutm3vGtsWMBPXvn24msFhfcxQc7iR+UOVK+h1pYVTkBwOOGvNMtPjrayfDIr+66eLtKBrQrAJpUDHF/A==}
 
   '@ledgerhq/hw-app-eth@6.40.3':
     resolution: {integrity: sha512-/hLv09xZmvqEEwZLiGoAdgdRsn1c+gsPte8BGgnKqjJC5GJYRtbBeRvGcxCvc+pmR+nRKg18BAw9FEhBIXQhiQ==}
@@ -1524,11 +1539,17 @@ packages:
   '@xchainjs/ledger-thorchain@0.2.0':
     resolution: {integrity: sha512-x4lY/H09rkPTcubn0D46bGa3n3c+VMYgehxrMIIzwKU8TJ6WS5cT8tvimheK11atcylgY81dSv88ffUqJIiBoQ==}
 
+  '@xchainjs/xchain-avax@1.0.12':
+    resolution: {integrity: sha512-4mAb847AKaR31BJf/otYiICIPQTmRT+Golw5UJXyal7z/y3XLzUPiWuuhgXkYRzIAPe3A7+RxvvfrKmJh+XDuA==}
+
   '@xchainjs/xchain-bitcoin@1.2.0':
     resolution: {integrity: sha512-9djkMeXUqjXZHPlCVMPAe/3v3RLIcXhf0lJWrqYsQAMWNY9umdBrTQLHjSk6qQ+VxYD0O8aprIazhAS272qKEA==}
 
   '@xchainjs/xchain-bitcoincash@1.0.7':
     resolution: {integrity: sha512-XW0j2a0gEBFwBaj/mj1419fUVQv4Uv5y23I8Sev3zV2tJOsLN/b6qorTWBTgOKOZyvFI8qpDpI1tXWSQRL7TrQ==}
+
+  '@xchainjs/xchain-bsc@1.0.12':
+    resolution: {integrity: sha512-qNgxB2R//qBGuXStbVVYKfCqACbqt5OH+rIdsREne3deBexiqTc4nnL9qRxec8qarRu3E+pgsffslL/8DZptMA==}
 
   '@xchainjs/xchain-client@1.0.7':
     resolution: {integrity: sha512-aDtPLV8h2DNXR4kKcuJRZDQBXOVySqNUChnUznVFg1h+VlhKWbyCAf1KwDcXrAEv61qZDe0us/+Fa/bec+ElvA==}
@@ -1553,6 +1574,15 @@ packages:
 
   '@xchainjs/xchain-doge@1.0.7':
     resolution: {integrity: sha512-AW4cbs8Izo8wAG3p/4Dhi/Chu8/mdSBWnbypOUtBElkBXh8i7qHr0i8Ql1Y5V7TZjlEqu87HaNcYaueg8dYEtA==}
+
+  '@xchainjs/xchain-ethereum@1.0.12':
+    resolution: {integrity: sha512-xL/bwG+LKAGEo5z5lt25Y/sA+giwDEOT/QL2SwV6tobdIIRcmVRRPHMFq2Ms2JR9f3ldlEIPu0Ywnc7febSgrQ==}
+
+  '@xchainjs/xchain-evm-providers@1.0.10':
+    resolution: {integrity: sha512-dQtPv76bMblLfUeCq2p9h0yIUgaUkFtRQSExPZuLNIVPGBvkWJ14FARvvESnWlUxuf+GvlUIpCmU5cJvTtocbg==}
+
+  '@xchainjs/xchain-evm@1.0.12':
+    resolution: {integrity: sha512-yeAIVw0p2xKGPUojDp/r1dRdKE0BeTD6KZwoaXOXFcAf82s9EaZu6Tcw1lk2gQvsm3iIXWVmhhqJHldHGsL8gw==}
 
   '@xchainjs/xchain-litecoin@1.0.7':
     resolution: {integrity: sha512-2LIq0+cSP2XQX4bwQkf5dfMV+E/mpx4of3W05zgulRY/wO9kdc8jqjB+3YSvkiCJIs6BddLrGn/rUnuV4cnq2A==}
@@ -6242,6 +6272,14 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
+  '@ledgerhq/cryptoassets@12.1.0':
+    dependencies:
+      axios: 1.7.7
+      bs58check: 2.1.2
+      invariant: 2.2.4
+    transitivePeerDependencies:
+      - debug
+
   '@ledgerhq/devices@5.51.1':
     dependencies:
       '@ledgerhq/errors': 5.50.0
@@ -6325,6 +6363,25 @@ snapshots:
       '@ledgerhq/errors': 6.19.1
       '@ledgerhq/hw-transport': 6.31.4
       bip32-path: 0.4.2
+
+  '@ledgerhq/hw-app-eth@6.36.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ethersproject/abi': 5.7.0
+      '@ethersproject/rlp': 5.7.0
+      '@ledgerhq/cryptoassets': 12.1.0
+      '@ledgerhq/domain-service': 1.2.10
+      '@ledgerhq/errors': 6.19.1
+      '@ledgerhq/evm-tools': 1.2.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@ledgerhq/hw-transport': 6.31.4
+      '@ledgerhq/hw-transport-mocker': 6.29.4
+      '@ledgerhq/logs': 6.12.0
+      '@ledgerhq/types-live': 6.52.4
+      axios: 1.7.7
+      bignumber.js: 9.1.2
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
 
   '@ledgerhq/hw-app-eth@6.40.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
@@ -7654,6 +7711,19 @@ snapshots:
       ripemd160: 2.0.2
       stream-browserify: 3.0.0
 
+  '@xchainjs/xchain-avax@1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ledgerhq/hw-transport': 6.30.6
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-evm': 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-evm-providers': 1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-util': 1.0.6
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
   '@xchainjs/xchain-bitcoin@1.2.0':
     dependencies:
       '@bitcoin-js/tiny-secp256k1-asmjs': 2.2.3
@@ -7684,6 +7754,19 @@ snapshots:
       coinselect: 3.1.12
     transitivePeerDependencies:
       - debug
+
+  '@xchainjs/xchain-bsc@1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ledgerhq/hw-transport': 6.30.6
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-evm': 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-evm-providers': 1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-util': 1.0.6
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
 
   '@xchainjs/xchain-client@1.0.7':
     dependencies:
@@ -7792,6 +7875,43 @@ snapshots:
       coinselect: 3.1.12
     transitivePeerDependencies:
       - debug
+
+  '@xchainjs/xchain-ethereum@1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ledgerhq/hw-transport': 6.30.6
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-evm': 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-evm-providers': 1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-util': 1.0.6
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
+  '@xchainjs/xchain-evm-providers@1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@supercharge/promise-pool': 2.4.0
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-util': 1.0.6
+      axios: 1.7.4
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
+  '@xchainjs/xchain-evm@1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ledgerhq/hw-app-eth': 6.36.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-evm-providers': 1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-util': 1.0.6
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
 
   '@xchainjs/xchain-litecoin@1.0.7':
     dependencies:
@@ -9026,8 +9146,8 @@ snapshots:
       '@typescript-eslint/parser': 8.10.0(eslint@8.57.1)(typescript@5.6.3)
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1)
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.0(eslint@8.57.1)
       eslint-plugin-react: 7.37.1(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.0.0-canary-7118f5dd7-20230705(eslint@8.57.1)
@@ -9046,37 +9166,37 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1):
+  eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.3.7
       enhanced-resolve: 5.17.1
       eslint: 8.57.1
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       fast-glob: 3.3.2
       get-tsconfig: 4.8.1
       is-bun-module: 1.2.1
       is-glob: 4.0.3
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
     transitivePeerDependencies:
       - '@typescript-eslint/parser'
       - eslint-import-resolver-node
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.10.0(eslint@8.57.1)(typescript@5.6.3)
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0)(eslint@8.57.1)
+      eslint-import-resolver-typescript: 3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -9087,7 +9207,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3)(eslint@8.57.1)
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.3(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.10.0(eslint@8.57.1)(typescript@5.6.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.15.1
       is-glob: 4.0.3
@@ -11272,7 +11392,7 @@ snapshots:
 
   secp256k1@4.0.4:
     dependencies:
-      elliptic: 6.6.0
+      elliptic: 6.6.1
       node-addon-api: 5.1.0
       node-gyp-build: 4.8.2
 

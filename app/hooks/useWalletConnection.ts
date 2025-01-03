@@ -21,28 +21,23 @@ export function useWalletConnection() {
     wallet: WalletType,
     chain: ChainType,
   ) => {
-    if (!wallet.chainConnect[chain.providerType])
+    if (!wallet.chainConnect[chain.providerType]) {
       throw new Error(`Chain ${chain.name} Not Supported!`);
+    } 
 
-    let connectedWallet;
-    switch (chain.providerType) {
-      case ProviderKey.EVM:
-        connectedWallet = await wallet.chainConnect[ProviderKey.EVM]!();
-        break;
-      case ProviderKey.COSMOS:
-        connectedWallet = await wallet.chainConnect[ProviderKey.COSMOS]!();
-        break;
-      default:
-        connectedWallet = await wallet.chainConnect[chain.providerType]!();
-    }
+    const connectedWallet = await wallet.chainConnect[chain.providerType]!();
+    
+    if (!wallet.chainConnect[chain.providerType]) {
+      throw new Error(`Error conection wallet for provider ${chain.providerType}`);
+    } 
 
-    if (!connectedWallet) return;
     const provider = connectedWallet.provider;
     let chainId = null;
 
-    // Only fetch chainId for EVM chains
     if (
-      chain.providerType === ProviderKey.EVM &&
+      (chain.providerType === ProviderKey.AVALANCHE ||
+      chain.providerType === ProviderKey.BINANCESMARTCHAIN ||
+      chain.providerType === ProviderKey.ETHEREUM) &&
       wallet.id !== WalletKey.LEDGER
     ) {
       chainId = await connectedWallet.provider.request({

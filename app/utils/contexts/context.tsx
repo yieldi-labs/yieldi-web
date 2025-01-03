@@ -121,7 +121,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             walletId: WalletKey.WALLETCONNECT,
             address: addressFilteredAccount,
             chainType: chain.name,
-            providerType: ProviderKey.EVM,
+            providerType: chain.providerType,
             chainId: chain.chainId,
           };
         });
@@ -142,12 +142,21 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.xfi) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true; // TODO: Not modify a constant exported from other file. We are merging react state with static definitions
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () =>
+              [ProviderKey.AVALANCHE]: async () =>
                 await connectWallet({
-                  id: "xdefi-evm",
+                  id: "xdefi-avax", // TODO: Remove literal IDs use enum composition
                   provider: window?.xfi?.ethereum,
                 }),
-
+              [ProviderKey.BINANCESMARTCHAIN]: async () =>
+                await connectWallet({
+                  id: "xdefi-bsc",
+                  provider: window?.xfi?.ethereum,
+                }),
+              [ProviderKey.ETHEREUM]: async () =>
+                await connectWallet({
+                  id: "xdefi-eth",
+                  provider: window?.xfi?.ethereum,
+                }),
               [ProviderKey.THORCHAIN]: async () =>
                 await connectWallet({
                   id: "xdefi-thorchain",
@@ -206,9 +215,19 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () =>
+              [ProviderKey.AVALANCHE]: async () =>
                 await connectWallet({
-                  id: "metamask-evm",
+                  id: "metamask-avax",
+                  provider: window.ethereum,
+                }),
+              [ProviderKey.BINANCESMARTCHAIN]: async () =>
+                await connectWallet({
+                  id: "metamask-bsc",
+                  provider: window.ethereum,
+                }),
+              [ProviderKey.ETHEREUM]: async () =>
+                await connectWallet({
+                  id: "metamask-eth",
                   provider: window.ethereum,
                 }),
             };
@@ -221,9 +240,19 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.okxwallet) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () =>
+              [ProviderKey.AVALANCHE]: async () =>
                 await connectWallet({
-                  id: "okx-evm",
+                  id: "okx-avax",
+                  provider: window.okxwallet,
+                }),
+              [ProviderKey.BINANCESMARTCHAIN]: async () =>
+                await connectWallet({
+                  id: "okx-bsc",
+                  provider: window.okxwallet,
+                }),
+              [ProviderKey.ETHEREUM]: async () =>
+                await connectWallet({
+                  id: "okx-eth",
                   provider: window.okxwallet,
                 }),
               [ProviderKey.BITCOIN]: async () =>
@@ -252,9 +281,19 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () =>
+              [ProviderKey.AVALANCHE]: async () =>
                 await connectWallet({
-                  id: "phantom-evm",
+                  id: "phantom-avax",
+                  provider: window.phantom?.ethereum,
+                }),
+              [ProviderKey.BINANCESMARTCHAIN]: async () =>
+                await connectWallet({
+                  id: "phantom-bsc",
+                  provider: window.phantom?.ethereum,
+                }),
+              [ProviderKey.ETHEREUM]: async () =>
+                await connectWallet({
+                  id: "phantom-eth",
                   provider: window.phantom?.ethereum,
                 }),
               [ProviderKey.BITCOIN]: async () =>
@@ -278,9 +317,19 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           if (window.vultisig) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.EVM]: async () =>
+              [ProviderKey.AVALANCHE]: async () =>
                 await connectWallet({
-                  id: "vultisig-evm",
+                  id: "vultisig-avax",
+                  provider: window.vultisig?.ethereum,
+                }),
+              [ProviderKey.BINANCESMARTCHAIN]: async () =>
+                await connectWallet({
+                  id: "vultisig-bsc",
+                  provider: window.vultisig?.ethereum,
+                }),
+              [ProviderKey.ETHEREUM]: async () =>
+                await connectWallet({
+                  id: "vultisig-eth",
                   provider: window.vultisig?.ethereum,
                 }),
               [ProviderKey.THORCHAIN]: async () =>
@@ -323,9 +372,19 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         case WalletKey.WALLETCONNECT:
           SUPPORTED_WALLETS[walletKey].isAvailable = true;
           SUPPORTED_WALLETS[walletKey].chainConnect = {
-            [ProviderKey.EVM]: async () =>
+            [ProviderKey.AVALANCHE]: async () =>
               await connectWallet({
-                id: "walletconnect-evm",
+                id: "walletconnect-avax",
+                provider: modal,
+              }),
+            [ProviderKey.BINANCESMARTCHAIN]: async () =>
+              await connectWallet({
+                id: "walletconnect-bsc",
+                provider: modal,
+              }),
+            [ProviderKey.ETHEREUM]: async () =>
+              await connectWallet({
+                id: "walletconnect-eth",
                 provider: modal,
               }),
           };
@@ -333,12 +392,26 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         case WalletKey.LEDGER:
           SUPPORTED_WALLETS[walletKey].isAvailable = true;
           SUPPORTED_WALLETS[walletKey].chainConnect = {
-            [ProviderKey.EVM]: async () => {
+            [ProviderKey.AVALANCHE]: async () => {
               const transport = await TransportWebUSB.create();
               return await connectWallet({
-                id: "ledger-evm", // TODO: Review this approach
+                id: "ledger-avax",
                 provider: transport,
-              });
+              })
+            },
+            [ProviderKey.BINANCESMARTCHAIN]: async () => {
+              const transport = await TransportWebUSB.create();
+              return await connectWallet({
+                id: "ledger-bsc",
+                provider: transport,
+              })
+            },
+            [ProviderKey.ETHEREUM]: async () => {
+              const transport = await TransportWebUSB.create();
+              return await connectWallet({
+                id: "ledger-eth",
+                provider: transport,
+              })
             },
             [ProviderKey.BITCOIN]: async () => {
               const transport = await TransportWebUSB.create();
