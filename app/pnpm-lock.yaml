@@ -38,21 +38,33 @@ importers:
       '@walletconnect/universal-provider':
         specifier: ^2.17.3
         version: 2.17.3(bufferutil@4.0.8)(encoding@0.1.13)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-avax':
+        specifier: ^1.0.12
+        version: 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@xchainjs/xchain-bitcoin':
         specifier: ^1.2.0
         version: 1.2.0
       '@xchainjs/xchain-bitcoincash':
         specifier: ^1.0.7
         version: 1.0.7
+      '@xchainjs/xchain-bsc':
+        specifier: ^1.0.12
+        version: 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@xchainjs/xchain-client':
         specifier: ^1.0.7
         version: 1.0.7
+      '@xchainjs/xchain-cosmos':
+        specifier: ^2.0.11
+        version: 2.0.11(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@xchainjs/xchain-crypto':
         specifier: ^0.3.6
         version: 0.3.6
       '@xchainjs/xchain-doge':
         specifier: ^1.0.7
         version: 1.0.7
+      '@xchainjs/xchain-ethereum':
+        specifier: ^1.0.12
+        version: 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@xchainjs/xchain-litecoin':
         specifier: ^1.0.7
         version: 1.0.7
@@ -420,6 +432,9 @@ packages:
   '@cosmjs/json-rpc@0.32.4':
     resolution: {integrity: sha512-/jt4mBl7nYzfJ2J/VJ+r19c92mUKF0Lt0JxM3MXEJl7wlwW5haHAWtzRujHkyYMXOwIR+gBqT2S0vntXVBRyhQ==}
 
+  '@cosmjs/ledger-amino@0.32.4':
+    resolution: {integrity: sha512-Toys0CD/4pBfYDQmhQbmWualKJT98YVPpE8Ilkx1Rx0dcFtm57Mg7R4BgRFiL1sSoff5RWcDY6Chqp6zwAbrjA==}
+
   '@cosmjs/math@0.32.4':
     resolution: {integrity: sha512-++dqq2TJkoB8zsPVYCvrt88oJWsy1vMOuSOKcdlnXuOA/ASheTJuYy4+oZlTQ3Fr8eALDLGGPhJI02W2HyAQaw==}
 
@@ -774,11 +789,20 @@ packages:
   '@ledgerhq/cryptoassets-evm-signatures@13.5.1':
     resolution: {integrity: sha512-ktyMb4nx6WGzHZPezfiITwZ5NJDa4twRoeGY81Xb/8JQqOtJprfpL89niJZk1teUT5rcwehGRoJJBl4B94Ea8Q==}
 
+  '@ledgerhq/cryptoassets@12.1.0':
+    resolution: {integrity: sha512-KF9J0X5qmEpHyAy9FphAmDsuodQN/UA3xmjqBhmBSELt/8tAUHHWNOeEV4TfuJLmk2HzXF730aH+61lvVvIUVw==}
+
+  '@ledgerhq/devices@5.51.1':
+    resolution: {integrity: sha512-4w+P0VkbjzEXC7kv8T1GJ/9AVaP9I6uasMZ/JcdwZBS3qwvKo5A5z9uGhP5c7TvItzcmPb44b5Mw2kT+WjUuAA==}
+
   '@ledgerhq/devices@8.4.4':
     resolution: {integrity: sha512-sz/ryhe/R687RHtevIE9RlKaV8kkKykUV4k29e7GAVwzHX1gqG+O75cu1NCJUHLbp3eABV5FdvZejqRUlLis9A==}
 
   '@ledgerhq/domain-service@1.2.10':
     resolution: {integrity: sha512-2VFcikYqzWGq6TJyJocC0UqwReD3qLx4ttk/LOr0z+eM1qHS9v32tGEkEzCNycV7wRs39fUi3xRrhs8RT780GA==}
+
+  '@ledgerhq/errors@5.50.0':
+    resolution: {integrity: sha512-gu6aJ/BHuRlpU7kgVpy2vcYk6atjB4iauP2ymF7Gk0ez0Y/6VSMVSJvubeEQN+IV60+OBK0JgeIZG7OiHaw8ow==}
 
   '@ledgerhq/errors@6.19.1':
     resolution: {integrity: sha512-75yK7Nnit/Gp7gdrJAz0ipp31CCgncRp+evWt6QawQEtQKYEDfGo10QywgrrBBixeRxwnMy1DP6g2oCWRf1bjw==}
@@ -792,8 +816,14 @@ packages:
   '@ledgerhq/hw-app-btc@10.4.3':
     resolution: {integrity: sha512-UAbq7AE2ApdIIpgkmVPxtI2r9YigE2VD+q8W4rZxvQbfnRAwBtKRxSn+1IVta6NgY1WzbqO1zKPDXvsY9ys47g==}
 
+  '@ledgerhq/hw-app-cosmos@6.29.6':
+    resolution: {integrity: sha512-WjH3GMe4ppa60iwABGFx57vrvwaRYRQlsGM4kQDc64k1ZxTLv7nZ1oNOj1EgZheLfRUgCVXvntr4CmgrADyD+A==}
+
   '@ledgerhq/hw-app-cosmos@6.30.4':
     resolution: {integrity: sha512-YyX2zKHvCbT8aehLQPE0dNyT1Bl9ZmN0WabpE+RaKvBgmrid6Kp5CypvOTVRrKyv06E3yKlX06yM2EESlILlzA==}
+
+  '@ledgerhq/hw-app-eth@6.36.0':
+    resolution: {integrity: sha512-PnIUicutm3vGtsWMBPXvn24msFhfcxQc7iR+UOVK+h1pYVTkBwOOGvNMtPjrayfDIr+66eLtKBrQrAJpUDHF/A==}
 
   '@ledgerhq/hw-app-eth@6.40.3':
     resolution: {integrity: sha512-/hLv09xZmvqEEwZLiGoAdgdRsn1c+gsPte8BGgnKqjJC5GJYRtbBeRvGcxCvc+pmR+nRKg18BAw9FEhBIXQhiQ==}
@@ -816,6 +846,9 @@ packages:
   '@ledgerhq/hw-transport-webusb@6.29.4':
     resolution: {integrity: sha512-HoGF1LlBT9HEGBQy2XeCHrFdv/FEOZU0+J+yfKcgAQIAiASr2MLvdzwoJbUS8h6Gn+vc+/BjzBSO3JNn7Loqbg==}
 
+  '@ledgerhq/hw-transport@5.51.1':
+    resolution: {integrity: sha512-6wDYdbWrw9VwHIcoDnqWBaDFyviyjZWv6H9vz9Vyhe4Qd7TIFmbTl/eWs6hZvtZBza9K8y7zD8ChHwRI4s9tSw==}
+
   '@ledgerhq/hw-transport@6.30.1':
     resolution: {integrity: sha512-Xeeo4nt33g5Fsp3CdsPvcc2Uk7dwYeKRSlSFLWcYAAKprf/PmxgNekhke1eaNU/wLoeLOWhY2Cki8F8w9nLMdQ==}
 
@@ -827,6 +860,9 @@ packages:
 
   '@ledgerhq/live-env@2.4.0':
     resolution: {integrity: sha512-hXkaGPdMZUHbbjfezMKfqUa8LA5gnXfYsnGdQcXorRhdRBqc7w5xtYSlc53Vos88mbDij7iL7NrhDXF//IFd5Q==}
+
+  '@ledgerhq/logs@5.50.0':
+    resolution: {integrity: sha512-swKHYCOZUGyVt4ge0u8a7AwNcA//h4nx5wIi0sruGye1IJ5Cva0GyK9L2/WdX+kWVTKp92ZiEo1df31lrWGPgA==}
 
   '@ledgerhq/logs@6.12.0':
     resolution: {integrity: sha512-ExDoj1QV5eC6TEbMdLUMMk9cfvNKhhv5gXol4SmULRVCx/3iyCPhJ74nsb3S0Vb+/f+XujBEj3vQn5+cwS0fNA==}
@@ -1500,11 +1536,17 @@ packages:
   '@xchainjs/ledger-thorchain@0.2.0':
     resolution: {integrity: sha512-x4lY/H09rkPTcubn0D46bGa3n3c+VMYgehxrMIIzwKU8TJ6WS5cT8tvimheK11atcylgY81dSv88ffUqJIiBoQ==}
 
+  '@xchainjs/xchain-avax@1.0.12':
+    resolution: {integrity: sha512-4mAb847AKaR31BJf/otYiICIPQTmRT+Golw5UJXyal7z/y3XLzUPiWuuhgXkYRzIAPe3A7+RxvvfrKmJh+XDuA==}
+
   '@xchainjs/xchain-bitcoin@1.2.0':
     resolution: {integrity: sha512-9djkMeXUqjXZHPlCVMPAe/3v3RLIcXhf0lJWrqYsQAMWNY9umdBrTQLHjSk6qQ+VxYD0O8aprIazhAS272qKEA==}
 
   '@xchainjs/xchain-bitcoincash@1.0.7':
     resolution: {integrity: sha512-XW0j2a0gEBFwBaj/mj1419fUVQv4Uv5y23I8Sev3zV2tJOsLN/b6qorTWBTgOKOZyvFI8qpDpI1tXWSQRL7TrQ==}
+
+  '@xchainjs/xchain-bsc@1.0.12':
+    resolution: {integrity: sha512-qNgxB2R//qBGuXStbVVYKfCqACbqt5OH+rIdsREne3deBexiqTc4nnL9qRxec8qarRu3E+pgsffslL/8DZptMA==}
 
   '@xchainjs/xchain-client@1.0.7':
     resolution: {integrity: sha512-aDtPLV8h2DNXR4kKcuJRZDQBXOVySqNUChnUznVFg1h+VlhKWbyCAf1KwDcXrAEv61qZDe0us/+Fa/bec+ElvA==}
@@ -1512,8 +1554,14 @@ packages:
   '@xchainjs/xchain-client@1.0.8':
     resolution: {integrity: sha512-qoxdvdPAX+BLkzhCyGRPBZumGlMYi/wB4z+dFMz9ERVeIrlE44jL0266OeZy6H5MBA6Leb3fNRcI/u69TUpatQ==}
 
+  '@xchainjs/xchain-cosmos-sdk@1.0.10':
+    resolution: {integrity: sha512-iHOlAXPENAEDrjmYSFbgLkHSM+fajyqXZdSZt3NN3lQc4wmmP7ooQnzPVJN9oe3Snw+xJQrvSzdtsbCINLegQg==}
+
   '@xchainjs/xchain-cosmos-sdk@1.0.9':
     resolution: {integrity: sha512-Fp/h8Umy5yic3mQ5HW12T4/7xA5NntvDa8dDwy326t0WzbSixVzzp3JNUmb2suM/CSZZGAcp/VdkNbBA5av+PQ==}
+
+  '@xchainjs/xchain-cosmos@2.0.11':
+    resolution: {integrity: sha512-m/50NQsC/YkVnicZ0GSNgN0+DGaX2uVEpM3D+0+kNwh311LLMC3nl68flHCufKrqIEvPdul2cQNoJrjg6wUVTg==}
 
   '@xchainjs/xchain-crypto@0.3.6':
     resolution: {integrity: sha512-5GoY0/Ukd+4C3c1/Ljku4dDekBG4a8Kxk2rRg8Y+Cz4ulKILtS2Atd27mjR9QjdIKm0zXZ2Ddius/lWWFkJAnA==}
@@ -1523,6 +1571,15 @@ packages:
 
   '@xchainjs/xchain-doge@1.0.7':
     resolution: {integrity: sha512-AW4cbs8Izo8wAG3p/4Dhi/Chu8/mdSBWnbypOUtBElkBXh8i7qHr0i8Ql1Y5V7TZjlEqu87HaNcYaueg8dYEtA==}
+
+  '@xchainjs/xchain-ethereum@1.0.12':
+    resolution: {integrity: sha512-xL/bwG+LKAGEo5z5lt25Y/sA+giwDEOT/QL2SwV6tobdIIRcmVRRPHMFq2Ms2JR9f3ldlEIPu0Ywnc7febSgrQ==}
+
+  '@xchainjs/xchain-evm-providers@1.0.10':
+    resolution: {integrity: sha512-dQtPv76bMblLfUeCq2p9h0yIUgaUkFtRQSExPZuLNIVPGBvkWJ14FARvvESnWlUxuf+GvlUIpCmU5cJvTtocbg==}
+
+  '@xchainjs/xchain-evm@1.0.12':
+    resolution: {integrity: sha512-yeAIVw0p2xKGPUojDp/r1dRdKE0BeTD6KZwoaXOXFcAf82s9EaZu6Tcw1lk2gQvsm3iIXWVmhhqJHldHGsL8gw==}
 
   '@xchainjs/xchain-litecoin@1.0.7':
     resolution: {integrity: sha512-2LIq0+cSP2XQX4bwQkf5dfMV+E/mpx4of3W05zgulRY/wO9kdc8jqjB+3YSvkiCJIs6BddLrGn/rUnuV4cnq2A==}
@@ -3417,6 +3474,9 @@ packages:
     resolution: {integrity: sha512-MbjN408fEndfiQXbFQ1vnd+1NoLDsnQW41410oQBXiyXDMYH5z505juWa4KUE1LqxRC7DgOgZDbKLxHIwm27hA==}
     engines: {node: '>=0.10'}
 
+  ledger-cosmos-js@2.1.8:
+    resolution: {integrity: sha512-Gl7SWMq+3R9OTkF1hLlg5+1geGOmcHX9OdS+INDsGNxSiKRWlsWCvQipGoDnRIQ6CPo2i/Ze58Dw0Mt/l3UYyA==}
+
   leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}
     engines: {node: '>=6'}
@@ -4225,6 +4285,10 @@ packages:
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
+
+  rxjs@6.6.7:
+    resolution: {integrity: sha512-hTdwr+7yYNIT5n4AMYp85KA6yw2Va0FLa3Rguvbpa4W3I5xynaBZo41cM3XM+4Q6fRMj3sBYIR1VAmZMXYJvRQ==}
+    engines: {npm: '>=2.0.0'}
 
   rxjs@7.8.1:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
@@ -5350,6 +5414,16 @@ snapshots:
       '@cosmjs/stream': 0.32.4
       xstream: 11.14.0
 
+  '@cosmjs/ledger-amino@0.32.4':
+    dependencies:
+      '@cosmjs/amino': 0.32.4
+      '@cosmjs/crypto': 0.32.4
+      '@cosmjs/encoding': 0.32.4
+      '@cosmjs/math': 0.32.4
+      '@cosmjs/utils': 0.32.4
+      ledger-cosmos-js: 2.1.8
+      semver: 7.6.3
+
   '@cosmjs/math@0.32.4':
     dependencies:
       bn.js: 5.2.1
@@ -6190,6 +6264,21 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
+  '@ledgerhq/cryptoassets@12.1.0':
+    dependencies:
+      axios: 1.7.7
+      bs58check: 2.1.2
+      invariant: 2.2.4
+    transitivePeerDependencies:
+      - debug
+
+  '@ledgerhq/devices@5.51.1':
+    dependencies:
+      '@ledgerhq/errors': 5.50.0
+      '@ledgerhq/logs': 5.50.0
+      rxjs: 6.6.7
+      semver: 7.6.3
+
   '@ledgerhq/devices@8.4.4':
     dependencies:
       '@ledgerhq/errors': 6.19.1
@@ -6208,6 +6297,8 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
     transitivePeerDependencies:
       - debug
+
+  '@ledgerhq/errors@5.50.0': {}
 
   '@ledgerhq/errors@6.19.1': {}
 
@@ -6253,11 +6344,36 @@ snapshots:
       tiny-secp256k1: 1.1.6
       varuint-bitcoin: 1.1.2
 
+  '@ledgerhq/hw-app-cosmos@6.29.6':
+    dependencies:
+      '@ledgerhq/errors': 6.19.1
+      '@ledgerhq/hw-transport': 6.31.4
+      bip32-path: 0.4.2
+
   '@ledgerhq/hw-app-cosmos@6.30.4':
     dependencies:
       '@ledgerhq/errors': 6.19.1
       '@ledgerhq/hw-transport': 6.31.4
       bip32-path: 0.4.2
+
+  '@ledgerhq/hw-app-eth@6.36.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ethersproject/abi': 5.7.0
+      '@ethersproject/rlp': 5.7.0
+      '@ledgerhq/cryptoassets': 12.1.0
+      '@ledgerhq/domain-service': 1.2.10
+      '@ledgerhq/errors': 6.19.1
+      '@ledgerhq/evm-tools': 1.2.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@ledgerhq/hw-transport': 6.31.4
+      '@ledgerhq/hw-transport-mocker': 6.29.4
+      '@ledgerhq/logs': 6.12.0
+      '@ledgerhq/types-live': 6.52.4
+      axios: 1.7.7
+      bignumber.js: 9.1.2
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
 
   '@ledgerhq/hw-app-eth@6.40.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
@@ -6325,6 +6441,12 @@ snapshots:
       '@ledgerhq/hw-transport': 6.31.4
       '@ledgerhq/logs': 6.12.0
 
+  '@ledgerhq/hw-transport@5.51.1':
+    dependencies:
+      '@ledgerhq/devices': 5.51.1
+      '@ledgerhq/errors': 5.50.0
+      events: 3.3.0
+
   '@ledgerhq/hw-transport@6.30.1':
     dependencies:
       '@ledgerhq/devices': 8.4.4
@@ -6350,6 +6472,8 @@ snapshots:
     dependencies:
       rxjs: 7.8.1
       utility-types: 3.11.0
+
+  '@ledgerhq/logs@5.50.0': {}
 
   '@ledgerhq/logs@6.12.0': {}
 
@@ -7579,6 +7703,19 @@ snapshots:
       ripemd160: 2.0.2
       stream-browserify: 3.0.0
 
+  '@xchainjs/xchain-avax@1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ledgerhq/hw-transport': 6.30.6
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-evm': 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-evm-providers': 1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-util': 1.0.6
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
   '@xchainjs/xchain-bitcoin@1.2.0':
     dependencies:
       '@bitcoin-js/tiny-secp256k1-asmjs': 2.2.3
@@ -7610,6 +7747,19 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
+  '@xchainjs/xchain-bsc@1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ledgerhq/hw-transport': 6.30.6
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-evm': 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-evm-providers': 1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-util': 1.0.6
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
   '@xchainjs/xchain-client@1.0.7':
     dependencies:
       '@xchainjs/xchain-crypto': 0.3.6
@@ -7626,6 +7776,24 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
+  '@xchainjs/xchain-cosmos-sdk@1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@cosmjs/crypto': 0.32.4
+      '@cosmjs/encoding': 0.32.4
+      '@cosmjs/proto-signing': 0.32.4
+      '@cosmjs/stargate': 0.32.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@scure/base': 1.1.5
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-crypto': 0.3.7
+      '@xchainjs/xchain-util': 1.0.6
+      bech32: 1.1.4
+      bip32: 2.0.6
+      secp256k1: 5.0.1
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
   '@xchainjs/xchain-cosmos-sdk@1.0.9(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
       '@cosmjs/crypto': 0.32.4
@@ -7638,6 +7806,30 @@ snapshots:
       '@xchainjs/xchain-util': 1.0.6
       bech32: 1.1.4
       bip32: 2.0.6
+      secp256k1: 5.0.1
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
+  '@xchainjs/xchain-cosmos@2.0.11(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@cosmjs/amino': 0.32.4
+      '@cosmjs/encoding': 0.32.4
+      '@cosmjs/ledger-amino': 0.32.4
+      '@cosmjs/proto-signing': 0.32.4
+      '@ledgerhq/hw-app-cosmos': 6.29.6
+      '@ledgerhq/hw-transport': 6.30.6
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-cosmos-sdk': 1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-crypto': 0.3.7
+      '@xchainjs/xchain-util': 1.0.6
+      axios: 1.7.4
+      bech32: 1.1.4
+      bignumber.js: 9.0.0
+      bip32: 2.0.6
+      cosmjs-types: 0.9.0
+      protobufjs: 6.11.4
       secp256k1: 5.0.1
     transitivePeerDependencies:
       - bufferutil
@@ -7675,6 +7867,43 @@ snapshots:
       coinselect: 3.1.12
     transitivePeerDependencies:
       - debug
+
+  '@xchainjs/xchain-ethereum@1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ledgerhq/hw-transport': 6.30.6
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-evm': 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-evm-providers': 1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-util': 1.0.6
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
+  '@xchainjs/xchain-evm-providers@1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@supercharge/promise-pool': 2.4.0
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-util': 1.0.6
+      axios: 1.7.4
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
+  '@xchainjs/xchain-evm@1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ledgerhq/hw-app-eth': 6.36.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-client': 1.0.8
+      '@xchainjs/xchain-evm-providers': 1.0.10(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-util': 1.0.6
+      ethers: 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
 
   '@xchainjs/xchain-litecoin@1.0.7':
     dependencies:
@@ -10245,6 +10474,13 @@ snapshots:
     dependencies:
       language-subtag-registry: 0.3.23
 
+  ledger-cosmos-js@2.1.8:
+    dependencies:
+      '@babel/runtime': 7.25.7
+      '@ledgerhq/hw-transport': 5.51.1
+      bech32: 1.1.4
+      ripemd160: 2.0.2
+
   leven@3.1.0: {}
 
   levn@0.4.1:
@@ -11090,6 +11326,10 @@ snapshots:
     dependencies:
       queue-microtask: 1.2.3
 
+  rxjs@6.6.7:
+    dependencies:
+      tslib: 1.14.1
+
   rxjs@7.8.1:
     dependencies:
       tslib: 2.8.0
@@ -11140,7 +11380,7 @@ snapshots:
 
   secp256k1@4.0.4:
     dependencies:
-      elliptic: 6.6.0
+      elliptic: 6.6.1
       node-addon-api: 5.1.0
       node-gyp-build: 4.8.2
 
