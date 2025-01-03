@@ -1,15 +1,12 @@
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useState } from "react";
 import { WalletState } from "@/utils/interfaces";
-import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
+import { transferCosmos } from "@/utils/wallet/handlers/handleTransfer";
 
 interface UseCosmosProps {
   wallet?: WalletState | null;
 }
 
 export function useCosmos({ wallet }: UseCosmosProps) {
-  const chainId = "cosmoshub-4"; // TODO: Receive from chain info.
-  const keplr = wallet?.provider;
-  const rpcUrl = process.env.NEXT_PUBLIC_COSMOS_RPC_URL || "";
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -17,45 +14,26 @@ export function useCosmos({ wallet }: UseCosmosProps) {
     async (to: string, amount: number, memo: string) => {
       setError(null);
       setLoading(true);
+      
       try {
-        if (keplr.isVultiConnect) {
-          const txDetails = {
-            from: wallet!.address,
-            to,
-            value: amount,
-            data: memo,
-          };
-          await keplr.request({
-            method: "send_transaction",
-            params: [txDetails],
-          });
-        } else {
-          await keplr.enable(chainId);
-          const offlineSigner = keplr.getOfflineSigner(chainId);
 
-          const gasPrice = GasPrice.fromString("0.025uatom");
-          const cosmJS = await SigningStargateClient.connectWithSigner(
-            rpcUrl,
-            offlineSigner,
-            {
-              gasPrice,
-            },
-          );
-          const coin = {
-            denom: "uatom",
-            amount: amount + "",
-          };
-
-          const result = await cosmJS.sendTokens(
-            wallet!.address,
-            to,
-            [coin],
-            "auto",
-            memo,
-          );
-          return result.transactionHash;
+        if (!wallet) {
+          throw Error('No wallet initialized')
         }
+
+        const transferParams = {
+            from: wallet!.address,
+            recipient: to,
+            amount: {
+              amount: amount,
+              decimals: 6,
+            },
+            memo: memo,
+        }
+
+        return await transferCosmos(wallet, transferParams)
       } catch (err) {
+        console.error(err)
         const message =
           err instanceof Error ? err.message : "Failed to perform transfer";
         setError(message);
@@ -63,7 +41,7 @@ export function useCosmos({ wallet }: UseCosmosProps) {
         setLoading(false);
       }
     },
-    [keplr, chainId],
+    [wallet],
   );
 
   return { transfer, error, loading };

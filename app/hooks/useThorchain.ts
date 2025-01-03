@@ -2,23 +2,15 @@ import { useMemo, useCallback, useState } from "react";
 import {
   Client as ThorchainClient,
   defaultClientConfig,
+  AssetRuneNative as AssetRUNE
 } from "@xchainjs/xchain-thorchain";
 import {
   assetToBase,
   assetAmount,
-  Asset,
-  AssetType,
 } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
-
-// Define RUNE asset
-const AssetRUNE: Asset = {
-  chain: "THOR",
-  symbol: "RUNE",
-  ticker: "RUNE",
-  type: AssetType.NATIVE,
-};
+import { depositThorchain } from "@/utils/wallet/handlers/handleTransfer";
 
 interface UseThorchainProps {
   wallet?: WalletState | null;
@@ -118,7 +110,7 @@ export function useThorchain({ wallet }: UseThorchainProps) {
         setLoading(false);
       }
     },
-    [wallet, getFees],
+    [wallet],
   );
 
   return {
