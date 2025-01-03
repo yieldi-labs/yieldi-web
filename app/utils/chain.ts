@@ -1,7 +1,8 @@
 // chainUtils.ts
 
 import { SupportedChain } from "@/app/utils";
-import { ChainKey } from "./wallet/constants";
+import { ChainKey, SUPPORTED_WALLETS } from "./wallet/constants";
+import { WalletState } from "./interfaces";
 
 /**
  * Interface for inbound address data from THORChain
@@ -66,10 +67,17 @@ export const validateInboundAddress = (inbound: InboundAddress) => {
  * Switch EVM chain if necessary
  */
 export const switchEvmChain = async (
-  provider: any,
+  wallet: WalletState,
   targetChain: string,
 ): Promise<void> => {
-  const currentChainId = await provider.request({ method: "eth_chainId" });
+
+  const selectedWallet = SUPPORTED_WALLETS[wallet.walletId]
+
+  if (!selectedWallet.hasSupportMultichain) {
+    return
+  }
+  
+  const currentChainId = await wallet.provider.request({ method: "eth_chainId" });
   const targetChainId = CHAIN_ID_MAP[targetChain.toLowerCase()];
 
   if (!targetChainId) {
@@ -77,7 +85,7 @@ export const switchEvmChain = async (
   }
 
   if (parseInt(currentChainId, 16) !== targetChainId) {
-    await provider.request({
+    await wallet.provider.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: `0x${targetChainId.toString(16)}` }],
     });

@@ -122,7 +122,6 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             address: addressFilteredAccount,
             chainType: chain.name,
             providerType: chain.providerType,
-            chainId: chain.chainId,
           };
         });
 

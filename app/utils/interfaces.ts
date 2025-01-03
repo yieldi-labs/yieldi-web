@@ -50,7 +50,6 @@ export interface WalletState {
   providerType: ProviderKey;
   chainType: ChainKey;
   walletId: WalletKey;
-  chainId?: string;
 }
 
 export interface ConnectedWalletsState {

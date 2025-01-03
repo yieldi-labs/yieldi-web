@@ -1,4 +1,3 @@
-import Eth from "@ledgerhq/hw-app-eth";
 import Cosmos from "@ledgerhq/hw-app-cosmos";
 import { getLedgerClient } from "../utxoClients/ledgerClients";
 import { ChainKey } from "../constants";

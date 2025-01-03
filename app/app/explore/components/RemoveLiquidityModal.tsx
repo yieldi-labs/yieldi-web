@@ -98,6 +98,7 @@ export default function RemoveLiquidityModal({
 
       const hash = await removeLiquidity({
         asset: pool.asset,
+        assetDecimals: Number(pool.nativeDecimal),
         percentage,
         address: selectedWallet.address,
       });
