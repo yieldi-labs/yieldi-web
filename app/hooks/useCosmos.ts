@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
 import { WalletState } from "@/utils/interfaces";
 import { transferCosmos } from "@/utils/wallet/handlers/handleTransfer";
+import { baseAmount } from "@xchainjs/xchain-util";
+import { COSMOS_DECIMAL } from "@xchainjs/xchain-cosmos";
 
 interface UseCosmosProps {
   wallet?: WalletState | null;
@@ -24,10 +26,7 @@ export function useCosmos({ wallet }: UseCosmosProps) {
         const transferParams = {
             from: wallet!.address,
             recipient: to,
-            amount: {
-              amount: amount,
-              decimals: 6,
-            },
+            amount: baseAmount(amount, COSMOS_DECIMAL),
             memo: memo,
         }
 

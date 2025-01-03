@@ -2,7 +2,8 @@ import { useMemo, useCallback, useState } from "react";
 import {
   Client as ThorchainClient,
   defaultClientConfig,
-  AssetRuneNative as AssetRUNE
+  AssetRuneNative as AssetRUNE,
+  RUNE_DECIMAL
 } from "@xchainjs/xchain-thorchain";
 import {
   assetToBase,
@@ -57,7 +58,6 @@ export function useThorchain({ wallet }: UseThorchainProps) {
   }, [client]);
 
   // Transfer using wallet provider
-  const RUNE_DECIMALS = 8;
   const deposit = useCallback(
     async ({
       pool,
@@ -75,14 +75,11 @@ export function useThorchain({ wallet }: UseThorchainProps) {
 
       try {
         const from = wallet.address;
-        const finalAmount = assetToBase(assetAmount(amount, RUNE_DECIMALS));
+        const finalAmount = assetToBase(assetAmount(amount, RUNE_DECIMAL));
         const depositParams = {
           asset: AssetRUNE,
           from,
-          amount: {
-            amount: finalAmount.amount().toNumber(),
-            decimals: RUNE_DECIMALS,
-          },
+          amount: finalAmount,
           memo,
         };
 

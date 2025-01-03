@@ -12,9 +12,20 @@ import {
   baseAmount,
   baseToAsset,
 } from "@xchainjs/xchain-util";
-import { initialWalletTokensData } from "@/utils/wallet/balances";
 import { useQuery } from "@tanstack/react-query";
 import { getBalancePerChainAndAddress } from "@/ctrl/client";
+
+const initialWalletTokensData: WalletTokensData = {
+  [ChainKey.AVALANCHE]: {},
+  [ChainKey.BITCOIN]: {},
+  [ChainKey.BITCOINCASH]: {},
+  [ChainKey.BSCCHAIN]: {},
+  [ChainKey.DOGECOIN]: {},
+  [ChainKey.ETHEREUM]: {},
+  [ChainKey.GAIACHAIN]: {},
+  [ChainKey.LITECOIN]: {},
+  [ChainKey.THORCHAIN]: {},
+};
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
   const fetchWalletTokens = async () => {

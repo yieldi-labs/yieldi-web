@@ -185,6 +185,7 @@ export default function AddLiquidityModal({
 
       const hash = await addLiquidity({
         asset: pool.asset,
+        assetDecimals: Number(pool.nativeDecimal),
         amount: parsedAssetAmount,
         runeAmount: parsedRuneAmount,
         pairedAddress,

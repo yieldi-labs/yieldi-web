@@ -32,23 +32,10 @@ export function useWalletConnection() {
     } 
 
     const provider = connectedWallet.provider;
-    let chainId = null;
-
-    if (
-      (chain.providerType === ProviderKey.AVALANCHE ||
-      chain.providerType === ProviderKey.BINANCESMARTCHAIN ||
-      chain.providerType === ProviderKey.ETHEREUM) &&
-      wallet.id !== WalletKey.LEDGER
-    ) {
-      chainId = await connectedWallet.provider.request({
-        method: "eth_chainId",
-      });
-    }
 
     return {
       provider,
-      address: connectedWallet.address,
-      chainId,
+      address: connectedWallet.address
     };
   };
 
@@ -59,7 +46,6 @@ export function useWalletConnection() {
     chainType: ChainKey,
     provider: any,
     address: string,
-    chainId?: string,
   ): ConnectedWalletsState => {
     return {
       ...prevState,
@@ -69,7 +55,6 @@ export function useWalletConnection() {
         address,
         chainType,
         providerType,
-        chainId,
       },
     };
   };
@@ -134,7 +119,6 @@ export function useWalletConnection() {
         chain.name,
         connection.provider,
         connection.address,
-        connection.chainId,
       );
     }
 

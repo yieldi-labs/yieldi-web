@@ -34,6 +34,10 @@ export const getEvmLedgerClient = (chain: ChainKey, transport: Transport) => {
       return new AvalancheLedgerClient({
         ...defaultAvaxParams,
         ...commonConfig,
+        feeBounds: {
+          lower: 1000000000,
+          upper: defaultAvaxParams.feeBounds?.upper as number,
+        },
         transport,
       });
     case ChainKey.BSCCHAIN:
