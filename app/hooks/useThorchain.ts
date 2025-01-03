@@ -2,23 +2,15 @@ import { useMemo, useCallback, useState } from "react";
 import {
   Client as ThorchainClient,
   defaultClientConfig,
+  AssetRuneNative as AssetRUNE
 } from "@xchainjs/xchain-thorchain";
 import {
   assetToBase,
   assetAmount,
-  Asset,
-  AssetType,
 } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
-
-// Define RUNE asset
-const AssetRUNE: Asset = {
-  chain: "THOR",
-  symbol: "RUNE",
-  ticker: "RUNE",
-  type: AssetType.NATIVE,
-};
+import { depositThorchain } from "@/utils/wallet/handlers/handleTransfer";
 
 interface UseThorchainProps {
   wallet?: WalletState | null;
@@ -94,22 +86,9 @@ export function useThorchain({ wallet }: UseThorchainProps) {
           memo,
         };
 
-        return new Promise<string>((resolve, reject) => {
-          wallet.provider.request(
-            {
-              method: "deposit",
-              params: [depositParams],
-            },
-            (error: Error | null, result: TxResult | null) => {
-              if (error) {
-                setError(error.message);
-                reject(error);
-              } else {
-                resolve(result?.hash || "");
-              }
-            },
-          );
-        });
+        const hash = await depositThorchain(wallet, depositParams)
+
+        return hash
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : "Transfer failed";
         setError(errMsg);
@@ -118,7 +97,7 @@ export function useThorchain({ wallet }: UseThorchainProps) {
         setLoading(false);
       }
     },
-    [wallet, getFees],
+    [wallet],
   );
 
   return {
