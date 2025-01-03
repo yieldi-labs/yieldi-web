@@ -2,6 +2,7 @@ import Eth from "@ledgerhq/hw-app-eth";
 import Cosmos from "@ledgerhq/hw-app-cosmos";
 import { getLedgerClient } from "../utxoClients/ledgerClients";
 import { ChainKey } from "../constants";
+import { getBftLedgerClient } from "../bftClients/ledgerClients";
 
 export const connectWallet = async (wallet: any): Promise<any> => {
   let accounts: any;
@@ -177,14 +178,11 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         address: thorchainAddress,
       };
     case "ledger-cosmos":
-      const cosmos = new Cosmos(wallet.provider);
-      const { address: cosmosAddress } = await cosmos.getAddress(
-        "44'/118'/0'/0",
-        "cosmos",
-      );
+      const clientCosmos = getBftLedgerClient(ChainKey.GAIACHAIN, wallet.provider);
+      const addressCosmos = await clientCosmos.getAddressAsync();
       return {
         provider: wallet.provider,
-        address: cosmosAddress,
+        address: addressCosmos,
       };
     default:
       console.warn(`Unknown UTXO wallet: ${wallet.id}`);
