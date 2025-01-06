@@ -7,7 +7,7 @@ interface ComponentProps {
   strokeWidth?: number;
 }
 
-const Component: FC<ComponentProps> = ({
+const QrCodeIcon: FC<ComponentProps> = ({
   size = 24,
   strokeColor = "white",
   strokeWidth = 2,
@@ -24,4 +24,4 @@ const Component: FC<ComponentProps> = ({
   </svg>
 );
 
-export default Component;
+export default QrCodeIcon;
