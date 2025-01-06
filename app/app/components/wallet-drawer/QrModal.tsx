@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { Copy } from "@/svg/icons";
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
