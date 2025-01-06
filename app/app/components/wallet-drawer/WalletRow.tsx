@@ -37,7 +37,7 @@ export default function WalletRow({
       >
         <Copy strokeColor="#627eea" size={20} />
       </span>
-      <span 
+      <span
         className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
         onClick={() => setIsQrOpen(true)}
       >
@@ -63,14 +63,13 @@ export default function WalletRow({
           <Exit strokeColor="#ff6656" size={20} />
         </span>
       )}
-      {
-        isQrOpen && 
-        <QRCodeModal 
-          title={name} 
-          address={wallet.address} 
-          onClose={() => setIsQrOpen(false)} 
+      {isQrOpen && (
+        <QRCodeModal
+          title={name}
+          address={wallet.address}
+          onClose={() => setIsQrOpen(false)}
         />
-      }
+      )}
     </div>
   );
 }

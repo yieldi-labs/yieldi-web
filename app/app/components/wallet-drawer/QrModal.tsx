@@ -21,7 +21,12 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
     <Modal title={title} onClose={onClose}>
       <div className="flex flex-col items-center">
         <div className="bg-white p-2 rounded-md mb-4">
-          <QRCodeSVG value={address} size={200} bgColor="#ffffff" fgColor="#000000" />
+          <QRCodeSVG
+            value={address}
+            size={200}
+            bgColor="#ffffff"
+            fgColor="#000000"
+          />
         </div>
         <div className="flex items-center gap-2 text-gray-700 text-sm mb-2">
           <span className="truncate">{address}</span>
