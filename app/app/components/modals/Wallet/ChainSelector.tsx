@@ -10,19 +10,25 @@ interface ChainSelectorProps {
   selectedChains: ChainType[];
   onChainSelect: (chains: ChainType[]) => void;
   blockUnselect: boolean;
+  enableMultiselect: boolean;
 }
 
 export function ChainSelector({
   chains,
   onChainSelect,
   blockUnselect = false,
+  enableMultiselect = true,
 }: ChainSelectorProps) {
   const { selectedChains, selectedWallet } = useAppState();
   const handleSelect = (chainKey: ChainType) => {
-    if (selectedChains.includes(chainKey)) {
-      onChainSelect(selectedChains.filter((chain) => chain !== chainKey));
+    if (!enableMultiselect) {
+      onChainSelect([chainKey]);
     } else {
-      onChainSelect([...selectedChains, chainKey]);
+      if (selectedChains.includes(chainKey)) {
+        onChainSelect(selectedChains.filter((chain) => chain !== chainKey));
+      } else {
+        onChainSelect([...selectedChains, chainKey]);
+      }
     }
   };
 

@@ -8,12 +8,13 @@ import { useWalletConnection } from "@/hooks";
 import { IconSvg } from "@/svg";
 import { twMerge } from "tailwind-merge";
 import HardwareWallets from "./HardwareWallets";
+import { WalletType } from "@/utils/interfaces";
 import {
-  ConnectedWalletsState,
-  WalletState,
-  WalletType,
-} from "@/utils/interfaces";
-import { ChainKey, CHAINS, SUPPORTED_WALLETS } from "@/utils/wallet/constants";
+  ChainKey,
+  CHAINS,
+  SUPPORTED_WALLETS,
+  WalletKey,
+} from "@/utils/wallet/constants";
 import { isWalletValidForAllChains } from "@/utils/wallet/utils";
 
 export default function WalletModal() {
@@ -21,7 +22,6 @@ export default function WalletModal() {
   const {
     toggleWalletModal,
     isWalletModalOpen,
-    setWalletsState,
     setSelectedWallet,
     setSelectedChains,
     detected,
@@ -39,7 +39,7 @@ export default function WalletModal() {
     if (selectedWallet === wallet && selectedChains.length > 0) {
       setSelectedWallet(undefined);
       setSelectedChains([]);
-    } else if (selectedChains.length <= 0) {
+    } else if (selectedChains.length <= 0 && wallet.hasSupportMultichain) {
       setSelectedChains(
         CHAINS.filter(({ name }) => validChains.includes(name)),
       );
@@ -51,15 +51,6 @@ export default function WalletModal() {
 
   const handleConnectWallet = () => {
     if (selectedWallet) handleConnect(selectedWallet);
-  };
-
-  const handleHardwareWalletSelect = async (wallet: any) => {
-    setWalletsState(((prevState: ConnectedWalletsState) => ({
-      ...prevState,
-      [wallet.chain]: {
-        ...(wallet as WalletState),
-      },
-    })) as unknown as ConnectedWalletsState);
   };
 
   if (!isWalletModalOpen) return null;
@@ -76,6 +67,11 @@ export default function WalletModal() {
           chains={CHAINS}
           selectedChains={selectedChains}
           onChainSelect={setSelectedChains}
+          enableMultiselect={
+            selectedWallet
+              ? SUPPORTED_WALLETS[selectedWallet?.id].hasSupportMultichain
+              : true
+          }
         />
         {!showHardwareWallets ? (
           <>
@@ -88,7 +84,10 @@ export default function WalletModal() {
               onWalletSelect={handleWalletSelect}
             />
             <div
-              onClick={() => setShowHardwareWallets(true)}
+              onClick={() => {
+                handleWalletSelect(SUPPORTED_WALLETS[WalletKey.LEDGER]);
+                setShowHardwareWallets(true);
+              }}
               className={twMerge(
                 "flex items-center justify-between",
                 "bg-white rounded-2xl p-4",
@@ -106,7 +105,6 @@ export default function WalletModal() {
         ) : (
           <HardwareWallets
             onBack={() => setShowHardwareWallets(false)}
-            onWalletSelect={handleHardwareWalletSelect}
             selectedChains={selectedChains}
             isDisabled={isHWDisabled}
           />

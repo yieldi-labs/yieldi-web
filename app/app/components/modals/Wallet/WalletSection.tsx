@@ -33,20 +33,18 @@ export function WalletSection({
     <div className="flex flex-col gap-4">
       <h4 className="text-sm text-neutral-600 font-gt-america">{title}</h4>
       <div className="grid grid-cols-2 gap-4">
-        {wallets.map((wallet) => (
-          <Wallet
-            key={wallet.id}
-            wallet={wallet}
-            disabled={selectedWallet && selectedWallet.id !== wallet.id}
-            isSupported={isWalletValidForChain(wallet, selectedChains)}
-            onSelect={() => handleWalletSelect(wallet)}
-            className={`${
-              wallet.id === selectedWallet?.id
-                ? "border-primary"
-                : "border-transparent"
-            } `}
-          />
-        ))}
+        {wallets
+          .filter((wallet) => !wallet.isHardware)
+          .map((wallet) => (
+            <Wallet
+              key={wallet.id}
+              wallet={wallet}
+              disabled={selectedWallet && selectedWallet.id !== wallet.id}
+              isSupported={isWalletValidForChain(wallet, selectedChains)}
+              onSelect={() => handleWalletSelect(wallet)}
+              isSelected={wallet.id === selectedWallet?.id}
+            />
+          ))}
       </div>
     </div>
   );
