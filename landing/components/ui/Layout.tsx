@@ -7,7 +7,9 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => (
   <div className="flex min-h-screen flex-col bg-noise-pattern bg-contain">
-    <UIComponents.Navbar links={navbarLinks} />
+    <div className="z-50">
+      <UIComponents.Navbar links={navbarLinks} />
+    </div>
     <main className="flex-grow">{children}</main>
   </div>
 );

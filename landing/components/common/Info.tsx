@@ -4,7 +4,7 @@ const paragraphs = [
 ];
 
 const Info = () => (
-  <div className="relative w-100 max-w-7xl mx-auto flex justify-center z-50 font-gt-america-ext pt-[100px] 2xl:pt-[50px] pb-[80px] tablet:pb-[200px] tablet:px-0 px-[32px]">
+  <div className="relative w-100 max-w-7xl mx-auto flex justify-center font-gt-america-ext pt-[100px] 2xl:pt-[50px] pb-[80px] tablet:pb-[200px] tablet:px-0 px-[32px]">
     <div className="max-w-[680px] flex flex-col text-center gap-[30px]">
       <h2 className="text-3xl tablet:text-[32px] font-bold text-neutral-900">
         The only DeFi venue for native Bitcoin and L1 yield
