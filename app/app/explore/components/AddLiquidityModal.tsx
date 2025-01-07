@@ -14,15 +14,12 @@ import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
-import { useWalletConnection } from "@/hooks";
-import { getChainKeyFromChain } from "@/utils/chain";
+import { getChainKeyFromChain, parseAssetString } from "@/utils/chain";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import {
   PositionStatus,
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
-
-import { parseAssetString } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
 
 interface AddLiquidityModalProps {
@@ -39,24 +36,23 @@ export default function AddLiquidityModal({
   onClose,
 }: AddLiquidityModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { error: liquidityError, addLiquidity } = useLiquidityPosition({
+  const {
+    error: liquidityError,
+    addLiquidity,
+    getAssetWallet,
+  } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState, balanceList } = useAppState();
-  const { getNetworkAddressFromLocalStorage, hasThorAddressInLocalStorage } =
-    useWalletConnection();
+  const { toggleWalletModal, walletsState, balanceList, isWalletConnected } =
+    useAppState();
 
-  // Parse asset details
-  const [assetChain] = useMemo(
-    () => parseAssetString(pool.asset),
-    [pool.asset],
-  );
+  const [assetChain] = parseAssetString(pool.asset);
   const chainKey = getChainKeyFromChain(assetChain);
-  const selectedWallet =
-    walletsState && walletsState[chainKey] ? walletsState[chainKey] : null;
+  const selectedWallet = walletsState[chainKey] || null;
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
-  const [txHash, setTxHash] = useState<string | null>(null);
+  const [assetTxHash, setAssetTxHash] = useState<string | null>(null);
+  const [runeTxHash, setRuneTxHash] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDualSided, setIsDualSided] = useState(false);
@@ -75,10 +71,6 @@ export default function AddLiquidityModal({
     const chainKey = getChainKeyFromChain(pool.asset.split(".")[0]);
     return balanceList[chainKey][pool.asset].balance;
   }, [balanceList, pool.asset]);
-
-  if (!selectedWallet?.provider) {
-    throw new Error("Wallet provider not found, please connect your wallet.");
-  }
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -126,8 +118,6 @@ export default function AddLiquidityModal({
       const runeMaxAllowed =
         runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
       const isRuneAmountValid = runeAmt > 0 && runeAmt <= runeMaxAllowed;
-      // return isAssetAmountValid && isRuneAmountValid;
-      // TODO: remove temp condition atfer Mutichain Wallet connection.
       return isAssetAmountValid || isRuneAmountValid;
     }
 
@@ -165,43 +155,53 @@ export default function AddLiquidityModal({
     try {
       setIsSubmitting(true);
 
-      // If dual-sided, check if paired address is available on local storage
-      // in the future this will be replaced by multi-chain wallet connection.
-      let pairedAddress = undefined;
+      // If dual-sided, check if paired address is available in connected wallets
+      let pairedAddress: string | undefined;
+
       if (isDualSided) {
-        if (parsedRuneAmount === 0 || Number.isNaN(parsedRuneAmount)) {
-          pairedAddress =
-            getNetworkAddressFromLocalStorage(ChainKey.THORCHAIN) || undefined;
-        } else if (parsedAssetAmount === 0 || Number.isNaN(parsedAssetAmount)) {
-          const identifier = getChainKeyFromChain(pool.asset.split(".")[0]);
-          pairedAddress =
-            getNetworkAddressFromLocalStorage(identifier) || undefined;
+        if (walletsState[ChainKey.THORCHAIN]) {
+          pairedAddress = walletsState[ChainKey.THORCHAIN].address;
+        } else {
+          throw new Error("No paired wallet found.");
         }
       }
 
-      if (isDualSided && !pairedAddress) {
-        throw new Error("Paired address not found.");
+      if (parsedAssetAmount > 0) {
+        const result = await addLiquidity({
+          asset: pool.asset,
+          amount: parsedAssetAmount,
+          runeAmount: parsedRuneAmount,
+          pairedAddress,
+        });
+        if (result) {
+          setAssetTxHash(result);
+          setShowConfirmation(true);
+        } else {
+          throw new Error("Failed to add asset liquidity.");
+        }
       }
 
-      const hash = await addLiquidity({
-        asset: pool.asset,
-        amount: parsedAssetAmount,
-        runeAmount: parsedRuneAmount,
-        pairedAddress,
-      });
+      if (isDualSided && parsedRuneAmount) {
+        pairedAddress = getAssetWallet(pool.asset).address;
+        const result = await addLiquidity({
+          asset: "THOR.RUNE",
+          amount: 0,
+          pairedAddress,
+          runeAmount: parsedRuneAmount,
+        });
+        if (result) {
+          setRuneTxHash(result);
+          setShowConfirmation(true);
+        } else {
+          throw new Error("Failed to add Rune liquidity.");
+        }
+      }
 
       markPositionAsPending(
         pool.asset,
         type,
         PositionStatus.LP_POSITION_DEPOSIT_PENDING,
       );
-
-      if (hash) {
-        setTimeout(() => {
-          setTxHash(hash);
-          setShowConfirmation(true);
-        }, 0);
-      }
     } catch (err) {
       console.error("Failed to add liquidity:", err);
     } finally {
@@ -248,14 +248,22 @@ export default function AddLiquidityModal({
   };
 
   const type = isDualSided ? PositionType.DLP : PositionType.SLP;
-  if (showConfirmation && txHash && positions && positions[pool.asset][type]) {
+  if (
+    showConfirmation &&
+    (assetTxHash || runeTxHash) && // Changed condition
+    positions &&
+    positions[pool.asset][type]
+  ) {
+    const position = positions[pool.asset][type];
     return (
       <TransactionConfirmationModal
-        position={positions[pool.asset][type]}
-        txHash={txHash || ""}
+        position={position}
+        assetHash={assetTxHash}
+        runeHash={runeTxHash}
         onClose={() => {
           setShowConfirmation(false);
-          setTxHash(null);
+          setAssetTxHash(null);
+          setRuneTxHash(null);
           onClose(true);
         }}
       />
@@ -267,7 +275,7 @@ export default function AddLiquidityModal({
         {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
         {/* Toggle between Single-sided and Dual-sided */}
-        {hasThorAddressInLocalStorage() && (
+        {isWalletConnected(ChainKey.THORCHAIN) && (
           <div className="flex gap-4 mb-4">
             <div className="flex justify-between items-center flex-1 rounded-3xl border-2 border-neutral-50">
               <button

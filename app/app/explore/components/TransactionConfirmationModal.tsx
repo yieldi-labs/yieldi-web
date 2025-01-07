@@ -7,32 +7,72 @@ import {
 
 interface TransactionConfirmationModalProps {
   position: PositionStats | null;
-  txHash: string;
+  assetHash: string | null;
+  runeHash?: string | null;
   onClose: () => void;
 }
 
+interface ExplorerLinkProps {
+  url: string;
+  text: string;
+}
+
+const ExternalLinkIcon = () => (
+  <svg
+    className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M7 17L17 7" />
+    <path d="M7 7h10v10" />
+  </svg>
+);
+
+const ExplorerLink = ({ url, text }: ExplorerLinkProps) => {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
+    >
+      <span className="mr-2">{text}</span>
+      <ExternalLinkIcon />
+    </a>
+  );
+};
+
 export default function TransactionConfirmationModal({
   position,
-  txHash,
+  assetHash,
+  runeHash,
   onClose,
 }: TransactionConfirmationModalProps) {
-  const thorchainUrl = `https://thorchain.net/tx/${txHash}`;
-  const runescanUrl = `https://runescan.io/tx/${txHash}`;
+  const chainName = position ? position.pool.asset.split(".")[0] : "";
 
-  const ExternalLinkIcon = () => (
-    <svg
-      className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M7 17L17 7" />
-      <path d="M7 7h10v10" />
-    </svg>
-  );
+  const createExplorerLinks = (hash: string | null, chainName: string) => {
+    return hash
+      ? [
+          {
+            url: `https://thorchain.net/tx/${hash}`,
+            text: `View ${chainName} transaction on THORChain.net`,
+          },
+          {
+            url: `https://runescan.io/tx/${hash}`,
+            text: `View ${chainName} transaction on Runescan`,
+          },
+        ]
+      : [];
+  };
+
+  const links = {
+    asset: createExplorerLinks(assetHash, chainName),
+    rune: runeHash ? createExplorerLinks(runeHash, "Rune") : [],
+  };
 
   return (
     <Modal
@@ -41,7 +81,6 @@ export default function TransactionConfirmationModal({
       style={{ maxWidth: "36rem" }}
     >
       <div className="p-6 flex flex-col items-center">
-        {/* Success Icon */}
         {position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
         position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING ? (
           <div className="mb-3">
@@ -62,37 +101,19 @@ export default function TransactionConfirmationModal({
           </div>
         )}
 
-        {/* Message */}
         <p className="text-lg text-center mb-6">
           Your transaction has been submitted to the network
         </p>
 
-        {/* Explorer Links */}
         <div className="w-full space-y-3">
-          <a
-            href={thorchainUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
-          >
-            <span className="mr-2">View on THORChain.net</span>
-            <ExternalLinkIcon />
-          </a>
-
-          <a
-            href={runescanUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-full p-4 bg-white rounded-xl hover:bg-gray-50 transition-colors border text-foreground group"
-          >
-            <span className="mr-2">View on Runescan</span>
-            <ExternalLinkIcon />
-          </a>
+          {[...links.asset, ...links.rune].map((link, index) => (
+            <ExplorerLink key={index} {...link} />
+          ))}
         </div>
 
-        {/* Hash Preview */}
         <div className="mt-4 text-sm text-gray-500 truncate max-w-full">
-          Hash: {txHash}
+          {assetHash && <p>{`${chainName} Transaction Hash: ${assetHash}`}</p>}
+          {runeHash && <p>{`Rune Transaction Hash: ${runeHash}`}</p>}
         </div>
       </div>
     </Modal>
