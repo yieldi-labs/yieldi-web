@@ -1,9 +1,10 @@
 import { WalletState } from "@/utils/interfaces";
 import { CHAINS, SUPPORTED_WALLETS, WalletKey } from "@/utils/wallet/constants";
-import React, { cloneElement } from "react";
+import React, { cloneElement, useState } from "react";
 import MiddleTruncate from "../middle-truncate";
 import useCopyToClipboard from "@/hooks/useCopyToClipboard";
-import { Copy, Exit, LinkExternal } from "@/svg/icons";
+import { Copy, Exit, LinkExternal, QRCode } from "@/svg/icons";
+import QRCodeModal from "./QrModal";
 interface WalletHeaderProps {
   wallet: WalletState;
   name: string;
@@ -16,6 +17,7 @@ export default function WalletRow({
   onDisconnect,
 }: WalletHeaderProps) {
   const { copy } = useCopyToClipboard();
+  const [isQrOpen, setIsQrOpen] = useState(false);
   return (
     <div className="bg-white flex gap-1 rounded-lg p-4 text-sm">
       <span className="leading-6">
@@ -35,12 +37,12 @@ export default function WalletRow({
       >
         <Copy strokeColor="#627eea" size={20} />
       </span>
-      {/* <span 
-      className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
-      onClick={() => setQrOpen(true)}
-    >
-      <QRCodeIcon strokeColor="#627eea" size={20} />
-    </span> */}
+      <span
+        className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
+        onClick={() => setIsQrOpen(true)}
+      >
+        <QRCode strokeColor="#627eea" size={20} />
+      </span>
       <span
         className="cursor-pointer my-auto rounded-full transition-all transform hover:scale-110 active:scale-95"
         onClick={() => {
@@ -60,6 +62,13 @@ export default function WalletRow({
         >
           <Exit strokeColor="#ff6656" size={20} />
         </span>
+      )}
+      {isQrOpen && (
+        <QRCodeModal
+          title={name}
+          address={wallet.address}
+          onClose={() => setIsQrOpen(false)}
+        />
       )}
     </div>
   );
