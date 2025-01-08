@@ -31,7 +31,6 @@ export function useCosmos({ wallet }: UseCosmosProps) {
 
         return await transferCosmos(wallet, transferParams);
       } catch (err) {
-        console.error(err);
         const message =
           err instanceof Error ? err.message : "Failed to perform transfer";
         setError(message);

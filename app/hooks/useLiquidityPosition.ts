@@ -215,7 +215,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             const currentAllowance = await getAllowance(routerAddress);
             if (currentAllowance < parsedAmount) {
               await approveSpending(
-                wallet,
                 routerAddress,
                 tokenAddress,
                 assetDecimals,
@@ -224,7 +223,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             }
 
             txHash = await depositWithExpiry(
-              wallet,
               routerAddress,
               vaultAddress,
               tokenAddress,
@@ -236,7 +234,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           } else {
             const parsedAmount = parseUnits(amount.toString(), 18);
             txHash = await depositWithExpiry(
-              wallet,
               routerAddress,
               vaultAddress,
               "0x0000000000000000000000000000000000000000",
@@ -258,7 +255,20 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         setLoading(false);
       }
     },
-    [tokenAddress, isNativeAsset, utxoChain, addUTXOLiquidity, thorChainClient],
+    [
+      getAssetWallet,
+      pool,
+      utxoChain,
+      isEVMChain,
+      thorChainClient,
+      cosmosTransfer,
+      addUTXOLiquidity,
+      isNativeAsset,
+      tokenAddress,
+      getAllowance,
+      depositWithExpiry,
+      approveSpending,
+    ],
   );
 
   const removeLiquidity = useCallback(
@@ -354,7 +364,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         const minAmountByChain =
           getMinAmountByChain(supportedChain) * 10 ** decimals;
         const txHash = await depositWithExpiry(
-          wallet,
           routerAddress,
           vaultAddress,
           "0x0000000000000000000000000000000000000000",

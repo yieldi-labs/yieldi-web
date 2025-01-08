@@ -13,7 +13,6 @@ export enum ChainKey {
   THORCHAIN = "THORChain",
 }
 export enum ProviderKey {
-  EVM = "evm",
   ETHEREUM = "ethereum",
   AVALANCHE = "avalanche",
   BINANCESMARTCHAIN = "binancesmartchain",

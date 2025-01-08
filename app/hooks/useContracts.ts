@@ -102,7 +102,6 @@ export function useContracts({
 
   const approveSpending = useCallback(
     async (
-      wallet: WalletState,
       spender: Address,
       asset: Address,
       assetDecimals: number,
@@ -137,12 +136,11 @@ export function useContracts({
         throw new Error(message);
       }
     },
-    [tokenAddress, walletAddress],
+    [tokenAddress, wallet, walletAddress],
   );
 
   const depositWithExpiry = useCallback(
     async (
-      wallet: WalletState,
       router: Address,
       vault: Address,
       asset: Address,
@@ -182,7 +180,7 @@ export function useContracts({
         throw new Error(message);
       }
     },
-    [walletAddress],
+    [wallet, walletAddress],
   );
 
   return {

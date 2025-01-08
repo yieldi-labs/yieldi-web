@@ -197,14 +197,14 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         address: addressLtc,
       };
     case "ledger-thorchain":
-      const thor = new Cosmos(wallet.provider);
-      const { address: thorchainAddress } = await thor.getAddress(
-        "44'/931'/0'/0/0",
-        "thor",
+      const clientThorchain = getBftLedgerClient(
+        ChainKey.THORCHAIN,
+        wallet.provider,
       );
+      const addressThorchain = await clientThorchain.getAddressAsync();
       return {
         provider: wallet.provider,
-        address: thorchainAddress,
+        address: addressThorchain,
       };
     case "ledger-cosmos":
       const clientCosmos = getBftLedgerClient(
