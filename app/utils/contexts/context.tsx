@@ -396,21 +396,21 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-avax",
                 provider: transport,
-              })
+              });
             },
             [ProviderKey.BINANCESMARTCHAIN]: async () => {
               const transport = await TransportWebUSB.create();
               return await connectWallet({
                 id: "ledger-bsc",
                 provider: transport,
-              })
+              });
             },
             [ProviderKey.ETHEREUM]: async () => {
               const transport = await TransportWebUSB.create();
               return await connectWallet({
                 id: "ledger-eth",
                 provider: transport,
-              })
+              });
             },
             [ProviderKey.BITCOIN]: async () => {
               const transport = await TransportWebUSB.create();
@@ -454,48 +454,6 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 provider: transport,
               });
             },
-            [ProviderKey.BITCOIN]: async () => {
-              const transport = await TransportWebUSB.create();
-              return await connectWallet({
-                id: "ledger-btc",
-                provider: transport,
-              })
-            },
-            [ProviderKey.BITCOINCASH]: async () => {
-              const transport = await TransportWebUSB.create();
-              return await connectWallet({
-                id: "ledger-bch",
-                provider: transport
-              })
-            },
-            [ProviderKey.LITECOIN]: async () => {
-              const transport = await TransportWebUSB.create();
-              return await connectWallet({
-                id: "ledger-ltc",
-                provider: transport
-              })
-            },
-            [ProviderKey.DOGECOIN]: async () => {
-              const transport = await TransportWebUSB.create();
-              return await connectWallet({
-                id: "ledger-doge",
-                provider: transport
-              })
-            },
-            [ProviderKey.COSMOS]: async () => {
-              const transport = await TransportWebUSB.create();
-              return await connectWallet({
-                id: "ledger-cosmos",
-                provider: transport
-              })
-            },
-            [ProviderKey.THORCHAIN]: async () => {
-              const transport = await TransportWebUSB.create();
-              return await connectWallet({
-                id: "ledger-thorchain",
-                provider: transport
-              })
-            }
           };
           break;
       }

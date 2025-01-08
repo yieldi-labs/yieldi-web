@@ -169,6 +169,7 @@ export default function AddLiquidityModal({
       if (parsedAssetAmount > 0) {
         const result = await addLiquidity({
           asset: pool.asset,
+          assetDecimals: Number(pool.nativeDecimal),
           amount: parsedAssetAmount,
           runeAmount: parsedRuneAmount,
           pairedAddress,
@@ -185,6 +186,7 @@ export default function AddLiquidityModal({
         pairedAddress = getAssetWallet(pool.asset).address;
         const result = await addLiquidity({
           asset: "THOR.RUNE",
+          assetDecimals: Number(pool.nativeDecimal),
           amount: 0,
           pairedAddress,
           runeAmount: parsedRuneAmount,

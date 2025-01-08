@@ -70,14 +70,15 @@ export const switchEvmChain = async (
   wallet: WalletState,
   targetChain: string,
 ): Promise<void> => {
-
-  const selectedWallet = SUPPORTED_WALLETS[wallet.walletId]
+  const selectedWallet = SUPPORTED_WALLETS[wallet.walletId];
 
   if (!selectedWallet.hasSupportMultichain) {
-    return
+    return;
   }
-  
-  const currentChainId = await wallet.provider.request({ method: "eth_chainId" });
+
+  const currentChainId = await wallet.provider.request({
+    method: "eth_chainId",
+  });
   const targetChainId = CHAIN_ID_MAP[targetChain.toLowerCase()];
 
   if (!targetChainId) {

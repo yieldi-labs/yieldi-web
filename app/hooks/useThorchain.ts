@@ -2,13 +2,9 @@ import { useMemo, useCallback, useState } from "react";
 import {
   Client as ThorchainClient,
   defaultClientConfig,
-  AssetRuneNative as AssetRUNE,
-  RUNE_DECIMAL
+  RUNE_DECIMAL,
 } from "@xchainjs/xchain-thorchain";
-import {
-  assetToBase,
-  assetAmount,
-} from "@xchainjs/xchain-util";
+import { assetToBase, assetAmount } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
 import { depositThorchain } from "@/utils/wallet/handlers/handleTransfer";
@@ -59,13 +55,7 @@ export function useThorchain({ wallet }: UseThorchainProps) {
 
   // Transfer using wallet provider
   const deposit = useCallback(
-    async ({
-      pool,
-      recipient,
-      amount,
-      memo = "",
-      feeRate,
-    }: TransferParams): Promise<string> => {
+    async ({ amount, memo = "" }: TransferParams): Promise<string> => {
       if (!wallet?.provider || !wallet.address) {
         throw new Error("Wallet not initialized");
       }
@@ -76,28 +66,10 @@ export function useThorchain({ wallet }: UseThorchainProps) {
       try {
         const from = wallet.address;
         const finalAmount = assetToBase(assetAmount(amount, RUNE_DECIMAL));
-        const depositParams = {
-          asset: AssetRUNE,
-          from,
+        return depositThorchain(wallet, {
+          from: from,
           amount: finalAmount,
           memo,
-        };
-
-        return new Promise<string>((resolve, reject) => {
-          wallet.provider.request(
-            {
-              method: "deposit",
-              params: [depositParams],
-            },
-            (error: Error | null, result: string | null) => {
-              if (error) {
-                setError(error.message);
-                reject(error);
-              } else {
-                resolve(result || "");
-              }
-            },
-          );
         });
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : "Transfer failed";

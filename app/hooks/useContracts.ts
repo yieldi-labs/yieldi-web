@@ -1,17 +1,16 @@
-import { useState, useCallback, useMemo } from "react";
-import {
-  encodeFunctionData,
-  Address,
-  decodeFunctionResult,
-} from "viem";
+import { useState, useCallback } from "react";
+import { encodeFunctionData, Address, decodeFunctionResult } from "viem";
 import ERC20_ABI from "./erc20.json";
 import ROUTER_ABI from "./routerABI.json";
 import { useAppState } from "@/utils/contexts/context";
 import { assetFromString, baseAmount } from "@xchainjs/xchain-util";
 import { getChainKeyFromChain } from "@/utils/chain";
-import { TransactionEvmParams, transferEvm } from "@/utils/wallet/handlers/handleTransfer";
+import {
+  TransactionEvmParams,
+  transferEvm,
+} from "@/utils/wallet/handlers/handleTransfer";
 import { WalletState } from "@/utils/interfaces";
-import { constants } from "ethers"
+import { constants } from "ethers";
 import { infuraRequest } from "@/infura/client";
 
 interface UseContractProps {
@@ -27,7 +26,9 @@ async function waitForTransaction(
   return new Promise((resolve, reject) => {
     const checkReceipt = async () => {
       try {
-        const receipt = await infuraRequest(wallet.chainType, "eth_getTransactionReceipt",
+        const receipt = await infuraRequest(
+          wallet.chainType,
+          "eth_getTransactionReceipt",
           [txHash],
         );
 
@@ -96,11 +97,17 @@ export function useContracts({
         return BigInt(0);
       }
     },
-    [tokenAddress, walletAddress],
+    [tokenAddress, wallet.chainType, walletAddress],
   );
 
   const approveSpending = useCallback(
-    async (provider: any, spender: Address, amount: bigint = BigInt(constants.MaxUint256.toString())) => {
+    async (
+      wallet: WalletState,
+      spender: Address,
+      asset: Address,
+      assetDecimals: number,
+      amount: bigint = BigInt(constants.MaxUint256.toString()),
+    ) => {
       if (!tokenAddress || !walletAddress) {
         throw new Error("Token address, wallet or provider not available");
       }
@@ -112,18 +119,17 @@ export function useContracts({
           args: [spender, amount],
         });
 
-        const txHash = await provider.request({
-          method: "eth_sendTransaction",
-          params: [
-            {
-              from: walletAddress,
-              to: tokenAddress,
-              data,
-            },
-          ],
-        });
+        const transferParams: TransactionEvmParams = {
+          from: walletAddress,
+          recipient: tokenAddress,
+          amount: baseAmount(amount.toString(), assetDecimals),
+          assetAddress: asset,
+          data: data,
+        };
 
-        return await waitForTransaction(provider, txHash);
+        const hash = await transferEvm(wallet, transferParams);
+
+        return await waitForTransaction(wallet, hash);
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Failed to approve token";
@@ -162,12 +168,12 @@ export function useContracts({
           amount: baseAmount(amount.toString(), assetDecimals),
           assetAddress: asset,
           memo: memo,
-          data: data
-        }
+          data: data,
+        };
 
-        const hash = await transferEvm(wallet, transferParams)
+        const hash = await transferEvm(wallet, transferParams);
 
-        return await waitForTransaction(wallet.provider, hash);
+        return await waitForTransaction(wallet, hash);
       } catch (err) {
         console.error("Deposit with expiry error:", err);
         const message =

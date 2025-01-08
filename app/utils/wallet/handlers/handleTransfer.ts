@@ -9,8 +9,8 @@ import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
 
 export interface TransactionEvmParams extends TransactionParams {
-  data: `0x${string}`
-  assetAddress: `0x${string}`
+  data: `0x${string}`;
+  assetAddress: `0x${string}`;
 }
 
 interface TransactionParams extends DepositParams {
@@ -21,13 +21,13 @@ interface TransactionParams extends DepositParams {
 interface DepositParams {
   from: string;
   amount: BaseAmount;
-  memo: string;
+  memo?: string;
 }
 
 export const transferUTXO = async (
   wallet: WalletState,
   transferParams: TransactionParams,
-  clientBuilder?: BitcoinClient
+  clientBuilder?: BitcoinClient,
 ): Promise<string> => {
   try {
     switch (wallet.walletId) {
@@ -62,7 +62,7 @@ export const transferUTXO = async (
         });
         const fromHexString = (hexString: any) =>
           Uint8Array.from(
-            hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16))
+            hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16)),
           );
         const psbtUnsigned = Bitcoin.Psbt.fromBase64(rawUnsignedTx);
         const signedPSBTBytes: Uint8Array = await wallet.provider.signPSBT(
@@ -74,7 +74,7 @@ export const transferUTXO = async (
                 signingIndexes: inputs.map((input) => input.index),
               },
             ],
-          }
+          },
         );
 
         const psbtSigned = Bitcoin.Psbt.fromBuffer(signedPSBTBytes);
@@ -87,9 +87,7 @@ export const transferUTXO = async (
         const hash = await clientBuilder.broadcastTx(txHex);
         return hash;
       case WalletKey.OKX:
-        const value = baseToAsset(transferParams.amount)
-          .amount()
-          .toString();
+        const value = baseToAsset(transferParams.amount).amount().toString();
         const { txHash } = await wallet.provider.send({
           from: transferParams.from,
           to: transferParams.recipient,
@@ -102,7 +100,7 @@ export const transferUTXO = async (
       case WalletKey.LEDGER:
         const ledgerClient = getLedgerClient(
           wallet.chainType as UTXOChain,
-          wallet.provider
+          wallet.provider,
         );
         const btcHash = await ledgerClient.transfer({
           amount: transferParams.amount,
@@ -122,7 +120,7 @@ export const transferUTXO = async (
 
 export const depositThorchain = async (
   wallet: WalletState,
-  transferParams: DepositParams
+  transferParams: DepositParams,
 ): Promise<string> => {
   switch (wallet.walletId) {
     case WalletKey.VULTISIG:
@@ -139,7 +137,7 @@ export const depositThorchain = async (
 
 export const transferCosmos = async (
   wallet: WalletState,
-  transferParams: TransactionParams
+  transferParams: TransactionParams,
 ): Promise<string> => {
   switch (wallet.walletId) {
     case WalletKey.CTRL:
@@ -155,7 +153,7 @@ export const transferCosmos = async (
         offlineSigner,
         {
           gasPrice,
-        }
+        },
       );
       const coin = {
         denom: "uatom",
@@ -182,13 +180,13 @@ export const transferCosmos = async (
         params: [txDetails],
       });
     case WalletKey.LEDGER:
-      const client = getBftLedgerClient(ChainKey.GAIACHAIN, wallet.provider)
+      const client = getBftLedgerClient(ChainKey.GAIACHAIN, wallet.provider);
       const hash = await client.transfer({
         recipient: transferParams.recipient,
         amount: transferParams.amount,
         memo: transferParams.memo,
-      })
-      return hash
+      });
+      return hash;
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }
@@ -196,7 +194,7 @@ export const transferCosmos = async (
 
 export const transferEvm = async (
   wallet: WalletState,
-  transferParams: TransactionEvmParams
+  transferParams: TransactionEvmParams,
 ): Promise<any> => {
   switch (wallet.walletId) {
     case WalletKey.CTRL:
@@ -213,30 +211,31 @@ export const transferEvm = async (
             to: transferParams.recipient,
             data: transferParams.data,
             value:
-              transferParams.assetAddress === "0x0000000000000000000000000000000000000000"
+              transferParams.assetAddress ===
+              "0x0000000000000000000000000000000000000000"
                 ? `0x${transferParams.amount.amount().toString(16)}`
                 : undefined,
           },
         ],
       });
-      return txHash
+      return txHash;
     case WalletKey.LEDGER:
-      const client = getEvmLedgerClient(wallet.chainType, wallet.provider)
-      const gasLimit = await client.estimateGasLimit({ 
-        recipient: transferParams.recipient, 
-        amount: transferParams.amount, 
+      const client = getEvmLedgerClient(wallet.chainType, wallet.provider);
+      const gasLimit = await client.estimateGasLimit({
+        recipient: transferParams.recipient,
+        amount: transferParams.amount,
         memo: transferParams.data,
         from: transferParams.from,
         isMemoEncoded: true,
-      })
+      });
       const hash = await client.transfer({
         recipient: transferParams.recipient,
         amount: transferParams.amount,
         memo: transferParams.data,
         isMemoEncoded: true,
-        gasLimit: gasLimit
-      })
-      return hash
+        gasLimit: gasLimit,
+      });
+      return hash;
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }

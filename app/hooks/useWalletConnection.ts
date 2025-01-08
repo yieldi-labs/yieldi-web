@@ -23,19 +23,21 @@ export function useWalletConnection() {
   ) => {
     if (!wallet.chainConnect[chain.providerType]) {
       throw new Error(`Chain ${chain.name} Not Supported!`);
-    } 
+    }
 
     const connectedWallet = await wallet.chainConnect[chain.providerType]!();
-    
+
     if (!wallet.chainConnect[chain.providerType]) {
-      throw new Error(`Error conection wallet for provider ${chain.providerType}`);
-    } 
+      throw new Error(
+        `Error conection wallet for provider ${chain.providerType}`,
+      );
+    }
 
     const provider = connectedWallet.provider;
 
     return {
       provider,
-      address: connectedWallet.address
+      address: connectedWallet.address,
     };
   };
 
@@ -110,7 +112,7 @@ export function useWalletConnection() {
         continue;
       }
       const connection = await handleProviderConnection(wallet, chain);
-      if (!connection) continue;
+      if (!connection || !connection.address) continue;
       saveNetworkAddressToLocalStorage(chain.name, connection.address);
       newWalletState = updateWalletState(
         newWalletState,

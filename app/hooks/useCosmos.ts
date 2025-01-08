@@ -16,23 +16,22 @@ export function useCosmos({ wallet }: UseCosmosProps) {
     async (to: string, amount: number, memo: string) => {
       setError(null);
       setLoading(true);
-      
-      try {
 
+      try {
         if (!wallet) {
-          throw Error('No wallet initialized')
+          throw Error("No wallet initialized");
         }
 
         const transferParams = {
-            from: wallet!.address,
-            recipient: to,
-            amount: baseAmount(amount, COSMOS_DECIMAL),
-            memo: memo,
-        }
+          from: wallet!.address,
+          recipient: to,
+          amount: baseAmount(amount, COSMOS_DECIMAL),
+          memo: memo,
+        };
 
-        return await transferCosmos(wallet, transferParams)
+        return await transferCosmos(wallet, transferParams);
       } catch (err) {
-        console.error(err)
+        console.error(err);
         const message =
           err instanceof Error ? err.message : "Failed to perform transfer";
         setError(message);
