@@ -1,4 +1,3 @@
-import Cosmos from "@ledgerhq/hw-app-cosmos";
 import { getLedgerClient } from "../utxoClients/ledgerClients";
 import { ChainKey } from "../constants";
 import { getBftLedgerClient } from "../bftClients/ledgerClients";

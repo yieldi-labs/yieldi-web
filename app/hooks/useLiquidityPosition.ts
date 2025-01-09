@@ -350,8 +350,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         await switchEvmChain(wallet, assetChain);
 
-        await delay(5000);
-
         const routerAddress = inbound.router
           ? normalizeAddress(inbound.router)
           : undefined;

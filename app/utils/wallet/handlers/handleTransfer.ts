@@ -45,9 +45,31 @@ export const transferUTXO = async (
           ],
         });
       case WalletKey.CTRL:
-        return wallet.provider.request({
-          method: "transfer",
-          params: [transferParams],
+        return await new Promise((resolve, reject) => {
+          wallet.provider.request(
+            {
+              method: "transfer",
+              params: [{
+                feeRate: transferParams.feeRate,
+                from: transferParams.from,
+                recipient: transferParams.recipient,
+                memo: transferParams.memo,
+                amount: {
+                  amount: transferParams.amount.amount().toNumber(),
+                  decimals: transferParams.amount.decimal
+                },
+              }],
+            },
+            (error: any, result: string) => {
+              if (error) {
+                console.error(error)
+                reject(error)
+              } else {
+                console.log(result)
+                resolve(result)
+              }
+            },
+          );
         });
       case WalletKey.PHANTOM:
         if (!clientBuilder) {
@@ -126,10 +148,20 @@ export const depositThorchain = async (
     case WalletKey.VULTISIG:
     case WalletKey.CTRL:
     case WalletKey.LEDGER:
-      return wallet.provider.request({
-        method: "deposit",
-        params: [transferParams],
-      });
+      return new Promise<string>((resolve, reject) => {
+        wallet.provider.request(
+          {
+          method: "deposit",
+          params: [transferParams],
+          },
+          (error: Error | null, result: string | null) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result || "");
+            }
+          },
+      )});
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }
