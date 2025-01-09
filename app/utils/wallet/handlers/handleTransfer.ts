@@ -49,24 +49,26 @@ export const transferUTXO = async (
           wallet.provider.request(
             {
               method: "transfer",
-              params: [{
-                feeRate: transferParams.feeRate,
-                from: transferParams.from,
-                recipient: transferParams.recipient,
-                memo: transferParams.memo,
-                amount: {
-                  amount: transferParams.amount.amount().toNumber(),
-                  decimals: transferParams.amount.decimal
+              params: [
+                {
+                  feeRate: transferParams.feeRate,
+                  from: transferParams.from,
+                  recipient: transferParams.recipient,
+                  memo: transferParams.memo,
+                  amount: {
+                    amount: transferParams.amount.amount().toNumber(),
+                    decimals: transferParams.amount.decimal,
+                  },
                 },
-              }],
+              ],
             },
             (error: any, result: string) => {
               if (error) {
-                console.error(error)
-                reject(error)
+                console.error(error);
+                reject(error);
               } else {
-                console.log(result)
-                resolve(result)
+                console.log(result);
+                resolve(result);
               }
             },
           );
@@ -151,8 +153,8 @@ export const depositThorchain = async (
       return new Promise<string>((resolve, reject) => {
         wallet.provider.request(
           {
-          method: "deposit",
-          params: [transferParams],
+            method: "deposit",
+            params: [transferParams],
           },
           (error: Error | null, result: string | null) => {
             if (error) {
@@ -161,7 +163,8 @@ export const depositThorchain = async (
               resolve(result || "");
             }
           },
-      )});
+        );
+      });
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }
