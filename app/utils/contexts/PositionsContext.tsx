@@ -29,8 +29,14 @@ export const LiquidityPositionsProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const { positions, pools, markPositionAsPending, isPending, error, cleanPositions } =
-    usePositionStats({});
+  const {
+    positions,
+    pools,
+    markPositionAsPending,
+    isPending,
+    error,
+    cleanPositions,
+  } = usePositionStats({});
 
   return (
     <LiquidityPositionsContext.Provider

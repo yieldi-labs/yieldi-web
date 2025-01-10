@@ -67,7 +67,7 @@ export function usePositionStats({
     const addresses = [];
     for (const key in walletsState!) {
       if (walletsState!.hasOwnProperty(key)) {
-        let address = walletsState![key].address
+        let address = walletsState![key].address;
         if (ethers.utils.isAddress(address)) {
           address = ethers.utils.getAddress(address); // Address with checksum
         }
@@ -118,28 +118,32 @@ export function usePositionStats({
       );
 
       // Filter based on connected wallets
-      const walletsConnected = Object.keys(walletsState)
-      const filteredPositions = Object.keys(newPayload.positions).reduce((positions: Positions, key: string) => {
-        const chain = assetFromString(key)?.chain
-        if (!chain) {
-          throw Error ('Invalid chain')
-        }
-        const chainKey = getChainKeyFromChain(chain)
-        if (walletsConnected.includes(chainKey)) {
-          positions[key] = newPayload.positions[key]
-        }
-        if (walletsConnected.includes(ChainKey.THORCHAIN)) { // Symmetrical positions can be managed from THORChain wallet
-          positions[key] = {
-            SLP: null,
-            DLP: newPayload.positions[key].DLP
+      const walletsConnected = Object.keys(walletsState);
+      const filteredPositions = Object.keys(newPayload.positions).reduce(
+        (positions: Positions, key: string) => {
+          const chain = assetFromString(key)?.chain;
+          if (!chain) {
+            throw Error("Invalid chain");
           }
-        }
-        return positions
-      }, {})
+          const chainKey = getChainKeyFromChain(chain);
+          if (walletsConnected.includes(chainKey)) {
+            positions[key] = newPayload.positions[key];
+          }
+          if (walletsConnected.includes(ChainKey.THORCHAIN)) {
+            // Symmetrical positions can be managed from THORChain wallet
+            positions[key] = {
+              SLP: null,
+              DLP: newPayload.positions[key].DLP,
+            };
+          }
+          return positions;
+        },
+        {},
+      );
 
       setCurrentPositionsStats({
         ...newPayload,
-        positions: filteredPositions
+        positions: filteredPositions,
       });
 
       return { positions: genericPositionsDataStructure, pools };
@@ -164,7 +168,10 @@ export function usePositionStats({
     }
   }, [currentPositionsStats, defaultRefetchInterval]);
 
-  const cleanPositions = useCallback(() => setCurrentPositionsStats(undefined), [])
+  const cleanPositions = useCallback(
+    () => setCurrentPositionsStats(undefined),
+    [],
+  );
 
   const markPositionAsPending = useCallback(
     (pooldId: string, positionType: PositionType, status: PositionStatus) => {

@@ -23,10 +23,8 @@ const WalletDrawerContainer: FC = () => {
     selectedWallet,
   } = useAppState();
 
-  const {
-    cleanPositions
-  } = useLiquidityPositions()
- 
+  const { cleanPositions } = useLiquidityPositions();
+
   const handleAddWallet = () => {
     toggleWalletModal();
     toggleWalletDrawer();
@@ -41,7 +39,7 @@ const WalletDrawerContainer: FC = () => {
       wallet.provider.disconnect();
     }
     if (Object.keys(walletsState).length === 1) {
-      cleanPositions()
+      cleanPositions();
       toggleWalletDrawer();
     }
     setWalletsState((prev) => {
