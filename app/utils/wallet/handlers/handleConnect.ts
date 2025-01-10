@@ -1,7 +1,7 @@
-import Eth from "@ledgerhq/hw-app-eth";
-import Cosmos from "@ledgerhq/hw-app-cosmos";
 import { getLedgerClient } from "../utxoClients/ledgerClients";
 import { ChainKey } from "../constants";
+import { getBftLedgerClient } from "../bftClients/ledgerClients";
+import { getEvmLedgerClient } from "../evmClients/ledgerClients";
 
 export const connectWallet = async (wallet: any): Promise<any> => {
   let accounts: any;
@@ -100,11 +100,21 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         provider: wallet.provider,
         address: accounts.address,
       };
-    case "xdefi-evm":
-    case "metamask-evm":
-    case "vultisig-evm":
-    case "phantom-evm":
-    case "okx-evm":
+    case "xdefi-avax":
+    case "xdefi-bsc":
+    case "xdefi-eth":
+    case "metamask-avax":
+    case "metamask-bsc":
+    case "metamask-eth":
+    case "vultisig-avax":
+    case "vultisig-bsc":
+    case "vultisig-eth":
+    case "phantom-avax":
+    case "phantom-bsc":
+    case "phantom-eth":
+    case "okx-avax":
+    case "okx-bsc":
+    case "okx-eth":
       address = "";
 
       if (!wallet.provider.connect || wallet.provider.isConnected()) {
@@ -125,18 +135,37 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         provider: wallet.provider,
         address,
       };
-    case "walletconnect-evm":
+    case "walletconnect-avax":
+    case "walletconnect-bsc":
+    case "walletconnect-eth":
       await wallet.provider.open({ view: "Connect" });
       return {
         provider: wallet.provider,
         address: "",
       };
-    case "ledger-evm":
-      const eth = new Eth(wallet.provider);
-      const result = await eth.getAddress("44'/60'/0'/0/0"); // TODO: Use chain ID
+    case "ledger-eth":
+      const clientEth = getEvmLedgerClient(ChainKey.ETHEREUM, wallet.provider);
+      const addressEth = await clientEth.getAddressAsync();
       return {
         provider: wallet.provider,
-        address: result.address,
+        address: addressEth,
+      };
+    case "ledger-avax":
+      const clientAvax = getEvmLedgerClient(
+        ChainKey.AVALANCHE,
+        wallet.provider,
+      );
+      const addressAvax = await clientAvax.getAddressAsync();
+      return {
+        provider: wallet.provider,
+        address: addressAvax,
+      };
+    case "ledger-bsc":
+      const clientBsc = getEvmLedgerClient(ChainKey.BSCCHAIN, wallet.provider);
+      const addressBsc = await clientBsc.getAddressAsync();
+      return {
+        provider: wallet.provider,
+        address: addressBsc,
       };
     case "ledger-btc":
       const clientBtc = getLedgerClient(ChainKey.BITCOIN, wallet.provider);
@@ -167,24 +196,24 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         address: addressLtc,
       };
     case "ledger-thorchain":
-      const thor = new Cosmos(wallet.provider);
-      const { address: thorchainAddress } = await thor.getAddress(
-        "44'/931'/0'/0/0",
-        "thor",
+      const clientThorchain = getBftLedgerClient(
+        ChainKey.THORCHAIN,
+        wallet.provider,
       );
+      const addressThorchain = await clientThorchain.getAddressAsync();
       return {
         provider: wallet.provider,
-        address: thorchainAddress,
+        address: addressThorchain,
       };
     case "ledger-cosmos":
-      const cosmos = new Cosmos(wallet.provider);
-      const { address: cosmosAddress } = await cosmos.getAddress(
-        "44'/118'/0'/0",
-        "cosmos",
+      const clientCosmos = getBftLedgerClient(
+        ChainKey.GAIACHAIN,
+        wallet.provider,
       );
+      const addressCosmos = await clientCosmos.getAddressAsync();
       return {
         provider: wallet.provider,
-        address: cosmosAddress,
+        address: addressCosmos,
       };
     default:
       console.warn(`Unknown UTXO wallet: ${wallet.id}`);

@@ -117,10 +117,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
           from,
           asset: asset as Asset,
           recipient,
-          amount: {
-            amount: finalAmount.amount().toNumber(),
-            decimals: nativeDecimal,
-          },
+          amount: finalAmount,
           memo,
           feeRate: fees,
         };
@@ -143,7 +140,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         setLoading(false);
       }
     },
-    [wallet, getFees, chain, client],
+    [wallet, getFees, client],
   );
 
   // Add liquidity to a pool using transfer

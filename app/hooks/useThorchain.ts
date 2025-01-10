@@ -2,23 +2,12 @@ import { useMemo, useCallback, useState } from "react";
 import {
   Client as ThorchainClient,
   defaultClientConfig,
+  RUNE_DECIMAL,
 } from "@xchainjs/xchain-thorchain";
-import {
-  assetToBase,
-  assetAmount,
-  Asset,
-  AssetType,
-} from "@xchainjs/xchain-util";
+import { assetToBase, assetAmount } from "@xchainjs/xchain-util";
 import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
-
-// Define RUNE asset
-const AssetRUNE: Asset = {
-  chain: "THOR",
-  symbol: "RUNE",
-  ticker: "RUNE",
-  type: AssetType.NATIVE,
-};
+import { depositThorchain } from "@/utils/wallet/handlers/handleTransfer";
 
 interface UseThorchainProps {
   wallet?: WalletState | null;
@@ -65,15 +54,8 @@ export function useThorchain({ wallet }: UseThorchainProps) {
   }, [client]);
 
   // Transfer using wallet provider
-  const RUNE_DECIMALS = 8;
   const deposit = useCallback(
-    async ({
-      pool,
-      recipient,
-      amount,
-      memo = "",
-      feeRate,
-    }: TransferParams): Promise<string> => {
+    async ({ amount, memo = "" }: TransferParams): Promise<string> => {
       if (!wallet?.provider || !wallet.address) {
         throw new Error("Wallet not initialized");
       }
@@ -83,32 +65,11 @@ export function useThorchain({ wallet }: UseThorchainProps) {
 
       try {
         const from = wallet.address;
-        const finalAmount = assetToBase(assetAmount(amount, RUNE_DECIMALS));
-        const depositParams = {
-          asset: AssetRUNE,
-          from,
-          amount: {
-            amount: finalAmount.amount().toNumber(),
-            decimals: RUNE_DECIMALS,
-          },
+        const finalAmount = assetToBase(assetAmount(amount, RUNE_DECIMAL));
+        return depositThorchain(wallet, {
+          from: from,
+          amount: finalAmount,
           memo,
-        };
-
-        return new Promise<string>((resolve, reject) => {
-          wallet.provider.request(
-            {
-              method: "deposit",
-              params: [depositParams],
-            },
-            (error: Error | null, result: string | null) => {
-              if (error) {
-                setError(error.message);
-                reject(error);
-              } else {
-                resolve(result || "");
-              }
-            },
-          );
         });
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : "Transfer failed";
@@ -118,7 +79,7 @@ export function useThorchain({ wallet }: UseThorchainProps) {
         setLoading(false);
       }
     },
-    [wallet, getFees],
+    [wallet],
   );
 
   return {

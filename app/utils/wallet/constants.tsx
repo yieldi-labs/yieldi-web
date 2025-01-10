@@ -11,10 +11,11 @@ export enum ChainKey {
   GAIACHAIN = "Cosmos",
   LITECOIN = "Litecoin",
   THORCHAIN = "THORChain",
-  ZKSYNC = "Zksync",
 }
 export enum ProviderKey {
-  EVM = "evm",
+  ETHEREUM = "ethereum",
+  AVALANCHE = "avalanche",
+  BINANCESMARTCHAIN = "binancesmartchain",
   BITCOIN = "bitcoin",
   DOGECOIN = "dogecoin",
   LITECOIN = "litecoin",
@@ -37,7 +38,7 @@ export const CHAINS: ChainType[] = [
   {
     icon: <ChainSvg.Avax />,
     name: ChainKey.AVALANCHE,
-    providerType: ProviderKey.EVM,
+    providerType: ProviderKey.AVALANCHE,
     thorchainIdentifier: "avax",
     nativeAsset: "avax",
     chainId: "0xa86a",
@@ -65,7 +66,7 @@ export const CHAINS: ChainType[] = [
   {
     icon: <ChainSvg.BSC />,
     name: ChainKey.BSCCHAIN,
-    providerType: ProviderKey.EVM,
+    providerType: ProviderKey.BINANCESMARTCHAIN,
     chainId: "0x38",
     thorchainIdentifier: "bsc",
     nativeAsset: "bnb",
@@ -93,7 +94,7 @@ export const CHAINS: ChainType[] = [
   {
     icon: <ChainSvg.Ethereum />,
     name: ChainKey.ETHEREUM,
-    providerType: ProviderKey.EVM,
+    providerType: ProviderKey.ETHEREUM,
     chainId: "0x1",
     thorchainIdentifier: "eth",
     nativeAsset: "eth",
@@ -133,7 +134,7 @@ export const EVM_CHAINS: ChainType[] = [
   {
     icon: <ChainSvg.Avax />,
     name: ChainKey.AVALANCHE,
-    providerType: ProviderKey.EVM,
+    providerType: ProviderKey.AVALANCHE,
     chainId: "0xa86a",
     thorchainIdentifier: "avax",
     nativeAsset: "avax",
@@ -143,7 +144,7 @@ export const EVM_CHAINS: ChainType[] = [
   {
     icon: <ChainSvg.BSC />,
     name: ChainKey.BSCCHAIN,
-    providerType: ProviderKey.EVM,
+    providerType: ProviderKey.BINANCESMARTCHAIN,
     chainId: "0x38",
     thorchainIdentifier: "bsc",
     nativeAsset: "bnb",
@@ -153,7 +154,7 @@ export const EVM_CHAINS: ChainType[] = [
   {
     icon: <ChainSvg.Ethereum />,
     name: ChainKey.ETHEREUM,
-    providerType: ProviderKey.EVM,
+    providerType: ProviderKey.ETHEREUM,
     chainId: "0x1",
     thorchainIdentifier: "eth",
     nativeAsset: "eth",
