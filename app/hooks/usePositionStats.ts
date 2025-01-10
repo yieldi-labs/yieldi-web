@@ -16,6 +16,9 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useAppState } from "@/utils/contexts/context";
 import { ethers } from "ethers";
+import { assetFromString } from "@xchainjs/xchain-util";
+import { getChainKeyFromChain } from "@/utils/chain";
+import { ChainKey } from "@/utils/wallet/constants";
 
 interface UsePositionStatsProps {
   defaultRefetchInterval?: number;
@@ -113,7 +116,31 @@ export function usePositionStats({
         },
         { positions: genericPositionsDataStructure, pools },
       );
-      setCurrentPositionsStats(newPayload);
+
+      // Filter based on connected wallets
+      const walletsConnected = Object.keys(walletsState)
+      const filteredPositions = Object.keys(newPayload.positions).reduce((positions: Positions, key: string) => {
+        const chain = assetFromString(key)?.chain
+        if (!chain) {
+          throw Error ('Invalid chain')
+        }
+        const chainKey = getChainKeyFromChain(chain)
+        if (walletsConnected.includes(chainKey)) {
+          positions[key] = newPayload.positions[key]
+        }
+        if (walletsConnected.includes(ChainKey.THORCHAIN)) { // Symmetrical positions can be managed from THORChain wallet
+          positions[key] = {
+            SLP: null,
+            DLP: newPayload.positions[key].DLP
+          }
+        }
+        return positions
+      }, {})
+
+      setCurrentPositionsStats({
+        ...newPayload,
+        positions: filteredPositions
+      });
 
       return { positions: genericPositionsDataStructure, pools };
     },
@@ -136,6 +163,8 @@ export function usePositionStats({
       setRefetchInterval(undefined);
     }
   }, [currentPositionsStats, defaultRefetchInterval]);
+
+  const cleanPositions = useCallback(() => setCurrentPositionsStats(undefined), [])
 
   const markPositionAsPending = useCallback(
     (pooldId: string, positionType: PositionType, status: PositionStatus) => {
@@ -215,6 +244,7 @@ export function usePositionStats({
     positions: currentPositionsStats?.positions,
     pools: currentPositionsStats?.pools,
     markPositionAsPending,
+    cleanPositions,
     isPending,
     error,
   };

@@ -15,6 +15,7 @@ interface LiquidityPositionsContextType {
     type: PositionType,
     status: PositionStatus,
   ) => void;
+  cleanPositions: () => void;
   isPending: boolean;
   error: Error | null;
 }
@@ -28,7 +29,7 @@ export const LiquidityPositionsProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const { positions, pools, markPositionAsPending, isPending, error } =
+  const { positions, pools, markPositionAsPending, isPending, error, cleanPositions } =
     usePositionStats({});
 
   return (
@@ -37,6 +38,7 @@ export const LiquidityPositionsProvider = ({
         positions,
         pools,
         markPositionAsPending,
+        cleanPositions,
         isPending,
         error,
       }}
