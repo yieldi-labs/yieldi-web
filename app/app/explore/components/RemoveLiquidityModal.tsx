@@ -26,6 +26,7 @@ import AssetInput from "./AssetInput";
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;
   position: MemberPool;
+  positionType: PositionType;
   runePriceUSD: number;
   onClose: (transactionSubmitted: boolean) => void;
 }
@@ -45,6 +46,7 @@ const DECIMALS = {
 export default function RemoveLiquidityModal({
   pool,
   position,
+  positionType,
   runePriceUSD,
   onClose,
 }: RemoveLiquidityModalProps) {
@@ -67,7 +69,9 @@ export default function RemoveLiquidityModal({
     null,
   );
   const [withdrawalType, setWithdrawalType] = useState<WithdrawalType>(
-    WithdrawalType.SPLIT,
+    positionType === PositionType.SLP
+      ? WithdrawalType.ALL_ASSET
+      : WithdrawalType.SPLIT,
   );
   const chainKey = getChainKeyFromChain(assetChain);
   const selectedWallet = walletsState![chainKey];
@@ -88,12 +92,18 @@ export default function RemoveLiquidityModal({
     .decimalPlaces(DECIMALS.USD)
     .toNumber();
 
-  const posAssetAmount = new BigNumber(positionAssetAmount);
-  const posRuneAmount = new BigNumber(positionRuneAmount);
-  const posAssetUSdValue = posAssetAmount.times(
+  const posAssetAmount = useMemo(
+    () => new BigNumber(positionAssetAmount),
+    [positionAssetAmount],
+  );
+  const posRuneAmount = useMemo(
+    () => new BigNumber(positionRuneAmount),
+    [positionRuneAmount],
+  );
+  const posAssetUsdValue = posAssetAmount.times(
     new BigNumber(pool.assetPriceUSD),
   );
-  const posRuneUSdValue = posRuneAmount.times(new BigNumber(runePriceUSD));
+  const posRuneUsdValue = posRuneAmount.times(new BigNumber(runePriceUSD));
 
   const totalAssetAmount = posAssetAmount.plus(
     posRuneAmount.times(assetRuneRatio),
@@ -286,6 +296,25 @@ export default function RemoveLiquidityModal({
     setLastModified(null);
   };
 
+  const assetBalance =
+    withdrawalType === WithdrawalType.ALL_ASSET
+      ? posAssetAmount.plus(posRuneAmount.times(assetRuneRatio)).toNumber()
+      : posAssetAmount.toNumber();
+  const runeBalance =
+    withdrawalType === WithdrawalType.ALL_RUNE
+      ? posRuneAmount.plus(posAssetAmount.div(assetRuneRatio)).toNumber()
+      : posRuneAmount.toNumber();
+  const assetUsdBalance =
+    withdrawalType === WithdrawalType.ALL_ASSET
+      ? new BigNumber(assetBalance)
+          .times(new BigNumber(pool.assetPriceUSD))
+          .toNumber()
+      : posAssetUsdValue.toNumber();
+  const runeUsdBalance =
+    withdrawalType === WithdrawalType.ALL_RUNE
+      ? new BigNumber(runeBalance).times(new BigNumber(runePriceUSD)).toNumber()
+      : posRuneUsdValue.toNumber();
+
   return (
     <Modal onClose={() => onClose(false)} title="Remove">
       <div className="p-2 w-m">
@@ -294,31 +323,55 @@ export default function RemoveLiquidityModal({
         )}
 
         {/* Withdrawal Options */}
-        <div className="mb-6">
-          <h3 className="text-base text-neutral-900 font-medium mb-4">
-            Withdraw Options
-          </h3>
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={() => handleWithdrawalTypeChange(WithdrawalType.SPLIT)}
-              className={`p-4 rounded-xl border-2 transition-colors ${
-                withdrawalType === WithdrawalType.SPLIT
-                  ? "border-primary"
-                  : "border-transparent bg-white"
-              }`}
-            >
-              <div className="flex justify-between items-center">
-                <span className="text-neutral-900">
-                  Both {assetSymbol} and RUNE
-                </span>
-                <div className="flex gap-2">
-                  <Image
-                    src={getLogoPath(pool.asset)}
-                    alt={assetSymbol}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
+        {positionType === PositionType.DLP && (
+          <div className="mb-6">
+            <h3 className="text-base text-neutral-900 font-medium mb-4">
+              Withdraw Options
+            </h3>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => handleWithdrawalTypeChange(WithdrawalType.SPLIT)}
+                className={`p-4 rounded-xl border-2 transition-colors ${
+                  withdrawalType === WithdrawalType.SPLIT
+                    ? "border-primary"
+                    : "border-transparent bg-white"
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-neutral-900">
+                    Both {assetSymbol} and RUNE
+                  </span>
+                  <div className="flex gap-2">
+                    <Image
+                      src={getLogoPath(pool.asset)}
+                      alt={assetSymbol}
+                      width={24}
+                      height={24}
+                      className="rounded-full"
+                    />
+                    <Image
+                      src={getLogoPath("THOR.RUNE")}
+                      alt="RUNE"
+                      width={24}
+                      height={24}
+                      className="rounded-full"
+                    />
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() =>
+                  handleWithdrawalTypeChange(WithdrawalType.ALL_RUNE)
+                }
+                className={`p-4 rounded-xl border-2 transition-colors ${
+                  withdrawalType === WithdrawalType.ALL_RUNE
+                    ? "border-primary"
+                    : "border-transparent bg-white"
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-neutral-900">All RUNE</span>
                   <Image
                     src={getLogoPath("THOR.RUNE")}
                     alt="RUNE"
@@ -327,54 +380,32 @@ export default function RemoveLiquidityModal({
                     className="rounded-full"
                   />
                 </div>
-              </div>
-            </button>
+              </button>
 
-            <button
-              onClick={() =>
-                handleWithdrawalTypeChange(WithdrawalType.ALL_RUNE)
-              }
-              className={`p-4 rounded-xl border-2 transition-colors ${
-                withdrawalType === WithdrawalType.ALL_RUNE
-                  ? "border-primary"
-                  : "border-transparent bg-white"
-              }`}
-            >
-              <div className="flex justify-between items-center">
-                <span className="text-neutral-900">All RUNE</span>
-                <Image
-                  src={getLogoPath("THOR.RUNE")}
-                  alt="RUNE"
-                  width={24}
-                  height={24}
-                  className="rounded-full"
-                />
-              </div>
-            </button>
-
-            <button
-              onClick={() =>
-                handleWithdrawalTypeChange(WithdrawalType.ALL_ASSET)
-              }
-              className={`p-4 rounded-xl border-2 transition-colors ${
-                withdrawalType === WithdrawalType.ALL_ASSET
-                  ? "border-primary"
-                  : "border-transparent bg-white"
-              }`}
-            >
-              <div className="flex justify-between items-center">
-                <span className="text-neutral-900">All {assetSymbol}</span>
-                <Image
-                  src={getLogoPath(pool.asset)}
-                  alt={assetSymbol}
-                  width={24}
-                  height={24}
-                  className="rounded-full"
-                />
-              </div>
-            </button>
+              <button
+                onClick={() =>
+                  handleWithdrawalTypeChange(WithdrawalType.ALL_ASSET)
+                }
+                className={`p-4 rounded-xl border-2 transition-colors ${
+                  withdrawalType === WithdrawalType.ALL_ASSET
+                    ? "border-primary"
+                    : "border-transparent bg-white"
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-neutral-900">All {assetSymbol}</span>
+                  <Image
+                    src={getLogoPath(pool.asset)}
+                    alt={assetSymbol}
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                </div>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Asset Input */}
         {(withdrawalType === WithdrawalType.SPLIT ||
@@ -387,8 +418,8 @@ export default function RemoveLiquidityModal({
             logoPath={getLogoPath(pool.asset)}
             assetDecimalScale={DECIMALS.ASSET}
             usdDecimalScale={DECIMALS.USD}
-            assetBalance={posAssetAmount.toNumber()}
-            usdBalance={posAssetUSdValue.toNumber()}
+            assetBalance={assetBalance}
+            usdBalance={assetUsdBalance}
           />
         )}
 
@@ -403,8 +434,8 @@ export default function RemoveLiquidityModal({
             logoPath={getLogoPath("THOR.RUNE")}
             assetDecimalScale={DECIMALS.ASSET}
             usdDecimalScale={DECIMALS.USD}
-            assetBalance={posRuneAmount.toNumber()}
-            usdBalance={posRuneUSdValue.toNumber()}
+            assetBalance={runeBalance}
+            usdBalance={runeUsdBalance}
           />
         )}
 

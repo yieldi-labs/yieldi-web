@@ -277,6 +277,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           <RemoveLiquidityModal
             pool={pool}
             position={selectedPosition.memberDetails}
+            positionType={selectedPosition.type}
             runePriceUSD={runePriceUSD}
             onClose={handleRemoveLiquidityClose}
           />
