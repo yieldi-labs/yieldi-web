@@ -1,6 +1,6 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
-import { NumberFormatValues, NumericFormat } from "react-number-format";
+import { NumberFormatValues } from "react-number-format";
 import BigNumber from "bignumber.js";
 import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail, MemberPool } from "@/midgard";
@@ -8,7 +8,6 @@ import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
   getAssetShortSymbol,
   getLogoPath,
-  formatNumber,
   getPositionDetails,
 } from "@/app/utils";
 import { useAppState } from "@/utils/contexts/context";
@@ -22,6 +21,7 @@ import {
 } from "@/hooks/dataTransformers/positionsTransformer";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { Slider } from "@shared/components/ui";
+import AssetInput from "./AssetInput";
 
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;
@@ -58,12 +58,14 @@ export default function RemoveLiquidityModal({
   );
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
-  const inputRef = useRef<HTMLInputElement>(null);
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [percentage, setPercentage] = useState(0);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastModified, setLastModified] = useState<"asset" | "rune" | null>(
+    null,
+  );
   const [withdrawalType, setWithdrawalType] = useState<WithdrawalType>(
     WithdrawalType.SPLIT,
   );
@@ -88,6 +90,11 @@ export default function RemoveLiquidityModal({
 
   const posAssetAmount = new BigNumber(positionAssetAmount);
   const posRuneAmount = new BigNumber(positionRuneAmount);
+  const posAssetUSdValue = posAssetAmount.times(
+    new BigNumber(pool.assetPriceUSD),
+  );
+  const posRuneUSdValue = posRuneAmount.times(new BigNumber(runePriceUSD));
+
   const totalAssetAmount = posAssetAmount.plus(
     posRuneAmount.times(assetRuneRatio),
   );
@@ -126,12 +133,78 @@ export default function RemoveLiquidityModal({
     }
   };
 
+  useEffect(() => {
+    // Skip effect if no values entered
+    if (!assetAmount && !runeAmount) return;
+
+    // Skip if invalid numbers
+    const currAssetAmount = new BigNumber(assetAmount || 0);
+    const currRuneAmount = new BigNumber(runeAmount || 0);
+    if (currAssetAmount.isNaN() || currRuneAmount.isNaN()) return;
+
+    let newPercentage = 0;
+
+    switch (withdrawalType) {
+      case WithdrawalType.ALL_ASSET:
+        newPercentage = currAssetAmount
+          .div(totalAssetAmount)
+          .times(100)
+          .toNumber();
+        setPercentage(newPercentage);
+        break;
+
+      case WithdrawalType.ALL_RUNE:
+        newPercentage = currRuneAmount
+          .div(totalRuneAmount)
+          .times(100)
+          .toNumber();
+        setPercentage(newPercentage);
+        break;
+
+      case WithdrawalType.SPLIT:
+        // If asset amount was changed
+        if (lastModified === "asset") {
+          const pct = currAssetAmount.div(posAssetAmount).times(100);
+          const calculatedRuneAmount = posRuneAmount.times(pct.div(100));
+
+          // Only update rune if it's different to avoid loop
+          if (!calculatedRuneAmount.eq(currRuneAmount)) {
+            setRuneAmount(calculatedRuneAmount.toNumber().toString());
+          }
+          setPercentage(pct.toNumber());
+        }
+        // If rune amount was changed
+        else if (lastModified === "rune") {
+          const pct = currRuneAmount.div(posRuneAmount).times(100);
+          const calculatedAssetAmount = posAssetAmount.times(pct.div(100));
+
+          // Only update asset if it's different to avoid loop
+          if (!calculatedAssetAmount.eq(currAssetAmount)) {
+            setAssetAmount(calculatedAssetAmount.toNumber().toString());
+          }
+          setPercentage(pct.toNumber());
+        }
+        break;
+    }
+  }, [
+    assetAmount,
+    runeAmount,
+    withdrawalType,
+    posAssetAmount,
+    posRuneAmount,
+    totalAssetAmount,
+    totalRuneAmount,
+    lastModified,
+  ]);
+
   const handleAssetValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
+    setLastModified("asset");
   };
 
   const handleRuneValueChange = (values: NumberFormatValues) => {
     setRuneAmount(values.value);
+    setLastModified("rune");
   };
 
   const handleRemoveLiquidity = async () => {
@@ -159,7 +232,7 @@ export default function RemoveLiquidityModal({
       if (hash) {
         markPositionAsPending(
           pool.asset,
-          PositionType.SLP, // TODO: Update with support for SLP and DLP
+          PositionType.SLP,
           PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
         );
         setTxHash(hash);
@@ -210,6 +283,7 @@ export default function RemoveLiquidityModal({
     setRuneAmount("");
     setAssetAmount("");
     setPercentage(0);
+    setLastModified(null);
   };
 
   return (
@@ -305,64 +379,33 @@ export default function RemoveLiquidityModal({
         {/* Asset Input */}
         {(withdrawalType === WithdrawalType.SPLIT ||
           withdrawalType === WithdrawalType.ALL_ASSET) && (
-          <div className="bg-white rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <NumericFormat
-                getInputRef={inputRef}
-                value={assetAmount}
-                onValueChange={handleAssetValueChange}
-                placeholder="0"
-                className="flex-1 text-xl font-medium outline-none"
-                thousandSeparator=","
-                decimalScale={DECIMALS.ASSET}
-                allowNegative={false}
-              />
-              <div className="flex items-center gap-2">
-                <Image
-                  src={getLogoPath(pool.asset)}
-                  alt={assetSymbol}
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-                <span className="text-neutral">{assetSymbol}</span>
-              </div>
-            </div>
-            <div className="flex justify-between text-base font-medium text-neutral-800">
-              <div>≈ ${formatNumber(assetUsdValue, DECIMALS.USD)}</div>
-            </div>
-          </div>
+          <AssetInput
+            value={assetAmount}
+            onValueChange={handleAssetValueChange}
+            assetSymbol={assetSymbol}
+            assetUsdValue={assetUsdValue}
+            logoPath={getLogoPath(pool.asset)}
+            assetDecimalScale={DECIMALS.ASSET}
+            usdDecimalScale={DECIMALS.USD}
+            assetBalance={posAssetAmount.toNumber()}
+            usdBalance={posAssetUSdValue.toNumber()}
+          />
         )}
 
         {/* Rune Input */}
         {(withdrawalType === WithdrawalType.SPLIT ||
           withdrawalType === WithdrawalType.ALL_RUNE) && (
-          <div className="bg-white rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <NumericFormat
-                value={runeAmount}
-                onValueChange={handleRuneValueChange}
-                placeholder="0"
-                className="flex-1 text-xl font-medium outline-none"
-                thousandSeparator=","
-                decimalScale={DECIMALS.ASSET}
-                allowNegative={false}
-              />
-              <div className="flex items-center gap-2">
-                <Image
-                  src={getLogoPath("THOR.RUNE")}
-                  alt="RUNE"
-                  width={32}
-                  height={32}
-                  className="rounded-full"
-                />
-                <span className="text-neutral">RUNE</span>
-              </div>
-            </div>
-            <div className="flex justify-between text-base font-medium text-neutral-800">
-              <div>≈ ${formatNumber(runeUsdValue, DECIMALS.USD)}</div>
-            </div>
-          </div>
+          <AssetInput
+            value={runeAmount}
+            onValueChange={handleRuneValueChange}
+            assetSymbol="RUNE"
+            assetUsdValue={runeUsdValue}
+            logoPath={getLogoPath("THOR.RUNE")}
+            assetDecimalScale={DECIMALS.ASSET}
+            usdDecimalScale={DECIMALS.USD}
+            assetBalance={posRuneAmount.toNumber()}
+            usdBalance={posRuneUSdValue.toNumber()}
+          />
         )}
 
         {/* Percentage Buttons */}

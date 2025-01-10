@@ -1,14 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
-import { NumberFormatValues, NumericFormat } from "react-number-format";
+import { NumberFormatValues } from "react-number-format";
 import Modal from "@/app/modal";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
-import {
-  getAssetShortSymbol,
-  getLogoPath,
-  formatNumber,
-  DECIMALS,
-} from "@/app/utils";
+import { getAssetShortSymbol, getLogoPath, DECIMALS } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
@@ -21,6 +15,7 @@ import {
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
 import { ChainKey } from "@/utils/wallet/constants";
+import AssetInput from "./AssetInput";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -306,37 +301,17 @@ export default function AddLiquidityModal({
           </div>
         )}
 
-        <div className="bg-white rounded-xl p-4 mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <NumericFormat
-              getInputRef={inputRef}
-              value={assetAmount}
-              onValueChange={handleValueChange}
-              placeholder="0"
-              className="flex-1 text-xl font-medium outline-none"
-              thousandSeparator=","
-              decimalScale={poolNativeDecimal}
-              allowNegative={false}
-            />
-            <div className="flex items-center gap-2">
-              <Image
-                src={getLogoPath(pool.asset)}
-                alt={assetSymbol}
-                width={32}
-                height={32}
-                className="rounded-full"
-              />
-              <span className="text-neutral">{assetSymbol}</span>
-            </div>
-          </div>
-          <div className="flex justify-between text-base font-medium text-neutral-800">
-            <div>≈ ${formatNumber(usdValue, 2)}</div>
-            <div>
-              Balance: {formatNumber(assetBalance)} ($
-              {formatNumber(assetUsdBalance, 2)})
-            </div>
-          </div>
-        </div>
+        <AssetInput
+          value={assetAmount}
+          onValueChange={handleValueChange}
+          assetSymbol={assetSymbol}
+          assetUsdValue={usdValue}
+          logoPath={getLogoPath(pool.asset)}
+          assetDecimalScale={6}
+          usdDecimalScale={2}
+          assetBalance={assetBalance}
+          usdBalance={assetUsdBalance}
+        />
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
             <button
@@ -355,36 +330,17 @@ export default function AddLiquidityModal({
         {/* RUNE Amount Input (Only if Dual-sided) */}
         {isDualSided && (
           <>
-            <div className="bg-white rounded-xl p-4 mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                <NumericFormat
-                  value={runeAmount}
-                  onValueChange={handleRuneValueChange}
-                  placeholder="0"
-                  className="flex-1 text-xl font-medium outline-none"
-                  thousandSeparator=","
-                  decimalScale={8}
-                  allowNegative={false}
-                />
-                <div className="flex items-center gap-2">
-                  <Image
-                    src={getLogoPath("thor.rune")}
-                    alt="RUNE"
-                    width={32}
-                    height={32}
-                    className="rounded-full"
-                  />
-                  <span className="text-neutral">RUNE</span>
-                </div>
-              </div>
-              <div className="flex justify-between text-base font-medium text-neutral-800">
-                <div>≈ ${formatNumber(runeUsdValue, 2)}</div>
-                <div>
-                  Balance: {formatNumber(runeBalance, 6)} ($
-                  {formatNumber(runeUsdBalance, 2)})
-                </div>
-              </div>
-            </div>
+            <AssetInput
+              value={runeAmount}
+              onValueChange={handleRuneValueChange}
+              assetSymbol="RUNE"
+              assetUsdValue={runeUsdValue}
+              logoPath={getLogoPath("thor.rune")}
+              assetDecimalScale={6}
+              usdDecimalScale={2}
+              assetBalance={runeBalance}
+              usdBalance={runeUsdBalance}
+            />
             <div className="flex justify-end gap-2 mb-6">
               {[25, 50, 100].map((percent) => (
                 <button
