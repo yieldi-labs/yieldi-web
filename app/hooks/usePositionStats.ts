@@ -15,6 +15,7 @@ import {
 } from "./dataTransformers/positionsTransformer";
 import { useCallback, useEffect, useState } from "react";
 import { useAppState } from "@/utils/contexts/context";
+import { ethers } from "ethers";
 
 interface UsePositionStatsProps {
   defaultRefetchInterval?: number;
@@ -63,8 +64,11 @@ export function usePositionStats({
     const addresses = [];
     for (const key in walletsState!) {
       if (walletsState!.hasOwnProperty(key)) {
-        const wallet = walletsState![key];
-        addresses.push(wallet.address);
+        let address = walletsState![key].address
+        if (ethers.utils.isAddress(address)) {
+          address = ethers.utils.getAddress(address); // Address with checksum
+        }
+        addresses.push(address);
       }
     }
     setAddresses(addresses);

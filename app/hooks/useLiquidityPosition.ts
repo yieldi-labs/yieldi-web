@@ -18,7 +18,7 @@ import {
 } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
 import { useCosmos } from "./useCosmos";
-import { assetAmount, assetToBase, delay } from "@xchainjs/xchain-util";
+import { assetAmount, assetToBase } from "@xchainjs/xchain-util";
 
 interface AddLiquidityParams {
   asset: string;
