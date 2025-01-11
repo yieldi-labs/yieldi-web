@@ -5,7 +5,7 @@ import {
   ConnectedWalletsState,
 } from "@/utils/interfaces";
 import { ChainKey, CHAINS } from "@/utils/wallet/constants";
-import { getPools, PoolDetail } from "@/midgard";
+import { getPools } from "@/midgard";
 import { getChainKeyFromChain } from "@/utils/chain";
 import {
   assetFromString,
@@ -40,35 +40,6 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       };
     };
 
-    const fetchNativeTokens = (pool: PoolDetail) => {
-      const asset = assetFromString(pool.asset);
-      if (!asset) {
-        throw Error(`Invalid asset ${pool.asset}`);
-      }
-      const chainKey = getChainKeyFromChain(asset.chain);
-
-      const wallet = walletsState[chainKey as ChainKey];
-      if (wallet?.address && wallet?.provider) {
-        try {
-          addTokenData(chainKey as ChainKey, {
-            name: chainKey,
-            symbol: asset.symbol,
-            decimals: Number(pool.nativeDecimal),
-            balance: 0,
-            asset: pool.asset,
-            chainName: "Native",
-            chainKey: chainKey,
-            tokenAddress: "0x",
-          });
-        } catch (error) {
-          console.error(
-            `Error fetching native balance for ${chainKey}:`,
-            error,
-          );
-        }
-      }
-    };
-
     const fetchPoolTokens = async () => {
       const { data: pools } = await getPools({
         query: { period: "30d", status: "available" },
@@ -76,14 +47,21 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
       if (!pools) return;
 
-      pools.map((pool) => {
+      pools.forEach((pool) => {
         const asset = assetFromString(pool.asset);
         if (!asset) {
           throw Error(`Invalid asset ${pool.asset}`);
         }
+
+        const chainKey = getChainKeyFromChain(asset.chain);
+        const wallet = walletsState[chainKey as ChainKey];
+
+        if (!wallet) {
+          return;
+        }
+
         if (isERC20(pool.asset)) {
           const poolViemAddress = pool.asset.split(".")[1].split("-")[1];
-          const chainKey = getChainKeyFromChain(asset.chain);
           const tokenAddress = normalizeAddress(poolViemAddress!);
           if (tokenAddress) {
             addTokenData(chainKey, {
@@ -96,21 +74,33 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
             });
           }
         } else if (walletsState[getChainKeyFromChain(asset.chain)]) {
-          fetchNativeTokens(pool);
+          addTokenData(chainKey as ChainKey, {
+            name: chainKey,
+            symbol: asset.symbol,
+            decimals: Number(pool.nativeDecimal),
+            balance: 0,
+            asset: pool.asset,
+            chainName: "Native",
+            chainKey: chainKey,
+            tokenAddress: "0x",
+          });
         }
       });
     };
 
-    addTokenData(ChainKey.THORCHAIN, {
-      name: ChainKey.THORCHAIN,
-      symbol: "RUNE",
-      decimals: 8,
-      balance: 0,
-      asset: "THOR.RUNE",
-      chainName: "Native",
-      chainKey: ChainKey.THORCHAIN,
-      tokenAddress: "",
-    });
+    if (walletsState[ChainKey.THORCHAIN]) {
+      addTokenData(ChainKey.THORCHAIN, {
+        // There is no pool for THORChain
+        name: ChainKey.THORCHAIN,
+        symbol: "RUNE",
+        decimals: 8,
+        balance: 0,
+        asset: "THOR.RUNE",
+        chainName: "Native",
+        chainKey: ChainKey.THORCHAIN,
+        tokenAddress: "",
+      });
+    }
 
     await fetchPoolTokens();
 
