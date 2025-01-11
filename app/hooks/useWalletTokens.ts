@@ -89,7 +89,8 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
     };
 
     if (walletsState[ChainKey.THORCHAIN]) {
-      addTokenData(ChainKey.THORCHAIN, { // There is no pool for THORChain
+      addTokenData(ChainKey.THORCHAIN, {
+        // There is no pool for THORChain
         name: ChainKey.THORCHAIN,
         symbol: "RUNE",
         decimals: 8,
