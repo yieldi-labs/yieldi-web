@@ -128,8 +128,7 @@ export function usePositionStats({
           const chainKey = getChainKeyFromChain(chain);
           if (walletsConnected.includes(chainKey)) {
             positions[key] = newPayload.positions[key];
-          }
-          if (walletsConnected.includes(ChainKey.THORCHAIN)) {
+          } else if (walletsConnected.includes(ChainKey.THORCHAIN)) {
             // Symmetrical positions can be managed from THORChain wallet
             positions[key] = {
               SLP: null,
