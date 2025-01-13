@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from "react";
-import Image from "next/image";
 import { NumberFormatValues } from "react-number-format";
 import BigNumber from "bignumber.js";
 import Modal from "@/app/modal";
@@ -22,6 +21,7 @@ import {
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { Slider } from "@shared/components/ui";
 import AssetInput from "./AssetInput";
+import ToggleButtonGroup from "./ToggleButtonGroup";
 
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;
@@ -324,87 +324,15 @@ export default function RemoveLiquidityModal({
 
         {/* Withdrawal Options */}
         {positionType === PositionType.DLP && (
-          <div className="mb-6">
-            <h3 className="text-base text-neutral-900 font-medium mb-4">
-              Withdraw Options
-            </h3>
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => handleWithdrawalTypeChange(WithdrawalType.SPLIT)}
-                className={`p-4 rounded-xl border-2 transition-colors ${
-                  withdrawalType === WithdrawalType.SPLIT
-                    ? "border-primary"
-                    : "border-transparent bg-white"
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-neutral-900">
-                    Both {assetSymbol} and RUNE
-                  </span>
-                  <div className="flex gap-2">
-                    <Image
-                      src={getLogoPath(pool.asset)}
-                      alt={assetSymbol}
-                      width={24}
-                      height={24}
-                      className="rounded-full"
-                    />
-                    <Image
-                      src={getLogoPath("THOR.RUNE")}
-                      alt="RUNE"
-                      width={24}
-                      height={24}
-                      className="rounded-full"
-                    />
-                  </div>
-                </div>
-              </button>
-
-              <button
-                onClick={() =>
-                  handleWithdrawalTypeChange(WithdrawalType.ALL_RUNE)
-                }
-                className={`p-4 rounded-xl border-2 transition-colors ${
-                  withdrawalType === WithdrawalType.ALL_RUNE
-                    ? "border-primary"
-                    : "border-transparent bg-white"
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-neutral-900">All RUNE</span>
-                  <Image
-                    src={getLogoPath("THOR.RUNE")}
-                    alt="RUNE"
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                </div>
-              </button>
-
-              <button
-                onClick={() =>
-                  handleWithdrawalTypeChange(WithdrawalType.ALL_ASSET)
-                }
-                className={`p-4 rounded-xl border-2 transition-colors ${
-                  withdrawalType === WithdrawalType.ALL_ASSET
-                    ? "border-primary"
-                    : "border-transparent bg-white"
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-neutral-900">All {assetSymbol}</span>
-                  <Image
-                    src={getLogoPath(pool.asset)}
-                    alt={assetSymbol}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                </div>
-              </button>
-            </div>
-          </div>
+          <ToggleButtonGroup
+            options={[
+              { label: `${assetSymbol} + RUNE`, value: WithdrawalType.SPLIT },
+              { label: "RUNE", value: WithdrawalType.ALL_RUNE },
+              { label: `${assetSymbol}`, value: WithdrawalType.ALL_ASSET },
+            ]}
+            selectedValue={withdrawalType}
+            onChange={handleWithdrawalTypeChange}
+          />
         )}
 
         {/* Asset Input */}
