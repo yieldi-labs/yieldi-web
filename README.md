@@ -43,7 +43,7 @@ For detailed information, see [App README](app/README.md) and [Landing Page READ
 
 - Next.js, React, TypeScript
 - Tailwind CSS
-- Viem (Ethereum), Sats-Connect (Bitcoin)
+- XchainJS
 - Thorchain API
 
 ## Contributing

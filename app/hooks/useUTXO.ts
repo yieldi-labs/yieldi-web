@@ -214,7 +214,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         throw new Error(errMsg);
       }
     },
-    [getFees],
+    [getFees, transfer, wallet?.address],
   );
 
   return {
