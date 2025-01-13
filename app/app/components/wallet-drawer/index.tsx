@@ -7,6 +7,7 @@ import WalletDrawerHeader from "./WalletDrawerHeader";
 import Modal from "@/app/modal";
 import WalletDrawerContent from "./WalletDrawerContent";
 import { SUPPORTED_WALLETS } from "@/utils/wallet/constants";
+import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 
 const WalletDrawerContainer: FC = () => {
   const {
@@ -22,6 +23,8 @@ const WalletDrawerContainer: FC = () => {
     selectedWallet,
   } = useAppState();
 
+  const { cleanPositions } = useLiquidityPositions();
+
   const handleAddWallet = () => {
     toggleWalletModal();
     toggleWalletDrawer();
@@ -36,6 +39,7 @@ const WalletDrawerContainer: FC = () => {
       wallet.provider.disconnect();
     }
     if (Object.keys(walletsState).length === 1) {
+      cleanPositions();
       toggleWalletDrawer();
     }
     setWalletsState((prev) => {
@@ -54,6 +58,7 @@ const WalletDrawerContainer: FC = () => {
         }
       });
     }
+    cleanPositions();
     setWalletsState({});
     toggleWalletDrawer();
   };
