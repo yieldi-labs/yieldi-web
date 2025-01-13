@@ -101,11 +101,14 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     }
   }, [assetIdentifier, isNativeAsset]);
 
-  const getAssetWallet = useCallback((asset: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [chain, _] = parseAssetString(asset);
-    return walletsState![getChainKeyFromChain(chain)];
-  }, [walletsState]);
+  const getAssetWallet = useCallback(
+    (asset: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [chain, _] = parseAssetString(asset);
+      return walletsState![getChainKeyFromChain(chain)];
+    },
+    [walletsState],
+  );
 
   const { approveSpending, getAllowance, depositWithExpiry } = useContracts({
     wallet: getAssetWallet(pool.asset),
