@@ -66,6 +66,7 @@ export function useThorchain({ wallet }: UseThorchainProps) {
       try {
         const from = wallet.address;
         const finalAmount = assetToBase(assetAmount(amount, RUNE_DECIMAL));
+        console.log("finalAmount", finalAmount);
         return depositThorchain(wallet, {
           from: from,
           amount: finalAmount,

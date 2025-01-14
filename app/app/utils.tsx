@@ -21,7 +21,7 @@ export enum SupportedChain {
   // Chainflip = "FLIP",
   // Polygon = "MATIC",
   // Radix = "XRD",
-  // THORChain = "THOR",
+  THORChain = "THOR",
   // Solana = "SOL",
 }
 

@@ -305,12 +305,19 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           withdrawAsset,
         );
 
+
+        console.log("wallet chain type", wallet.chainType);
+
+
         // Handle Thorchain withdrawals
         if (wallet.chainType === ChainKey.THORCHAIN) {
+          console.log("wallet chain type", wallet.chainType);
+          const amount = getMinAmountByChain(supportedChain);
+          console.log("amount", amount);
           return await thorChainClient.deposit({
             pool,
             recipient: "",
-            amount: getMinAmountByChain(supportedChain),
+            amount: amount,
             memo: memo,
           });
         }

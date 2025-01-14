@@ -226,8 +226,9 @@ export default function RemoveLiquidityModal({
     try {
       setIsSubmitting(true);
 
+      const asset = positionType === PositionType.SLP ? pool.asset : "THOR.RUNE";
       const hash = await removeLiquidity({
-        asset: pool.asset,
+        asset,
         assetDecimals: Number(pool.nativeDecimal),
         percentage,
         address: selectedWallet.address,
@@ -242,7 +243,7 @@ export default function RemoveLiquidityModal({
       if (hash) {
         markPositionAsPending(
           pool.asset,
-          PositionType.SLP,
+          positionType,
           PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
         );
         setTxHash(hash);
