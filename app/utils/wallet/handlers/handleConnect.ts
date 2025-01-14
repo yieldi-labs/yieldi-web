@@ -65,10 +65,10 @@ export const connectWallet = async (wallet: any): Promise<any> => {
           { method: "request_accounts", params: [] },
           (error: any, accounts: string[]) => {
             if (error) {
-              reject(error)
+              reject(error);
             } else {
-              resolve(accounts[0])
-            };
+              resolve(accounts[0]);
+            }
           },
         );
       });
