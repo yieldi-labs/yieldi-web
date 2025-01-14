@@ -19,7 +19,7 @@ const Wallet = ({
   return (
     <button
       className={`
-        bg-white p-[12px] flex gap-4 items-center border-[2px] rounded-2xl 
+        bg-white p-[12px] flex gap-2 md:gap-4 items-center border-[2px] rounded-2xl 
         transition-all duration-75 min-h-[58px]
           
         ${
@@ -31,11 +31,13 @@ const Wallet = ({
       `}
       onClick={() => isSupported && !disabled && onSelect && onSelect()}
     >
-      {cloneElement(wallet.icon, {
-        className: "w-[30px]",
-      })}
+      <div>
+        {cloneElement(wallet.icon, {
+          className: "w-[30px]",
+        })}
+      </div>
       <div className="flex flex-col items-start">
-        <span className="text-neutral-900 font-gt-america font-medium text-[14px]">
+        <span className="text-neutral-900 font-gt-america font-medium text-[14px] truncate">
           {wallet.name}
         </span>
       </div>
