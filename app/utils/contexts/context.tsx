@@ -207,10 +207,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         }
         case WalletKey.METAMASK: {
           if (
-            window.ethereum?.isMetaMask &&
-            !window.ethereum?.isVultisig &&
-            !window.ethereum?.isXDEFI &&
-            !window.ethereum?.isPhanthom
+            window.ethereum?.isMetaMask
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
@@ -273,10 +270,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         }
         case WalletKey.PHANTOM: {
           if (
-            window.solana?.isPhantom &&
-            !window.solana?.isBraveWallet &&
-            !window.solana?.isXDEFI &&
-            !window.solana?.isOkxWallet
+            window.solana?.isPhantom
           ) {
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
