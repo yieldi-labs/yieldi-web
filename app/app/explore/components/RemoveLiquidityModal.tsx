@@ -63,7 +63,8 @@ export default function RemoveLiquidityModal({
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [percentage, setPercentage] = useState(0);
-  const [txHash, setTxHash] = useState<string | null>(null);
+  const [assetTxHash, setAssetTxHash] = useState<string | null>(null);
+  const [runeTxHash, setRuneTxHash] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastModified, setLastModified] = useState<"asset" | "rune" | null>(
     null,
@@ -242,12 +243,16 @@ export default function RemoveLiquidityModal({
       });
 
       if (hash) {
+        if (positionType === PositionType.SLP) {
+          setAssetTxHash(hash);
+        } else {
+          setRuneTxHash(hash);
+        }
         markPositionAsPending(
           pool.asset,
           positionType,
           PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
         );
-        setTxHash(hash);
       }
     } catch (err) {
       console.error("Failed to remove liquidity:", err);
@@ -277,13 +282,19 @@ export default function RemoveLiquidityModal({
     }
   };
 
-  if (txHash && positions && positions[pool.asset][PositionType.SLP]) {
+  if (
+    (assetTxHash || runeTxHash) &&
+    positions &&
+    positions[pool.asset][positionType]
+  ) {
     return (
       <TransactionConfirmationModal
-        position={positions[pool.asset][PositionType.SLP]}
-        assetHash={txHash}
+        position={positions[pool.asset][positionType]}
+        assetHash={assetTxHash}
+        runeHash={runeTxHash}
         onClose={() => {
-          setTxHash(null);
+          setAssetTxHash(null);
+          setRuneTxHash(null);
           onClose(true);
         }}
       />
