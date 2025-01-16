@@ -294,10 +294,9 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         if (!supportedChain) {
           throw new Error(`Chain not supported: ${assetChain}`);
         }
-
         const memo = getLiquidityMemo(
           "remove",
-          asset,
+          pool.asset,
           undefined,
           undefined,
           undefined,
@@ -305,15 +304,9 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           withdrawAsset,
         );
 
-
-        console.log("wallet chain type", wallet.chainType);
-
-
         // Handle Thorchain withdrawals
         if (wallet.chainType === ChainKey.THORCHAIN) {
-          console.log("wallet chain type", wallet.chainType);
           const amount = getMinAmountByChain(supportedChain);
-          console.log("amount", amount);
           return await thorChainClient.deposit({
             pool,
             recipient: "",

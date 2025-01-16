@@ -226,7 +226,8 @@ export default function RemoveLiquidityModal({
     try {
       setIsSubmitting(true);
 
-      const asset = positionType === PositionType.SLP ? pool.asset : "THOR.RUNE";
+      const asset =
+        positionType === PositionType.SLP ? pool.asset : "THOR.RUNE";
       const hash = await removeLiquidity({
         asset,
         assetDecimals: Number(pool.nativeDecimal),
