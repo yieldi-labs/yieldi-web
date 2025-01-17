@@ -62,7 +62,7 @@ function MobileSortableHeader<T extends string>({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-32 rounded-lg gap-1 p-1 border-4 border-white bg-white shadow-lg">
+        <div className="absolute right-0 mt-2 w-32 rounded-lg gap-1 p-1 border-4 border-white bg-white shadow-lg z-30">
           {options.map((option) => (
             <button
               key={option.key}
