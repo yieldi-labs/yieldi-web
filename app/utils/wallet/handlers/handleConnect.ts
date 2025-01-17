@@ -216,6 +216,6 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         address: addressCosmos,
       };
     default:
-      console.warn(`Unknown UTXO wallet: ${wallet.id}`);
+      console.error(`Unknown UTXO wallet: ${wallet.id}`);
   }
 };

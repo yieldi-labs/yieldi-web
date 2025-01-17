@@ -90,20 +90,25 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     if (isNativeAsset) return undefined;
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [_, addressPart] = assetIdentifier.split("-");
       return addressPart
         ? (normalizeAddress(addressPart) as Address)
         : undefined;
     } catch (err) {
-      console.warn("Failed to parse token address:", err);
+      console.error("Failed to parse token address:", err);
       return undefined;
     }
   }, [assetIdentifier, isNativeAsset]);
 
-  const getAssetWallet = useCallback((asset: string) => {
-    const [chain, _] = parseAssetString(asset);
-    return walletsState![getChainKeyFromChain(chain)];
-  }, []);
+  const getAssetWallet = useCallback(
+    (asset: string) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const [chain, _] = parseAssetString(asset);
+      return walletsState![getChainKeyFromChain(chain)];
+    },
+    [walletsState],
+  );
 
   const { approveSpending, getAllowance, depositWithExpiry } = useContracts({
     wallet: getAssetWallet(pool.asset),

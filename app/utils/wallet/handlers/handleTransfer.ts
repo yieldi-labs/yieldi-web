@@ -67,7 +67,6 @@ export const transferUTXO = async (
                 console.error(error);
                 reject(error);
               } else {
-                console.log(result);
                 resolve(result);
               }
             },

@@ -16,6 +16,9 @@ const nextConfig = {
       },
     ],
   },
+  eslint: {
+    dirs: ["app", "utils", "hooks", "types", "infura", "ctrl"], // Agrega las carpetas que deseas analizar
+  },
   reactStrictMode: true,
   webpack: (config) => {
     // Ensure shared folder is transpiled
