@@ -59,12 +59,16 @@ export const connectWallet = async (wallet: any): Promise<any> => {
     case "xdefi-bch":
     case "xdefi-doge":
     case "xdefi-ltc":
+    case "xdefi-utxo":
       address = await new Promise((resolve, reject) => {
         wallet.provider.request(
           { method: "request_accounts", params: [] },
           (error: any, accounts: string[]) => {
-            if (error) reject(error);
-            else resolve(accounts[0]);
+            if (error) {
+              reject(error);
+            } else {
+              resolve(accounts[0]);
+            }
           },
         );
       });
@@ -73,21 +77,6 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         provider: wallet.provider,
         address,
       };
-    case "xdefi-utxo":
-      address = await wallet.provider.getAccounts();
-      return {
-        provider: wallet.provider,
-        address: address[0],
-      };
-    case "xdefi-solana":
-    case "phantom-solana": {
-      const resp = await wallet.provider.connect();
-
-      return {
-        provider: wallet.provider,
-        address: resp.publicKey.toString(),
-      };
-    }
     case "phantom-utxo":
       accounts = await wallet.provider.requestAccounts();
       return {
@@ -115,8 +104,6 @@ export const connectWallet = async (wallet: any): Promise<any> => {
     case "okx-avax":
     case "okx-bsc":
     case "okx-eth":
-      address = "";
-
       if (!wallet.provider.connect || wallet.provider.isConnected()) {
         let accounts = [];
         accounts = await wallet.provider.request({ method: "eth_accounts" });
