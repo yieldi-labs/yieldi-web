@@ -58,10 +58,10 @@ export default function PositionRow({
               <StatusPosition position={position} />
             </div>
           )}
-            <div className="hidden md:flex px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
-              {!hideAddButton && (
-                disableActions ?
-                <UIComponents.Tooltip text={'Connect wallet'}>
+          <div className="hidden md:flex px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
+            {!hideAddButton &&
+              (disableActions ? (
+                <UIComponents.Tooltip text={"Connect wallet"}>
                   <button
                     disabled={disableActions}
                     onClick={() => onAdd(position.assetId)}
@@ -69,7 +69,8 @@ export default function PositionRow({
                   >
                     Add
                   </button>
-                </UIComponents.Tooltip> :
+                </UIComponents.Tooltip>
+              ) : (
                 <button
                   disabled={disableActions}
                   onClick={() => onAdd(position.assetId)}
@@ -77,29 +78,29 @@ export default function PositionRow({
                 >
                   Add
                 </button>
-              )}
-              {
-                disableActions ?
-                <UIComponents.Tooltip text={'Connect wallet'}>
-                  <button
-                    disabled={disableActions}
-                    className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
-                              transition-all disabled:opacity-50 disabled:cursor-not-allowed ml-2"
-                    onClick={() => onRemove(position.assetId, position.type)}
-                  >
-                    Remove
-                  </button>
-                </UIComponents.Tooltip> : 
+              ))}
+            {disableActions ? (
+              <UIComponents.Tooltip text={"Connect wallet"}>
                 <button
+                  disabled={disableActions}
                   className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
-                            hover:text-opacity-50 hover:border-opacity-50 transition-all 
-                            disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                              transition-all disabled:opacity-50 disabled:cursor-not-allowed ml-2"
                   onClick={() => onRemove(position.assetId, position.type)}
                 >
                   Remove
                 </button>
-              }
-            </div>
+              </UIComponents.Tooltip>
+            ) : (
+              <button
+                className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
+                            hover:text-opacity-50 hover:border-opacity-50 transition-all 
+                            disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                onClick={() => onRemove(position.assetId, position.type)}
+              >
+                Remove
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </TranslucentCard>

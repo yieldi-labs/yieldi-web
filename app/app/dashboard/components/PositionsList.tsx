@@ -130,7 +130,7 @@ export default function PositionsList({
       </div>
       <div className="space-y-1.5">
         {sortedPositions.map((position) => {
-          const asset = assetFromString(position.assetId)
+          const asset = assetFromString(position.assetId);
           if (!asset) {
             throw new Error("Invalid asset");
           }
@@ -141,9 +141,13 @@ export default function PositionsList({
               position={position}
               onAdd={onAdd}
               onRemove={onRemove}
-              disableActions={Boolean(position.type === PositionType.DLP && (!walletsState[ChainKey.THORCHAIN] || !walletsState[chainKey]))}
+              disableActions={Boolean(
+                position.type === PositionType.DLP &&
+                  (!walletsState[ChainKey.THORCHAIN] ||
+                    !walletsState[chainKey]),
+              )}
             />
-          )
+          );
         })}
       </div>
     </>
