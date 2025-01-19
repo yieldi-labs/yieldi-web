@@ -8,6 +8,9 @@ import {
 } from "@/hooks/dataTransformers/positionsTransformer";
 import PositionsPlaceholder from "./PositionsPlaceholder";
 import { useAppState } from "@/utils/contexts/context";
+import { ChainKey } from "@/utils/wallet/constants";
+import { assetFromString } from "@xchainjs/xchain-util";
+import { getChainKeyFromChain } from "@/utils/chain";
 
 interface PositionsList {
   positions: PositionStats[];
@@ -126,14 +129,22 @@ export default function PositionsList({
         </div>
       </div>
       <div className="space-y-1.5">
-        {sortedPositions.map((position) => (
-          <PositionRow
-            key={`${position.assetId}-${position.type}`}
-            position={position}
-            onAdd={onAdd}
-            onRemove={onRemove}
-          />
-        ))}
+        {sortedPositions.map((position) => {
+          const asset = assetFromString(position.assetId)
+          if (!asset) {
+            throw new Error("Invalid asset");
+          }
+          const chainKey = getChainKeyFromChain(asset?.chain);
+          return (
+            <PositionRow
+              key={`${position.assetId}-${position.type}`}
+              position={position}
+              onAdd={onAdd}
+              onRemove={onRemove}
+              disableActions={Boolean(position.type === PositionType.DLP && (!walletsState[ChainKey.THORCHAIN] || !walletsState[chainKey]))}
+            />
+          )
+        })}
       </div>
     </>
   );

@@ -7,6 +7,7 @@ import {
   PositionType,
 } from "@/hooks/dataTransformers/positionsTransformer";
 import StatusPosition from "./StatusPosition";
+import { UIComponents } from "@shared/components";
 
 interface PositionsRow {
   position: PositionStats;
@@ -14,6 +15,7 @@ interface PositionsRow {
   onRemove: (poolId: string, type: PositionType) => void;
   hideAddButton?: boolean;
   hideStatus?: boolean;
+  disableActions?: boolean;
 }
 
 export default function PositionRow({
@@ -22,9 +24,10 @@ export default function PositionRow({
   onRemove,
   hideAddButton = false,
   hideStatus = false,
+  disableActions = false,
 }: PositionsRow) {
   return (
-    <TranslucentCard className="rounded-xl mb-1.5 overflow-scroll overflow-y-hidden overflow-x-hidden">
+    <TranslucentCard className="rounded-xl mb-1.5">
       <div className="flex items-center w-full">
         <div className="px-3 whitespace-nowrap md:w-1/5 w-1/2">
           <div className="flex items-center">
@@ -55,24 +58,48 @@ export default function PositionRow({
               <StatusPosition position={position} />
             </div>
           )}
-          <div className="hidden md:flex px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
-            {!hideAddButton && (
-              <button
-                onClick={() => onAdd(position.assetId)}
-                className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
-              >
-                Add
-              </button>
-            )}
-            <button
-              className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
-                        hover:text-opacity-50 hover:border-opacity-50 transition-all 
-                        disabled:opacity-50 disabled:cursor-not-allowed ml-2"
-              onClick={() => onRemove(position.assetId, position.type)}
-            >
-              Remove
-            </button>
-          </div>
+            <div className="hidden md:flex px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
+              {!hideAddButton && (
+                disableActions ?
+                <UIComponents.Tooltip text={'Connect wallet'}>
+                  <button
+                    disabled={disableActions}
+                    onClick={() => onAdd(position.assetId)}
+                    className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:opacity-50 disabled:cursor-not-allowed "
+                  >
+                    Add
+                  </button>
+                </UIComponents.Tooltip> :
+                <button
+                  disabled={disableActions}
+                  onClick={() => onAdd(position.assetId)}
+                  className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
+                >
+                  Add
+                </button>
+              )}
+              {
+                disableActions ?
+                <UIComponents.Tooltip text={'Connect wallet'}>
+                  <button
+                    disabled={disableActions}
+                    className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
+                              transition-all disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                    onClick={() => onRemove(position.assetId, position.type)}
+                  >
+                    Remove
+                  </button>
+                </UIComponents.Tooltip> : 
+                <button
+                  className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
+                            hover:text-opacity-50 hover:border-opacity-50 transition-all 
+                            disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                  onClick={() => onRemove(position.assetId, position.type)}
+                >
+                  Remove
+                </button>
+              }
+            </div>
         </div>
       </div>
     </TranslucentCard>
