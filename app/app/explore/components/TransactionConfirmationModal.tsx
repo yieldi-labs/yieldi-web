@@ -7,7 +7,7 @@ import {
 
 interface TransactionConfirmationModalProps {
   position: PositionStats | null;
-  assetHash: string | null;
+  assetHash?: string | null;
   runeHash?: string | null;
   onClose: () => void;
 }
@@ -70,7 +70,7 @@ export default function TransactionConfirmationModal({
   };
 
   const links = {
-    asset: createExplorerLinks(assetHash, chainName),
+    asset: assetHash ? createExplorerLinks(assetHash, chainName) : [],
     rune: runeHash ? createExplorerLinks(runeHash, "Rune") : [],
   };
 

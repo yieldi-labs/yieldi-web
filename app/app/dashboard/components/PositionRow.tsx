@@ -69,7 +69,6 @@ export default function PositionRow({
                         hover:text-opacity-50 hover:border-opacity-50 transition-all 
                         disabled:opacity-50 disabled:cursor-not-allowed ml-2"
               onClick={() => onRemove(position.assetId, position.type)}
-              disabled={position.type !== PositionType.SLP}
             >
               Remove
             </button>

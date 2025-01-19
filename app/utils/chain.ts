@@ -128,13 +128,10 @@ export const getMinAmountByChain = (chain: SupportedChain): number => {
       return 1.00000001;
     case SupportedChain.Avalanche:
     case SupportedChain.Ethereum:
-    // case SupportedChain.Arbitrum:
     case SupportedChain.BinanceSmartChain:
       return 0.00000001;
-    // case SupportedChain.THORChain:
-    // case SupportedChain.Maya:
-    //   return 0;
-    // case SupportedChain.Kujira:
+    case SupportedChain.THORChain:
+      return 0;
     case SupportedChain.Cosmos:
       return 0.000001;
     default:

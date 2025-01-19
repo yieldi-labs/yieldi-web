@@ -11,6 +11,14 @@ export enum SupportedChain {
   Dogecoin = "DOGE",
   Ethereum = "ETH",
   Litecoin = "LTC",
+  // Maya = "MAYA",
+  // Optimism = "OP",
+  // Polkadot = "DOT",
+  // Chainflip = "FLIP",
+  // Polygon = "MATIC",
+  // Radix = "XRD",
+  THORChain = "THOR",
+  // Solana = "SOL",
 }
 
 export function formatAddress(a: undefined | null | string) {

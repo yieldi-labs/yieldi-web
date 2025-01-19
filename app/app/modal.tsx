@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 
 export default function Modal({
@@ -11,8 +12,20 @@ export default function Modal({
   onClose: () => void;
   style?: object;
 }) {
-  const modalRoot = document.getElementById("modal-root");
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
 
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
+  const modalRoot = document.getElementById("modal-root");
   if (!modalRoot) {
     console.error("Can not find id 'modal-root' in DOM.");
     return null;

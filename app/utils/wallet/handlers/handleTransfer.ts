@@ -7,6 +7,7 @@ import { ChainKey, WalletKey } from "../constants";
 import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
 import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
+import { AssetRuneNative, RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 
 export interface TransactionEvmParams extends TransactionParams {
   data: `0x${string}`;
@@ -150,10 +151,19 @@ export const depositThorchain = async (
     case WalletKey.CTRL:
     case WalletKey.LEDGER:
       return new Promise<string>((resolve, reject) => {
+        const depositParams = {
+          asset: AssetRuneNative,
+          from: transferParams.from,
+          amount: {
+            amount: transferParams.amount.amount().toNumber(),
+            decimals: RUNE_DECIMAL,
+          },
+          memo: transferParams.memo,
+        };
         wallet.provider.request(
           {
             method: "deposit",
-            params: [transferParams],
+            params: [depositParams],
           },
           (error: Error | null, result: string | null) => {
             if (error) {
