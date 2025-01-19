@@ -3,17 +3,13 @@ import { CHAINS } from "@/utils/wallet/constants";
 import { assetFromString } from "@xchainjs/xchain-util";
 
 export enum SupportedChain {
-  // Arbitrum = "ARB",
   Avalanche = "AVAX",
-  // Base = "BASE",
   BinanceSmartChain = "BSC",
   Bitcoin = "BTC",
   BitcoinCash = "BCH",
   Cosmos = "GAIA",
-  // Dash = "DASH",
   Dogecoin = "DOGE",
   Ethereum = "ETH",
-  // Kujira = "KUJI",
   Litecoin = "LTC",
   // Maya = "MAYA",
   // Optimism = "OP",

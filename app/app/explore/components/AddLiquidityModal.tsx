@@ -60,7 +60,7 @@ export default function AddLiquidityModal({
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
   const runeBalance = useMemo(() => {
     if (!balanceList) return 0;
-    return balanceList[ChainKey.THORCHAIN]["THOR.RUNE"].balance;
+    return balanceList[ChainKey.THORCHAIN]["THOR.RUNE"]?.balance;
   }, [balanceList]);
   const assetBalance = useMemo(() => {
     if (!balanceList || !pool.asset) return 0;
