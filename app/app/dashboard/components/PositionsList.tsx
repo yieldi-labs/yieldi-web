@@ -5,7 +5,7 @@ import PositionRow from "./PositionRow";
 import {
   PositionStats,
   PositionType,
-} from "@/hooks/dataTransformers/positionsTransformer";
+} from "@/utils/lp-monitor/parsePositions";;
 import PositionsPlaceholder from "./PositionsPlaceholder";
 import { useAppState } from "@/utils/contexts/context";
 import { ChainKey } from "@/utils/wallet/constants";

@@ -2,12 +2,9 @@ import React from "react";
 import TranslucentCard from "@/app/TranslucentCard";
 import { addDollarSignAndSuffix, getAssetSymbol } from "@/app/utils";
 import TokenLogo from "./TokenLogo";
-import {
-  PositionStats,
-  PositionType,
-} from "@/hooks/dataTransformers/positionsTransformer";
 import StatusPosition from "./StatusPosition";
 import { UIComponents } from "@shared/components";
+import { PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
 
 interface PositionsRow {
   position: PositionStats;

@@ -25,7 +25,7 @@ export const actionsTransformer = async (
   onlyPending = true
 ): Promise<ActionData[]> => {
   const resultActions = await getActions({
-    path: {
+    query: {
       type: "withdraw,addLiquidity",
       address: addresses.join(","),
     },

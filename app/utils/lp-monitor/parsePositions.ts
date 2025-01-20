@@ -6,7 +6,7 @@ import {
   baseToAsset,
 } from "@xchainjs/xchain-util";
 import BigNumber from "bignumber.js";
-import { ActionData, actionsTransformer } from "./parseActions";
+import { ActionData, actionsTransformer, ActionType } from "./parseActions";
 
 export enum PositionStatus {
   LP_POSITION_DEPOSIT_PENDING = "LP_POSITION_DEPOSIT_PENDING",
@@ -60,7 +60,7 @@ export const positionsTransformer = async (
   });
 
   const actions = await actionsTransformer(addresses)
-
+  
   const memberPools = memberPoolsResult.data?.pools
 
   if (!memberPools) {
@@ -129,10 +129,12 @@ export const positionsTransformer = async (
     assetAdded = depositValueAsset.amount().toNumber();
     runeAdded = depositValueRune.amount().toNumber();
 
+    const pendingActions = actions.filter((action) => action.pool === memberPool.pool)
+
     result[key][type] = {
       assetId: memberPool.pool,
       type: determinePositionType(memberPool),
-      status: determinePositionStatus(memberPool),
+      status: determinePositionStatus(memberPool, pendingActions),
       deposit: {
         usd: totalAddedValueInUsd.amount().toNumber(),
         totalInAsset: totalAddedValueInAsset.amount().toNumber(),
@@ -149,7 +151,7 @@ export const positionsTransformer = async (
           .toFixed(4),
       },
       pool,
-      pendingActions: actions.filter((action) => action.pool === memberPool.pool),
+      pendingActions,
       memberDetails: memberPool,
     };
   });
@@ -167,7 +169,14 @@ const determinePositionType = (memberPool: MemberPool): PositionType => {
   return PositionType.SLP;
 };
 
-const determinePositionStatus = (memberPool: MemberPool) => {
+const determinePositionStatus = (memberPool: MemberPool, actionsPending: ActionData[]) => {
+  if (actionsPending.length > 0) {
+    if (actionsPending[0].type === ActionType.ADD_LIQUIDITY) {
+      return PositionStatus.LP_POSITION_DEPOSIT_PENDING;
+    } else {
+      return PositionStatus.LP_POSITION_WITHDRAWAL_PENDING;
+    }
+  }
   if (Number(memberPool.assetPending) > 0 || Number(memberPool.runePending) > 0)
     return PositionStatus.LP_POSITION_INCOMPLETE;
   return PositionStatus.LP_POSITION_COMPLETE;

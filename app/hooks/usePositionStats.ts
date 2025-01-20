@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  getMemberDetail,
   getPools,
   MemberPool,
   PoolDetail,
@@ -12,7 +11,7 @@ import {
   PositionStatus,
   positionsTransformer,
   PositionType,
-} from "./dataTransformers/positionsTransformer";
+} from "@/utils/lp-monitor/parsePositions";
 import { useCallback, useEffect, useState } from "react";
 import { useAppState } from "@/utils/contexts/context";
 import { ethers } from "ethers";
@@ -45,6 +44,7 @@ export function emptyPositionStats(asset = "BTC.BTC"): PositionStats {
       asset: 0,
       percentage: "0",
     },
+    pendingActions: [],
     pool: {} as PoolDetail,
     memberDetails: {} as MemberPool,
   };
@@ -67,14 +67,16 @@ export function usePositionStats({
     const addresses = [];
     for (const key in walletsState!) {
       if (walletsState!.hasOwnProperty(key)) {
-        let address = walletsState![key].address;
+        const address = walletsState![key].address;
         if (ethers.utils.isAddress(address)) {
-          address = ethers.utils.getAddress(address); // Address with checksum
+          const checksummeAddress = ethers.utils.getAddress(address); // Address with checksum
+          addresses.push(checksummeAddress);
         }
         addresses.push(address);
       }
     }
-    setAddresses(addresses);
+    const uniqueAddresses = addresses.filter((address, index, arrayAddresses) => arrayAddresses.indexOf(address) === index);
+    setAddresses(uniqueAddresses);
   }, [walletsState]);
 
   const {
@@ -89,23 +91,13 @@ export function usePositionStats({
     queryFn: async () => {
       const resultPools = await getPools();
       const pools = resultPools.data;
-      const result = await getMemberDetail({
-        path: {
-          address: addresses.join(","),
-        },
-      });
-
-      if (result.response.status === 404) {
-        // Midgard return 404 if user hasn't positions
-        setRefetchInterval(undefined);
-      }
 
       if (!pools) {
         throw Error("No pools available");
       }
 
-      const genericPositionsDataStructure = positionsTransformer(
-        result.data?.pools || [],
+      const genericPositionsDataStructure = await positionsTransformer(
+        addresses,
         pools,
       );
 

@@ -13,7 +13,7 @@ import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import {
   PositionStatus,
   PositionType,
-} from "@/hooks/dataTransformers/positionsTransformer";
+} from "@/utils/lp-monitor/parsePositions";;
 import { ChainKey } from "@/utils/wallet/constants";
 import AssetInput from "./AssetInput";
 import ToggleButtonGroup from "./ToggleButtonGroup";

@@ -17,7 +17,7 @@ import { getChainKeyFromChain, parseAssetString } from "@/utils/chain";
 import {
   PositionStatus,
   PositionType,
-} from "@/hooks/dataTransformers/positionsTransformer";
+} from "@/utils/lp-monitor/parsePositions";;
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { Slider } from "@shared/components/ui";
 import AssetInput from "./AssetInput";

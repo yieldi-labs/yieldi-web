@@ -27,7 +27,7 @@ import {
   Positions,
   PositionStats,
   PositionStatus,
-} from "@/hooks/dataTransformers/positionsTransformer";
+} from "@/utils/lp-monitor/parsePositions";;
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 
 interface PoolDetailProps {
