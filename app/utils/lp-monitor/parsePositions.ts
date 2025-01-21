@@ -59,7 +59,7 @@ export interface Positions {
 
 export const positionsTransformer = async (
   addresses: string[],
-  pools: PoolDetails,
+  pools: PoolDetails
 ) => {
   const result: Positions = {};
 
@@ -83,7 +83,7 @@ export const positionsTransformer = async (
     }
 
     const pool = pools?.find(
-      (p) => p.asset === memberPool.pool.replace("/", "."),
+      (p) => p.asset === memberPool.pool.replace("/", ".")
     );
     if (!pool) throw Error("Position on invalid liquidity pool");
 
@@ -95,17 +95,17 @@ export const positionsTransformer = async (
     let runeAdded = 0;
 
     const userPoolPercentage = BigNumber(memberPool.liquidityUnits).div(
-      pool.units,
+      pool.units
     );
     const assetToRedeem = baseAmount(
-      BigNumber(pool.assetDepth).times(userPoolPercentage),
+      BigNumber(pool.assetDepth).times(userPoolPercentage)
     );
     const runeToRedeem = baseAmount(
-      BigNumber(pool.runeDepth).times(userPoolPercentage),
+      BigNumber(pool.runeDepth).times(userPoolPercentage)
     );
 
     const redeemValueAssetInUsd = baseToAsset(assetToRedeem).times(
-      pool.assetPriceUSD,
+      pool.assetPriceUSD
     );
     const redeemValueRuneInUsd = baseToAsset(runeToRedeem)
       .div(pool.assetPrice)
@@ -114,10 +114,10 @@ export const positionsTransformer = async (
       redeemValueAssetInUsd.plus(redeemValueRuneInUsd);
 
     const depositValueAsset = baseToAsset(
-      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn),
+      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn)
     );
     const depositValueRune = baseToAsset(
-      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn),
+      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn)
     );
 
     totalAddedValueInUsd = depositValueAsset
@@ -126,7 +126,7 @@ export const positionsTransformer = async (
     gainInUsd = totalRedeemValueInUsd.minus(totalAddedValueInUsd);
 
     totalAddedValueInAsset = depositValueAsset.plus(
-      depositValueRune.div(pool.assetPrice),
+      depositValueRune.div(pool.assetPrice)
     );
     gainInAsset = baseToAsset(assetToRedeem)
       .plus(baseToAsset(runeToRedeem).div(pool.assetPrice))
