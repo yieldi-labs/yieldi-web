@@ -52,7 +52,6 @@ export default function TransactionConfirmationModal({
   runeHash,
   onClose,
 }: TransactionConfirmationModalProps) {
-  if (!position || !position.pool) return null;
   const chainName = position ? position.assetId.split(".")[0] : "";
 
   const createExplorerLinks = (hash: string | null, chainName: string) => {

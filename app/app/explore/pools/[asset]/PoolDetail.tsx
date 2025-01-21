@@ -143,6 +143,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                 asset: total.gain.asset + position.gain.asset,
                 percentage: total.gain.percentage,
               },
+              pendingActions: total.pendingActions,
               pool: total.pool,
               memberDetails: total.memberDetails,
             };
@@ -157,12 +158,13 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         position = position as PositionStats;
         return (
           <PositionRow
-            key={position.memberDetails.liquidityUnits}
+            key={position.memberDetails?.liquidityUnits}
             position={position}
             onAdd={() => {}}
             onRemove={() => handleRemove(position)}
             hideAddButton={true}
             hideStatus={true}
+            reasonToDisable={null}
           />
         );
       });

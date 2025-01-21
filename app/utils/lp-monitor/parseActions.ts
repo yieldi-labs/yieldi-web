@@ -1,5 +1,5 @@
 import { getActions } from "@/midgard";
-import { txStages } from "@/thornode";
+import { txStatus } from "@/thornode";
 
 export enum ActionType {
   ADD_LIQUIDITY = "ADD_LIQUIDITY",
@@ -12,12 +12,13 @@ export enum ActionStatus {
 }
 
 export interface ActionData {
-  date: Date;
+  date: string;
   type: ActionType;
   status: ActionStatus;
   thorchainTxId: string;
   pendingDelayInSeconds: number;
   pool: string;
+  chain: string;
 }
 
 export const actionsTransformer = async (
@@ -40,9 +41,9 @@ export const actionsTransformer = async (
   const filterActions = onlyPending ? actionsData?.actions.filter(action => action.status === "pending") : actionsData?.actions
 
   const parseActionsPromises = filterActions.map(async (action) => {
-    let stages = null
+    let status = null
     if (action.status === "pending") {
-        stages = await txStages({
+        status = await txStatus({
             path: {
                 hash: action.in[0].txID
             }
@@ -53,7 +54,8 @@ export const actionsTransformer = async (
         type: action.date === 'addLiquidity' ? ActionType.ADD_LIQUIDITY : ActionType.REMOVE_LIQUIDITY,
         status: action.status === 'pending' ? ActionStatus.PENDING : ActionStatus.COMPLETE,
         thorchainTxId: action.in[0].txID,
-        pendingDelayInSeconds: stages?.data?.outbound_delay?.remaining_delay_seconds || 0,
+        chain: status?.data?.tx?.chain || '-',
+        pendingDelayInSeconds: status?.data?.stages.outbound_delay?.remaining_delay_seconds || 0,
         pool: action.pools[0]
     }
   });

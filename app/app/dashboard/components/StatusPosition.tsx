@@ -6,19 +6,11 @@ import {
 } from "@/utils/lp-monitor/parsePositions";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { UIComponents } from "@shared/components";
+import { formatTime } from "@/app/utils";
 
 interface StatusPositionProps {
   position: PositionStats;
 }
-
-const formatTime = (seconds: number) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-};
 
 export default function StatusPosition({ position }: StatusPositionProps) {
   const asset = assetFromString(position.assetId);
@@ -46,7 +38,7 @@ export default function StatusPosition({ position }: StatusPositionProps) {
     <span className="font-medium text-sm flex flex-col space-y-2">
       {position.status === PositionStatus.LP_POSITION_INCOMPLETE && (
         <span className="flex items-center bg-yellow-100 text-yellow-700 px-2 py-1 rounded-md shadow-sm animate-pulse">
-          {Number(position.memberDetails.runePending) > 0
+          {Number(position.memberDetails?.runePending) > 0
             ? `Awaiting ${asset?.symbol} deposit`
             : "Awaiting RUNE deposit"}
         </span>

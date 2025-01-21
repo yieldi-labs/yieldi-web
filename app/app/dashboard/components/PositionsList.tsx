@@ -4,6 +4,7 @@ import { SortDirection } from "@shared/components/ui/types";
 import PositionRow from "./PositionRow";
 import {
   PositionStats,
+  PositionStatus,
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";;
 import PositionsPlaceholder from "./PositionsPlaceholder";
@@ -41,6 +42,18 @@ export default function PositionsList({
     key: PoolSortKey.PRINCIPAL,
     direction: SortDirection.DESC,
   });
+
+  const areActionsDisabled = (position: PositionStats, chainKey: ChainKey): string | null => {
+    if (position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING || position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING) {
+      return 'Action in progress'
+    } else if (position.type === PositionType.DLP &&
+      (!walletsState[ChainKey.THORCHAIN] || !walletsState[chainKey])) {
+          return 'Connect wallet'
+    } else {
+      return null
+    }
+  }
+
   const sortedPositions = useMemo(() => {
     const sortableItems = [...positions];
     sortableItems.sort((a, b) => {
@@ -141,11 +154,7 @@ export default function PositionsList({
               position={position}
               onAdd={onAdd}
               onRemove={onRemove}
-              disableActions={Boolean(
-                position.type === PositionType.DLP &&
-                  (!walletsState[ChainKey.THORCHAIN] ||
-                    !walletsState[chainKey]),
-              )}
+              reasonToDisable={areActionsDisabled(position, chainKey)}
             />
           );
         })}

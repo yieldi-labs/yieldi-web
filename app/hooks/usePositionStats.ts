@@ -51,44 +51,40 @@ export function emptyPositionStats(asset = "BTC.BTC"): PositionStats {
 }
 
 export function usePositionStats({
-  defaultRefetchInterval = 15000,
+  defaultRefetchInterval = 30000,
 }: UsePositionStatsProps) {
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     PositionsCache | undefined
   >();
 
-  const [addresses, setAddresses] = useState<string[]>([]);
   const [currentRefetchInterval, setRefetchInterval] = useState<
     number | undefined
   >(defaultRefetchInterval);
   const { walletsState } = useAppState();
 
-  useEffect(() => {
-    const addresses = [];
-    for (const key in walletsState!) {
-      if (walletsState!.hasOwnProperty(key)) {
-        const address = walletsState![key].address;
-        if (ethers.utils.isAddress(address)) {
-          const checksummeAddress = ethers.utils.getAddress(address); // Address with checksum
-          addresses.push(checksummeAddress);
-        }
-        addresses.push(address);
-      }
-    }
-    const uniqueAddresses = addresses.filter((address, index, arrayAddresses) => arrayAddresses.indexOf(address) === index);
-    setAddresses(uniqueAddresses);
-  }, [walletsState]);
-
   const {
     isFetching: isPending,
     error,
-    refetch,
   } = useQuery({
-    queryKey: ["position-stats", addresses],
+    queryKey: ["position-stats", Object.keys(walletsState).length],
     retry: false,
-    enabled: addresses.length > 0,
+    enabled: Object.keys(walletsState).length > 0,
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
+
+      const addresses = [];
+      for (const key in walletsState!) {
+        if (walletsState!.hasOwnProperty(key)) {
+          const address = walletsState![key].address;
+          if (ethers.utils.isAddress(address)) {
+            const checksummeAddress = ethers.utils.getAddress(address); // Address with checksum
+            addresses.push(checksummeAddress);
+          }
+          addresses.push(address);
+        }
+      }
+      const uniqueAddresses = addresses.filter((address, index, arrayAddresses) => arrayAddresses.indexOf(address) === index);
+
       const resultPools = await getPools();
       const pools = resultPools.data;
 
@@ -97,21 +93,13 @@ export function usePositionStats({
       }
 
       const genericPositionsDataStructure = await positionsTransformer(
-        addresses,
+        uniqueAddresses,
         pools,
-      );
-
-      const newPayload = updatePendingPositions(
-        currentPositionsStats || {
-          positions: genericPositionsDataStructure,
-          pools,
-        },
-        { positions: genericPositionsDataStructure, pools },
       );
 
       // Filter based on connected wallets
       const walletsConnected = Object.keys(walletsState);
-      const filteredPositions = Object.keys(newPayload.positions).reduce(
+      const filteredPositions = Object.keys(genericPositionsDataStructure).reduce(
         (positions: Positions, key: string) => {
           const chain = assetFromString(key)?.chain;
           if (!chain) {
@@ -119,12 +107,12 @@ export function usePositionStats({
           }
           const chainKey = getChainKeyFromChain(chain);
           if (walletsConnected.includes(chainKey)) {
-            positions[key] = newPayload.positions[key];
+            positions[key] = genericPositionsDataStructure[key];
           } else if (walletsConnected.includes(ChainKey.THORCHAIN)) {
             // Symmetrical positions can be managed from THORChain wallet
             positions[key] = {
               SLP: null,
-              DLP: newPayload.positions[key].DLP,
+              DLP: genericPositionsDataStructure[key].DLP,
             };
           }
           return positions;
@@ -133,8 +121,8 @@ export function usePositionStats({
       );
 
       setCurrentPositionsStats({
-        ...newPayload,
         positions: filteredPositions,
+        pools: pools || [],
       });
 
       return { positions: genericPositionsDataStructure, pools };
@@ -186,57 +174,12 @@ export function usePositionStats({
             status: status,
           };
         }
-        setRefetchInterval(defaultRefetchInterval);
-        refetch();
+        setRefetchInterval(defaultRefetchInterval + 1); // Reset refech interval to improve UX
         return updatedPositions as PositionsCache;
       });
     },
-    [defaultRefetchInterval, refetch],
+    [defaultRefetchInterval],
   );
-
-  const updatePendingPositions = (
-    previous: PositionsCache,
-    newPayload: PositionsCache,
-  ) => {
-    if (
-      Object.entries(previous.positions).length !==
-      Object.entries(newPayload.positions).length
-    ) {
-      return {
-        pools: newPayload.pools,
-        positions: {
-          ...newPayload.positions,
-          ...previous.positions,
-        },
-      };
-    }
-    Object.entries(previous.positions).forEach(([poolId, positions]) => {
-      Object.entries(positions).forEach(([type, position]) => {
-        if (
-          position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
-          position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
-        ) {
-          const positionType = type as PositionType;
-          const previousData = previous.positions[poolId]?.[positionType];
-          const currentData = newPayload.positions[poolId]?.[positionType];
-
-          if (
-            currentData &&
-            JSON.stringify(previousData?.memberDetails) !==
-              JSON.stringify(currentData.memberDetails)
-          ) {
-            const updatedPositions = { ...previous };
-            updatedPositions.positions[poolId][positionType] = {
-              ...(newPayload.positions[poolId][positionType] ||
-                emptyPositionStats()),
-            };
-            return updatedPositions;
-          }
-        }
-      });
-    });
-    return previous;
-  };
 
   return {
     positions: currentPositionsStats?.positions,

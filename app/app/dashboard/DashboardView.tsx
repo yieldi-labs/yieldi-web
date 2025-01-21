@@ -8,7 +8,6 @@ import { PoolDetail } from "@/midgard";
 import AddLiquidityModal from "../explore/components/AddLiquidityModal";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import Loader from "../components/Loader";
-import { emptyPositionStats } from "@/hooks/usePositionStats";
 import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
 import { Positions, PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
 
@@ -32,7 +31,7 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
         .filter(([, position]) => position)
         .map(([, position]) => position as PositionStats);
       return pools.concat(chainPools);
-    }, [])) || [emptyPositionStats()];
+    }, [])) || [];
 
   // Calculate totals
   const totalValue = allPositionsArray?.reduce((total, position) => {
@@ -111,10 +110,10 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
           }}
         />
       )}
-      {showRemoveLiquidityModal && selectedPool && selectedPosition && (
+      {showRemoveLiquidityModal && selectedPool && selectedPosition && selectedPosition.memberDetails && (
         <RemoveLiquidityModal
           pool={selectedPool}
-          position={selectedPosition?.memberDetails}
+          position={selectedPosition.memberDetails}
           positionType={selectedPosition?.type}
           runePriceUSD={runePriceUSD}
           onClose={() => {

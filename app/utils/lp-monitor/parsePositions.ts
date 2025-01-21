@@ -1,4 +1,9 @@
-import { getMemberDetail, MemberPool, PoolDetail, PoolDetails } from "@/midgard";
+import {
+  getMemberDetail,
+  MemberPool,
+  PoolDetail,
+  PoolDetails,
+} from "@/midgard";
 import {
   assetAmount,
   AssetAmount,
@@ -6,7 +11,12 @@ import {
   baseToAsset,
 } from "@xchainjs/xchain-util";
 import BigNumber from "bignumber.js";
-import { ActionData, actionsTransformer, ActionType } from "./parseActions";
+import {
+  ActionData,
+  ActionStatus,
+  actionsTransformer,
+  ActionType,
+} from "./parseActions";
 
 export enum PositionStatus {
   LP_POSITION_DEPOSIT_PENDING = "LP_POSITION_DEPOSIT_PENDING",
@@ -37,7 +47,7 @@ export interface PositionStats {
   };
   pendingActions: ActionData[];
   pool: PoolDetail;
-  memberDetails: MemberPool;
+  memberDetails?: MemberPool;
 }
 
 export interface Positions {
@@ -49,7 +59,7 @@ export interface Positions {
 
 export const positionsTransformer = async (
   addresses: string[],
-  pools: PoolDetails,
+  pools: PoolDetails
 ) => {
   const result: Positions = {};
 
@@ -59,15 +69,11 @@ export const positionsTransformer = async (
     },
   });
 
-  const actions = await actionsTransformer(addresses)
-  
-  const memberPools = memberPoolsResult.data?.pools
+  const actions = await actionsTransformer(addresses);
 
-  if (!memberPools) {
-    throw Error("No member pools data");
-  }
-  
-  memberPools.forEach((memberPool) => {
+  const memberPools = memberPoolsResult.data?.pools;
+
+  memberPools?.forEach((memberPool) => {
     const type = determinePositionType(memberPool);
 
     const key = memberPool.pool.replace("/", ".");
@@ -77,7 +83,7 @@ export const positionsTransformer = async (
     }
 
     const pool = pools?.find(
-      (p) => p.asset === memberPool.pool.replace("/", "."),
+      (p) => p.asset === memberPool.pool.replace("/", ".")
     );
     if (!pool) throw Error("Position on invalid liquidity pool");
 
@@ -89,17 +95,17 @@ export const positionsTransformer = async (
     let runeAdded = 0;
 
     const userPoolPercentage = BigNumber(memberPool.liquidityUnits).div(
-      pool.units,
+      pool.units
     );
     const assetToRedeem = baseAmount(
-      BigNumber(pool.assetDepth).times(userPoolPercentage),
+      BigNumber(pool.assetDepth).times(userPoolPercentage)
     );
     const runeToRedeem = baseAmount(
-      BigNumber(pool.runeDepth).times(userPoolPercentage),
+      BigNumber(pool.runeDepth).times(userPoolPercentage)
     );
 
     const redeemValueAssetInUsd = baseToAsset(assetToRedeem).times(
-      pool.assetPriceUSD,
+      pool.assetPriceUSD
     );
     const redeemValueRuneInUsd = baseToAsset(runeToRedeem)
       .div(pool.assetPrice)
@@ -108,10 +114,10 @@ export const positionsTransformer = async (
       redeemValueAssetInUsd.plus(redeemValueRuneInUsd);
 
     const depositValueAsset = baseToAsset(
-      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn),
+      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn)
     );
     const depositValueRune = baseToAsset(
-      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn),
+      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn)
     );
 
     totalAddedValueInUsd = depositValueAsset
@@ -120,7 +126,7 @@ export const positionsTransformer = async (
     gainInUsd = totalRedeemValueInUsd.minus(totalAddedValueInUsd);
 
     totalAddedValueInAsset = depositValueAsset.plus(
-      depositValueRune.div(pool.assetPrice),
+      depositValueRune.div(pool.assetPrice)
     );
     gainInAsset = baseToAsset(assetToRedeem)
       .plus(baseToAsset(runeToRedeem).div(pool.assetPrice))
@@ -129,12 +135,22 @@ export const positionsTransformer = async (
     assetAdded = depositValueAsset.amount().toNumber();
     runeAdded = depositValueRune.amount().toNumber();
 
-    const pendingActions = actions.filter((action) => action.pool === memberPool.pool)
+    const pendingActions = actions.filter((action) => {
+      const isPending =
+        action.pool === memberPool.pool &&
+        action.status === ActionStatus.PENDING;
+      const isThorchainTx = Boolean(action.chain === "THOR");
+      if (type === PositionType.DLP) {
+        return isThorchainTx && isPending;
+      } else {
+        return !isThorchainTx && isPending;
+      }
+    });
 
     result[key][type] = {
       assetId: memberPool.pool,
       type: determinePositionType(memberPool),
-      status: determinePositionStatus(memberPool, pendingActions),
+      status: determinePositionStatus(pendingActions, memberPool),
       deposit: {
         usd: totalAddedValueInUsd.amount().toNumber(),
         totalInAsset: totalAddedValueInAsset.amount().toNumber(),
@@ -156,12 +172,62 @@ export const positionsTransformer = async (
     };
   });
 
+  const allPendingActions = actions.filter(
+    (action) => action.status === ActionStatus.PENDING
+  ); // Monitor also 100% remove or input delays on new position
+  allPendingActions.forEach((action) => {
+    const pool = pools?.find((p) => p.asset === action.pool);
+    if (!pool) throw Error("Position on invalid liquidity pool");
+    if (!result[action.pool]) {
+      result[action.pool] = { DLP: null, SLP: null };
+    }
+    if (!result[action.pool]["DLP"]) {
+      result[action.pool]["DLP"] = {
+        assetId: action.pool,
+        type: PositionType.DLP,
+        status: determinePositionStatus([action]),
+        deposit: {
+          usd: 0,
+          totalInAsset: 0,
+          assetAdded: 0,
+          runeAdded: 0,
+        },
+        gain: {
+          usd: 0,
+          asset: 0,
+          percentage: "0",
+        },
+        pool,
+        pendingActions: [action],
+      };
+    } else if (!result[action.pool]["SLP"]) {
+      result[action.pool]["SLP"] = {
+        assetId: action.pool,
+        type: PositionType.SLP,
+        status: determinePositionStatus([action]),
+        deposit: {
+          usd: 0,
+          totalInAsset: 0,
+          assetAdded: 0,
+          runeAdded: 0,
+        },
+        gain: {
+          usd: 0,
+          asset: 0,
+          percentage: "0",
+        },
+        pool,
+        pendingActions: [action],
+      };
+    }
+  });
+
   return result;
 };
 
 const determinePositionType = (memberPool: MemberPool): PositionType => {
   if (
-    (memberPool.runeAdded !== "0" && memberPool.assetDeposit !== "0") ||
+    (memberPool.runeAdded !== "0" && memberPool.assetAdded !== "0") ||
     memberPool.runePending !== "0" ||
     memberPool.assetPending !== "0"
   )
@@ -169,7 +235,10 @@ const determinePositionType = (memberPool: MemberPool): PositionType => {
   return PositionType.SLP;
 };
 
-const determinePositionStatus = (memberPool: MemberPool, actionsPending: ActionData[]) => {
+const determinePositionStatus = (
+  actionsPending: ActionData[],
+  memberPool?: MemberPool
+) => {
   if (actionsPending.length > 0) {
     if (actionsPending[0].type === ActionType.ADD_LIQUIDITY) {
       return PositionStatus.LP_POSITION_DEPOSIT_PENDING;
@@ -177,8 +246,10 @@ const determinePositionStatus = (memberPool: MemberPool, actionsPending: ActionD
       return PositionStatus.LP_POSITION_WITHDRAWAL_PENDING;
     }
   }
-  if (Number(memberPool.assetPending) > 0 || Number(memberPool.runePending) > 0)
+  if (
+    Number(memberPool?.assetPending) > 0 ||
+    Number(memberPool?.runePending) > 0
+  )
     return PositionStatus.LP_POSITION_INCOMPLETE;
   return PositionStatus.LP_POSITION_COMPLETE;
 };
-
