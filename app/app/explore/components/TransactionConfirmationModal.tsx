@@ -6,7 +6,7 @@ import {
 } from "@/hooks/dataTransformers/positionsTransformer";
 
 interface TransactionConfirmationModalProps {
-  position: PositionStats | null;
+  position: PositionStats;
   assetHash?: string | null;
   runeHash?: string | null;
   onClose: () => void;
@@ -52,7 +52,8 @@ export default function TransactionConfirmationModal({
   runeHash,
   onClose,
 }: TransactionConfirmationModalProps) {
-  const chainName = position ? position.pool.asset.split(".")[0] : "";
+  if (!position || !position.pool) return null;
+  const chainName = position ? position.assetId.split(".")[0] : "";
 
   const createExplorerLinks = (hash: string | null, chainName: string) => {
     return hash

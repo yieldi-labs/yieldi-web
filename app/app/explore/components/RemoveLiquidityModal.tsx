@@ -287,9 +287,12 @@ export default function RemoveLiquidityModal({
     positions &&
     positions[pool.asset][positionType]
   ) {
+    const position = positions[pool.asset][positionType];
+    if (!position) return null;
+
     return (
       <TransactionConfirmationModal
-        position={positions[pool.asset][positionType]}
+        position={positions[pool.asset][positionType]!}
         assetHash={assetTxHash}
         runeHash={runeTxHash}
         onClose={() => {
