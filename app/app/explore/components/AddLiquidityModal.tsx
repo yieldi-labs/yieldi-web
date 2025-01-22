@@ -22,6 +22,7 @@ interface AddLiquidityModalProps {
   pool: IPoolDetail;
   runePriceUSD: number;
   onClose: (transactionSubmitted: boolean) => void;
+  initialType?: PositionType; // Add this line
 }
 
 const MAX_BALANCE_PERCENTAGE = 0.99;
@@ -30,6 +31,7 @@ export default function AddLiquidityModal({
   pool,
   runePriceUSD,
   onClose,
+  initialType,
 }: AddLiquidityModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const {
@@ -51,7 +53,9 @@ export default function AddLiquidityModal({
   const [runeTxHash, setRuneTxHash] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDualSided, setIsDualSided] = useState(false);
+  const [isDualSided, setIsDualSided] = useState(
+    initialType === PositionType.DLP,
+  ); // Modify this line
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
 
@@ -312,16 +316,17 @@ export default function AddLiquidityModal({
         {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
         {/* Toggle between Single-sided and Dual-sided */}
-        {isWalletConnected(ChainKey.THORCHAIN) && (
-          <ToggleButtonGroup
-            options={[
-              { label: assetSymbol, value: false },
-              { label: `${assetSymbol} + RUNE`, value: true },
-            ]}
-            selectedValue={isDualSided}
-            onChange={setIsDualSided}
-          />
-        )}
+        {isWalletConnected(ChainKey.THORCHAIN) &&
+          !initialType && ( // Modify this line
+            <ToggleButtonGroup
+              options={[
+                { label: assetSymbol, value: false },
+                { label: `${assetSymbol} + RUNE`, value: true },
+              ]}
+              selectedValue={isDualSided}
+              onChange={setIsDualSided}
+            />
+          )}
 
         <AssetInput
           value={assetAmount}

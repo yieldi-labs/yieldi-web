@@ -114,6 +114,7 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
             setSelectedPool(null);
             setShowAddLiquidityModal(false);
           }}
+          initialType={selectedPosition?.type} // Add this line
         />
       )}
       {showRemoveLiquidityModal &&
