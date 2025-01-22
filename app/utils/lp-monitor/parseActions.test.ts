@@ -1,15 +1,15 @@
 import { getActions } from "@/midgard";
-import { txStages } from "@/thornode";
+import { txStatus } from "@/thornode";
 import { ActionStatus, actionsTransformer, ActionType } from "./parseActions";
 import { actionsResponse } from "@/__mocks__/responses/actionsResponse";
-import { stagesResponse } from "@/__mocks__/responses/stagesResponse";
+import { statusResponse } from "@/__mocks__/responses/statusResponse";
 
 jest.mock("@/midgard", () => ({
   getActions: jest.fn(),
 }));
 
 jest.mock("@/thornode", () => ({
-  txStages: jest.fn(),
+  txStatus: jest.fn(),
 }));
 
 const addresses = [
@@ -22,9 +22,9 @@ describe("actionsTransformer", () => {
     jest.clearAllMocks();
   });
 
-  it("should transform midgard actions to the expected structure", async () => {
+  it("should transform midgard actions to the expected structure - Symm and confirmed", async () => {
     (getActions as jest.Mock).mockResolvedValueOnce(actionsResponse);
-    (txStages as jest.Mock).mockResolvedValue(stagesResponse);
+    (txStatus as jest.Mock).mockResolvedValue(statusResponse);
 
     const result = await actionsTransformer(addresses);
 
@@ -39,6 +39,7 @@ describe("actionsTransformer", () => {
     expect(result).toEqual([
       {
         date: "Wed Apr 04 56998",
+        chain: "AVAX",
         type: ActionType.REMOVE_LIQUIDITY,
         status: ActionStatus.PENDING,
         thorchainTxId:

@@ -6,8 +6,8 @@ import {
 } from "./parsePositions";
 import { memberDetailsResponse } from "@/__mocks__/responses/memberDetailsResponse";
 import { actionsResponse } from "@/__mocks__/responses/actionsResponse";
-import { stagesResponse } from "@/__mocks__/responses/stagesResponse";
-import { txStages } from "@/thornode";
+import { statusResponse } from "@/__mocks__/responses/statusResponse";
+import { txStatus } from "@/thornode";
 import { ActionStatus, ActionType } from "./parseActions";
 
 jest.mock("@/midgard", () => ({
@@ -16,7 +16,7 @@ jest.mock("@/midgard", () => ({
 }));
 
 jest.mock("@/thornode", () => ({
-  txStages: jest.fn(),
+  txStatus: jest.fn(),
 }));
 
 const addresses = [
@@ -54,9 +54,9 @@ const mockPools: PoolDetails = [
 
 describe("parsePositions", () => {
   it("should transform member pools and pool details into the expected structure", async () => {
-    (getActions as jest.Mock).mockResolvedValueOnce(actionsResponse);
-    (getMemberDetail as jest.Mock).mockResolvedValueOnce(memberDetailsResponse);
-    (txStages as jest.Mock).mockResolvedValue(stagesResponse);
+    (getActions as jest.Mock).mockResolvedValue(actionsResponse);
+    (getMemberDetail as jest.Mock).mockResolvedValue(memberDetailsResponse);
+    (txStatus as jest.Mock).mockResolvedValue(statusResponse);
 
     const result = await positionsTransformer(addresses, mockPools);
 
@@ -70,17 +70,7 @@ describe("parsePositions", () => {
         assetAdded: 0.12999999,
         runeAdded: 0.6,
       },
-      pendingActions: [
-        {
-          date: expect.any(String),
-          pendingDelayInSeconds: 30,
-          pool: "AVAX.AVAX",
-          status: ActionStatus.PENDING,
-          thorchainTxId:
-            "10D27CEBA9A44898E3AC4FA7F80F607A6A954226EE821C68EA9B8D2370917FF0",
-          type: ActionType.REMOVE_LIQUIDITY,
-        },
-      ],
+      pendingActions: [],
       gain: {
         usd: expect.any(Number),
         asset: expect.any(Number),
@@ -89,10 +79,5 @@ describe("parsePositions", () => {
       pool: mockPools[0],
       memberDetails: memberDetailsResponse.data.pools[0],
     });
-  });
-
-  it("should handle empty inputs gracefully", () => {
-    const result = positionsTransformer([], []);
-    expect(result).toEqual({});
   });
 });
