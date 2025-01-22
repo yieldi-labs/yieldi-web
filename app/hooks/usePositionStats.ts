@@ -1,10 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  getPools,
-  MemberPool,
-  PoolDetail,
-  PoolDetails,
-} from "@/midgard";
+import { getPools, MemberPool, PoolDetail, PoolDetails } from "@/midgard";
 import {
   Positions,
   PositionStats,
@@ -28,11 +23,14 @@ interface PositionsCache {
   pools: PoolDetails;
 }
 
-export function emptyPositionStats(asset = "BTC.BTC"): PositionStats {
+export function emptyPositionStats(
+  asset = "BTC.BTC",
+  positionType = PositionType.DLP,
+): PositionStats {
   return {
     assetId: asset,
     status: PositionStatus.LP_POSITION_COMPLETE,
-    type: PositionType.SLP,
+    type: positionType,
     deposit: {
       usd: 0,
       totalInAsset: 0,
@@ -62,16 +60,12 @@ export function usePositionStats({
   >(defaultRefetchInterval);
   const { walletsState } = useAppState();
 
-  const {
-    isFetching: isPending,
-    error,
-  } = useQuery({
+  const { isFetching: isPending, error } = useQuery({
     queryKey: ["position-stats", Object.keys(walletsState).length],
     retry: false,
     enabled: Object.keys(walletsState).length > 0,
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
-
       const addresses = [];
       for (const key in walletsState!) {
         if (walletsState!.hasOwnProperty(key)) {
@@ -83,7 +77,10 @@ export function usePositionStats({
           addresses.push(address);
         }
       }
-      const uniqueAddresses = addresses.filter((address, index, arrayAddresses) => arrayAddresses.indexOf(address) === index);
+      const uniqueAddresses = addresses.filter(
+        (address, index, arrayAddresses) =>
+          arrayAddresses.indexOf(address) === index,
+      );
 
       const resultPools = await getPools();
       const pools = resultPools.data;
@@ -99,26 +96,25 @@ export function usePositionStats({
 
       // Filter based on connected wallets
       const walletsConnected = Object.keys(walletsState);
-      const filteredPositions = Object.keys(genericPositionsDataStructure).reduce(
-        (positions: Positions, key: string) => {
-          const chain = assetFromString(key)?.chain;
-          if (!chain) {
-            throw Error("Invalid chain");
-          }
-          const chainKey = getChainKeyFromChain(chain);
-          if (walletsConnected.includes(chainKey)) {
-            positions[key] = genericPositionsDataStructure[key];
-          } else if (walletsConnected.includes(ChainKey.THORCHAIN)) {
-            // Symmetrical positions can be managed from THORChain wallet
-            positions[key] = {
-              SLP: null,
-              DLP: genericPositionsDataStructure[key].DLP,
-            };
-          }
-          return positions;
-        },
-        {},
-      );
+      const filteredPositions = Object.keys(
+        genericPositionsDataStructure,
+      ).reduce((positions: Positions, key: string) => {
+        const chain = assetFromString(key)?.chain;
+        if (!chain) {
+          throw Error("Invalid chain");
+        }
+        const chainKey = getChainKeyFromChain(chain);
+        if (walletsConnected.includes(chainKey)) {
+          positions[key] = genericPositionsDataStructure[key];
+        } else if (walletsConnected.includes(ChainKey.THORCHAIN)) {
+          // Symmetrical positions can be managed from THORChain wallet
+          positions[key] = {
+            SLP: null,
+            DLP: genericPositionsDataStructure[key].DLP,
+          };
+        }
+        return positions;
+      }, {});
 
       setCurrentPositionsStats({
         positions: filteredPositions,
@@ -167,7 +163,7 @@ export function usePositionStats({
 
         if (!updatedPositions.positions[pooldId][positionType]) {
           updatedPositions.positions[pooldId][positionType] =
-            emptyPositionStats(pooldId);
+            emptyPositionStats(pooldId, positionType);
         } else {
           updatedPositions.positions[pooldId][positionType] = {
             ...updatedPositions.positions[pooldId][positionType],

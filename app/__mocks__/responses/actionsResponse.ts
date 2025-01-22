@@ -1,6 +1,7 @@
 export const actionsResponse = {
-    data: {
-      actions: [{
+  data: {
+    actions: [
+      {
         date: "1736524122179623492",
         height: "19373906",
         in: [
@@ -46,11 +47,12 @@ export const actionsResponse = {
         pools: ["AVAX.AVAX"],
         status: "pending",
         type: "withdraw",
-      }],
-      count: "1",
-      meta: {
-        nextPageToken: "193597061001150013",
-        prevPageToken: null,
       },
+    ],
+    count: "1",
+    meta: {
+      nextPageToken: "193597061001150013",
+      prevPageToken: null,
     },
-  }
+  },
+};

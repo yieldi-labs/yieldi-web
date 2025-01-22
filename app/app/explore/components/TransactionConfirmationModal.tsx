@@ -3,7 +3,7 @@ import Modal from "@/app/modal";
 import {
   PositionStats,
   PositionStatus,
-} from "@/utils/lp-monitor/parsePositions";;
+} from "@/utils/lp-monitor/parsePositions";
 
 interface TransactionConfirmationModalProps {
   position: PositionStats;

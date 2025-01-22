@@ -59,7 +59,7 @@ export interface Positions {
 
 export const positionsTransformer = async (
   addresses: string[],
-  pools: PoolDetails
+  pools: PoolDetails,
 ) => {
   const result: Positions = {};
 
@@ -83,7 +83,7 @@ export const positionsTransformer = async (
     }
 
     const pool = pools?.find(
-      (p) => p.asset === memberPool.pool.replace("/", ".")
+      (p) => p.asset === memberPool.pool.replace("/", "."),
     );
     if (!pool) throw Error("Position on invalid liquidity pool");
 
@@ -95,17 +95,17 @@ export const positionsTransformer = async (
     let runeAdded = 0;
 
     const userPoolPercentage = BigNumber(memberPool.liquidityUnits).div(
-      pool.units
+      pool.units,
     );
     const assetToRedeem = baseAmount(
-      BigNumber(pool.assetDepth).times(userPoolPercentage)
+      BigNumber(pool.assetDepth).times(userPoolPercentage),
     );
     const runeToRedeem = baseAmount(
-      BigNumber(pool.runeDepth).times(userPoolPercentage)
+      BigNumber(pool.runeDepth).times(userPoolPercentage),
     );
 
     const redeemValueAssetInUsd = baseToAsset(assetToRedeem).times(
-      pool.assetPriceUSD
+      pool.assetPriceUSD,
     );
     const redeemValueRuneInUsd = baseToAsset(runeToRedeem)
       .div(pool.assetPrice)
@@ -114,10 +114,10 @@ export const positionsTransformer = async (
       redeemValueAssetInUsd.plus(redeemValueRuneInUsd);
 
     const depositValueAsset = baseToAsset(
-      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn)
+      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn),
     );
     const depositValueRune = baseToAsset(
-      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn)
+      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn),
     );
 
     totalAddedValueInUsd = depositValueAsset
@@ -126,7 +126,7 @@ export const positionsTransformer = async (
     gainInUsd = totalRedeemValueInUsd.minus(totalAddedValueInUsd);
 
     totalAddedValueInAsset = depositValueAsset.plus(
-      depositValueRune.div(pool.assetPrice)
+      depositValueRune.div(pool.assetPrice),
     );
     gainInAsset = baseToAsset(assetToRedeem)
       .plus(baseToAsset(runeToRedeem).div(pool.assetPrice))
@@ -173,53 +173,35 @@ export const positionsTransformer = async (
   });
 
   const allPendingActions = actions.filter(
-    (action) => action.status === ActionStatus.PENDING
-  ); // Monitor also 100% remove or input delays on new position
+    (action) => action.status === ActionStatus.PENDING,
+  );
+
   allPendingActions.forEach((action) => {
     const pool = pools?.find((p) => p.asset === action.pool);
     if (!pool) throw Error("Position on invalid liquidity pool");
     if (!result[action.pool]) {
       result[action.pool] = { DLP: null, SLP: null };
     }
-    if (!result[action.pool]["DLP"]) {
-      result[action.pool]["DLP"] = {
-        assetId: action.pool,
-        type: PositionType.DLP,
-        status: determinePositionStatus([action]),
-        deposit: {
-          usd: 0,
-          totalInAsset: 0,
-          assetAdded: 0,
-          runeAdded: 0,
-        },
-        gain: {
-          usd: 0,
-          asset: 0,
-          percentage: "0",
-        },
-        pool,
-        pendingActions: [action],
-      };
-    } else if (!result[action.pool]["SLP"]) {
-      result[action.pool]["SLP"] = {
-        assetId: action.pool,
-        type: PositionType.SLP,
-        status: determinePositionStatus([action]),
-        deposit: {
-          usd: 0,
-          totalInAsset: 0,
-          assetAdded: 0,
-          runeAdded: 0,
-        },
-        gain: {
-          usd: 0,
-          asset: 0,
-          percentage: "0",
-        },
-        pool,
-        pendingActions: [action],
-      };
-    }
+    const pendingActionType =
+      action.chain === "THOR" ? PositionType.DLP : PositionType.SLP;
+    result[action.pool][pendingActionType] = {
+      assetId: action.pool,
+      type: pendingActionType,
+      status: determinePositionStatus([action]),
+      deposit: {
+        usd: 0,
+        totalInAsset: 0,
+        assetAdded: 0,
+        runeAdded: 0,
+      },
+      gain: {
+        usd: 0,
+        asset: 0,
+        percentage: "0",
+      },
+      pool,
+      pendingActions: [action],
+    };
   });
 
   return result;
@@ -237,7 +219,7 @@ const determinePositionType = (memberPool: MemberPool): PositionType => {
 
 const determinePositionStatus = (
   actionsPending: ActionData[],
-  memberPool?: MemberPool
+  memberPool?: MemberPool,
 ) => {
   if (actionsPending.length > 0) {
     if (actionsPending[0].type === ActionType.ADD_LIQUIDITY) {

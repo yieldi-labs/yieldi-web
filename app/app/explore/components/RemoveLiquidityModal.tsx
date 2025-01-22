@@ -17,7 +17,7 @@ import { getChainKeyFromChain, parseAssetString } from "@/utils/chain";
 import {
   PositionStatus,
   PositionType,
-} from "@/utils/lp-monitor/parsePositions";;
+} from "@/utils/lp-monitor/parsePositions";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { Slider } from "@shared/components/ui";
 import AssetInput from "./AssetInput";

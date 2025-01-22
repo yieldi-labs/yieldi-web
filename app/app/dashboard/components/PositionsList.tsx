@@ -6,7 +6,7 @@ import {
   PositionStats,
   PositionStatus,
   PositionType,
-} from "@/utils/lp-monitor/parsePositions";;
+} from "@/utils/lp-monitor/parsePositions";
 import PositionsPlaceholder from "./PositionsPlaceholder";
 import { useAppState } from "@/utils/contexts/context";
 import { ChainKey } from "@/utils/wallet/constants";
@@ -43,16 +43,24 @@ export default function PositionsList({
     direction: SortDirection.DESC,
   });
 
-  const areActionsDisabled = (position: PositionStats, chainKey: ChainKey): string | null => {
-    if (position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING || position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING) {
-      return 'Action in progress'
-    } else if (position.type === PositionType.DLP &&
-      (!walletsState[ChainKey.THORCHAIN] || !walletsState[chainKey])) {
-          return 'Connect wallet'
+  const areActionsDisabled = (
+    position: PositionStats,
+    chainKey: ChainKey,
+  ): string | null => {
+    if (
+      position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
+      position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
+    ) {
+      return "Action in progress";
+    } else if (
+      position.type === PositionType.DLP &&
+      (!walletsState[ChainKey.THORCHAIN] || !walletsState[chainKey])
+    ) {
+      return "Connect wallet";
     } else {
-      return null
+      return null;
     }
-  }
+  };
 
   const sortedPositions = useMemo(() => {
     const sortableItems = [...positions];

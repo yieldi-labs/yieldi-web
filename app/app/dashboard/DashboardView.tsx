@@ -9,7 +9,11 @@ import AddLiquidityModal from "../explore/components/AddLiquidityModal";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import Loader from "../components/Loader";
 import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
-import { Positions, PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
+import {
+  Positions,
+  PositionStats,
+  PositionType,
+} from "@/utils/lp-monitor/parsePositions";
 
 interface DashboardViewProps {
   runePriceUSD: number;
@@ -25,13 +29,15 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
 
   const { positions, pools, isPending } = useLiquidityPositions();
 
-  const allPositionsArray = (positions &&
-    Object.entries(positions).reduce((pools: PositionStats[], [, types]) => {
-      const chainPools = Object.entries(types)
-        .filter(([, position]) => position)
-        .map(([, position]) => position as PositionStats);
-      return pools.concat(chainPools);
-    }, [])) || [];
+  const allPositionsArray =
+    (positions &&
+      Object.entries(positions).reduce((pools: PositionStats[], [, types]) => {
+        const chainPools = Object.entries(types)
+          .filter(([, position]) => position)
+          .map(([, position]) => position as PositionStats);
+        return pools.concat(chainPools);
+      }, [])) ||
+    [];
 
   // Calculate totals
   const totalValue = allPositionsArray?.reduce((total, position) => {
@@ -110,19 +116,22 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
           }}
         />
       )}
-      {showRemoveLiquidityModal && selectedPool && selectedPosition && selectedPosition.memberDetails && (
-        <RemoveLiquidityModal
-          pool={selectedPool}
-          position={selectedPosition.memberDetails}
-          positionType={selectedPosition?.type}
-          runePriceUSD={runePriceUSD}
-          onClose={() => {
-            setSelectedPool(null);
-            setSelectedPosition(null);
-            setShowRemoveLiquidityModal(false);
-          }}
-        />
-      )}
+      {showRemoveLiquidityModal &&
+        selectedPool &&
+        selectedPosition &&
+        selectedPosition.memberDetails && (
+          <RemoveLiquidityModal
+            pool={selectedPool}
+            position={selectedPosition.memberDetails}
+            positionType={selectedPosition?.type}
+            runePriceUSD={runePriceUSD}
+            onClose={() => {
+              setSelectedPool(null);
+              setSelectedPosition(null);
+              setShowRemoveLiquidityModal(false);
+            }}
+          />
+        )}
     </main>
   );
 }

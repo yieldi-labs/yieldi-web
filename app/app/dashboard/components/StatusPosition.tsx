@@ -19,7 +19,7 @@ export default function StatusPosition({ position }: StatusPositionProps) {
   useEffect(() => {
     if (position.pendingActions?.length) {
       const initialTimers = position.pendingActions.map(
-        (action) => action.pendingDelayInSeconds || 0
+        (action) => action.pendingDelayInSeconds || 0,
       );
       setTimers(initialTimers);
     }
@@ -28,7 +28,7 @@ export default function StatusPosition({ position }: StatusPositionProps) {
   useEffect(() => {
     const interval = setInterval(() => {
       setTimers((prevTimers) =>
-        prevTimers.map((time) => (time > 0 ? time - 1 : 0))
+        prevTimers.map((time) => (time > 0 ? time - 1 : 0)),
       );
     }, 1000);
     return () => clearInterval(interval);
@@ -46,26 +46,24 @@ export default function StatusPosition({ position }: StatusPositionProps) {
 
       {(position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING ||
         position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING) && (
-          <div className="flex flex-col space-y-2">
-            <span
-              className="flex items-center bg-blue-100 text-blue px-2 py-1 rounded-md shadow-sm"
+        <div className="flex flex-col space-y-2">
+          <span className="flex items-center bg-blue-100 text-blue px-2 py-1 rounded-md shadow-sm">
+            <span className="mr-2">
+              <Loader sizeInPixels={4} color="blue" />
+            </span>
+            <UIComponents.Tooltip
+              text={
+                timers[0] > 0 ? `${formatTime(timers[0])}` : "Processing..."
+              }
             >
               <span className="mr-2">
-                <Loader sizeInPixels={4} color="blue" />
+                {position.status ===
+                PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
+                  ? "Withdrawal pending"
+                  : "Deposit pending"}
               </span>
-              <UIComponents.Tooltip text={
-                timers[0] > 0
-                  ? `${formatTime(timers[0])}`
-                  : "Processing..."
-              }>
-                <span className="mr-2">
-                  {position.status ===
-                  PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
-                    ? "Withdrawal pending"
-                    : "Deposit pending"}
-                </span>
-              </UIComponents.Tooltip>
-              {/* {
+            </UIComponents.Tooltip>
+            {/* {
                 timers?.length > 0 && 
                 <span>
                   {timers[0] > 0
@@ -73,9 +71,9 @@ export default function StatusPosition({ position }: StatusPositionProps) {
                     : "Processing..."}
                 </span>
               } */}
-            </span>
-          </div>
-        )}
+          </span>
+        </div>
+      )}
 
       {position.status === PositionStatus.LP_POSITION_COMPLETE && (
         <span className="flex items-center bg-green-100 text-green-700 px-2 py-1 rounded-md shadow-sm">

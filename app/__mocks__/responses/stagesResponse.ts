@@ -37,6 +37,6 @@ export const stagesResponse = {
       scheduled_outbound_height: 1234,
       blocks_since_scheduled: 1234,
       completed: false,
-    }
-  }
-}
+    },
+  },
+};

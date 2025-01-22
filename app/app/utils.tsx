@@ -44,7 +44,7 @@ export function formatNumber(
 
 export const addDollarSignAndSuffix = (value: number) => {
   if (value === 0) {
-    return '-'
+    return "-";
   }
   if (value >= 1e6) {
     return `$${formatNumber(value / 1e6, 2, 2)}M`;
@@ -176,4 +176,3 @@ export const formatTime = (seconds: number) => {
     .toString()
     .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
-
