@@ -35,7 +35,7 @@ export default function WalletButton() {
             ? isMobile
               ? "Connect"
               : "Connect Wallet"
-            : 'Wallet'
+            : "Wallet"
         }
       />
     </div>

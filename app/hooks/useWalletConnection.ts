@@ -1,9 +1,5 @@
 "use client";
-import {
-  ChainKey,
-  ProviderKey,
-  WalletKey,
-} from "@/utils/wallet/constants";
+import { ChainKey, ProviderKey, WalletKey } from "@/utils/wallet/constants";
 import {
   ChainType,
   ConnectedWalletsState,
@@ -89,6 +85,6 @@ export function useWalletConnection() {
   };
 
   return {
-    handleConnect
+    handleConnect,
   };
 }
