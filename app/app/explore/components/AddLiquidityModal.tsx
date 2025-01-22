@@ -74,10 +74,46 @@ export default function AddLiquidityModal({
 
   const handleValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
+
+    if (isDualSided) {
+      const value = parseFloat(values.value);
+      const assetPriceUSD = parseFloat(pool.assetPriceUSD);
+      const assetUsdValue = value * assetPriceUSD;
+      const runeEquivalent = (assetUsdValue / runePriceUSD).toFixed(8);
+      const runeMaxUsdValue = runeBalance * runePriceUSD;
+
+      if (assetUsdValue > runeMaxUsdValue) {
+        const maxAssetAmount = (runeMaxUsdValue / assetPriceUSD).toFixed(
+          poolNativeDecimal,
+        );
+        setAssetAmount(maxAssetAmount);
+        setRuneAmount(runeBalance.toFixed(8));
+      } else {
+        setRuneAmount(runeEquivalent);
+      }
+    }
   };
 
   const handleRuneValueChange = (values: NumberFormatValues) => {
     setRuneAmount(values.value);
+
+    if (isDualSided) {
+      const value = parseFloat(values.value);
+      const runeUsdValue = value * runePriceUSD;
+      const assetPriceUSD = parseFloat(pool.assetPriceUSD);
+      const assetEquivalent = (runeUsdValue / assetPriceUSD).toFixed(
+        poolNativeDecimal,
+      );
+      const assetMaxUsdValue = assetBalance * assetPriceUSD;
+
+      if (runeUsdValue > assetMaxUsdValue) {
+        const maxRuneAmount = (assetMaxUsdValue / runePriceUSD).toFixed(8);
+        setRuneAmount(maxRuneAmount);
+        setAssetAmount(assetBalance.toFixed(poolNativeDecimal));
+      } else {
+        setAssetAmount(assetEquivalent);
+      }
+    }
   };
 
   const handleAssetPercentageClick = (percentage: number) => {
@@ -104,6 +140,7 @@ export default function AddLiquidityModal({
     setRuneAmount(formattedAmount);
   };
 
+  //The quick brown fox jumps over the lazy dog
   const isValidAmount = useMemo(() => {
     const amount = parseFloat(assetAmount);
     const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE - assetMinimalUnit;
@@ -250,9 +287,11 @@ export default function AddLiquidityModal({
     showConfirmation &&
     (assetTxHash || runeTxHash) && // Changed condition
     positions &&
+    positions[pool.asset] &&
     positions[pool.asset][type]
   ) {
     const position = positions[pool.asset][type];
+    if (!position) return null;
     return (
       <TransactionConfirmationModal
         position={position}
