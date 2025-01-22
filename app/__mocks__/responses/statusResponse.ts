@@ -8,16 +8,16 @@ export const statusResponse = {
       coins: [
         {
           asset: "AVAX.AVAX",
-          amount: "1"
-        }
+          amount: "1",
+        },
       ],
       gas: [
         {
           asset: "AVAX.AVAX",
-          amount: "4931"
-        }
+          amount: "4931",
+        },
       ],
-      memo: "-:AVAX.AVAX:10000:THOR.RUNE"
+      memo: "-:AVAX.AVAX:10000:THOR.RUNE",
     },
     planned_out_txs: [
       {
@@ -25,10 +25,10 @@ export const statusResponse = {
         to_address: "0x38019bc40f504be4546f24083ccaf0c8553c408a",
         coin: {
           asset: "AVAX.AVAX",
-          amount: "14425583"
+          amount: "14425583",
         },
-        refund: false
-      }
+        refund: false,
+      },
     ],
     out_txs: [
       {
@@ -39,17 +39,17 @@ export const statusResponse = {
         coins: [
           {
             asset: "AVAX.AVAX",
-            amount: "14425583"
-          }
+            amount: "14425583",
+          },
         ],
         gas: [
           {
             asset: "AVAX.AVAX",
-            amount: "212840"
-          }
+            amount: "212840",
+          },
         ],
-        memo: "OUT:10D27CEBA9A44898E3AC4FA7F80F607A6A954226EE821C68EA9B8D2370917FF0"
-      }
+        memo: "OUT:10D27CEBA9A44898E3AC4FA7F80F607A6A954226EE821C68EA9B8D2370917FF0",
+      },
     ],
     stages: {
       inbound_observed: {
@@ -90,6 +90,6 @@ export const statusResponse = {
         blocks_since_scheduled: 1234,
         completed: false,
       },
-    }
-  }
+    },
+  },
 };

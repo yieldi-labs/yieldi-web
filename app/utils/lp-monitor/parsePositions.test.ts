@@ -8,7 +8,6 @@ import { memberDetailsResponse } from "@/__mocks__/responses/memberDetailsRespon
 import { actionsResponse } from "@/__mocks__/responses/actionsResponse";
 import { statusResponse } from "@/__mocks__/responses/statusResponse";
 import { txStatus } from "@/thornode";
-import { ActionStatus, ActionType } from "./parseActions";
 
 jest.mock("@/midgard", () => ({
   getActions: jest.fn(),
