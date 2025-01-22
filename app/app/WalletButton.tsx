@@ -24,18 +24,20 @@ export default function WalletButton() {
   }
 
   return (
-    <Button
-      className="text-sm md:text-base md:w-48"
-      onClick={() =>
-        connectedWallets === 0 ? toggleWalletModal() : toggleWalletDrawer()
-      }
-      label={
-        connectedWallets === 0
-          ? isMobile
-            ? "Connect"
-            : "Connect Wallet"
-          : formatAddress(Object.values(walletsState!)[0].address)
-      }
-    />
+    <div className="flex justify-end md:w-48">
+      <Button
+        className="text-sm md:text-base md:w-auto"
+        onClick={() =>
+          connectedWallets === 0 ? toggleWalletModal() : toggleWalletDrawer()
+        }
+        label={
+          connectedWallets === 0
+            ? isMobile
+              ? "Connect"
+              : "Connect Wallet"
+            : 'Wallet'
+        }
+      />
+    </div>
   );
 }

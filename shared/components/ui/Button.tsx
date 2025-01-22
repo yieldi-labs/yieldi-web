@@ -13,7 +13,7 @@ interface ButtonProps {
 
 const Button = ({ label, className = "", onClick, link, disabled = false }: ButtonProps) => {
   const baseClass = twMerge(
-    `bg-primary hover:bg-primary/50 rounded-full px-9 py-3 font-semibold text-gray-900 transition duration-300 ease-in-out`,
+    `bg-primary hover:bg-primary/50 rounded-full px-9 py-3 font-semibold text-gray-900 transition duration-300 ease-in-out whitespace-nowrap`,
     className,
     disabled && 'cursor-disabled bg-primary/50'
   );

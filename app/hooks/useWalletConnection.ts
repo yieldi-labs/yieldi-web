@@ -1,7 +1,6 @@
 "use client";
 import {
   ChainKey,
-  CHAINS,
   ProviderKey,
   WalletKey,
 } from "@/utils/wallet/constants";
@@ -10,7 +9,6 @@ import {
   ConnectedWalletsState,
   WalletType,
 } from "@/utils/interfaces";
-import { useCallback } from "react";
 import { useAppState } from "@/utils/contexts/context";
 
 export function useWalletConnection() {
@@ -61,43 +59,6 @@ export function useWalletConnection() {
     };
   };
 
-  const saveNetworkAddressToLocalStorage = (
-    chainKey: ChainKey,
-    address: string,
-  ) => {
-    if (typeof window !== "undefined" && localStorage) {
-      localStorage.setItem(`wallet-${chainKey}-address`, address);
-    }
-  };
-
-  const getNetworkAddressFromLocalStorage = (chainKey: ChainKey) => {
-    if (typeof window !== "undefined" && localStorage) {
-      return localStorage.getItem(`wallet-${chainKey}-address`);
-    }
-    return null;
-  };
-
-  const getAllNetworkAddressesFromLocalStorage = useCallback((): string[] => {
-    const addresses: string[] = [];
-    if (typeof window !== "undefined" && localStorage) {
-      for (const config of CHAINS) {
-        const address = localStorage.getItem(
-          `wallet-${config.thorchainIdentifier}-address`,
-        );
-        if (!address) continue;
-        addresses.push(address);
-      }
-    }
-    return addresses;
-  }, []);
-
-  const hasThorAddressInLocalStorage = () => {
-    if (typeof window !== "undefined" && localStorage) {
-      return !!localStorage.getItem(`wallet-${ChainKey.THORCHAIN}-address`);
-    }
-    return false;
-  };
-
   const handleConnect = async (wallet: WalletType) => {
     if (!selectedChains.length) {
       console.error("No chains selected.");
@@ -113,7 +74,6 @@ export function useWalletConnection() {
       }
       const connection = await handleProviderConnection(wallet, chain);
       if (!connection || !connection.address) continue;
-      saveNetworkAddressToLocalStorage(chain.name, connection.address);
       newWalletState = updateWalletState(
         newWalletState,
         wallet.id,
@@ -129,9 +89,6 @@ export function useWalletConnection() {
   };
 
   return {
-    handleConnect,
-    getNetworkAddressFromLocalStorage,
-    getAllNetworkAddressesFromLocalStorage,
-    hasThorAddressInLocalStorage,
+    handleConnect
   };
 }
