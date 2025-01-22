@@ -1,7 +1,6 @@
 "use client";
 import { useAppState } from "@/utils/contexts/context";
 import { Button } from "@shared/components/ui";
-import { formatAddress } from "./utils";
 import { useMobileDetection } from "@shared/hooks/useMobileDetection";
 import Image from "next/image";
 

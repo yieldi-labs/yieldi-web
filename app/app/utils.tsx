@@ -21,11 +21,6 @@ export enum SupportedChain {
   // Solana = "SOL",
 }
 
-export function formatAddress(a: undefined | null | string) {
-  if (!a) return "-";
-  return a.slice(0, 6) + "…" + a.slice(-4);
-}
-
 export function formatNumber(
   amount: string | number,
   decimals = 8,
