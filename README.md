@@ -54,10 +54,6 @@ Please read our contributing guidelines before submitting pull requests.
 
 MIT License. See [LICENSE](LICENSE) file.
 
-## Contact
-
-For inquiries: support@blinder.com
-
 ---
 
 Visit [https://yieldi.xyz](https://yieldi.xyz) for more information.
