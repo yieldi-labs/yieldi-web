@@ -57,7 +57,7 @@ describe("parsePositions", () => {
     (getMemberDetail as jest.Mock).mockResolvedValue(memberDetailsResponse);
     (txStatus as jest.Mock).mockResolvedValue(statusResponse);
 
-    const result = await positionsTransformer(addresses, mockPools);
+    const result = await positionsTransformer(addresses, mockPools,  { LIQUIDITYLOCKUPBLOCKS: 600 });
 
     expect(result["AVAX.AVAX"].DLP).toEqual({
       assetId: "AVAX.AVAX",
