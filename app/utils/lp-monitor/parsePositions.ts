@@ -46,6 +46,7 @@ export interface PositionStats {
     percentage: string;
   };
   pendingActions: ActionData[];
+  liquidityLockUpRemainingInSeconds: number;
   pool: PoolDetail;
   memberDetails?: MemberPool;
 }
@@ -60,7 +61,9 @@ export interface Positions {
 export const positionsTransformer = async (
   addresses: string[],
   pools: PoolDetails,
+  options: { LIQUIDITYLOCKUPBLOCKS: number },
 ) => {
+  const defaultLockupPeriodInSecond = options.LIQUIDITYLOCKUPBLOCKS * 6; // six second per block
   const result: Positions = {};
 
   const memberPoolsResult = await getMemberDetail({
@@ -147,6 +150,15 @@ export const positionsTransformer = async (
       }
     });
 
+    const timestamp = new Date().getTime();
+    const lastAddedTimestamp = new Date(
+      Number(memberPool.dateLastAdded) * 1000,
+    ).getTime();
+    const liquidityLockUpRemainingInSeconds = Math.ceil(
+      (lastAddedTimestamp + defaultLockupPeriodInSecond * 1000 - timestamp) /
+        1000,
+    );
+
     result[key][type] = {
       assetId: memberPool.pool,
       type: determinePositionType(memberPool),
@@ -167,6 +179,10 @@ export const positionsTransformer = async (
           .toFixed(4),
       },
       pool,
+      liquidityLockUpRemainingInSeconds:
+        liquidityLockUpRemainingInSeconds > 0
+          ? liquidityLockUpRemainingInSeconds
+          : 0,
       pendingActions,
       memberDetails: memberPool,
     };
@@ -199,6 +215,7 @@ export const positionsTransformer = async (
         asset: 0,
         percentage: "0",
       },
+      liquidityLockUpRemainingInSeconds: 0,
       pool,
       pendingActions: [action],
     };

@@ -29,6 +29,9 @@ import { createAppKit } from "@reown/appkit/react";
 import { mainnet, avalanche, bsc } from "@reown/appkit/networks";
 import UniversalProvider from "@walletconnect/universal-provider";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
+import { useQuery } from "@tanstack/react-query";
+import { mimir } from "@/thornode/services.gen";
+import { MimirResponse } from "@/thornode";
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
@@ -48,6 +51,7 @@ interface AppStateContextType {
   detected: WalletType[];
   undetected: WalletType[];
   isWalletConnected: (chainKey: ChainKey) => boolean;
+  mimirParameters: MimirResponse | undefined;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -90,6 +94,18 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
 
   const { refreshBalances, balanceList, isLoadingBalance, isLoadingTokenList } =
     useWalletTokens(walletsState!);
+
+  const { data: mimirParameters } = useQuery({
+    queryKey: ["mimir-params"],
+    retry: false,
+    queryFn: async () => {
+      const data = await mimir();
+      if (!data.data) {
+        throw Error("No mimir parameters found");
+      }
+      return data.data;
+    },
+  });
 
   useEffect(() => {
     modal.subscribeProviders((data) => {
@@ -511,6 +527,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         detected,
         undetected,
         isWalletConnected,
+        mimirParameters,
       }}
     >
       {children}

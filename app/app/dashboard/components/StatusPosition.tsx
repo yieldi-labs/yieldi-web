@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Loader from "@/app/components/Loader";
 import {
   PositionStats,
@@ -6,7 +6,7 @@ import {
 } from "@/utils/lp-monitor/parsePositions";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { UIComponents } from "@shared/components";
-import { formatTime } from "@/app/utils";
+import Timer from "@shared/components/ui/Timmer";
 
 interface StatusPositionProps {
   position: PositionStats;
@@ -14,25 +14,16 @@ interface StatusPositionProps {
 
 export default function StatusPosition({ position }: StatusPositionProps) {
   const asset = assetFromString(position.assetId);
-  const [timers, setTimers] = useState<number[]>([]);
+  const [initialTimers, setInitialTimers] = useState<number[]>([]);
 
   useEffect(() => {
     if (position.pendingActions?.length) {
-      const initialTimers = position.pendingActions.map(
+      const timers = position.pendingActions.map(
         (action) => action.pendingDelayInSeconds || 0,
       );
-      setTimers(initialTimers);
+      setInitialTimers(timers);
     }
   }, [position.pendingActions]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimers((prevTimers) =>
-        prevTimers.map((time) => (time > 0 ? time - 1 : 0)),
-      );
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <span className="font-medium text-sm flex flex-col space-y-2">
@@ -52,8 +43,12 @@ export default function StatusPosition({ position }: StatusPositionProps) {
               <Loader sizeInPixels={4} color="blue" />
             </span>
             <UIComponents.Tooltip
-              text={
-                timers[0] > 0 ? `${formatTime(timers[0])}` : "Processing..."
+              content={
+                initialTimers.length > 0 ? (
+                  <Timer initialTimes={initialTimers} />
+                ) : (
+                  <>Processing...</>
+                )
               }
             >
               <span className="mr-2">
@@ -63,14 +58,6 @@ export default function StatusPosition({ position }: StatusPositionProps) {
                   : "Deposit pending"}
               </span>
             </UIComponents.Tooltip>
-            {/* {
-                timers?.length > 0 && 
-                <span>
-                  {timers[0] > 0
-                    ? `${formatTime(timers[0])}`
-                    : "Processing..."}
-                </span>
-              } */}
           </span>
         </div>
       )}

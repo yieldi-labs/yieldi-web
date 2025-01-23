@@ -163,11 +163,16 @@ export const getPositionDetails = (position: MemberPool): PositionDetails => {
   };
 };
 
-export const formatTime = (seconds: number) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-  return `${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+export const disableDueTooSmallAmount = (
+  currentMinOutboundFee: number,
+  usdAssetAmount: number,
+  usdRuneAmount: number,
+): boolean => {
+  const MIN_OUTBOUND_FEE_MULTIPLIER = 3; // Random multiplier to stay sage despite of refund or other things happen. Real calcs are more complex than that. https://dev.thorchain.org/concepts/fees.html#outbound-fee
+  const minOutboundInDollars = currentMinOutboundFee / 10e7;
+  const totalAmountInDollarsOfAction = usdAssetAmount + usdRuneAmount;
+  return (
+    minOutboundInDollars * MIN_OUTBOUND_FEE_MULTIPLIER >
+    totalAmountInDollarsOfAction
+  );
 };

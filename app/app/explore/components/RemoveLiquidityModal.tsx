@@ -5,6 +5,7 @@ import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail, MemberPool } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
+  disableDueTooSmallAmount,
   getAssetShortSymbol,
   getLogoPath,
   getPositionDetails,
@@ -53,7 +54,7 @@ export default function RemoveLiquidityModal({
   const { error: liquidityError, removeLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState } = useAppState();
+  const { toggleWalletModal, walletsState, mimirParameters } = useAppState();
   const [assetChain] = useMemo(
     () => parseAssetString(pool.asset),
     [pool.asset],
@@ -331,6 +332,12 @@ export default function RemoveLiquidityModal({
       ? new BigNumber(runeBalance).times(new BigNumber(runePriceUSD)).toNumber()
       : posRuneUsdValue.toNumber();
 
+  const isDisableDueTooSmallAmount = disableDueTooSmallAmount(
+    Number(mimirParameters?.MINIMUML1OUTBOUNDFEEUSD || 0),
+    assetUsdValue,
+    runeUsdValue,
+  );
+
   return (
     <Modal onClose={() => onClose(false)} title="Remove">
       <div className="p-2 w-m">
@@ -415,10 +422,14 @@ export default function RemoveLiquidityModal({
 
         <button
           onClick={handleRemoveLiquidity}
-          disabled={!isEnabled()}
+          disabled={!isEnabled() || isDisableDueTooSmallAmount}
           className="w-full bg-red text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Submitting Transaction..." : "Remove"}
+          {isSubmitting
+            ? "Submitting Transaction..."
+            : isDisableDueTooSmallAmount
+              ? "Small amount"
+              : "Remove"}
         </button>
       </div>
     </Modal>
