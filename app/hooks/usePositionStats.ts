@@ -25,7 +25,7 @@ interface PositionsCache {
 
 export function emptyPositionStats(
   asset = "BTC.BTC",
-  positionType = PositionType.DLP,
+  positionType = PositionType.SYM,
 ): PositionStats {
   return {
     assetId: asset,
@@ -113,8 +113,8 @@ export function usePositionStats({
         } else if (walletsConnected.includes(ChainKey.THORCHAIN)) {
           // Symmetrical positions can be managed from THORChain wallet
           positions[key] = {
-            SLP: null,
-            DLP: genericPositionsDataStructure[key].DLP,
+            ASYM: null,
+            SYM: genericPositionsDataStructure[key].SYM,
           };
         }
         return positions;
@@ -162,7 +162,7 @@ export function usePositionStats({
         }
 
         if (!updatedPositions.positions[pooldId]) {
-          updatedPositions.positions[pooldId] = { DLP: null, SLP: null };
+          updatedPositions.positions[pooldId] = { SYM: null, ASYM: null };
         }
 
         if (!updatedPositions.positions[pooldId][positionType]) {

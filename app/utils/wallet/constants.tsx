@@ -1,5 +1,5 @@
 import { ChainSvg, WalletSvg } from "@/svg";
-import { ChainType, WalletType } from "../interfaces";
+import { ChainInfo, ChainType, WalletType } from "../interfaces";
 
 export enum ChainKey {
   AVALANCHE = "Avalanche",
@@ -11,6 +11,7 @@ export enum ChainKey {
   GAIACHAIN = "Cosmos",
   LITECOIN = "Litecoin",
   THORCHAIN = "THORChain",
+  BASE = "Base",
 }
 export enum ProviderKey {
   ETHEREUM = "ethereum",
@@ -23,6 +24,7 @@ export enum ProviderKey {
   SOLANA = "solana",
   THORCHAIN = "thorchain",
   COSMOS = "cosmos",
+  BASE = "Base",
 }
 export enum WalletKey {
   CTRL = "xdefi",
@@ -34,81 +36,102 @@ export enum WalletKey {
   LEDGER = "ledger",
 }
 
-export const CHAINS: ChainType[] = [
+export enum ThorchainIdentifiers {
+  AVAX = "AVAX",
+  BTC = "BTC",
+  BCH = "BCH",
+  BSC = "BSC",
+  ETH = "ETH",
+  LTC = "LTC",
+  THOR = "THOR",
+  GAIA = "GAIA",
+  DOGE = "DOGE",
+  BASE = "BASE"
+}
+
+export const CHAINS: ChainInfo[] = [
   {
     icon: <ChainSvg.Avax />,
     name: ChainKey.AVALANCHE,
     providerType: ProviderKey.AVALANCHE,
-    thorchainIdentifier: "avax",
+    thorchainIdentifier: ThorchainIdentifiers.AVAX,
     nativeAsset: "avax",
     chainId: "0xa86a",
     addressUrl: "https://snowtrace.dev/address/{wallet}",
     ctrlChainId: "avalanche",
+    type: ChainType.EVM,
   },
   {
     icon: <ChainSvg.Bitcoin />,
     name: ChainKey.BITCOIN,
     providerType: ProviderKey.BITCOIN,
-    thorchainIdentifier: "btc",
+    thorchainIdentifier: ThorchainIdentifiers.BTC,
     nativeAsset: "btc",
     addressUrl: "https://www.blockchain.com/btc/address/{wallet}",
     ctrlChainId: "bitcoin",
+    type: ChainType.UTXO,
   },
   {
     icon: <ChainSvg.BitcoinCash />,
     name: ChainKey.BITCOINCASH,
     providerType: ProviderKey.BITCOINCASH,
-    thorchainIdentifier: "bch",
+    thorchainIdentifier: ThorchainIdentifiers.BCH,
     nativeAsset: "bch",
     addressUrl: "https://www.blockchain.com/bch/address/{wallet}",
     ctrlChainId: "bitcoincash",
+    type: ChainType.UTXO,
   },
   {
     icon: <ChainSvg.BSC />,
     name: ChainKey.BSCCHAIN,
     providerType: ProviderKey.BINANCESMARTCHAIN,
     chainId: "0x38",
-    thorchainIdentifier: "bsc",
+    thorchainIdentifier: ThorchainIdentifiers.BSC,
     nativeAsset: "bnb",
     addressUrl: "https://bscscan.com/address/{wallet}",
     ctrlChainId: "binanceSmartChain",
+    type: ChainType.EVM,
   },
   {
     icon: <ChainSvg.Cosmos />,
     name: ChainKey.GAIACHAIN,
     providerType: ProviderKey.COSMOS,
-    thorchainIdentifier: "gaia",
+    thorchainIdentifier: ThorchainIdentifiers.GAIA,
     nativeAsset: "atom",
     addressUrl: "https://mintscan.io/cosmos/address/{wallet}",
     ctrlChainId: "cosmos",
+    type: ChainType.BFT,
   },
   {
     icon: <ChainSvg.Dogechain />,
     name: ChainKey.DOGECOIN,
     providerType: ProviderKey.DOGECOIN,
-    thorchainIdentifier: "doge",
+    thorchainIdentifier: ThorchainIdentifiers.DOGE,
     nativeAsset: "doge",
     addressUrl: "https://dogechain.info/address/{wallet}",
     ctrlChainId: "dogecoin",
+    type: ChainType.UTXO,
   },
   {
     icon: <ChainSvg.Ethereum />,
     name: ChainKey.ETHEREUM,
     providerType: ProviderKey.ETHEREUM,
     chainId: "0x1",
-    thorchainIdentifier: "eth",
+    thorchainIdentifier: ThorchainIdentifiers.ETH,
     nativeAsset: "eth",
     addressUrl: "https://etherscan.io/address/{wallet}",
     ctrlChainId: "ethereum",
+    type: ChainType.EVM,
   },
   {
     icon: <ChainSvg.Litecoin />,
     name: ChainKey.LITECOIN,
     providerType: ProviderKey.LITECOIN,
-    thorchainIdentifier: "ltc",
+    thorchainIdentifier: ThorchainIdentifiers.LTC,
     nativeAsset: "ltc",
     addressUrl: "https://ltc.bitaps.com/{wallet}",
     ctrlChainId: "litecoin",
+    type: ChainType.UTXO,
   },
   // {
   //   icon: <ChainSvg.Solana />,
@@ -122,44 +145,22 @@ export const CHAINS: ChainType[] = [
     icon: <ChainSvg.Thorchain />,
     name: ChainKey.THORCHAIN,
     providerType: ProviderKey.THORCHAIN,
-    thorchainIdentifier: "thor",
+    thorchainIdentifier: ThorchainIdentifiers.THOR,
     nativeAsset: "rune",
     addressUrl: "https://runescan.io/address/{wallet}",
     ctrlChainId: "thorchain",
-  },
-];
-
-// TODO: Duplicate info on CHAINs array. Remove this as part of https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration
-export const EVM_CHAINS: ChainType[] = [
-  {
-    icon: <ChainSvg.Avax />,
-    name: ChainKey.AVALANCHE,
-    providerType: ProviderKey.AVALANCHE,
-    chainId: "0xa86a",
-    thorchainIdentifier: "avax",
-    nativeAsset: "avax",
-    addressUrl: "https://snowtrace.dev/address/{wallet}",
-    ctrlChainId: "avalanche",
+    type: ChainType.BFT,
   },
   {
-    icon: <ChainSvg.BSC />,
-    name: ChainKey.BSCCHAIN,
-    providerType: ProviderKey.BINANCESMARTCHAIN,
-    chainId: "0x38",
-    thorchainIdentifier: "bsc",
-    nativeAsset: "bnb",
-    addressUrl: "https://bscscan.com/address/{wallet}",
-    ctrlChainId: "binanceSmartChain",
-  },
-  {
-    icon: <ChainSvg.Ethereum />,
-    name: ChainKey.ETHEREUM,
-    providerType: ProviderKey.ETHEREUM,
-    chainId: "0x1",
-    thorchainIdentifier: "eth",
-    nativeAsset: "eth",
-    addressUrl: "https://etherscan.io/address/{wallet}",
-    ctrlChainId: "ethereum",
+    icon: <ChainSvg.Base />,
+    name: ChainKey.BASE,
+    providerType: ProviderKey.BASE,
+    thorchainIdentifier: ThorchainIdentifiers.BASE,
+    nativeAsset: "base",
+    addressUrl: "https://basescan.org/address/{wallet}",
+    chainId: "0x2105",
+    ctrlChainId: "base",
+    type: ChainType.EVM,
   },
 ];
 
@@ -177,6 +178,7 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
       ChainKey.LITECOIN,
       ChainKey.THORCHAIN,
       ChainKey.GAIACHAIN,
+      ChainKey.BASE,
     ],
     downloadUrl: "https://ctrl.xyz/",
     icon: <WalletSvg.Ctrl />,

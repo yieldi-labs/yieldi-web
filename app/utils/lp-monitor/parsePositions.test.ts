@@ -61,9 +61,9 @@ describe("parsePositions", () => {
       LIQUIDITYLOCKUPBLOCKS: 600,
     });
 
-    expect(result["AVAX.AVAX"].DLP).toEqual({
+    expect(result["AVAX.AVAX"].SYM).toEqual({
       assetId: "AVAX.AVAX",
-      type: PositionType.DLP,
+      type: PositionType.SYM,
       status: PositionStatus.LP_POSITION_COMPLETE,
       deposit: {
         usd: expect.any(Number),

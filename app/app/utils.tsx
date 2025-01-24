@@ -18,6 +18,7 @@ export enum SupportedChain {
   // Polygon = "MATIC",
   // Radix = "XRD",
   THORChain = "THOR",
+  Base = "BASE",
   // Solana = "SOL",
 }
 
@@ -101,9 +102,9 @@ export const getLogoPath = (asset: string): string => {
 export const getNetworkLogoPath = (assetString: string): string => {
   const asset = assetFromString(assetString);
   const chain = CHAINS.find(
-    (chain) => chain.thorchainIdentifier === asset?.chain.toLowerCase(),
+    (chain) => chain.thorchainIdentifier.toLowerCase() === asset?.chain.toLowerCase(),
   );
-  return `https://storage.googleapis.com/token-list-swapkit-dev/images/${chain?.thorchainIdentifier}.${chain?.nativeAsset}.png`;
+  return `https://storage.googleapis.com/token-list-swapkit-dev/images/${chain?.thorchainIdentifier.toLowerCase()}.${chain?.nativeAsset.toLowerCase()}.png`;
 };
 
 export const getAssetCanonicalSymbol = (asset: string) => {

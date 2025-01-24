@@ -1,15 +1,15 @@
-import { ChainType, WalletType } from "@/utils/interfaces";
+import { ChainInfo, WalletType } from "@/utils/interfaces";
 import React from "react";
 import Wallet from "./Wallet";
 
 interface WalletSectionProps {
   title: string;
   wallets: WalletType[];
-  selectedChains: ChainType[];
+  selectedChains: ChainInfo[];
   selectedWallet?: WalletType;
   isWalletValidForChain: (
     wallet: WalletType,
-    selectedChains: ChainType[],
+    selectedChains: ChainInfo[],
   ) => boolean;
   onWalletSelect: (wallet: WalletType) => void;
 }

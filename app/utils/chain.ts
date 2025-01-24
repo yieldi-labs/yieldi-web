@@ -1,50 +1,15 @@
 // chainUtils.ts
 
 import { SupportedChain } from "@/app/utils";
-import { ChainKey, SUPPORTED_WALLETS } from "./wallet/constants";
-import { WalletState } from "./interfaces";
-
-/**
- * Interface for inbound address data from THORChain
- */
-export interface InboundAddress {
-  chain: string;
-  pub_key: string;
-  address: string;
-  router?: string;
-  halted: boolean;
-  global_trading_paused: boolean;
-  chain_trading_paused: boolean;
-  chain_lp_actions_paused: boolean;
-  gas_rate: string;
-  gas_rate_units: string;
-  outbound_tx_size: string;
-  outbound_fee: string;
-  dust_threshold: string;
-}
-
-/**
- * Chain ID mapping for EVM chains
- */
-export const CHAIN_ID_MAP: Record<string, number> = {
-  // TODO: This info is also in constants. Unify with issue: https://linear.app/project-chaos/issue/YLD-141/consolidate-all-chain-configuration
-  eth: 1,
-  avax: 43114,
-  bsc: 56,
-};
-
-/**
- * Get inbound addresses from THORChain
- */
-export const getInboundAddresses = async (): Promise<InboundAddress[]> => {
-  const response = await fetch(
-    "https://thornode.ninerealms.com/thorchain/inbound_addresses",
-  );
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  return response.json();
-};
+import {
+  ChainKey,
+  CHAINS,
+  SUPPORTED_WALLETS,
+  ThorchainIdentifiers,
+} from "./wallet/constants";
+import { ChainType, WalletState } from "./interfaces";
+import { InboundAddress } from "@/thornode";
+import { AnyAsset } from "@xchainjs/xchain-util";
 
 /**
  * Validate inbound address for liquidity operations
@@ -79,16 +44,21 @@ export const switchEvmChain = async (
   const currentChainId = await wallet.provider.request({
     method: "eth_chainId",
   });
-  const targetChainId = CHAIN_ID_MAP[targetChain.toLowerCase()];
+
+  const targetChainInfo = CHAINS.find(
+    (chain) =>
+      chain.thorchainIdentifier.toLowerCase() === targetChain.toLowerCase(),
+  );
+  const targetChainId = targetChainInfo?.chainId;
 
   if (!targetChainId) {
     throw new Error(`Unsupported chain: ${targetChain}`);
   }
 
-  if (parseInt(currentChainId, 16) !== targetChainId) {
+  if (currentChainId !== targetChainInfo?.chainId) {
     await wallet.provider.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: `0x${targetChainId.toString(16)}` }],
+      params: [{ chainId: targetChainId }],
     });
   }
 };
@@ -174,18 +144,6 @@ export const getLiquidityMemo = (
   throw new Error("Invalid liquidity operation type");
 };
 
-/**
- * Parse asset details from asset string
- */
-export const parseAssetString = (asset: string): [string, string] => {
-  const [chain = "", identifier = ""] = asset.split(".");
-  return [chain, identifier];
-};
-
-export const isEVMAddress = (address: string): boolean => {
-  return address.startsWith("0x") && address.length === 42;
-};
-
 export const getChainKeyFromChain = (chain: string): ChainKey => {
   chain = chain.toUpperCase();
   switch (chain) {
@@ -216,8 +174,23 @@ export const getChainKeyFromChain = (chain: string): ChainKey => {
     case "THOR": {
       return ChainKey.THORCHAIN;
     }
+    case "BASE": {
+      return ChainKey.BASE;
+    }
     default: {
       return ChainKey.ETHEREUM;
     }
   }
+};
+
+export const isChainType = (
+  type: ChainType,
+  asset: AnyAsset,
+): ThorchainIdentifiers | null => {
+  const chain = CHAINS.find(
+    (c) =>
+      c.thorchainIdentifier.toLowerCase() === asset.chain.toLowerCase() &&
+      c.type === type,
+  );
+  return chain ? chain.thorchainIdentifier : null;
 };

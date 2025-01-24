@@ -123,7 +123,7 @@ export const transferUTXO = async (
         return txHash;
       case WalletKey.LEDGER:
         const ledgerClient = getLedgerClient(
-          wallet.chainType as UTXOChain,
+          wallet.ChainInfo as UTXOChain,
           wallet.provider,
         );
         const utxoHash = await ledgerClient.transfer({
@@ -264,7 +264,7 @@ export const transferEvm = async (
       });
       return txHash;
     case WalletKey.LEDGER:
-      const client = getEvmLedgerClient(wallet.chainType, wallet.provider);
+      const client = getEvmLedgerClient(wallet.ChainInfo, wallet.provider);
       const gasLimit = await client.estimateGasLimit({
         recipient: transferParams.recipient,
         amount: transferParams.amount,

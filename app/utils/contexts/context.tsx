@@ -19,7 +19,7 @@ import {
 } from "../wallet/constants";
 import { connectWallet } from "../wallet/handlers/handleConnect";
 import {
-  ChainType,
+  ChainInfo,
   ConnectedWalletsState,
   WalletTokensData,
   WalletType,
@@ -40,8 +40,8 @@ interface AppStateContextType {
   setWalletsState: React.Dispatch<React.SetStateAction<ConnectedWalletsState>>;
   toggleWalletDrawer: () => void;
   isWalletDrawerOpen: boolean;
-  selectedChains: ChainType[];
-  setSelectedChains: Dispatch<SetStateAction<ChainType[]>>;
+  selectedChains: ChainInfo[];
+  setSelectedChains: Dispatch<SetStateAction<ChainInfo[]>>;
   selectedWallet: WalletType | undefined;
   setSelectedWallet: Dispatch<SetStateAction<WalletType | undefined>>;
   balanceList: WalletTokensData | undefined;
@@ -78,7 +78,7 @@ const modal = createAppKit({
 });
 
 export const AppStateProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedChains, setSelectedChains] = useState<ChainType[]>([]);
+  const [selectedChains, setSelectedChains] = useState<ChainInfo[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<WalletType>();
   const [detected, setDetected] = useState<WalletType[]>([]);
   const [undetected, setUndetected] = useState<WalletType[]>([]);
@@ -136,7 +136,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             provider: data.eip155,
             walletId: WalletKey.WALLETCONNECT,
             address: addressFilteredAccount,
-            chainType: chain.name,
+            ChainInfo: chain.name,
             providerType: chain.providerType,
           };
         });
@@ -170,6 +170,11 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               [ProviderKey.ETHEREUM]: async () =>
                 await connectWallet({
                   id: "xdefi-eth",
+                  provider: window?.xfi?.ethereum,
+                }),
+              [ProviderKey.BASE]: async () =>
+                await connectWallet({
+                  id: "xdefi-base",
                   provider: window?.xfi?.ethereum,
                 }),
               [ProviderKey.THORCHAIN]: async () =>

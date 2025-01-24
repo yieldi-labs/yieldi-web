@@ -27,7 +27,7 @@ async function waitForTransaction(
     const checkReceipt = async () => {
       try {
         const receipt = await infuraRequest(
-          wallet.chainType,
+          wallet.ChainInfo,
           "eth_getTransactionReceipt",
           [txHash],
         );
@@ -77,7 +77,7 @@ export function useContracts({
           args: [walletAddress, spender],
         });
 
-        const result = await infuraRequest(wallet.chainType, "eth_call", [
+        const result = await infuraRequest(wallet.ChainInfo, "eth_call", [
           {
             to: tokenAddress,
             data,
@@ -97,7 +97,7 @@ export function useContracts({
         return BigInt(0);
       }
     },
-    [tokenAddress, wallet.chainType, walletAddress],
+    [tokenAddress, wallet.ChainInfo, walletAddress],
   );
 
   const approveSpending = useCallback(

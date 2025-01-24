@@ -26,8 +26,8 @@ export enum PositionStatus {
 }
 
 export enum PositionType {
-  SLP = "SLP",
-  DLP = "DLP",
+  ASYM = "ASYM",
+  SYM = "SYM",
 }
 
 export interface PositionStats {
@@ -53,8 +53,8 @@ export interface PositionStats {
 
 export interface Positions {
   [pool: string]: {
-    DLP: PositionStats | null;
-    SLP: PositionStats | null;
+    SYM: PositionStats | null;
+    ASYM: PositionStats | null;
   };
 }
 
@@ -82,7 +82,7 @@ export const positionsTransformer = async (
     const key = memberPool.pool.replace("/", ".");
 
     if (!result[key]) {
-      result[key] = { DLP: null, SLP: null };
+      result[key] = { SYM: null, ASYM: null };
     }
 
     const pool = pools?.find(
@@ -143,7 +143,7 @@ export const positionsTransformer = async (
         action.pool === memberPool.pool &&
         action.status === ActionStatus.PENDING;
       const isThorchainTx = Boolean(action.chain === "THOR");
-      if (type === PositionType.DLP) {
+      if (type === PositionType.SYM) {
         return isThorchainTx && isPending;
       } else {
         return !isThorchainTx && isPending;
@@ -196,10 +196,10 @@ export const positionsTransformer = async (
     const pool = pools?.find((p) => p.asset === action.pool);
     if (!pool) throw Error("Position on invalid liquidity pool");
     if (!result[action.pool]) {
-      result[action.pool] = { DLP: null, SLP: null };
+      result[action.pool] = { SYM: null, ASYM: null };
     }
     const pendingActionType =
-      action.chain === "THOR" ? PositionType.DLP : PositionType.SLP;
+      action.chain === "THOR" ? PositionType.SYM : PositionType.ASYM;
     result[action.pool][pendingActionType] = {
       assetId: action.pool,
       type: pendingActionType,
@@ -230,8 +230,8 @@ const determinePositionType = (memberPool: MemberPool): PositionType => {
     memberPool.runePending !== "0" ||
     memberPool.assetPending !== "0"
   )
-    return PositionType.DLP;
-  return PositionType.SLP;
+    return PositionType.SYM;
+  return PositionType.ASYM;
 };
 
 const determinePositionStatus = (

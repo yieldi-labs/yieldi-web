@@ -1,4 +1,4 @@
-import { ChainType, WalletType } from "@/utils/interfaces";
+import { ChainInfo, WalletType } from "@/utils/interfaces";
 import { WalletSection } from "./WalletSection";
 
 interface WalletListProps {
@@ -6,10 +6,10 @@ interface WalletListProps {
   undetected: WalletType[];
   isWalletValidForChain: (
     wallet: WalletType,
-    selectedChains: ChainType[],
+    selectedChains: ChainInfo[],
   ) => boolean;
   selectedWallet?: WalletType;
-  selectedChains: ChainType[];
+  selectedChains: ChainInfo[];
   onWalletSelect: (wallet: WalletType) => void;
 }
 

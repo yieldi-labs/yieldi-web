@@ -14,10 +14,10 @@ import { WalletState } from "@/utils/interfaces";
 import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
 import { defaultBchParams } from "@xchainjs/xchain-bitcoincash";
 import { getClient } from "@/utils/wallet/utxoClients/clients";
-type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
+import { ThorchainIdentifiers } from "@/utils/wallet/constants";
 
 interface UseUTXOProps {
-  chain: UTXOChain;
+  chain: ThorchainIdentifiers | null;
   wallet?: WalletState | null;
 }
 
@@ -47,19 +47,19 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
     network: Network.Mainnet,
     explorerUrl: (() => {
       switch (chain) {
-        case "BTC":
+        case ThorchainIdentifiers.BTC:
           return defaultBTCParams.explorerProviders[
             Network.Mainnet
           ].getExplorerUrl();
-        case "DOGE":
+        case ThorchainIdentifiers.DOGE:
           return defaultDogeParams.explorerProviders[
             Network.Mainnet
           ].getExplorerUrl();
-        case "LTC":
+        case ThorchainIdentifiers.LTC:
           return defaultLtcParams.explorerProviders[
             Network.Mainnet
           ].getExplorerUrl();
-        case "BCH":
+        case ThorchainIdentifiers.BCH:
           return defaultBchParams.explorerProviders[
             Network.Mainnet
           ].getExplorerUrl();

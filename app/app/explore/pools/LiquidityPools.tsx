@@ -173,6 +173,9 @@ const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
     );
   }
 
+  console.log(pools)
+  console.log(sortedPools)
+
   // Desktop view with sortable columns
   return (
     <div className="w-full">

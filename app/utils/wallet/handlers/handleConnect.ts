@@ -92,6 +92,7 @@ export const connectWallet = async (wallet: any): Promise<any> => {
     case "xdefi-avax":
     case "xdefi-bsc":
     case "xdefi-eth":
+    case "xdefi-base":
     case "metamask-avax":
     case "metamask-bsc":
     case "metamask-eth":
