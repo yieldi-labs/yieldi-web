@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { SortableHeader, Timmer } from "@shared/components/ui";
+import { SortableHeader, Timer } from "@shared/components/ui";
 import { SortDirection } from "@shared/components/ui/types";
 import PositionRow from "./PositionRow";
 import {
@@ -58,7 +58,7 @@ export default function PositionsList({
             <span>
               Liquidity is currently in the lockup period and cannot be
               withdrawn. Your liquidity will become withdrawable in:{" "}
-              <Timmer
+              <Timer
                 initialTimes={[position.liquidityLockUpRemainingInSeconds]}
               />
             </span>
