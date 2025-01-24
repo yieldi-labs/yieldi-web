@@ -5,7 +5,7 @@ import {
   Positions,
   PositionStatus,
   PositionType,
-} from "@/hooks/dataTransformers/positionsTransformer";
+} from "@/utils/lp-monitor/parsePositions";
 import { PoolDetails } from "@/midgard";
 interface LiquidityPositionsContextType {
   positions: Positions | undefined;

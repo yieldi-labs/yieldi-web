@@ -1,4 +1,9 @@
-import { MemberPool, PoolDetail, PoolDetails } from "@/midgard";
+import {
+  getMemberDetail,
+  MemberPool,
+  PoolDetail,
+  PoolDetails,
+} from "@/midgard";
 import {
   assetAmount,
   AssetAmount,
@@ -6,6 +11,12 @@ import {
   baseToAsset,
 } from "@xchainjs/xchain-util";
 import BigNumber from "bignumber.js";
+import {
+  ActionData,
+  ActionStatus,
+  actionsTransformer,
+  ActionType,
+} from "./parseActions";
 
 export enum PositionStatus {
   LP_POSITION_DEPOSIT_PENDING = "LP_POSITION_DEPOSIT_PENDING",
@@ -34,8 +45,9 @@ export interface PositionStats {
     asset: number;
     percentage: string;
   };
+  pendingActions: ActionData[];
   pool: PoolDetail;
-  memberDetails: MemberPool;
+  memberDetails?: MemberPool;
 }
 
 export interface Positions {
@@ -45,13 +57,23 @@ export interface Positions {
   };
 }
 
-export const positionsTransformer = (
-  memberPools: MemberPool[],
+export const positionsTransformer = async (
+  addresses: string[],
   pools: PoolDetails,
 ) => {
   const result: Positions = {};
 
-  memberPools.forEach((memberPool) => {
+  const memberPoolsResult = await getMemberDetail({
+    path: {
+      address: addresses.join(","),
+    },
+  });
+
+  const actions = await actionsTransformer(addresses);
+
+  const memberPools = memberPoolsResult.data?.pools;
+
+  memberPools?.forEach((memberPool) => {
     const type = determinePositionType(memberPool);
 
     const key = memberPool.pool.replace("/", ".");
@@ -113,10 +135,22 @@ export const positionsTransformer = (
     assetAdded = depositValueAsset.amount().toNumber();
     runeAdded = depositValueRune.amount().toNumber();
 
+    const pendingActions = actions.filter((action) => {
+      const isPending =
+        action.pool === memberPool.pool &&
+        action.status === ActionStatus.PENDING;
+      const isThorchainTx = Boolean(action.chain === "THOR");
+      if (type === PositionType.DLP) {
+        return isThorchainTx && isPending;
+      } else {
+        return !isThorchainTx && isPending;
+      }
+    });
+
     result[key][type] = {
       assetId: memberPool.pool,
       type: determinePositionType(memberPool),
-      status: determinePositionStatus(memberPool),
+      status: determinePositionStatus(pendingActions, memberPool),
       deposit: {
         usd: totalAddedValueInUsd.amount().toNumber(),
         totalInAsset: totalAddedValueInAsset.amount().toNumber(),
@@ -133,7 +167,40 @@ export const positionsTransformer = (
           .toFixed(4),
       },
       pool,
+      pendingActions,
       memberDetails: memberPool,
+    };
+  });
+
+  const allPendingActions = actions.filter(
+    (action) => action.status === ActionStatus.PENDING,
+  );
+
+  allPendingActions.forEach((action) => {
+    const pool = pools?.find((p) => p.asset === action.pool);
+    if (!pool) throw Error("Position on invalid liquidity pool");
+    if (!result[action.pool]) {
+      result[action.pool] = { DLP: null, SLP: null };
+    }
+    const pendingActionType =
+      action.chain === "THOR" ? PositionType.DLP : PositionType.SLP;
+    result[action.pool][pendingActionType] = {
+      assetId: action.pool,
+      type: pendingActionType,
+      status: determinePositionStatus([action]),
+      deposit: {
+        usd: 0,
+        totalInAsset: 0,
+        assetAdded: 0,
+        runeAdded: 0,
+      },
+      gain: {
+        usd: 0,
+        asset: 0,
+        percentage: "0",
+      },
+      pool,
+      pendingActions: [action],
     };
   });
 
@@ -142,7 +209,7 @@ export const positionsTransformer = (
 
 const determinePositionType = (memberPool: MemberPool): PositionType => {
   if (
-    (memberPool.runeAdded !== "0" && memberPool.assetDeposit !== "0") ||
+    (memberPool.runeAdded !== "0" && memberPool.assetAdded !== "0") ||
     memberPool.runePending !== "0" ||
     memberPool.assetPending !== "0"
   )
@@ -150,8 +217,21 @@ const determinePositionType = (memberPool: MemberPool): PositionType => {
   return PositionType.SLP;
 };
 
-const determinePositionStatus = (memberPool: MemberPool) => {
-  if (Number(memberPool.assetPending) > 0 || Number(memberPool.runePending) > 0)
+const determinePositionStatus = (
+  actionsPending: ActionData[],
+  memberPool?: MemberPool,
+) => {
+  if (actionsPending.length > 0) {
+    if (actionsPending[0].type === ActionType.ADD_LIQUIDITY) {
+      return PositionStatus.LP_POSITION_DEPOSIT_PENDING;
+    } else {
+      return PositionStatus.LP_POSITION_WITHDRAWAL_PENDING;
+    }
+  }
+  if (
+    Number(memberPool?.assetPending) > 0 ||
+    Number(memberPool?.runePending) > 0
+  )
     return PositionStatus.LP_POSITION_INCOMPLETE;
   return PositionStatus.LP_POSITION_COMPLETE;
 };

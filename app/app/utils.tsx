@@ -43,6 +43,9 @@ export function formatNumber(
 }
 
 export const addDollarSignAndSuffix = (value: number) => {
+  if (value === 0) {
+    return "-";
+  }
   if (value >= 1e6) {
     return `$${formatNumber(value / 1e6, 2, 2)}M`;
   } else if (value >= 1e3) {
@@ -163,4 +166,13 @@ export const getPositionDetails = (position: MemberPool): PositionDetails => {
     assetAdded,
     runeAdded,
   };
+};
+
+export const formatTime = (seconds: number) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };

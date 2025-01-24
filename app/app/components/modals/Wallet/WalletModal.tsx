@@ -104,7 +104,10 @@ export default function WalletModal() {
           </>
         ) : (
           <HardwareWallets
-            onBack={() => setShowHardwareWallets(false)}
+            onBack={() => {
+              setSelectedWallet(undefined);
+              setShowHardwareWallets(false);
+            }}
             selectedChains={selectedChains}
             isDisabled={isHWDisabled}
           />

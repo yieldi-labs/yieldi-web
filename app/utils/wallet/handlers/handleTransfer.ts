@@ -126,13 +126,13 @@ export const transferUTXO = async (
           wallet.chainType as UTXOChain,
           wallet.provider,
         );
-        const btcHash = await ledgerClient.transfer({
+        const utxoHash = await ledgerClient.transfer({
           amount: transferParams.amount,
           recipient: transferParams.recipient,
           memo: transferParams.memo,
           feeRate: transferParams.feeRate,
         });
-        return btcHash;
+        return utxoHash;
       default:
         throw Error(`Unknown walletId UTXO transfer: ${wallet.walletId}`);
     }

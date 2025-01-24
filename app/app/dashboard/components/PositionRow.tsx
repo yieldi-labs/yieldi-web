@@ -2,12 +2,9 @@ import React from "react";
 import TranslucentCard from "@/app/TranslucentCard";
 import { addDollarSignAndSuffix, getAssetSymbol } from "@/app/utils";
 import TokenLogo from "./TokenLogo";
-import {
-  PositionStats,
-  PositionType,
-} from "@/hooks/dataTransformers/positionsTransformer";
 import StatusPosition from "./StatusPosition";
 import { UIComponents } from "@shared/components";
+import { PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
 
 interface PositionsRow {
   position: PositionStats;
@@ -15,7 +12,7 @@ interface PositionsRow {
   onRemove: (poolId: string, type: PositionType) => void;
   hideAddButton?: boolean;
   hideStatus?: boolean;
-  disableActions?: boolean;
+  reasonToDisable: string | null;
 }
 
 export default function PositionRow({
@@ -24,7 +21,7 @@ export default function PositionRow({
   onRemove,
   hideAddButton = false,
   hideStatus = false,
-  disableActions = false,
+  reasonToDisable = null,
 }: PositionsRow) {
   return (
     <TranslucentCard className="rounded-xl mb-1.5">
@@ -60,10 +57,10 @@ export default function PositionRow({
           )}
           <div className="hidden md:flex px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
             {!hideAddButton &&
-              (disableActions ? (
-                <UIComponents.Tooltip text={"Connect wallet"}>
+              (reasonToDisable ? (
+                <UIComponents.Tooltip text={reasonToDisable}>
                   <button
-                    disabled={disableActions}
+                    disabled={Boolean(reasonToDisable)}
                     onClick={() => onAdd(position.assetId)}
                     className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:opacity-50 disabled:cursor-not-allowed "
                   >
@@ -72,17 +69,17 @@ export default function PositionRow({
                 </UIComponents.Tooltip>
               ) : (
                 <button
-                  disabled={disableActions}
+                  disabled={Boolean(reasonToDisable)}
                   onClick={() => onAdd(position.assetId)}
                   className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
                 >
                   Add
                 </button>
               ))}
-            {disableActions ? (
-              <UIComponents.Tooltip text={"Connect wallet"}>
+            {reasonToDisable ? (
+              <UIComponents.Tooltip text={reasonToDisable}>
                 <button
-                  disabled={disableActions}
+                  disabled={Boolean(reasonToDisable)}
                   className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
                               transition-all disabled:opacity-50 disabled:cursor-not-allowed ml-2"
                   onClick={() => onRemove(position.assetId, position.type)}
