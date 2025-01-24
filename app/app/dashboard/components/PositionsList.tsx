@@ -15,7 +15,7 @@ import { getChainKeyFromChain } from "@/utils/chain";
 
 interface PositionsList {
   positions: PositionStats[];
-  onAdd: (assetId: string) => void;
+  onAdd: (assetId: string, type: PositionType) => void;
   onRemove: (poolId: string, type: PositionType) => void;
 }
 
