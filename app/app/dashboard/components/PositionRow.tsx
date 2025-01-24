@@ -63,7 +63,7 @@ export default function PositionRow({
                 <UIComponents.Tooltip content={<>{reasonToDisableAdd}</>}>
                   <button
                     disabled={Boolean(reasonToDisableAdd)}
-                    onClick={() => onAdd(position.assetId)}
+                    onClick={() => onAdd(position.assetId, position.type)}
                     className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:opacity-50 disabled:cursor-not-allowed "
                   >
                     Add
@@ -72,7 +72,7 @@ export default function PositionRow({
               ) : (
                 <button
                   disabled={Boolean(reasonToDisableAdd)}
-                  onClick={() => onAdd(position.assetId)}
+                  onClick={() => onAdd(position.assetId, position.type)}
                   className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
                 >
                   Add
