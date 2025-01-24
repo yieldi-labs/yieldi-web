@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 
 interface TimerProps {
-  initialTimes: number[]; // Array de tiempos iniciales en segundos
-  onComplete?: () => void; // Callback opcional al completar todos los temporizadores
+  initialTimes: number[];
+  onComplete?: () => void;
 }
 
 const Timer: React.FC<TimerProps> = ({ initialTimes, onComplete }) => {

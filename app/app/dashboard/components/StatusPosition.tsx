@@ -6,7 +6,6 @@ import {
 } from "@/utils/lp-monitor/parsePositions";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { UIComponents } from "@shared/components";
-import Timer from "@shared/components/ui/Timmer";
 
 interface StatusPositionProps {
   position: PositionStats;
@@ -45,7 +44,7 @@ export default function StatusPosition({ position }: StatusPositionProps) {
             <UIComponents.Tooltip
               content={
                 initialTimers.length > 0 ? (
-                  <Timer initialTimes={initialTimers} />
+                  <UIComponents.Timer initialTimes={initialTimers} />
                 ) : (
                   <>Processing...</>
                 )
