@@ -90,9 +90,12 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
         ) : (
           <PositionsList
             positions={allPositionsArray}
-            onAdd={(poolId) => {
+            onAdd={(assetId: string, type: PositionType) => {
               setSelectedPool(
-                pools?.find((pool) => pool.asset === poolId) || null,
+                pools?.find((pool) => pool.asset === assetId) || null,
+              );
+              setSelectedPosition(
+                (positions as Positions)[assetId][type] || null,
               );
               setShowAddLiquidityModal(true);
             }}
@@ -114,6 +117,7 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
             setSelectedPool(null);
             setShowAddLiquidityModal(false);
           }}
+          initialType={selectedPosition?.type}
         />
       )}
       {showRemoveLiquidityModal &&

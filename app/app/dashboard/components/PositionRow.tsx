@@ -8,7 +8,7 @@ import { PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
 
 interface PositionsRow {
   position: PositionStats;
-  onAdd: (assetId: string) => void;
+  onAdd: (assetId: string, type: PositionType) => void;
   onRemove: (poolId: string, type: PositionType) => void;
   hideAddButton?: boolean;
   hideStatus?: boolean;
@@ -61,7 +61,7 @@ export default function PositionRow({
                 <UIComponents.Tooltip text={reasonToDisable}>
                   <button
                     disabled={Boolean(reasonToDisable)}
-                    onClick={() => onAdd(position.assetId)}
+                    onClick={() => onAdd(position.assetId, position.type)}
                     className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:opacity-50 disabled:cursor-not-allowed "
                   >
                     Add
@@ -70,7 +70,7 @@ export default function PositionRow({
               ) : (
                 <button
                   disabled={Boolean(reasonToDisable)}
-                  onClick={() => onAdd(position.assetId)}
+                  onClick={() => onAdd(position.assetId, position.type)}
                   className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
                 >
                   Add
