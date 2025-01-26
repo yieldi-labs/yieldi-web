@@ -65,7 +65,7 @@ export default function AddLiquidityModal({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDualSided, setIsDualSided] = useState(
-    initialType === PositionType.DLP,
+    initialType === PositionType.SYM,
   );
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
