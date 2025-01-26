@@ -18,7 +18,7 @@ export default function TokenLogo({ assetId }: TokenLogoProps) {
         height={32}
         className="rounded-full"
       />
-      {assetId.indexOf("-") !== -1 || chain.nativeAsset === '-' ? (
+      {assetId.indexOf("-") !== -1 || chain.nativeAsset === "-" ? (
         <div className="absolute bottom-0 right-0">
           <chain.icon width={16} height={16} />
         </div>

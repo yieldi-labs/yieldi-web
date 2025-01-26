@@ -48,7 +48,7 @@ export interface WalletType {
   };
 }
 
-export interface AddChainRequestPayload {
+export interface AddChainRequestPayload {
   chainId: string;
   chainName: string;
   rpcUrls: string[];
@@ -56,8 +56,8 @@ export interface AddChainRequestPayload {
   nativeCurrency: {
     name: string;
     symbol: string;
-    decimals: number
-  }
+    decimals: number;
+  };
   blockExplorerUrls: string[];
 }
 
@@ -78,5 +78,5 @@ export interface ChainInfo {
   addressUrl: string;
   ctrlChainId: string;
   type: ChainType;
-  addChainRequestPayload?: AddChainRequestPayload
+  addChainRequestPayload?: AddChainRequestPayload;
 }

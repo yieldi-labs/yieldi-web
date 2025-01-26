@@ -60,7 +60,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     wallet: walletsState![ChainKey.GAIACHAIN],
   });
 
-  const parsedAsset = assetFromString(pool.asset);// TODO: Remove duplicity between parameters in removeliquidity addliquidity functions and hook parameters
+  const parsedAsset = assetFromString(pool.asset); // TODO: Remove duplicity between parameters in removeliquidity addliquidity functions and hook parameters
 
   if (!parsedAsset) {
     throw new Error("Invalid asset");
@@ -195,7 +195,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         let txHash;
 
         const chainInfo = getChainInfoFromChainString(parsedAsset.chain);
-        const chainId = chainInfo?.chainId as string
+        const chainId = chainInfo?.chainId as string;
 
         if (isChainType(ChainType.EVM, parsedAsset)) {
           if (!isNativeAsset && tokenAddress) {
@@ -292,7 +292,9 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           assetIdToStartActionParsed?.chain || "",
         );
         if (!selectedChainToStartAction) {
-          throw new Error(`Chain not supported: ${assetIdToStartActionParsed?.chain}`);
+          throw new Error(
+            `Chain not supported: ${assetIdToStartActionParsed?.chain}`,
+          );
         }
         const memo = getLiquidityMemo(
           "remove",
@@ -306,7 +308,9 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         // Handle Thorchain withdrawals
         if (wallet.ChainInfo === ChainKey.THORCHAIN) {
-          const amount = getMinAmountByChain(selectedChainToStartAction.thorchainIdentifier); // TODO: Handle decimals
+          const amount = getMinAmountByChain(
+            selectedChainToStartAction.thorchainIdentifier,
+          ); // TODO: Handle decimals
           return await thorChainClient.deposit({
             amount: amount,
             memo: memo,
@@ -316,9 +320,11 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         const inbound = inboundAddressesData.data?.find(
           (i) => i.chain === assetIdToStartActionParsed.chain.toUpperCase(),
         );
-        
+
         if (!inbound?.address) {
-          throw new Error(`No inbound address found for ${assetIdToStartActionParsed.chain}`);
+          throw new Error(
+            `No inbound address found for ${assetIdToStartActionParsed.chain}`,
+          );
         }
 
         validateInboundAddress(inbound);
@@ -327,7 +333,9 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         if (wallet.ChainInfo === ChainKey.GAIACHAIN) {
           const cosmosAmount = assetToBase(
             assetAmount(
-              getMinAmountByChain(selectedChainToStartAction.thorchainIdentifier),
+              getMinAmountByChain(
+                selectedChainToStartAction.thorchainIdentifier,
+              ),
               selectedChainToStartAction.nativeDecimals,
             ),
           )
@@ -343,7 +351,9 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             asset: assetIdToStartActionParsed as Asset,
             assetDecimals: selectedChainToStartAction.nativeDecimals,
             vault: inbound.address,
-            amount: getMinAmountByChain(selectedChainToStartAction.thorchainIdentifier), // TODO: Handle decimals
+            amount: getMinAmountByChain(
+              selectedChainToStartAction.thorchainIdentifier,
+            ), // TODO: Handle decimals
             memo: memo,
           });
         }
@@ -358,7 +368,8 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         // Use base unit amount for withdrawal transaction
         const decimals = selectedChainToStartAction.nativeDecimals;
         const minAmountByChain =
-          getMinAmountByChain(selectedChainToStartAction.thorchainIdentifier) * 10 ** decimals;
+          getMinAmountByChain(selectedChainToStartAction.thorchainIdentifier) *
+          10 ** decimals;
         const txHash = await depositWithExpiry(
           routerAddress,
           vaultAddress,
@@ -380,7 +391,14 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         setLoading(false);
       }
     },
-    [getAssetWallet, pool, depositWithExpiry, thorChainClient, cosmosTransfer, removeUTXOLiquidity],
+    [
+      getAssetWallet,
+      pool,
+      depositWithExpiry,
+      thorChainClient,
+      cosmosTransfer,
+      removeUTXOLiquidity,
+    ],
   );
 
   return {

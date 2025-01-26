@@ -125,7 +125,7 @@ export function useContracts({
           amount: baseAmount(amount.toString(), assetDecimals),
           assetAddress: asset,
           data: data,
-          chainId
+          chainId,
         };
 
         const hash = await transferEvm(wallet, transferParams);

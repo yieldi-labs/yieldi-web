@@ -425,19 +425,19 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               await connectWallet({
                 id: "walletconnect-avax",
                 provider: modal,
-                walletId: WalletKey.WALLETCONNECT
+                walletId: WalletKey.WALLETCONNECT,
               }),
             [ProviderKey.BINANCESMARTCHAIN]: async () =>
               await connectWallet({
                 id: "walletconnect-bsc",
                 provider: modal,
-                walletId: WalletKey.WALLETCONNECT
+                walletId: WalletKey.WALLETCONNECT,
               }),
             [ProviderKey.ETHEREUM]: async () =>
               await connectWallet({
                 id: "walletconnect-eth",
                 provider: modal,
-                walletId: WalletKey.WALLETCONNECT
+                walletId: WalletKey.WALLETCONNECT,
               }),
           };
           break;

@@ -249,7 +249,6 @@ export const transferEvm = async (
     case WalletKey.PHANTOM:
     case WalletKey.VULTISIG:
     case WalletKey.WALLETCONNECT:
-
       await switchEvmChain(wallet, transferParams.chainId as string);
 
       const currentChainId = await wallet.provider.request({
@@ -257,7 +256,9 @@ export const transferEvm = async (
       });
 
       // Security measure to avoid sending a transaction through the wrong network
-      if (currentChainId.toLowerCase() !== transferParams.chainId.toLowerCase()) {
+      if (
+        currentChainId.toLowerCase() !== transferParams.chainId.toLowerCase()
+      ) {
         throw new Error("Incorrect chain broadcast attempt");
       }
 

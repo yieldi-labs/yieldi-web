@@ -10,7 +10,6 @@ interface PoolsViewProps {
 }
 
 export default function PoolsView({ pools, stats }: PoolsViewProps) {
-
   return (
     <main className="md:mx-16">
       <ExploreNav />

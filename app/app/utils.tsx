@@ -82,12 +82,13 @@ export const getLogoPath = (asset: string): string => {
 export const getNetworkLogoPath = (assetString: string) => {
   const asset = assetFromString(assetString);
   const chain = CHAINS.find(
-    (chain) => chain.thorchainIdentifier.toLowerCase() === asset?.chain.toLowerCase(),
+    (chain) =>
+      chain.thorchainIdentifier.toLowerCase() === asset?.chain.toLowerCase(),
   );
   if (!chain) {
-    throw (`Chain not found for asset ${assetString}`);
+    throw `Chain not found for asset ${assetString}`;
   }
-  return chain.icon
+  return chain.icon;
 };
 
 export const getAssetCanonicalSymbol = (asset: string) => {

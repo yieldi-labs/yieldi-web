@@ -30,7 +30,7 @@ export const validateInboundAddress = (inbound: InboundAddress) => {
  * Switch EVM chain if necessary
  */
 export const switchEvmChain = async (
-  wallet: { walletId: WalletKey, provider: any},
+  wallet: { walletId: WalletKey; provider: any },
   targetChain: string,
 ): Promise<void> => {
   const selectedWallet = SUPPORTED_WALLETS[wallet.walletId];
@@ -46,12 +46,11 @@ export const switchEvmChain = async (
       method: "eth_chainId",
     });
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
-  
+
   const targetChainInfo = CHAINS.find(
-    (chain) =>
-      chain.chainId?.toLowerCase() === targetChain.toLowerCase(),
+    (chain) => chain.chainId?.toLowerCase() === targetChain.toLowerCase(),
   );
   const targetChainId = targetChainInfo?.chainId;
 
@@ -86,11 +85,13 @@ export const switchEvmChain = async (
 export const getChainInfoFromChainString = (
   assetChain: string,
 ): ChainInfo | undefined => {
-  const chain = CHAINS.find((c) => assetChain.toLowerCase() === c.thorchainIdentifier.toLowerCase());
+  const chain = CHAINS.find(
+    (c) => assetChain.toLowerCase() === c.thorchainIdentifier.toLowerCase(),
+  );
   if (!chain) {
     throw new Error(`Chain not found for assetId: ${assetChain}`);
   }
-  return chain
+  return chain;
 };
 
 /**
@@ -125,7 +126,7 @@ export const getMinAmountByChain = (chain: ThorchainIdentifiers): number => {
     case ThorchainIdentifiers.GAIA:
       return 0.000001;
     default:
-      throw Error ('No dust amount defined for chain');
+      throw Error("No dust amount defined for chain");
   }
 };
 
@@ -165,11 +166,13 @@ export const getLiquidityMemo = (
 };
 
 export const getChainKeyFromChain = (chain: string): ChainKey => {
-  const chainInfo = CHAINS.find((c) => c.thorchainIdentifier.toLowerCase() === chain.toLowerCase());
+  const chainInfo = CHAINS.find(
+    (c) => c.thorchainIdentifier.toLowerCase() === chain.toLowerCase(),
+  );
   if (!chainInfo) {
     throw new Error(`Chain not found for chain: ${chain}`);
   }
-  return chainInfo.name
+  return chainInfo.name;
 };
 
 export const isChainType = (
@@ -191,4 +194,4 @@ export const getChainFromAssetId = (assetId: string): ChainInfo => {
     throw new Error(`Chain not found for assetId: ${assetId}`);
   }
   return chain;
-}
+};

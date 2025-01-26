@@ -1,6 +1,17 @@
 import { WalletSvg } from "@/svg";
 import { ChainInfo, ChainType, WalletType } from "../interfaces";
-import { Avax, Base, Bitcoin, BitcoinCash, BSC, Cosmos, Dogechain, Ethereum, Litecoin, Thorchain } from "@/svg/chains";
+import {
+  Avax,
+  Base,
+  Bitcoin,
+  BitcoinCash,
+  BSC,
+  Cosmos,
+  Dogechain,
+  Ethereum,
+  Litecoin,
+  Thorchain,
+} from "@/svg/chains";
 
 export enum ChainKey {
   AVALANCHE = "Avalanche",
@@ -47,7 +58,7 @@ export enum ThorchainIdentifiers {
   THOR = "THOR",
   GAIA = "GAIA",
   DOGE = "DOGE",
-  BASE = "BASE"
+  BASE = "BASE",
 }
 
 export const CHAINS: ChainInfo[] = [
@@ -165,16 +176,16 @@ export const CHAINS: ChainInfo[] = [
     ctrlChainId: "base",
     type: ChainType.EVM,
     addChainRequestPayload: {
-      chainId: '0x2105',
-      chainName: 'Base',
-      rpcUrls: ['https://mainnet.base.org'],
-      iconUrls: ['https://www.base.org/_next/static/media/logo.f6fdedfc.svg'],
+      chainId: "0x2105",
+      chainName: "Base",
+      rpcUrls: ["https://mainnet.base.org"],
+      iconUrls: ["https://www.base.org/_next/static/media/logo.f6fdedfc.svg"],
       nativeCurrency: {
-        name: 'eth',
-        symbol: 'eth',
+        name: "eth",
+        symbol: "eth",
         decimals: 18,
       },
-      blockExplorerUrls: ['https://basescan.org'],
+      blockExplorerUrls: ["https://basescan.org"],
     },
   },
 ];
@@ -207,7 +218,12 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
   [WalletKey.METAMASK]: {
     id: WalletKey.METAMASK,
     name: "MetaMask",
-    chains: [ChainKey.AVALANCHE, ChainKey.BSCCHAIN, ChainKey.ETHEREUM, ChainKey.BASE],
+    chains: [
+      ChainKey.AVALANCHE,
+      ChainKey.BSCCHAIN,
+      ChainKey.ETHEREUM,
+      ChainKey.BASE,
+    ],
     downloadUrl: "https://metamask.io/",
     icon: <WalletSvg.Metamask />,
     isAvailable: false,

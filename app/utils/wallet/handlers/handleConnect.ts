@@ -4,7 +4,12 @@ import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
 import { getChainInfoFromChainString, switchEvmChain } from "@/utils/chain";
 
-export const connectWallet = async (wallet: { id: string, provider: any, subchain?: string, walletId: WalletKey }): Promise<any> => {
+export const connectWallet = async (wallet: {
+  id: string;
+  provider: any;
+  subchain?: string;
+  walletId: WalletKey;
+}): Promise<any> => {
   let accounts: any;
   let address = "";
 
@@ -107,9 +112,8 @@ export const connectWallet = async (wallet: { id: string, provider: any, subchai
     case "okx-avax":
     case "okx-bsc":
     case "okx-eth":
-
       const [, chainIdentifier] = wallet.id.split("-");
-      const chain = getChainInfoFromChainString(chainIdentifier)
+      const chain = getChainInfoFromChainString(chainIdentifier);
 
       if (!chain) {
         throw new Error(`Chain not found: ${chainIdentifier}`);

@@ -3,11 +3,7 @@ import { defaultBTCParams } from "@xchainjs/xchain-bitcoin";
 import { defaultDogeParams } from "@xchainjs/xchain-doge";
 import { defaultLtcParams } from "@xchainjs/xchain-litecoin";
 import { Network } from "@xchainjs/xchain-client";
-import {
-  assetToBase,
-  assetAmount,
-  Asset,
-} from "@xchainjs/xchain-util";
+import { assetToBase, assetAmount, Asset } from "@xchainjs/xchain-util";
 import { WalletState } from "@/utils/interfaces";
 import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
 import { defaultBchParams } from "@xchainjs/xchain-bitcoincash";
@@ -27,7 +23,7 @@ interface UTXOMetadata {
 
 interface TransferParams {
   asset: Asset;
-  assetDecimals: number,
+  assetDecimals: number;
   recipient: string;
   amount: number;
   memo?: string;
