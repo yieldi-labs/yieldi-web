@@ -12,7 +12,8 @@ interface PositionsRow {
   onRemove: (poolId: string, type: PositionType) => void;
   hideAddButton?: boolean;
   hideStatus?: boolean;
-  reasonToDisable: string | null;
+  reasonToDisableAdd: string | React.ReactNode;
+  reasonToDisableRemove: string | React.ReactNode;
 }
 
 export default function PositionRow({
@@ -21,7 +22,8 @@ export default function PositionRow({
   onRemove,
   hideAddButton = false,
   hideStatus = false,
-  reasonToDisable = null,
+  reasonToDisableAdd = null,
+  reasonToDisableRemove = null,
 }: PositionsRow) {
   return (
     <TranslucentCard className="rounded-xl mb-1.5">
@@ -57,10 +59,10 @@ export default function PositionRow({
           )}
           <div className="hidden md:flex px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
             {!hideAddButton &&
-              (reasonToDisable ? (
-                <UIComponents.Tooltip text={reasonToDisable}>
+              (reasonToDisableAdd ? (
+                <UIComponents.Tooltip content={<>{reasonToDisableAdd}</>}>
                   <button
-                    disabled={Boolean(reasonToDisable)}
+                    disabled={Boolean(reasonToDisableAdd)}
                     onClick={() => onAdd(position.assetId, position.type)}
                     className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:opacity-50 disabled:cursor-not-allowed "
                   >
@@ -69,19 +71,19 @@ export default function PositionRow({
                 </UIComponents.Tooltip>
               ) : (
                 <button
-                  disabled={Boolean(reasonToDisable)}
+                  disabled={Boolean(reasonToDisableAdd)}
                   onClick={() => onAdd(position.assetId, position.type)}
                   className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
                 >
                   Add
                 </button>
               ))}
-            {reasonToDisable ? (
-              <UIComponents.Tooltip text={reasonToDisable}>
+            {reasonToDisableRemove ? (
+              <UIComponents.Tooltip content={<>{reasonToDisableRemove}</>}>
                 <button
-                  disabled={Boolean(reasonToDisable)}
+                  disabled={Boolean(reasonToDisableRemove)}
                   className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
-                              transition-all disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+                              transition-all disabled:border-neutral-900 disabled:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed ml-2"
                   onClick={() => onRemove(position.assetId, position.type)}
                 >
                   Remove

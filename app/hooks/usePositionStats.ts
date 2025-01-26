@@ -43,6 +43,7 @@ export function emptyPositionStats(
       percentage: "0",
     },
     pendingActions: [],
+    liquidityLockUpRemainingInSeconds: 0,
     pool: {} as PoolDetail,
     memberDetails: {} as MemberPool,
   };
@@ -58,12 +59,12 @@ export function usePositionStats({
   const [currentRefetchInterval, setRefetchInterval] = useState<
     number | undefined
   >(defaultRefetchInterval);
-  const { walletsState } = useAppState();
+  const { walletsState, mimirParameters } = useAppState();
 
   const { isFetching: isPending, error } = useQuery({
     queryKey: ["position-stats", Object.keys(walletsState).length],
     retry: false,
-    enabled: Object.keys(walletsState).length > 0,
+    enabled: Object.keys(walletsState).length > 0 && Boolean(mimirParameters),
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
       const addresses = [];
@@ -92,6 +93,9 @@ export function usePositionStats({
       const genericPositionsDataStructure = await positionsTransformer(
         uniqueAddresses,
         pools,
+        {
+          LIQUIDITYLOCKUPBLOCKS: Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS),
+        },
       );
 
       // Filter based on connected wallets

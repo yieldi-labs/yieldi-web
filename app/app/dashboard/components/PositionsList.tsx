@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { SortableHeader } from "@shared/components/ui";
+import { SortableHeader, Timer } from "@shared/components/ui";
 import { SortDirection } from "@shared/components/ui/types";
 import PositionRow from "./PositionRow";
 import {
@@ -43,11 +43,29 @@ export default function PositionsList({
     direction: SortDirection.DESC,
   });
 
-  const areActionsDisabled = (
+  const isActionDisabled = (
     position: PositionStats,
     chainKey: ChainKey,
-  ): string | null => {
+    actionn: "add" | "remove",
+  ): string | React.ReactNode | null => {
     if (
+      position.liquidityLockUpRemainingInSeconds > 0 &&
+      actionn === "remove"
+    ) {
+      return (
+        <div className="w-[300px] flex">
+          <div className="whitespace-normal break-words">
+            <span>
+              Liquidity is currently in the lockup period and cannot be
+              withdrawn. Your liquidity will become withdrawable in:{" "}
+              <Timer
+                initialTimes={[position.liquidityLockUpRemainingInSeconds]}
+              />
+            </span>
+          </div>
+        </div>
+      );
+    } else if (
       position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
       position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
     ) {
@@ -120,7 +138,7 @@ export default function PositionsList({
         <div className="flex flex-1 md:w-4/5 w-1/2 justify-between">
           <div className="w-1/2 md:w-1/5">
             <SortableHeader<PoolSortKey>
-              label="Gain"
+              label="LP vs HOLD"
               sortKey={PoolSortKey.GAIN}
               currentSortKey={sortConfig.key}
               sortDirection={sortConfig.direction}
@@ -162,7 +180,12 @@ export default function PositionsList({
               position={position}
               onAdd={onAdd}
               onRemove={onRemove}
-              reasonToDisable={areActionsDisabled(position, chainKey)}
+              reasonToDisableAdd={isActionDisabled(position, chainKey, "add")}
+              reasonToDisableRemove={isActionDisabled(
+                position,
+                chainKey,
+                "remove",
+              )}
             />
           );
         })}

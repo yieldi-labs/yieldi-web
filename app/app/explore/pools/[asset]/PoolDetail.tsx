@@ -144,6 +144,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                 percentage: total.gain.percentage,
               },
               pendingActions: total.pendingActions,
+              liquidityLockUpRemainingInSeconds: 0,
               pool: total.pool,
               memberDetails: total.memberDetails,
             };
@@ -164,7 +165,8 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             onRemove={() => handleRemove(position)}
             hideAddButton={true}
             hideStatus={true}
-            reasonToDisable={null}
+            reasonToDisableAdd={null}
+            reasonToDisableRemove={null}
           />
         );
       });

@@ -61,7 +61,7 @@ export function ChainSelector({
               !isChainSupportedByWallet(chain, selectedWallet) && !blockUnselect
             }
           >
-            <UIComponents.Tooltip text={chain.name}>
+            <UIComponents.Tooltip content={<>{chain.name}</>}>
               {React.isValidElement(chain.icon)
                 ? cloneElement(chain.icon)
                 : null}

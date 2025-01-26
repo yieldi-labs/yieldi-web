@@ -2,7 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { NumberFormatValues } from "react-number-format";
 import Modal from "@/app/modal";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
-import { getAssetShortSymbol, getLogoPath, DECIMALS } from "@/app/utils";
+import {
+  getAssetShortSymbol,
+  getLogoPath,
+  DECIMALS,
+  disableDueTooSmallAmount,
+} from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
@@ -41,9 +46,13 @@ export default function AddLiquidityModal({
   } = useLiquidityPosition({
     pool,
   });
-
-  const { toggleWalletModal, walletsState, balanceList, isWalletConnected } =
-    useAppState();
+  const {
+    toggleWalletModal,
+    walletsState,
+    balanceList,
+    isWalletConnected,
+    mimirParameters,
+  } = useAppState();
 
   const [assetChain] = parseAssetString(pool.asset);
   const chainKey = getChainKeyFromChain(assetChain);
@@ -311,6 +320,13 @@ export default function AddLiquidityModal({
       />
     );
   }
+
+  const isDisableDueTooSmallAmount = disableDueTooSmallAmount(
+    Number(mimirParameters?.MINIMUML1OUTBOUNDFEEUSD || 0),
+    usdValue,
+    runeUsdValue,
+  );
+
   return (
     <Modal onClose={() => onClose(false)}>
       <div className="p-2 w-full">
@@ -387,7 +403,9 @@ export default function AddLiquidityModal({
 
         <button
           onClick={handleAddLiquidity}
-          disabled={!isValidAmount || isSubmitting}
+          disabled={
+            !isValidAmount || isSubmitting || isDisableDueTooSmallAmount
+          }
           className="w-full bg-primary text-black font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {!selectedWallet?.address
@@ -396,7 +414,9 @@ export default function AddLiquidityModal({
               ? "Submitting Transaction..."
               : !isValidAmount && assetAmount
                 ? "Invalid Amount"
-                : "Add"}
+                : isDisableDueTooSmallAmount
+                  ? "Small amount"
+                  : "Add"}
         </button>
       </div>
     </Modal>
