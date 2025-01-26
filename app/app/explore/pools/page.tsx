@@ -5,13 +5,12 @@ export default async function PoolsPage() {
   const [poolsData, statsData] = await Promise.all([
     getPools({
       query: {
+        period: "30d",
         status: "available",
       },
     }),
     getStats(),
   ]);
-
-  console.log('poolsData', poolsData.data)
 
   if (!poolsData.data || !statsData.data) return null;
 

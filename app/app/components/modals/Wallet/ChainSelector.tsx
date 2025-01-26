@@ -1,4 +1,3 @@
-import { cloneElement } from "react";
 import { UIComponents } from "@shared/components";
 import { ChainInfo } from "@/utils/interfaces";
 import React from "react";
@@ -62,9 +61,7 @@ export function ChainSelector({
             }
           >
             <UIComponents.Tooltip content={<>{chain.name}</>}>
-              {React.isValidElement(chain.icon)
-                ? cloneElement(chain.icon)
-                : null}
+              <chain.icon />
             </UIComponents.Tooltip>
           </button>
         ))}

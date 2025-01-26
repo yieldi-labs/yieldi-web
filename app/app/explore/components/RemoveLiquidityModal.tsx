@@ -227,11 +227,10 @@ export default function RemoveLiquidityModal({
     try {
       setIsSubmitting(true);
 
-      const asset =
+      const assetId =
         positionType === PositionType.ASYM ? pool.asset : "THOR.RUNE";
       const hash = await removeLiquidity({
-        asset,
-        assetDecimals: Number(pool.nativeDecimal),
+        assetIdToStartAction: assetId,
         percentage,
         address: selectedWallet.address,
         withdrawAsset:

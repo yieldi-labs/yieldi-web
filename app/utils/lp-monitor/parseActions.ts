@@ -54,7 +54,7 @@ export const actionsTransformer = async (
     return {
       date: new Date(Number(action.date) / 1000).toDateString(),
       type:
-        action.date === "addLiquidity"
+        action.type === "addLiquidity"
           ? ActionType.ADD_LIQUIDITY
           : ActionType.REMOVE_LIQUIDITY,
       status:

@@ -10,7 +10,6 @@ interface PoolsViewProps {
 }
 
 export default function PoolsView({ pools, stats }: PoolsViewProps) {
-  console.log('poolsData', pools)
 
   return (
     <main className="md:mx-16">

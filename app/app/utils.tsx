@@ -2,26 +2,6 @@ import { MemberPool, PoolDetail } from "@/midgard";
 import { CHAINS } from "@/utils/wallet/constants";
 import { assetFromString } from "@xchainjs/xchain-util";
 
-export enum SupportedChain {
-  Avalanche = "AVAX",
-  BinanceSmartChain = "BSC",
-  Bitcoin = "BTC",
-  BitcoinCash = "BCH",
-  Cosmos = "GAIA",
-  Dogecoin = "DOGE",
-  Ethereum = "ETH",
-  Litecoin = "LTC",
-  // Maya = "MAYA",
-  // Optimism = "OP",
-  // Polkadot = "DOT",
-  // Chainflip = "FLIP",
-  // Polygon = "MATIC",
-  // Radix = "XRD",
-  THORChain = "THOR",
-  Base = "BASE",
-  // Solana = "SOL",
-}
-
 export function formatNumber(
   amount: string | number,
   decimals = 8,
@@ -99,12 +79,15 @@ export const getLogoPath = (asset: string): string => {
   return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
 };
 
-export const getNetworkLogoPath = (assetString: string): string => {
+export const getNetworkLogoPath = (assetString: string) => {
   const asset = assetFromString(assetString);
   const chain = CHAINS.find(
     (chain) => chain.thorchainIdentifier.toLowerCase() === asset?.chain.toLowerCase(),
   );
-  return `https://storage.googleapis.com/token-list-swapkit-dev/images/${chain?.thorchainIdentifier.toLowerCase()}.${chain?.nativeAsset.toLowerCase()}.png`;
+  if (!chain) {
+    throw (`Chain not found for asset ${assetString}`);
+  }
+  return chain.icon
 };
 
 export const getAssetCanonicalSymbol = (asset: string) => {

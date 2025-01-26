@@ -8,10 +8,12 @@ import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
 import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
 import { AssetRuneNative, RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
+import { switchEvmChain } from "@/utils/chain";
 
 export interface TransactionEvmParams extends TransactionParams {
   data: `0x${string}`;
   assetAddress: `0x${string}`;
+  chainId: string;
 }
 
 interface TransactionParams extends DepositParams {
@@ -247,6 +249,19 @@ export const transferEvm = async (
     case WalletKey.PHANTOM:
     case WalletKey.VULTISIG:
     case WalletKey.WALLETCONNECT:
+
+      await switchEvmChain(wallet, transferParams.chainId as string);
+
+      const currentChainId = await wallet.provider.request({
+        method: "eth_chainId",
+      });
+
+      // Security measure to avoid sending a transaction through the wrong network
+      if (currentChainId.toLowerCase() !== transferParams.chainId.toLowerCase()) {
+        throw new Error("Incorrect chain broadcast attempt");
+      }
+
+      // TODO: Enserue chainId before proceed
       const txHash = await wallet.provider.request({
         method: "eth_sendTransaction",
         params: [

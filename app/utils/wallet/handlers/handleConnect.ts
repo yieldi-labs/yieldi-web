@@ -1,9 +1,10 @@
 import { getLedgerClient } from "../utxoClients/ledgerClients";
-import { ChainKey } from "../constants";
+import { ChainKey, WalletKey } from "../constants";
 import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
+import { getChainInfoFromChainString, switchEvmChain } from "@/utils/chain";
 
-export const connectWallet = async (wallet: any): Promise<any> => {
+export const connectWallet = async (wallet: { id: string, provider: any, subchain?: string, walletId: WalletKey }): Promise<any> => {
   let accounts: any;
   let address = "";
 
@@ -96,6 +97,7 @@ export const connectWallet = async (wallet: any): Promise<any> => {
     case "metamask-avax":
     case "metamask-bsc":
     case "metamask-eth":
+    case "metamask-base":
     case "vultisig-avax":
     case "vultisig-bsc":
     case "vultisig-eth":
@@ -105,6 +107,25 @@ export const connectWallet = async (wallet: any): Promise<any> => {
     case "okx-avax":
     case "okx-bsc":
     case "okx-eth":
+
+      const [, chainIdentifier] = wallet.id.split("-");
+      const chain = getChainInfoFromChainString(chainIdentifier)
+
+      if (!chain) {
+        throw new Error(`Chain not found: ${chainIdentifier}`);
+      }
+
+      await switchEvmChain(wallet, chain.chainId as string);
+
+      const currentChainId = await wallet.provider.request({
+        method: "eth_chainId",
+      });
+
+      // Security measure to avoid sending a transaction through the wrong network
+      if (currentChainId.toLowerCase() !== chain.chainId?.toLowerCase()) {
+        throw new Error("Incorrect chain broadcast attempt");
+      }
+
       if (!wallet.provider.connect || wallet.provider.isConnected()) {
         let accounts = [];
         accounts = await wallet.provider.request({ method: "eth_accounts" });

@@ -1,15 +1,13 @@
-// chainUtils.ts
-
-import { SupportedChain } from "@/app/utils";
 import {
   ChainKey,
   CHAINS,
   SUPPORTED_WALLETS,
   ThorchainIdentifiers,
+  WalletKey,
 } from "./wallet/constants";
-import { ChainType, WalletState } from "./interfaces";
+import { ChainInfo, ChainType } from "./interfaces";
 import { InboundAddress } from "@/thornode";
-import { AnyAsset } from "@xchainjs/xchain-util";
+import { AnyAsset, assetFromString } from "@xchainjs/xchain-util";
 
 /**
  * Validate inbound address for liquidity operations
@@ -32,7 +30,7 @@ export const validateInboundAddress = (inbound: InboundAddress) => {
  * Switch EVM chain if necessary
  */
 export const switchEvmChain = async (
-  wallet: WalletState,
+  wallet: { walletId: WalletKey, provider: any},
   targetChain: string,
 ): Promise<void> => {
   const selectedWallet = SUPPORTED_WALLETS[wallet.walletId];
@@ -41,13 +39,19 @@ export const switchEvmChain = async (
     return;
   }
 
-  const currentChainId = await wallet.provider.request({
-    method: "eth_chainId",
-  });
+  let currentChainId = null;
 
+  try {
+    currentChainId = await wallet.provider.request({
+      method: "eth_chainId",
+    });
+  } catch (e) {
+    console.error(e)
+  }
+  
   const targetChainInfo = CHAINS.find(
     (chain) =>
-      chain.thorchainIdentifier.toLowerCase() === targetChain.toLowerCase(),
+      chain.chainId?.toLowerCase() === targetChain.toLowerCase(),
   );
   const targetChainId = targetChainInfo?.chainId;
 
@@ -55,23 +59,38 @@ export const switchEvmChain = async (
     throw new Error(`Unsupported chain: ${targetChain}`);
   }
 
-  if (currentChainId !== targetChainInfo?.chainId) {
-    await wallet.provider.request({
-      method: "wallet_switchEthereumChain",
-      params: [{ chainId: targetChainId }],
-    });
+  try {
+    if (currentChainId !== targetChainInfo?.chainId) {
+      await wallet.provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: targetChainId }],
+      });
+    }
+  } catch (e) {
+    if ((e as { code: number }).code === 4902) {
+      if (!targetChainInfo.addChainRequestPayload) {
+        throw new Error("Chain not supported. Add it manually");
+      }
+
+      await wallet.provider.request({
+        method: "wallet_addEthereumChain",
+        params: [targetChainInfo.addChainRequestPayload],
+      });
+    }
   }
 };
 
 /**
  * Get supported chain by asset chain
  */
-export const getSupportedChainByAssetChain = (
+export const getChainInfoFromChainString = (
   assetChain: string,
-): SupportedChain | undefined => {
-  return Object.values(SupportedChain).find(
-    (chainValue) => chainValue.toLowerCase() === assetChain.toLowerCase(),
-  ) as SupportedChain | undefined;
+): ChainInfo | undefined => {
+  const chain = CHAINS.find((c) => assetChain.toLowerCase() === c.thorchainIdentifier.toLowerCase());
+  if (!chain) {
+    throw new Error(`Chain not found for assetId: ${assetChain}`);
+  }
+  return chain
 };
 
 /**
@@ -81,31 +100,32 @@ export const getSupportedChainByAssetChain = (
  * @returns boolean, true if it's a supported chain, false otherwise
  */
 export const isSupportedChain = (assetChain: string): boolean => {
-  return !!getSupportedChainByAssetChain(assetChain);
+  return !!getChainInfoFromChainString(assetChain);
 };
 
 /**
  * Get minimum amount by chain
  * TODO: Get from inbound endpoint
  */
-export const getMinAmountByChain = (chain: SupportedChain): number => {
+export const getMinAmountByChain = (chain: ThorchainIdentifiers): number => {
   switch (chain) {
-    case SupportedChain.Bitcoin:
-    case SupportedChain.Litecoin:
-    case SupportedChain.BitcoinCash:
+    case ThorchainIdentifiers.BTC:
+    case ThorchainIdentifiers.LTC:
+    case ThorchainIdentifiers.BCH:
       return 0.00010001;
-    case SupportedChain.Dogecoin:
+    case ThorchainIdentifiers.DOGE:
       return 1.00000001;
-    case SupportedChain.Avalanche:
-    case SupportedChain.Ethereum:
-    case SupportedChain.BinanceSmartChain:
+    case ThorchainIdentifiers.AVAX:
+    case ThorchainIdentifiers.BASE:
+    case ThorchainIdentifiers.ETH:
+    case ThorchainIdentifiers.BSC:
       return 0.00000001;
-    case SupportedChain.THORChain:
+    case ThorchainIdentifiers.THOR:
       return 0;
-    case SupportedChain.Cosmos:
+    case ThorchainIdentifiers.GAIA:
       return 0.000001;
     default:
-      return 0.00000001;
+      throw Error ('No dust amount defined for chain');
   }
 };
 
@@ -145,42 +165,11 @@ export const getLiquidityMemo = (
 };
 
 export const getChainKeyFromChain = (chain: string): ChainKey => {
-  chain = chain.toUpperCase();
-  switch (chain) {
-    case "AVAX": {
-      return ChainKey.AVALANCHE;
-    }
-    case "BSC": {
-      return ChainKey.BSCCHAIN;
-    }
-    case "ETH": {
-      return ChainKey.ETHEREUM;
-    }
-    case "BTC": {
-      return ChainKey.BITCOIN;
-    }
-    case "DOGE": {
-      return ChainKey.DOGECOIN;
-    }
-    case "LTC": {
-      return ChainKey.LITECOIN;
-    }
-    case "GAIA": {
-      return ChainKey.GAIACHAIN;
-    }
-    case "BCH": {
-      return ChainKey.BITCOINCASH;
-    }
-    case "THOR": {
-      return ChainKey.THORCHAIN;
-    }
-    case "BASE": {
-      return ChainKey.BASE;
-    }
-    default: {
-      return ChainKey.ETHEREUM;
-    }
+  const chainInfo = CHAINS.find((c) => c.thorchainIdentifier.toLowerCase() === chain.toLowerCase());
+  if (!chainInfo) {
+    throw new Error(`Chain not found for chain: ${chain}`);
   }
+  return chainInfo.name
 };
 
 export const isChainType = (
@@ -194,3 +183,12 @@ export const isChainType = (
   );
   return chain ? chain.thorchainIdentifier : null;
 };
+
+export const getChainFromAssetId = (assetId: string): ChainInfo => {
+  const asset = assetFromString(assetId);
+  const chain = getChainInfoFromChainString(asset?.chain || "");
+  if (!chain) {
+    throw new Error(`Chain not found for assetId: ${assetId}`);
+  }
+  return chain;
+}

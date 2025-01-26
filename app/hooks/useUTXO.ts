@@ -6,10 +6,8 @@ import { Network } from "@xchainjs/xchain-client";
 import {
   assetToBase,
   assetAmount,
-  assetFromString,
   Asset,
 } from "@xchainjs/xchain-util";
-import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
 import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
 import { defaultBchParams } from "@xchainjs/xchain-bitcoincash";
@@ -28,7 +26,8 @@ interface UTXOMetadata {
 }
 
 interface TransferParams {
-  pool: PoolDetail;
+  asset: Asset;
+  assetDecimals: number,
   recipient: string;
   amount: number;
   memo?: string;
@@ -91,7 +90,8 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   // Transfer using wallet provider
   const transfer = useCallback(
     async ({
-      pool,
+      asset,
+      assetDecimals,
       recipient,
       amount,
       memo = "",
@@ -107,9 +107,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       try {
         const fees = feeRate || (await getFees()).fastest;
         const from = wallet.address;
-        const nativeDecimal = parseInt(pool.nativeDecimal);
-        const finalAmount = assetToBase(assetAmount(amount, nativeDecimal));
-        const asset = assetFromString(pool.asset);
+        const finalAmount = assetToBase(assetAmount(amount, assetDecimals));
         if (!asset) {
           throw Error("Invalid asset");
         }
@@ -146,12 +144,14 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   // Add liquidity to a pool using transfer
   const addLiquidity = useCallback(
     async ({
-      pool,
+      asset,
+      assetDecimals,
       vault,
       amount,
       memo,
     }: {
-      pool: PoolDetail;
+      asset: Asset;
+      assetDecimals: number;
       vault: string;
       amount: number;
       memo: string;
@@ -163,7 +163,8 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       try {
         const fees = await getFees();
         const txHash = await transfer({
-          pool,
+          asset,
+          assetDecimals,
           recipient: vault,
           amount,
           memo,
@@ -183,12 +184,14 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   // Remove liquidity from a pool using transfer
   const removeLiquidity = useCallback(
     async ({
-      pool,
+      asset,
+      assetDecimals,
       vault,
       amount,
       memo,
     }: {
-      pool: PoolDetail;
+      asset: Asset;
+      assetDecimals: number;
       vault: string;
       amount: number;
       memo: string;
@@ -199,7 +202,8 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       try {
         const fees = await getFees();
         const result = await transfer({
-          pool,
+          asset,
+          assetDecimals,
           recipient: vault,
           amount,
           memo,

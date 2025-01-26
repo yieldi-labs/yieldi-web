@@ -48,6 +48,19 @@ export interface WalletType {
   };
 }
 
+export interface AddChainRequestPayload {
+  chainId: string;
+  chainName: string;
+  rpcUrls: string[];
+  iconUrls: string[];
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number
+  }
+  blockExplorerUrls: string[];
+}
+
 export enum ChainType {
   EVM = "EVM",
   UTXO = "UTXO",
@@ -55,13 +68,15 @@ export enum ChainType {
 }
 
 export interface ChainInfo {
-  icon: SVGProps<SVGSVGElement>;
+  icon: (props: SVGProps<SVGSVGElement>) => React.JSX.Element;
   name: ChainKey;
   providerType: ProviderKey;
   chainId?: string;
   thorchainIdentifier: ThorchainIdentifiers;
   nativeAsset: string;
+  nativeDecimals: number;
   addressUrl: string;
   ctrlChainId: string;
   type: ChainType;
+  addChainRequestPayload?: AddChainRequestPayload
 }
