@@ -132,7 +132,7 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
           <RemoveLiquidityModal
             pool={selectedPool}
             position={selectedPosition.memberDetails}
-            positionType={selectedPosition?.type}
+            positionType={selectedPosition.type}
             runePriceUSD={runePriceUSD}
             onClose={() => {
               setSelectedPool(null);
