@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { NumberFormatValues } from "react-number-format";
-import Modal from "@/app/modal";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
   getAssetShortSymbol,
@@ -29,6 +28,7 @@ interface AddLiquidityModalProps {
   runePriceUSD: number;
   onClose: (transactionSubmitted: boolean) => void;
   initialType?: PositionType;
+  nextStep: () => void;
 }
 
 const MAX_BALANCE_PERCENTAGE = 0.99;
@@ -38,6 +38,7 @@ export default function AddLiquidityModal({
   runePriceUSD,
   onClose,
   initialType,
+  nextStep
 }: AddLiquidityModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const {
@@ -329,7 +330,7 @@ export default function AddLiquidityModal({
   );
 
   return (
-    <Modal onClose={() => onClose(false)}>
+    <>
       <div className="p-2 w-full">
         {error && <ErrorCard className="mb-4">{error}</ErrorCard>}
 
@@ -403,7 +404,7 @@ export default function AddLiquidityModal({
         )}
 
         <button
-          onClick={handleAddLiquidity}
+          onClick={() => nextStep()}
           disabled={
             !isValidAmount || isSubmitting || isDisableDueTooSmallAmount
           }
@@ -420,6 +421,6 @@ export default function AddLiquidityModal({
                   : "Add"}
         </button>
       </div>
-    </Modal>
+    </>
   );
 }
