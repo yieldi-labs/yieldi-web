@@ -7,18 +7,23 @@ import { useContracts } from "./useContracts";
 import { useUTXO } from "./useUTXO";
 import { useThorchain } from "./useThorchain";
 import {
-  getInboundAddresses,
   validateInboundAddress,
-  switchEvmChain,
-  getSupportedChainByAssetChain,
+  getChainInfoFromChainString,
   getMinAmountByChain,
   getLiquidityMemo,
-  parseAssetString,
   getChainKeyFromChain,
+  isChainType,
 } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
 import { useCosmos } from "./useCosmos";
-import { assetAmount, assetToBase } from "@xchainjs/xchain-util";
+import {
+  Asset,
+  assetAmount,
+  assetFromString,
+  assetToBase,
+} from "@xchainjs/xchain-util";
+import { inboundAddresses } from "@/thornode";
+import { ChainType } from "@/utils/interfaces";
 
 interface AddLiquidityParams {
   asset: string;
@@ -31,8 +36,7 @@ interface AddLiquidityParams {
 }
 
 interface RemoveLiquidityParams {
-  asset: string;
-  assetDecimals: number;
+  assetIdToStartAction: string;
   percentage: number;
   address: string;
   withdrawAsset?: string;
@@ -56,33 +60,16 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     wallet: walletsState![ChainKey.GAIACHAIN],
   });
 
-  // Parse asset details
-  const [assetChain, assetIdentifier] = useMemo(
-    () => parseAssetString(pool.asset),
-    [pool.asset],
-  );
+  const parsedAsset = assetFromString(pool.asset); // TODO: Remove duplicity between parameters in removeliquidity addliquidity functions and hook parameters
 
-  // Determine if this is a UTXO chain and which one
-  const utxoChain = useMemo(() => {
-    const chainMap: Record<string, string> = {
-      btc: "BTC",
-      doge: "DOGE",
-      ltc: "LTC",
-      bch: "BCH",
-    };
-    return chainMap[assetChain.toLowerCase()] || null;
-  }, [assetChain]);
-
-  // Determine if this is an EVM chain
-  const isEVMChain = useMemo(() => {
-    const evmChains = ["eth", "avax", "bsc"];
-    return evmChains.includes(assetChain.toLowerCase());
-  }, [assetChain]);
+  if (!parsedAsset) {
+    throw new Error("Invalid asset");
+  }
 
   // Check if it's a native asset
   const isNativeAsset = useMemo(
-    () => assetIdentifier.indexOf("-") === -1,
-    [assetIdentifier],
+    () => parsedAsset.symbol.indexOf("-") === -1,
+    [parsedAsset],
   );
 
   // Get token address for non-native assets
@@ -91,7 +78,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [_, addressPart] = assetIdentifier.split("-");
+      const [_, addressPart] = parsedAsset.symbol.split("-");
       return addressPart
         ? (normalizeAddress(addressPart) as Address)
         : undefined;
@@ -99,13 +86,13 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       console.error("Failed to parse token address:", err);
       return undefined;
     }
-  }, [assetIdentifier, isNativeAsset]);
+  }, [parsedAsset, isNativeAsset]);
 
   const getAssetWallet = useCallback(
     (asset: string) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [chain, _] = parseAssetString(asset);
-      return walletsState![getChainKeyFromChain(chain)];
+      const parsedAsset = assetFromString(asset);
+      return walletsState![getChainKeyFromChain((parsedAsset as Asset).chain)];
     },
     [walletsState],
   );
@@ -121,8 +108,10 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     addLiquidity: addUTXOLiquidity,
     removeLiquidity: removeUTXOLiquidity,
   } = useUTXO({
-    chain: utxoChain as "BTC" | "DOGE" | "LTC" | "BCH",
-    wallet: utxoChain ? getAssetWallet(pool.asset) : null,
+    chain: isChainType(ChainType.UTXO, parsedAsset),
+    wallet: isChainType(ChainType.UTXO, parsedAsset)
+      ? getAssetWallet(pool.asset)
+      : null,
   });
 
   const addLiquidity = useCallback(
@@ -135,6 +124,10 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     }: AddLiquidityParams) => {
       if (!getAssetWallet(asset)?.address) {
         throw new Error("Wallet not connected");
+      }
+      const parsedAsset = assetFromString(asset);
+      if (!parsedAsset) {
+        throw new Error("Invalid asset");
       }
       try {
         setLoading(true);
@@ -150,11 +143,9 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         );
 
         // Handle Thorchain deposits
-        if (wallet.chainType === ChainKey.THORCHAIN) {
+        if (wallet.ChainInfo === ChainKey.THORCHAIN) {
           if (amount === 0 && runeAmount && runeAmount > 0) {
             const result = await thorChainClient.deposit({
-              pool,
-              recipient: "",
               amount: runeAmount,
               memo: memo,
             });
@@ -162,19 +153,18 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           }
         }
 
-        const inboundAddresses = await getInboundAddresses();
-        const [assetChain] = parseAssetString(asset);
-        const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase(),
+        const inboundAddressesResponse = await inboundAddresses();
+        const inbound = inboundAddressesResponse.data?.find(
+          (i) => i.chain === parsedAsset.chain.toUpperCase(),
         );
-        if (!inbound) {
-          throw new Error(`No inbound address found for ${assetChain}`);
+        if (!inbound?.address) {
+          throw new Error(`No inbound address found for ${parsedAsset.chain}`);
         } else if (inbound) {
           validateInboundAddress(inbound);
         }
 
         // Handle Cosmos chain transactions
-        if (wallet.chainType === ChainKey.GAIACHAIN) {
+        if (wallet.ChainInfo === ChainKey.GAIACHAIN) {
           const cosmosAmount = assetToBase(
             assetAmount(amount, parseInt(pool.nativeDecimal)),
           )
@@ -184,17 +174,15 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         }
 
         // Handle UTXO chain transactions
-        if (utxoChain) {
+        if (isChainType(ChainType.UTXO, parsedAsset)) {
           return await addUTXOLiquidity({
-            pool,
+            asset: assetFromString(asset) as Asset,
+            assetDecimals,
             vault: inbound.address,
             amount: amount,
             memo: memo,
           });
         }
-
-        // Handle EVM chain transactions
-        await switchEvmChain(wallet, assetChain);
 
         const routerAddress = inbound.router
           ? normalizeAddress(inbound.router)
@@ -206,7 +194,10 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         // Handle token or native asset deposit
         let txHash;
 
-        if (isEVMChain) {
+        const chainInfo = getChainInfoFromChainString(parsedAsset.chain);
+        const chainId = chainInfo?.chainId as string;
+
+        if (isChainType(ChainType.EVM, parsedAsset)) {
           if (!isNativeAsset && tokenAddress) {
             // Handle ERC20 token deposit
 
@@ -223,6 +214,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
                 routerAddress,
                 tokenAddress,
                 assetDecimals,
+                chainId,
                 parsedAmount,
               );
             }
@@ -235,6 +227,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               parsedAmount,
               memo,
               expiry,
+              chainId,
             );
           } else {
             const parsedAmount = parseUnits(amount.toString(), 18);
@@ -246,6 +239,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               parsedAmount,
               memo,
               expiry,
+              chainId,
             );
           }
         }
@@ -263,8 +257,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     [
       getAssetWallet,
       pool,
-      utxoChain,
-      isEVMChain,
       thorChainClient,
       cosmosTransfer,
       addUTXOLiquidity,
@@ -278,26 +270,31 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
   const removeLiquidity = useCallback(
     async ({
-      asset,
-      assetDecimals,
+      assetIdToStartAction, // Rune or assets depends on position type
       percentage,
       withdrawAsset,
     }: RemoveLiquidityParams) => {
-      const wallet = getAssetWallet(asset);
+      const wallet = getAssetWallet(assetIdToStartAction);
       if (!wallet?.address) {
         throw new Error("Wallet not connected");
       }
-
+      const assetIdToStartActionParsed = assetFromString(assetIdToStartAction);
+      if (!assetIdToStartActionParsed) {
+        throw new Error("Invalid asset");
+      }
       try {
         setLoading(true);
         setError(null);
 
-        const inboundAddresses = await getInboundAddresses();
-        const [assetChain] = parseAssetString(asset);
+        const inboundAddressesData = await inboundAddresses();
 
-        const supportedChain = getSupportedChainByAssetChain(assetChain);
-        if (!supportedChain) {
-          throw new Error(`Chain not supported: ${assetChain}`);
+        const selectedChainToStartAction = getChainInfoFromChainString(
+          assetIdToStartActionParsed?.chain || "",
+        );
+        if (!selectedChainToStartAction) {
+          throw new Error(
+            `Chain not supported: ${assetIdToStartActionParsed?.chain}`,
+          );
         }
         const memo = getLiquidityMemo(
           "remove",
@@ -310,31 +307,36 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         );
 
         // Handle Thorchain withdrawals
-        if (wallet.chainType === ChainKey.THORCHAIN) {
-          const amount = getMinAmountByChain(supportedChain);
+        if (wallet.ChainInfo === ChainKey.THORCHAIN) {
+          const amount = getMinAmountByChain(
+            selectedChainToStartAction.thorchainIdentifier,
+          ); // TODO: Handle decimals
           return await thorChainClient.deposit({
-            pool,
-            recipient: "",
             amount: amount,
             memo: memo,
           });
         }
 
-        const inbound = inboundAddresses?.find(
-          (i) => i.chain === assetChain.toUpperCase(),
+        const inbound = inboundAddressesData.data?.find(
+          (i) => i.chain === assetIdToStartActionParsed.chain.toUpperCase(),
         );
-        if (!inbound) {
-          throw new Error(`No inbound address found for ${assetChain}`);
-        } else if (inbound) {
-          validateInboundAddress(inbound);
+
+        if (!inbound?.address) {
+          throw new Error(
+            `No inbound address found for ${assetIdToStartActionParsed.chain}`,
+          );
         }
 
+        validateInboundAddress(inbound);
+
         // Handle Cosmos chain withdrawals
-        if (wallet.chainType === ChainKey.GAIACHAIN) {
+        if (wallet.ChainInfo === ChainKey.GAIACHAIN) {
           const cosmosAmount = assetToBase(
             assetAmount(
-              getMinAmountByChain(supportedChain),
-              parseInt(pool.nativeDecimal),
+              getMinAmountByChain(
+                selectedChainToStartAction.thorchainIdentifier,
+              ),
+              selectedChainToStartAction.nativeDecimals,
             ),
           )
             .amount()
@@ -344,16 +346,17 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         }
 
         // Handle UTXO chain withdrawals
-        if (utxoChain) {
+        if (isChainType(ChainType.UTXO, assetIdToStartActionParsed)) {
           return await removeUTXOLiquidity({
-            pool,
+            asset: assetIdToStartActionParsed as Asset,
+            assetDecimals: selectedChainToStartAction.nativeDecimals,
             vault: inbound.address,
-            amount: getMinAmountByChain(supportedChain),
+            amount: getMinAmountByChain(
+              selectedChainToStartAction.thorchainIdentifier,
+            ), // TODO: Handle decimals
             memo: memo,
           });
         }
-
-        await switchEvmChain(wallet, assetChain);
 
         const routerAddress = inbound.router
           ? normalizeAddress(inbound.router)
@@ -363,17 +366,19 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300);
 
         // Use base unit amount for withdrawal transaction
-        const decimals = parseInt(pool.nativeDecimal);
+        const decimals = selectedChainToStartAction.nativeDecimals;
         const minAmountByChain =
-          getMinAmountByChain(supportedChain) * 10 ** decimals;
+          getMinAmountByChain(selectedChainToStartAction.thorchainIdentifier) *
+          10 ** decimals;
         const txHash = await depositWithExpiry(
           routerAddress,
           vaultAddress,
           "0x0000000000000000000000000000000000000000",
-          assetDecimals,
+          decimals,
           BigInt(minAmountByChain),
           memo,
           expiry,
+          selectedChainToStartAction.chainId as string,
         );
 
         return txHash;
@@ -388,7 +393,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     },
     [
       getAssetWallet,
-      utxoChain,
       pool,
       depositWithExpiry,
       thorChainClient,

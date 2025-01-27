@@ -13,7 +13,7 @@ import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
-import { getChainKeyFromChain, parseAssetString } from "@/utils/chain";
+import { getChainKeyFromChain } from "@/utils/chain";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import {
   PositionStatus,
@@ -22,6 +22,7 @@ import {
 import { ChainKey } from "@/utils/wallet/constants";
 import AssetInput from "./AssetInput";
 import ToggleButtonGroup from "./ToggleButtonGroup";
+import { Asset, assetFromString } from "@xchainjs/xchain-util";
 
 interface AddLiquidityModalProps {
   pool: IPoolDetail;
@@ -54,8 +55,8 @@ export default function AddLiquidityModal({
     mimirParameters,
   } = useAppState();
 
-  const [assetChain] = parseAssetString(pool.asset);
-  const chainKey = getChainKeyFromChain(assetChain);
+  const asset = assetFromString(pool.asset) as Asset;
+  const chainKey = getChainKeyFromChain(asset.chain);
   const selectedWallet = walletsState[chainKey] || null;
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
@@ -64,7 +65,7 @@ export default function AddLiquidityModal({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDualSided, setIsDualSided] = useState(
-    initialType === PositionType.DLP,
+    initialType === PositionType.SYM,
   );
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
@@ -296,7 +297,7 @@ export default function AddLiquidityModal({
     return Math.abs(currentPercentage - targetPercentage) <= tolerance;
   };
 
-  const type = isDualSided ? PositionType.DLP : PositionType.SLP;
+  const type = isDualSided ? PositionType.SYM : PositionType.ASYM;
   if (
     showConfirmation &&
     (assetTxHash || runeTxHash) && // Changed condition

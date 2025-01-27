@@ -1,11 +1,11 @@
 import { IconSvg } from "@/svg";
-import { ChainType } from "@/utils/interfaces";
+import { ChainInfo } from "@/utils/interfaces";
 import { SUPPORTED_WALLETS, WalletKey } from "@/utils/wallet/constants";
 import Wallet from "./Wallet";
 
 interface HardwareWalletsProps {
   onBack: () => void;
-  selectedChains: ChainType[];
+  selectedChains: ChainInfo[];
   isDisabled: boolean;
 }
 

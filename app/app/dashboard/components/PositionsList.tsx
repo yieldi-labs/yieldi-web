@@ -71,7 +71,7 @@ export default function PositionsList({
     ) {
       return "Action in progress";
     } else if (
-      position.type === PositionType.DLP &&
+      position.type === PositionType.SYM &&
       (!walletsState[ChainKey.THORCHAIN] || !walletsState[chainKey])
     ) {
       return "Connect wallet";

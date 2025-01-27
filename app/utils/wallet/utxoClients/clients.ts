@@ -20,6 +20,7 @@ import {
   BitgoLtcProviders,
   BlockcypherLtcDataProviders,
 } from "./providers";
+import { ThorchainIdentifiers } from "../constants";
 
 const commonConfig = {
   network: Network.Mainnet,
@@ -49,17 +50,15 @@ const clientBch = new BitcoinCashClient({
   ...commonConfig,
 });
 
-export type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
-
-export const getClient = (chain: UTXOChain) => {
+export const getClient = (chain: ThorchainIdentifiers) => {
   switch (chain) {
-    case "BTC":
+    case ThorchainIdentifiers.BTC:
       return clientBtc;
-    case "DOGE":
+    case ThorchainIdentifiers.DOGE:
       return clientDoge;
-    case "LTC":
+    case ThorchainIdentifiers.LTC:
       return clientLtc;
-    case "BCH":
+    case ThorchainIdentifiers.BCH:
       return clientBch;
     default:
       throw new Error(`Unsupported UTXO chain: ${chain}`);

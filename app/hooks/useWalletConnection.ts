@@ -1,7 +1,7 @@
 "use client";
 import { ChainKey, ProviderKey, WalletKey } from "@/utils/wallet/constants";
 import {
-  ChainType,
+  ChainInfo,
   ConnectedWalletsState,
   WalletType,
 } from "@/utils/interfaces";
@@ -13,7 +13,7 @@ export function useWalletConnection() {
 
   const handleProviderConnection = async (
     wallet: WalletType,
-    chain: ChainType,
+    chain: ChainInfo,
   ) => {
     if (!wallet.chainConnect[chain.providerType]) {
       throw new Error(`Chain ${chain.name} Not Supported!`);
@@ -39,17 +39,17 @@ export function useWalletConnection() {
     prevState: ConnectedWalletsState,
     walletId: WalletKey,
     providerType: ProviderKey,
-    chainType: ChainKey,
+    ChainInfo: ChainKey,
     provider: any,
     address: string,
   ): ConnectedWalletsState => {
     return {
       ...prevState,
-      [chainType]: {
+      [ChainInfo]: {
         provider,
         walletId,
         address,
-        chainType,
+        ChainInfo,
         providerType,
       },
     };

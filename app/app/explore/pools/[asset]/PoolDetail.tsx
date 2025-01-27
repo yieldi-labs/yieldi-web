@@ -16,11 +16,7 @@ import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
 import RemoveLiquidityModal from "@/app/explore/components/RemoveLiquidityModal";
 import { TopCard } from "@/app/components/TopCard";
 import { useAppState } from "@/utils/contexts/context";
-import {
-  getChainKeyFromChain,
-  isSupportedChain,
-  parseAssetString,
-} from "@/utils/chain";
+import { getChainKeyFromChain, isSupportedChain } from "@/utils/chain";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
 import PositionRow from "@/app/dashboard/components/PositionRow";
 import {
@@ -29,6 +25,7 @@ import {
   PositionStatus,
 } from "@/utils/lp-monitor/parsePositions";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
+import { assetFromString } from "@xchainjs/xchain-util";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -44,9 +41,9 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     useState<PositionStats | null>(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   // Get chain from pool asset
-  const [assetChain] = parseAssetString(pool.asset);
-  const isChainSupported = isSupportedChain(assetChain);
-  const chainKey = getChainKeyFromChain(assetChain);
+  const asset = assetFromString(pool.asset);
+  const isChainSupported = isSupportedChain(asset?.chain || "");
+  const chainKey = getChainKeyFromChain(asset?.chain || "");
   const wallet =
     walletsState && walletsState[chainKey] ? walletsState![chainKey] : null;
 
@@ -119,8 +116,8 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     !positions || !(positions as Positions)[pool.asset]
       ? emptyPositionStats()
       : [
-          (positions as Positions)[pool.asset].SLP,
-          (positions as Positions)[pool.asset].DLP,
+          (positions as Positions)[pool.asset].ASYM,
+          (positions as Positions)[pool.asset].SYM,
         ]
           .filter((position) => position !== null)
           .reduce((total, position) => {
@@ -204,7 +201,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         <div className="text-gray-700 font-medium text-lg mb-2">POSITIONS</div>
         {positions &&
           positions[pool.asset] &&
-          (positions[pool.asset].SLP || positions[pool.asset].DLP) && (
+          (positions[pool.asset].ASYM || positions[pool.asset].SYM) && (
             <>
               <div className="flex items-center w-full px-3 py-2 text-sm text-center">
                 <div className="py-3 md:w-1/5 w-1/2"></div>

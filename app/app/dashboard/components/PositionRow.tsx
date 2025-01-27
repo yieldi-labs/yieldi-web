@@ -36,7 +36,7 @@ export default function PositionRow({
                 {getAssetSymbol(position.assetId)}
               </span>
               <span className="hidden md:block ml-3 font-medium text-sm text-neutral-700">
-                {position.type === PositionType.DLP ? "DLP" : "SLP"}
+                {position.type === PositionType.SYM ? "SYM" : "ASYM"}
               </span>
             </div>
           </div>

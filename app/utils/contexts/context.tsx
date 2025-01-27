@@ -19,7 +19,7 @@ import {
 } from "../wallet/constants";
 import { connectWallet } from "../wallet/handlers/handleConnect";
 import {
-  ChainType,
+  ChainInfo,
   ConnectedWalletsState,
   WalletTokensData,
   WalletType,
@@ -40,8 +40,8 @@ interface AppStateContextType {
   setWalletsState: React.Dispatch<React.SetStateAction<ConnectedWalletsState>>;
   toggleWalletDrawer: () => void;
   isWalletDrawerOpen: boolean;
-  selectedChains: ChainType[];
-  setSelectedChains: Dispatch<SetStateAction<ChainType[]>>;
+  selectedChains: ChainInfo[];
+  setSelectedChains: Dispatch<SetStateAction<ChainInfo[]>>;
   selectedWallet: WalletType | undefined;
   setSelectedWallet: Dispatch<SetStateAction<WalletType | undefined>>;
   balanceList: WalletTokensData | undefined;
@@ -78,7 +78,7 @@ const modal = createAppKit({
 });
 
 export const AppStateProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedChains, setSelectedChains] = useState<ChainType[]>([]);
+  const [selectedChains, setSelectedChains] = useState<ChainInfo[]>([]);
   const [selectedWallet, setSelectedWallet] = useState<WalletType>();
   const [detected, setDetected] = useState<WalletType[]>([]);
   const [undetected, setUndetected] = useState<WalletType[]>([]);
@@ -136,7 +136,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             provider: data.eip155,
             walletId: WalletKey.WALLETCONNECT,
             address: addressFilteredAccount,
-            chainType: chain.name,
+            ChainInfo: chain.name,
             providerType: chain.providerType,
           };
         });
@@ -161,51 +161,66 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 await connectWallet({
                   id: "xdefi-avax", // TODO: Remove literal IDs use enum composition
                   provider: window?.xfi?.ethereum,
+                  walletId: WalletKey.CTRL,
                 }),
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "xdefi-bsc",
                   provider: window?.xfi?.ethereum,
+                  walletId: WalletKey.CTRL,
                 }),
               [ProviderKey.ETHEREUM]: async () =>
                 await connectWallet({
                   id: "xdefi-eth",
                   provider: window?.xfi?.ethereum,
+                  walletId: WalletKey.CTRL,
+                }),
+              [ProviderKey.BASE]: async () =>
+                await connectWallet({
+                  id: "xdefi-base",
+                  provider: window?.xfi?.ethereum,
+                  walletId: WalletKey.CTRL,
                 }),
               [ProviderKey.THORCHAIN]: async () =>
                 await connectWallet({
                   id: "xdefi-thorchain",
                   provider: window?.xfi?.thorchain,
+                  walletId: WalletKey.CTRL,
                 }),
 
               [ProviderKey.LITECOIN]: async () =>
                 await connectWallet({
                   id: "xdefi-ltc",
                   provider: window?.xfi?.litecoin,
+                  walletId: WalletKey.CTRL,
                 }),
 
               [ProviderKey.DOGECOIN]: async () =>
                 await connectWallet({
                   id: "xdefi-doge",
                   provider: window?.xfi?.dogecoin,
+                  walletId: WalletKey.CTRL,
                 }),
 
               [ProviderKey.BITCOIN]: async () =>
                 await connectWallet({
                   id: "xdefi-utxo",
                   provider: window?.xfi?.bitcoin,
+                  walletId: WalletKey.CTRL,
                 }),
 
               [ProviderKey.BITCOINCASH]: async () =>
                 await connectWallet({
                   id: "xdefi-bch",
                   provider: window?.xfi?.bitcoincash,
+                  walletId: WalletKey.CTRL,
                 }),
 
               [ProviderKey.SOLANA]: async () =>
                 await connectWallet({
                   id: "xdefi-solana",
                   provider: window?.xfi?.solana,
+                  walletId: WalletKey.CTRL,
                 }),
 
               [ProviderKey.COSMOS]: async () =>
@@ -213,6 +228,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   id: "xdefi-cosmos",
                   provider: window?.xfi?.keplr,
                   subchain: "cosmoshub-4",
+                  walletId: WalletKey.CTRL,
                 }),
             };
           } else {
@@ -229,16 +245,25 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 await connectWallet({
                   id: "metamask-avax",
                   provider: window.ethereum,
+                  walletId: WalletKey.METAMASK,
                 }),
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "metamask-bsc",
                   provider: window.ethereum,
+                  walletId: WalletKey.METAMASK,
                 }),
               [ProviderKey.ETHEREUM]: async () =>
                 await connectWallet({
                   id: "metamask-eth",
                   provider: window.ethereum,
+                  walletId: WalletKey.METAMASK,
+                }),
+              [ProviderKey.BASE]: async () =>
+                await connectWallet({
+                  id: "metamask-base",
+                  provider: window.ethereum,
+                  walletId: WalletKey.METAMASK,
                 }),
             };
           } else {
@@ -254,27 +279,32 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 await connectWallet({
                   id: "okx-avax",
                   provider: window.okxwallet,
+                  walletId: WalletKey.OKX,
                 }),
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "okx-bsc",
                   provider: window.okxwallet,
+                  walletId: WalletKey.OKX,
                 }),
               [ProviderKey.ETHEREUM]: async () =>
                 await connectWallet({
                   id: "okx-eth",
                   provider: window.okxwallet,
+                  walletId: WalletKey.OKX,
                 }),
               [ProviderKey.BITCOIN]: async () =>
                 await connectWallet({
                   id: "okx-utxo",
                   provider: window.okxwallet.bitcoin,
+                  walletId: WalletKey.OKX,
                 }),
               [ProviderKey.COSMOS]: async () =>
                 await connectWallet({
                   id: "okx-cosmos",
                   provider: window.okxwallet.keplr,
                   subchain: "cosmoshub-4",
+                  walletId: WalletKey.OKX,
                 }),
             };
           } else {
@@ -290,26 +320,31 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 await connectWallet({
                   id: "phantom-avax",
                   provider: window.phantom?.ethereum,
+                  walletId: WalletKey.PHANTOM,
                 }),
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "phantom-bsc",
                   provider: window.phantom?.ethereum,
+                  walletId: WalletKey.PHANTOM,
                 }),
               [ProviderKey.ETHEREUM]: async () =>
                 await connectWallet({
                   id: "phantom-eth",
                   provider: window.phantom?.ethereum,
+                  walletId: WalletKey.PHANTOM,
                 }),
               [ProviderKey.BITCOIN]: async () =>
                 await connectWallet({
                   id: "phantom-utxo",
                   provider: window.phantom.bitcoin,
+                  walletId: WalletKey.PHANTOM,
                 }),
               [ProviderKey.SOLANA]: async () =>
                 await connectWallet({
                   id: "phantom-solana",
                   provider: window.phantom.solana,
+                  walletId: WalletKey.PHANTOM,
                 }),
             };
           } else {
@@ -326,47 +361,56 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                 await connectWallet({
                   id: "vultisig-avax",
                   provider: window.vultisig?.ethereum,
+                  walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "vultisig-bsc",
                   provider: window.vultisig?.ethereum,
+                  walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.ETHEREUM]: async () =>
                 await connectWallet({
                   id: "vultisig-eth",
                   provider: window.vultisig?.ethereum,
+                  walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.THORCHAIN]: async () =>
                 await connectWallet({
                   id: "vultisig-thorchain",
                   provider: window.thorchain || window.vultisig?.thorchain,
+                  walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.BITCOIN]: async () =>
                 await connectWallet({
                   id: "vultisig-utxo",
                   provider: window.bitcoin || window.vultisig?.bitcoin,
+                  walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.BITCOINCASH]: async () =>
                 await connectWallet({
                   id: "vultisig-bch",
                   provider: window.bitcoincash || window.vultisig?.bitcoincash,
+                  walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.LITECOIN]: async () =>
                 await connectWallet({
                   id: "vultisig-ltc",
                   provider: window.litecoin || window.vultisig?.litecoin,
+                  walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.DOGECOIN]: async () =>
                 await connectWallet({
                   id: "vultisig-doge",
                   provider: window.dogecoin || window.vultisig?.dogecoin,
+                  walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.COSMOS]: async () =>
                 await connectWallet({
                   id: "vultisig-cosmos",
                   provider: window.vultisig?.cosmos,
                   subchain: "cosmoshub-4",
+                  walletId: WalletKey.VULTISIG,
                 }),
             };
           } else {
@@ -381,16 +425,19 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               await connectWallet({
                 id: "walletconnect-avax",
                 provider: modal,
+                walletId: WalletKey.WALLETCONNECT,
               }),
             [ProviderKey.BINANCESMARTCHAIN]: async () =>
               await connectWallet({
                 id: "walletconnect-bsc",
                 provider: modal,
+                walletId: WalletKey.WALLETCONNECT,
               }),
             [ProviderKey.ETHEREUM]: async () =>
               await connectWallet({
                 id: "walletconnect-eth",
                 provider: modal,
+                walletId: WalletKey.WALLETCONNECT,
               }),
           };
           break;
@@ -402,6 +449,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-avax",
                 provider: transport,
+                walletId: WalletKey.LEDGER,
               });
             },
             [ProviderKey.BINANCESMARTCHAIN]: async () => {
@@ -409,6 +457,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-bsc",
                 provider: transport,
+                walletId: WalletKey.LEDGER,
               });
             },
             [ProviderKey.ETHEREUM]: async () => {
@@ -416,6 +465,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-eth",
                 provider: transport,
+                walletId: WalletKey.LEDGER,
               });
             },
             [ProviderKey.BITCOIN]: async () => {
@@ -423,6 +473,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-btc",
                 provider: transport,
+                walletId: WalletKey.LEDGER,
               });
             },
             [ProviderKey.BITCOINCASH]: async () => {
@@ -430,6 +481,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-bch",
                 provider: transport,
+                walletId: WalletKey.LEDGER,
               });
             },
             [ProviderKey.LITECOIN]: async () => {
@@ -437,6 +489,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-ltc",
                 provider: transport,
+                walletId: WalletKey.LEDGER,
               });
             },
             [ProviderKey.DOGECOIN]: async () => {
@@ -444,6 +497,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-doge",
                 provider: transport,
+                walletId: WalletKey.LEDGER,
               });
             },
             [ProviderKey.COSMOS]: async () => {
@@ -451,6 +505,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-cosmos",
                 provider: transport,
+                walletId: WalletKey.LEDGER,
               });
             },
             [ProviderKey.THORCHAIN]: async () => {
@@ -458,6 +513,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               return await connectWallet({
                 id: "ledger-thorchain",
                 provider: transport,
+                walletId: WalletKey.LEDGER,
               });
             },
           };

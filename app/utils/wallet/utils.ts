@@ -1,8 +1,8 @@
-import { ChainType, WalletType } from "../interfaces";
+import { ChainInfo, WalletType } from "../interfaces";
 
 export const isWalletValidForAllChains = (
   wallet: WalletType,
-  selectedChains: ChainType[],
+  selectedChains: ChainInfo[],
 ): boolean => {
   if (selectedChains.length) {
     const selectedChainKeys = new Set(
@@ -17,7 +17,7 @@ export const isWalletValidForAllChains = (
 };
 
 export const isChainSupportedByWallet = (
-  chain: ChainType,
+  chain: ChainInfo,
   selectedWallet?: WalletType,
 ): boolean => {
   if (!selectedWallet) {

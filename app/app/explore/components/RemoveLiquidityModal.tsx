@@ -14,7 +14,7 @@ import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
-import { getChainKeyFromChain, parseAssetString } from "@/utils/chain";
+import { getChainKeyFromChain } from "@/utils/chain";
 import {
   PositionStatus,
   PositionType,
@@ -23,6 +23,7 @@ import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { Slider } from "@shared/components/ui";
 import AssetInput from "./AssetInput";
 import ToggleButtonGroup from "./ToggleButtonGroup";
+import { assetFromString } from "@xchainjs/xchain-util";
 
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;
@@ -55,10 +56,8 @@ export default function RemoveLiquidityModal({
     pool,
   });
   const { toggleWalletModal, walletsState, mimirParameters } = useAppState();
-  const [assetChain] = useMemo(
-    () => parseAssetString(pool.asset),
-    [pool.asset],
-  );
+
+  const asset = assetFromString(pool.asset);
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
   const [assetAmount, setAssetAmount] = useState("");
@@ -71,11 +70,11 @@ export default function RemoveLiquidityModal({
     null,
   );
   const [withdrawalType, setWithdrawalType] = useState<WithdrawalType>(
-    positionType === PositionType.SLP
+    positionType === PositionType.ASYM
       ? WithdrawalType.ALL_ASSET
       : WithdrawalType.SPLIT,
   );
-  const chainKey = getChainKeyFromChain(assetChain);
+  const chainKey = getChainKeyFromChain(asset?.chain || "");
   const selectedWallet = walletsState![chainKey];
   const { assetAdded: positionAssetAmount, runeAdded: positionRuneAmount } =
     getPositionDetails(position);
@@ -228,11 +227,10 @@ export default function RemoveLiquidityModal({
     try {
       setIsSubmitting(true);
 
-      const asset =
-        positionType === PositionType.SLP ? pool.asset : "THOR.RUNE";
+      const assetId =
+        positionType === PositionType.ASYM ? pool.asset : "THOR.RUNE";
       const hash = await removeLiquidity({
-        asset,
-        assetDecimals: Number(pool.nativeDecimal),
+        assetIdToStartAction: assetId,
         percentage,
         address: selectedWallet.address,
         withdrawAsset:
@@ -244,7 +242,7 @@ export default function RemoveLiquidityModal({
       });
 
       if (hash) {
-        if (positionType === PositionType.SLP) {
+        if (positionType === PositionType.ASYM) {
           setAssetTxHash(hash);
         } else {
           setRuneTxHash(hash);
@@ -346,7 +344,7 @@ export default function RemoveLiquidityModal({
         )}
 
         {/* Withdrawal Options */}
-        {positionType === PositionType.DLP && (
+        {positionType === PositionType.SYM && (
           <ToggleButtonGroup
             options={[
               { label: `${assetSymbol} + RUNE`, value: WithdrawalType.SPLIT },
