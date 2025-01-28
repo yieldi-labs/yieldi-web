@@ -28,7 +28,6 @@ export interface AddLiquidityStepData {
   runePriceUSD: number;
   initialType?: PositionType;
 }
-
 interface AddLiquidityModalProps {
   nextStep: (data: StatusStepData) => void;
   stepData: AddLiquidityStepData;
