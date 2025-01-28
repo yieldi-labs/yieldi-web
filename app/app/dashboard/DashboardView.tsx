@@ -5,7 +5,6 @@ import { addDollarSignAndSuffix } from "../utils";
 import DashboardHighlightsCard from "./components/DashboardHighlightsCards";
 import PositionsList from "./components/PositionsList";
 import { PoolDetail } from "@/midgard";
-import AddLiquidityModal from "../explore/components/AddLiquidityModal";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import Loader from "../components/Loader";
 import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
@@ -14,6 +13,9 @@ import {
   PositionStats,
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
+import AddLiquidityManager, {
+  LpSteps,
+} from "../explore/components/AddLiquidityManager";
 
 interface DashboardViewProps {
   runePriceUSD: number;
@@ -110,14 +112,17 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
         )}
       </div>
       {showAddLiquidityModal && selectedPool && (
-        <AddLiquidityModal
-          pool={selectedPool}
-          runePriceUSD={runePriceUSD}
+        <AddLiquidityManager
+          initialStep={LpSteps.SELECT_OPTIONS}
           onClose={() => {
             setSelectedPool(null);
             setShowAddLiquidityModal(false);
           }}
-          initialType={selectedPosition?.type}
+          stepData={{
+            pool: selectedPool,
+            runePriceUSD: runePriceUSD,
+            initialType: selectedPosition?.type,
+          }}
         />
       )}
       {showRemoveLiquidityModal &&
