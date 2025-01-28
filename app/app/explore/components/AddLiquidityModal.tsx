@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NumberFormatValues } from "react-number-format";
 import Modal from "@/app/modal";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
@@ -32,6 +32,7 @@ interface AddLiquidityModalProps {
 }
 
 const MAX_BALANCE_PERCENTAGE = 0.99;
+type InputChanging = "asset" | "rune";
 
 export default function AddLiquidityModal({
   pool,
@@ -39,7 +40,6 @@ export default function AddLiquidityModal({
   onClose,
   initialType,
 }: AddLiquidityModalProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
   const {
     error: liquidityError,
     addLiquidity,
@@ -67,6 +67,7 @@ export default function AddLiquidityModal({
   const [isDualSided, setIsDualSided] = useState(
     initialType === PositionType.SYM,
   );
+  const [inputChanging, setInputChanging] = useState<InputChanging>("asset");
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
 
@@ -84,55 +85,35 @@ export default function AddLiquidityModal({
   }, [balanceList, pool.asset]);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const handleValueChange = (values: NumberFormatValues) => {
-    setAssetAmount(values.value);
-
-    if (isDualSided) {
-      const value = parseFloat(values.value);
-      const assetPriceUSD = parseFloat(pool.assetPriceUSD);
-      const assetUsdValue = value * assetPriceUSD;
-      const runeEquivalent = (assetUsdValue / runePriceUSD).toFixed(8);
-      const runeMaxUsdValue = runeBalance * runePriceUSD;
-
-      if (assetUsdValue > runeMaxUsdValue) {
-        const maxAssetAmount = (runeMaxUsdValue / assetPriceUSD).toFixed(
-          poolNativeDecimal,
-        );
-        setAssetAmount(maxAssetAmount);
-        setRuneAmount(runeBalance.toFixed(8));
-      } else {
-        setRuneAmount(runeEquivalent);
-      }
+    if (assetAmount && inputChanging === "asset") {
+      const newUsdValue =
+        parseFloat(assetAmount) * parseFloat(pool.assetPriceUSD);
+      const newRuneAmount = newUsdValue / runePriceUSD;
+      setRuneAmount(newRuneAmount.toFixed(6));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assetAmount, pool.assetPriceUSD, runePriceUSD]);
+
+  useEffect(() => {
+    if (runeAmount && inputChanging === "rune") {
+      const newUsdValue = parseFloat(runeAmount) * runePriceUSD;
+      const newAssetAmount = newUsdValue / parseFloat(pool.assetPriceUSD);
+      setAssetAmount(newAssetAmount.toFixed(poolNativeDecimal));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runeAmount, pool.assetPriceUSD, runePriceUSD, poolNativeDecimal]);
+
+  const handleAssetValueChange = (values: NumberFormatValues) => {
+    setAssetAmount(values.value);
   };
 
   const handleRuneValueChange = (values: NumberFormatValues) => {
     setRuneAmount(values.value);
-
-    if (isDualSided) {
-      const value = parseFloat(values.value);
-      const runeUsdValue = value * runePriceUSD;
-      const assetPriceUSD = parseFloat(pool.assetPriceUSD);
-      const assetEquivalent = (runeUsdValue / assetPriceUSD).toFixed(
-        poolNativeDecimal,
-      );
-      const assetMaxUsdValue = assetBalance * assetPriceUSD;
-
-      if (runeUsdValue > assetMaxUsdValue) {
-        const maxRuneAmount = (assetMaxUsdValue / runePriceUSD).toFixed(8);
-        setRuneAmount(maxRuneAmount);
-        setAssetAmount(assetBalance.toFixed(poolNativeDecimal));
-      } else {
-        setAssetAmount(assetEquivalent);
-      }
-    }
   };
 
   const handleAssetPercentageClick = (percentage: number) => {
     if (assetBalance <= 0) return;
+    setInputChanging("asset");
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
@@ -145,6 +126,7 @@ export default function AddLiquidityModal({
 
   const handleRunePercentageClick = (percentage: number) => {
     if (balanceList![ChainKey.THORCHAIN]["THOR.RUNE"].balance <= 0) return;
+    setInputChanging("rune");
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
@@ -165,6 +147,12 @@ export default function AddLiquidityModal({
       const runeAmt = parseFloat(runeAmount);
       const runeMaxAllowed =
         runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
+      const assetMaxRuneEquivalent =
+        maxAllowed * parseFloat(pool.assetPriceUSD);
+      if (runeAmt > assetMaxRuneEquivalent) {
+        return false;
+      }
+
       const isRuneAmountValid = runeAmt > 0 && runeAmt <= runeMaxAllowed;
       return isAssetAmountValid || isRuneAmountValid;
     }
@@ -173,11 +161,12 @@ export default function AddLiquidityModal({
   }, [
     assetAmount,
     assetBalance,
+    assetMinimalUnit,
+    isDualSided,
     runeAmount,
     runeBalance,
-    isDualSided,
-    assetMinimalUnit,
     runeMinimalUnit,
+    pool.assetPriceUSD,
   ]);
 
   const handleAddLiquidity = async () => {
@@ -347,7 +336,7 @@ export default function AddLiquidityModal({
 
         <AssetInput
           value={assetAmount}
-          onValueChange={handleValueChange}
+          onValueChange={handleAssetValueChange}
           assetSymbol={assetSymbol}
           assetUsdValue={usdValue}
           logoPath={getLogoPath(pool.asset)}
@@ -355,6 +344,7 @@ export default function AddLiquidityModal({
           usdDecimalScale={2}
           assetBalance={assetBalance}
           usdBalance={assetUsdBalance}
+          onFocus={() => setInputChanging("asset")}
         />
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
@@ -384,6 +374,7 @@ export default function AddLiquidityModal({
               usdDecimalScale={2}
               assetBalance={runeBalance}
               usdBalance={runeUsdBalance}
+              onFocus={() => setInputChanging("rune")}
             />
             <div className="flex justify-end gap-2 mb-6">
               {[25, 50, 100].map((percent) => (

@@ -12,6 +12,7 @@ interface AssetInputProps {
   usdDecimalScale: number;
   assetBalance?: number;
   usdBalance?: number;
+  onFocus?: () => void;
 }
 
 export default function AssetInput({
@@ -24,12 +25,14 @@ export default function AssetInput({
   usdDecimalScale,
   assetBalance: balance,
   usdBalance,
+  onFocus,
 }: AssetInputProps) {
   return (
     <div className="bg-white rounded-xl p-4 mb-6">
       <div className="flex items-center gap-2 mb-2">
         <NumericFormat
           value={value}
+          onFocus={onFocus}
           onValueChange={onValueChange}
           placeholder="0"
           className="flex-1 text-xl font-medium outline-none"
