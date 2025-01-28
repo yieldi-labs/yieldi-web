@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NumberFormatValues } from "react-number-format";
 import {
   getAssetShortSymbol,
@@ -34,6 +34,7 @@ interface AddLiquidityModalProps {
 }
 
 const MAX_BALANCE_PERCENTAGE = 0.99;
+type InputChanging = "asset" | "rune";
 
 const getSubsteps = (isDualSided: boolean, asset: Asset) => {
   const steps = [];
@@ -69,6 +70,7 @@ export default function AddLiquidityModal({
   const [isDualSided, setIsDualSided] = useState(
     stepData.initialType === PositionType.SYM,
   );
+  const [inputChanging, setInputChanging] = useState<InputChanging>("asset");
 
   const poolNativeDecimal = parseInt(stepData.pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
@@ -107,6 +109,20 @@ export default function AddLiquidityModal({
         setRuneAmount(runeEquivalent);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assetAmount, pool.assetPriceUSD, runePriceUSD]);
+
+  useEffect(() => {
+    if (runeAmount && inputChanging === "rune") {
+      const newUsdValue = parseFloat(runeAmount) * runePriceUSD;
+      const newAssetAmount = newUsdValue / parseFloat(pool.assetPriceUSD);
+      setAssetAmount(newAssetAmount.toFixed(poolNativeDecimal));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runeAmount, pool.assetPriceUSD, runePriceUSD, poolNativeDecimal]);
+
+  const handleAssetValueChange = (values: NumberFormatValues) => {
+    setAssetAmount(values.value);
   };
 
   const handleRuneValueChange = (values: NumberFormatValues) => {
@@ -135,6 +151,7 @@ export default function AddLiquidityModal({
 
   const handleAssetPercentageClick = (percentage: number) => {
     if (assetBalance <= 0) return;
+    setInputChanging("asset");
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
@@ -147,6 +164,7 @@ export default function AddLiquidityModal({
 
   const handleRunePercentageClick = (percentage: number) => {
     if (balanceList![ChainKey.THORCHAIN]["THOR.RUNE"].balance <= 0) return;
+    setInputChanging("rune");
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
@@ -167,6 +185,12 @@ export default function AddLiquidityModal({
       const runeAmt = parseFloat(runeAmount);
       const runeMaxAllowed =
         runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
+      const assetMaxRuneEquivalent =
+        maxAllowed * parseFloat(pool.assetPriceUSD);
+      if (runeAmt > assetMaxRuneEquivalent) {
+        return false;
+      }
+
       const isRuneAmountValid = runeAmt > 0 && runeAmt <= runeMaxAllowed;
       return isAssetAmountValid || isRuneAmountValid;
     }
@@ -175,11 +199,12 @@ export default function AddLiquidityModal({
   }, [
     assetAmount,
     assetBalance,
+    assetMinimalUnit,
+    isDualSided,
     runeAmount,
     runeBalance,
-    isDualSided,
-    assetMinimalUnit,
     runeMinimalUnit,
+    pool.assetPriceUSD,
   ]);
 
   const assetSymbol = getAssetShortSymbol(stepData.pool.asset);
@@ -249,7 +274,7 @@ export default function AddLiquidityModal({
 
         <AssetInput
           value={assetAmount}
-          onValueChange={handleValueChange}
+          onValueChange={handleAssetValueChange}
           assetSymbol={assetSymbol}
           assetUsdValue={usdValue}
           logoPath={getLogoPath(stepData.pool.asset)}
@@ -257,6 +282,7 @@ export default function AddLiquidityModal({
           usdDecimalScale={2}
           assetBalance={assetBalance}
           usdBalance={assetUsdBalance}
+          onFocus={() => setInputChanging("asset")}
         />
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
@@ -285,6 +311,7 @@ export default function AddLiquidityModal({
               usdDecimalScale={2}
               assetBalance={runeBalance}
               usdBalance={runeUsdBalance}
+              onFocus={() => setInputChanging("rune")}
             />
             <div className="flex justify-end gap-2 mb-6">
               {[25, 50, 100].map((percent) => (
