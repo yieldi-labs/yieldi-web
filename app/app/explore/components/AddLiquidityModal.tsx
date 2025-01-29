@@ -57,8 +57,6 @@ export default function AddLiquidityModal({
   stepData,
   nextStep,
 }: AddLiquidityModalProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
   const { walletsState, balanceList, isWalletConnected, mimirParameters } =
     useAppState();
 
@@ -71,10 +69,9 @@ export default function AddLiquidityModal({
     stepData.initialType === PositionType.SYM,
   );
   const [inputChanging, setInputChanging] = useState<InputChanging>("asset");
-  const { positions, markPositionAsPending } = useLiquidityPositions();
   const inputChangeConstraint = 0.01; // 1%
 
-  const poolNativeDecimal = parseInt(pool.nativeDecimal);
+  const poolNativeDecimal = parseInt(stepData.pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
   const runeBalance = useMemo(() => {
@@ -90,8 +87,8 @@ export default function AddLiquidityModal({
   useEffect(() => {
     if (assetAmount && inputChanging === "asset") {
       const newUsdValue =
-        parseFloat(assetAmount) * parseFloat(pool.assetPriceUSD);
-      const newRuneAmount = newUsdValue / runePriceUSD;
+        parseFloat(assetAmount) * parseFloat(stepData.pool.assetPriceUSD);
+      const newRuneAmount = newUsdValue / stepData.runePriceUSD;
       // Prevents changing input value when focusing on the other input without changing the value
       if (
         Math.abs((newRuneAmount - parseFloat(runeAmount)) / newRuneAmount) >
@@ -103,9 +100,8 @@ export default function AddLiquidityModal({
   }, [
     assetAmount,
     runeAmount,
-    pool.assetPriceUSD,
-    runePriceUSD,
     inputChanging,
+    stepData,
   ]);
 
   useEffect(() => {
@@ -124,10 +120,9 @@ export default function AddLiquidityModal({
   }, [
     runeAmount,
     assetAmount,
-    pool.assetPriceUSD,
-    runePriceUSD,
     poolNativeDecimal,
     inputChanging,
+    stepData,
   ]);
 
   const handleAssetValueChange = (values: NumberFormatValues) => {
@@ -195,7 +190,7 @@ export default function AddLiquidityModal({
       const runeMaxAllowed =
         runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
       const assetMaxRuneEquivalent =
-        maxAllowed * parseFloat(pool.assetPriceUSD);
+        maxAllowed * parseFloat(stepData.pool.assetPriceUSD);
       if (runeAmt > assetMaxRuneEquivalent) {
         return false;
       }
@@ -213,7 +208,7 @@ export default function AddLiquidityModal({
     runeAmount,
     runeBalance,
     runeMinimalUnit,
-    pool.assetPriceUSD,
+    stepData,
   ]);
 
   const assetSymbol = getAssetShortSymbol(stepData.pool.asset);
