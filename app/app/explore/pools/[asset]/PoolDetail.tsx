@@ -176,7 +176,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
           <PositionRow
             key={position.memberDetails?.liquidityUnits}
             position={position}
-            onAdd={() => { } }
+            onAdd={() => {}}
             onRemove={() => handleRemove(position)}
             hideAddButton={true}
             hideStatus={true}
