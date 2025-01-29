@@ -71,8 +71,10 @@ export default function AddLiquidityModal({
     stepData.initialType === PositionType.SYM,
   );
   const [inputChanging, setInputChanging] = useState<InputChanging>("asset");
+  const { positions, markPositionAsPending } = useLiquidityPositions();
+  const inputChangeConstraint = 0.01; // 1%
 
-  const poolNativeDecimal = parseInt(stepData.pool.nativeDecimal);
+  const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
   const runeMinimalUnit = 1 / 10 ** DECIMALS;
   const runeBalance = useMemo(() => {
@@ -86,40 +88,46 @@ export default function AddLiquidityModal({
   }, [balanceList, stepData.pool.asset]);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const handleValueChange = (values: NumberFormatValues) => {
-    setAssetAmount(values.value);
-
-    if (isDualSided) {
-      const value = parseFloat(values.value);
-      const assetPriceUSD = parseFloat(stepData.pool.assetPriceUSD);
-      const assetUsdValue = value * assetPriceUSD;
-      const runeEquivalent = (assetUsdValue / stepData.runePriceUSD).toFixed(8);
-      const runeMaxUsdValue = runeBalance * stepData.runePriceUSD;
-
-      if (assetUsdValue > runeMaxUsdValue) {
-        const maxAssetAmount = (runeMaxUsdValue / assetPriceUSD).toFixed(
-          poolNativeDecimal,
-        );
-        setAssetAmount(maxAssetAmount);
-        setRuneAmount(runeBalance.toFixed(8));
-      } else {
-        setRuneAmount(runeEquivalent);
+    if (assetAmount && inputChanging === "asset") {
+      const newUsdValue =
+        parseFloat(assetAmount) * parseFloat(pool.assetPriceUSD);
+      const newRuneAmount = newUsdValue / runePriceUSD;
+      // Prevents changing input value when focusing on the other input without changing the value
+      if (
+        Math.abs((newRuneAmount - parseFloat(runeAmount)) / newRuneAmount) >
+        inputChangeConstraint
+      ) {
+        setRuneAmount(newRuneAmount.toFixed(6));
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assetAmount, pool.assetPriceUSD, runePriceUSD]);
+  }, [
+    assetAmount,
+    runeAmount,
+    pool.assetPriceUSD,
+    runePriceUSD,
+    inputChanging,
+  ]);
 
   useEffect(() => {
     if (runeAmount && inputChanging === "rune") {
       const newUsdValue = parseFloat(runeAmount) * runePriceUSD;
       const newAssetAmount = newUsdValue / parseFloat(pool.assetPriceUSD);
-      setAssetAmount(newAssetAmount.toFixed(poolNativeDecimal));
+      // Prevents changing input value when focusing on the other input without changing the value
+      if (
+        Math.abs((newAssetAmount - parseFloat(assetAmount)) / newAssetAmount) >
+        inputChangeConstraint
+      ) {
+        setAssetAmount(newAssetAmount.toFixed(poolNativeDecimal));
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runeAmount, pool.assetPriceUSD, runePriceUSD, poolNativeDecimal]);
+  }, [
+    runeAmount,
+    assetAmount,
+    pool.assetPriceUSD,
+    runePriceUSD,
+    poolNativeDecimal,
+    inputChanging,
+  ]);
 
   const handleAssetValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
