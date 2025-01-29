@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AddLiquidityModal from "./AddLiquidityModal";
+import AddLiquidityModal, { AddLiquidityStepData } from "./AddLiquidityModal";
 import StatusModal, { ConfirmStepData, StatusStepData } from "./StatusModal";
 import Modal from "@/app/modal";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
@@ -19,7 +19,7 @@ const modalTitles = {
 interface AddLiquidityManagerProps {
   onClose: () => void;
   initialStep?: LpSteps;
-  stepData?: any;
+  stepData?: StatusStepData | ConfirmStepData | AddLiquidityStepData;
 }
 
 const AddLiquidityManager = ({
@@ -43,13 +43,13 @@ const AddLiquidityManager = ({
     <Modal onClose={onClose} title={modalTitles[step]}>
       <>
         {step === LpSteps.SELECT_OPTIONS && (
-          <AddLiquidityModal nextStep={nextStep} stepData={data} />
+          <AddLiquidityModal nextStep={nextStep} stepData={data as AddLiquidityStepData} />
         )}
         {step === LpSteps.HANDLE_STATE && (
-          <StatusModal onClose={onClose} nextStep={nextStep} stepData={data} />
+          <StatusModal onClose={onClose} nextStep={nextStep} stepData={data as StatusStepData} />
         )}
         {step === LpSteps.SUCCESS_SCREEN && (
-          <TransactionConfirmationModal onClose={onClose} stepData={data} />
+          <TransactionConfirmationModal onClose={onClose} stepData={data as ConfirmStepData} />
         )}
       </>
     </Modal>

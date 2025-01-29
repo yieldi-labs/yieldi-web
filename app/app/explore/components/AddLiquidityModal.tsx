@@ -23,14 +23,16 @@ import {
 import { StatusStepData } from "./StatusModal";
 import { RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 
+
+export interface AddLiquidityStepData {
+  pool: IPoolDetail;
+  runePriceUSD: number;
+  initialType?: PositionType;
+}
+
 interface AddLiquidityModalProps {
   nextStep: (data: StatusStepData) => void;
-  stepData: {
-    pool: IPoolDetail;
-    runePriceUSD: number;
-    onClose: (transactionSubmitted: boolean) => void;
-    initialType?: PositionType;
-  };
+  stepData: AddLiquidityStepData;
 }
 
 const MAX_BALANCE_PERCENTAGE = 0.99;
@@ -314,7 +316,7 @@ export default function AddLiquidityModal({
               runeAmount: assetAmountConstructor(runeAmount, RUNE_DECIMAL),
               runeUsdAmount: runeUsdValue,
               positionType: type,
-              neccessarySteps: getSubsteps(isDualSided, asset),
+              requiredSteps: getSubsteps(isDualSided, asset),
             })
           }
           disabled={!isValidAmount || isDisableDueTooSmallAmount}

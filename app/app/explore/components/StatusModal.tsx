@@ -23,7 +23,7 @@ export interface StatusStepData {
   runeAmount: AssetAmount;
   runeUsdAmount: number;
   positionType: PositionType;
-  neccessarySteps: LpSubstepsAddLiquidity[];
+  requiredSteps: LpSubstepsAddLiquidity[];
 }
 
 export enum LpSubstepsStatus {
@@ -60,7 +60,7 @@ export default function StatusModal({
   const isInProgress = useRef(false);
 
   const [stepStatus, setStepStatus] = useState(
-    stepData.neccessarySteps.map((step) => ({
+    stepData.requiredSteps.map((step) => ({
       step: step,
       status: LpSubstepsStatus.INACTIVE,
     })),
