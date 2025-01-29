@@ -23,7 +23,6 @@ import {
 import { StatusStepData } from "./StatusModal";
 import { RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 
-
 export interface AddLiquidityStepData {
   pool: IPoolDetail;
   runePriceUSD: number;

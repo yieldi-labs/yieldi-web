@@ -43,13 +43,23 @@ const AddLiquidityManager = ({
     <Modal onClose={onClose} title={modalTitles[step]}>
       <>
         {step === LpSteps.SELECT_OPTIONS && (
-          <AddLiquidityModal nextStep={nextStep} stepData={data as AddLiquidityStepData} />
+          <AddLiquidityModal
+            nextStep={nextStep}
+            stepData={data as AddLiquidityStepData}
+          />
         )}
         {step === LpSteps.HANDLE_STATE && (
-          <StatusModal onClose={onClose} nextStep={nextStep} stepData={data as StatusStepData} />
+          <StatusModal
+            onClose={onClose}
+            nextStep={nextStep}
+            stepData={data as StatusStepData}
+          />
         )}
         {step === LpSteps.SUCCESS_SCREEN && (
-          <TransactionConfirmationModal onClose={onClose} stepData={data as ConfirmStepData} />
+          <TransactionConfirmationModal
+            onClose={onClose}
+            stepData={data as ConfirmStepData}
+          />
         )}
       </>
     </Modal>
