@@ -90,9 +90,12 @@ export default function AddLiquidityModal({
         parseFloat(assetAmount) * parseFloat(stepData.pool.assetPriceUSD);
       const newRuneAmount = newUsdValue / stepData.runePriceUSD;
       // Prevents changing input value when focusing on the other input without changing the value
+      const runeAmountChanged = Math.abs(
+        (newRuneAmount - parseFloat(runeAmount)) / newRuneAmount,
+      );
       if (
-        Math.abs((newRuneAmount - parseFloat(runeAmount)) / newRuneAmount) >
-        inputChangeConstraint
+        Number.isNaN(runeAmountChanged) ||
+        runeAmountChanged > inputChangeConstraint
       ) {
         setRuneAmount(newRuneAmount.toFixed(6));
       }
@@ -104,10 +107,13 @@ export default function AddLiquidityModal({
       const newUsdValue = parseFloat(runeAmount) * stepData.runePriceUSD;
       const newAssetAmount =
         newUsdValue / parseFloat(stepData.pool.assetPriceUSD);
-      // Prevents changing input value when focusing on the other input without changing the value
+
+      const assetAmountChanged = Math.abs(
+        (newAssetAmount - parseFloat(assetAmount)) / newAssetAmount,
+      );
       if (
-        Math.abs((newAssetAmount - parseFloat(assetAmount)) / newAssetAmount) >
-        inputChangeConstraint
+        Number.isNaN(assetAmountChanged) ||
+        assetAmountChanged > inputChangeConstraint
       ) {
         setAssetAmount(newAssetAmount.toFixed(poolNativeDecimal));
       }
@@ -120,26 +126,6 @@ export default function AddLiquidityModal({
 
   const handleRuneValueChange = (values: NumberFormatValues) => {
     setRuneAmount(values.value);
-
-    if (isDualSided) {
-      const value = parseFloat(values.value);
-      const runeUsdValue = value * stepData.runePriceUSD;
-      const assetPriceUSD = parseFloat(stepData.pool.assetPriceUSD);
-      const assetEquivalent = (runeUsdValue / assetPriceUSD).toFixed(
-        poolNativeDecimal,
-      );
-      const assetMaxUsdValue = assetBalance * assetPriceUSD;
-
-      if (runeUsdValue > assetMaxUsdValue) {
-        const maxRuneAmount = (
-          assetMaxUsdValue / stepData.runePriceUSD
-        ).toFixed(8);
-        setRuneAmount(maxRuneAmount);
-        setAssetAmount(assetBalance.toFixed(poolNativeDecimal));
-      } else {
-        setAssetAmount(assetEquivalent);
-      }
-    }
   };
 
   const handleAssetPercentageClick = (percentage: number) => {
