@@ -25,6 +25,12 @@ import {
 import { inboundAddresses } from "@/thornode";
 import { ChainType } from "@/utils/interfaces";
 
+export enum LpSubstepsAddLiquidity {
+  APRROVE_DEPOSIT_ASSET = "APRROVE_DEPOSIT_ASSET",
+  BROADCAST_DEPOSIT_ASSET = "BROADCAST_DEPOSIT_ASSET",
+  BROADCAST_DEPOSIT_RUNE = "BROADCAST_DEPOSIT_RUNE",
+}
+
 interface AddLiquidityParams {
   asset: string;
   assetDecimals: number;
@@ -33,6 +39,8 @@ interface AddLiquidityParams {
   pairedAddress?: string;
   affiliate?: string;
   feeBps?: number;
+  emitNewHash: (txHash: string, step: LpSubstepsAddLiquidity) => void;
+  emitError: (error: string) => void;
 }
 
 interface RemoveLiquidityParams {
@@ -121,12 +129,16 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       amount,
       pairedAddress,
       runeAmount,
+      emitNewHash,
+      emitError,
     }: AddLiquidityParams) => {
       if (!getAssetWallet(asset)?.address) {
+        emitError("Wallet not connected");
         throw new Error("Wallet not connected");
       }
       const parsedAsset = assetFromString(asset);
       if (!parsedAsset) {
+        emitError("Invalid asset");
         throw new Error("Invalid asset");
       }
       try {
@@ -149,6 +161,11 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               amount: runeAmount,
               memo: memo,
             });
+            if (!result) {
+              emitError("Failed to add liquidity to Thorchain");
+              throw new Error("Failed to add liquidity to Thorchain");
+            }
+            emitNewHash(result, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE);
             return result;
           }
         }
@@ -158,6 +175,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           (i) => i.chain === parsedAsset.chain.toUpperCase(),
         );
         if (!inbound?.address) {
+          emitError(`No inbound address found for ${parsedAsset.chain}`);
           throw new Error(`No inbound address found for ${parsedAsset.chain}`);
         } else if (inbound) {
           validateInboundAddress(inbound);
@@ -170,24 +188,43 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           )
             .amount()
             .toNumber();
-          return await cosmosTransfer(inbound.address, cosmosAmount, memo);
+          const bftHash = await cosmosTransfer(
+            inbound.address,
+            cosmosAmount,
+            memo,
+          );
+          if (!bftHash) {
+            emitError("Failed to add liquidity to Cosmos chain");
+            throw new Error("Failed to add liquidity to Cosmos chain");
+          }
+          emitNewHash(bftHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
+          return bftHash;
         }
 
         // Handle UTXO chain transactions
         if (isChainType(ChainType.UTXO, parsedAsset)) {
-          return await addUTXOLiquidity({
+          const utxoHash = await addUTXOLiquidity({
             asset: assetFromString(asset) as Asset,
             assetDecimals,
             vault: inbound.address,
             amount: amount,
             memo: memo,
           });
+          if (!utxoHash) {
+            emitError("Failed to add liquidity to UTXO chain");
+            throw new Error("Failed to add liquidity to UTXO chain");
+          }
+          emitNewHash(utxoHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
+          return utxoHash;
         }
 
         const routerAddress = inbound.router
           ? normalizeAddress(inbound.router)
           : undefined;
-        if (!routerAddress) throw new Error("Router address not found");
+        if (!routerAddress) {
+          emitError("Router address not found no router adddress");
+          throw new Error("Router address not found no router adddress");
+        }
         const vaultAddress = normalizeAddress(inbound.address);
         const expiry = BigInt(Math.floor(Date.now() / 1000) + 300); // 5 minutes
 
@@ -210,15 +247,23 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             // Check and handle allowance
             const currentAllowance = await getAllowance(routerAddress);
             if (currentAllowance < parsedAmount) {
-              await approveSpending(
+              const resultApproveHash = await approveSpending(
                 routerAddress,
                 tokenAddress,
                 assetDecimals,
                 chainId,
                 parsedAmount,
               );
+              if (!resultApproveHash) {
+                emitError("Failed to approve");
+                throw new Error("Failed to approve");
+              }
+              emitNewHash(
+                resultApproveHash,
+                LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET,
+              );
             }
-
+            emitNewHash("-", LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET);
             txHash = await depositWithExpiry(
               routerAddress,
               vaultAddress,
@@ -229,6 +274,11 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               expiry,
               chainId,
             );
+            if (!txHash) {
+              emitError("Failed to add liquidity to EVM chain");
+              throw new Error("Failed to add liquidity to EVM chain");
+            }
+            emitNewHash(txHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
           } else {
             const parsedAmount = parseUnits(amount.toString(), 18);
             txHash = await depositWithExpiry(
@@ -241,15 +291,20 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               expiry,
               chainId,
             );
+            if (!txHash) {
+              emitError("Failed to add liquidity to EVM chain");
+              throw new Error("Failed to add liquidity to EVM chain");
+            }
+            emitNewHash(txHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
           }
         }
 
         return txHash;
       } catch (err) {
+        console.error("Failed to add liquidity:", err);
         const errorMessage =
           err instanceof Error ? err.message : "Failed to add liquidity";
-        setError(errorMessage);
-        throw new Error(errorMessage);
+        emitError(errorMessage);
       } finally {
         setLoading(false);
       }

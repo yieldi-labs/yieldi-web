@@ -291,9 +291,12 @@ export default function RemoveLiquidityModal({
 
     return (
       <TransactionConfirmationModal
-        position={positions[pool.asset][positionType]!}
-        assetHash={assetTxHash}
-        runeHash={runeTxHash}
+        stepData={{
+          pool,
+          positionType,
+          assetHash: assetTxHash,
+          runeHash: runeTxHash,
+        }}
         onClose={() => {
           setAssetTxHash(null);
           setRuneTxHash(null);

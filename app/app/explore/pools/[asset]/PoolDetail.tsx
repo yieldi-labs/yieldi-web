@@ -12,7 +12,6 @@ import {
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
-import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
 import RemoveLiquidityModal from "@/app/explore/components/RemoveLiquidityModal";
 import { TopCard } from "@/app/components/TopCard";
 import { useAppState } from "@/utils/contexts/context";
@@ -26,6 +25,9 @@ import {
 } from "@/utils/lp-monitor/parsePositions";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { assetFromString } from "@xchainjs/xchain-util";
+import AddLiquidityManager, {
+  LpSteps,
+} from "../../components/AddLiquidityManager";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -285,10 +287,13 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         )}
 
       {showAddLiquidityModal && (
-        <AddLiquidityModal
-          pool={pool}
-          runePriceUSD={runePriceUSD}
+        <AddLiquidityManager
+          initialStep={LpSteps.SELECT_OPTIONS}
           onClose={handleAddLiquidityClose}
+          stepData={{
+            pool: pool,
+            runePriceUSD: runePriceUSD,
+          }}
         />
       )}
 
