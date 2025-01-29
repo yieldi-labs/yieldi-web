@@ -97,12 +97,7 @@ export default function AddLiquidityModal({
         setRuneAmount(newRuneAmount.toFixed(6));
       }
     }
-  }, [
-    assetAmount,
-    runeAmount,
-    inputChanging,
-    stepData,
-  ]);
+  }, [assetAmount, runeAmount, inputChanging, stepData]);
 
   useEffect(() => {
     if (runeAmount && inputChanging === "rune") {
@@ -117,13 +112,7 @@ export default function AddLiquidityModal({
         setAssetAmount(newAssetAmount.toFixed(poolNativeDecimal));
       }
     }
-  }, [
-    runeAmount,
-    assetAmount,
-    poolNativeDecimal,
-    inputChanging,
-    stepData,
-  ]);
+  }, [runeAmount, assetAmount, poolNativeDecimal, inputChanging, stepData]);
 
   const handleAssetValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
