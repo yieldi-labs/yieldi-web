@@ -19,7 +19,7 @@ export interface ActionData {
   pendingDelayInSeconds: number;
   pool: string;
   chain: string;
-  memo: string
+  memo: string;
 }
 
 export const actionsTransformer = async (

@@ -598,7 +598,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         undetected,
         isWalletConnected,
         mimirParameters,
-        midgardStats
+        midgardStats,
       }}
     >
       {children}

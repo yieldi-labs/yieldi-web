@@ -128,7 +128,7 @@ export default function StatusModal({
         });
       });
 
-      let hashAssetDeposit = null
+      let hashAssetDeposit = null;
       if (parsedAssetAmount > 0) {
         hashAssetDeposit = await addLiquidity({
           asset: stepData.pool.asset,
@@ -165,7 +165,11 @@ export default function StatusModal({
         });
       }
 
-      if (isDualSided && parsedRuneAmount > 0 && (hashAssetDeposit || parsedAssetAmount <= 0)) {
+      if (
+        isDualSided &&
+        parsedRuneAmount > 0 &&
+        (hashAssetDeposit || parsedAssetAmount <= 0)
+      ) {
         pairedAddress = getAssetWallet(stepData.pool.asset).address;
         await addLiquidity({
           asset: "THOR.RUNE",

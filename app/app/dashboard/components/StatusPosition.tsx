@@ -12,7 +12,10 @@ interface StatusPositionProps {
   onClick: () => void;
 }
 
-export default function StatusPosition({ position, onClick }: StatusPositionProps) {
+export default function StatusPosition({
+  position,
+  onClick,
+}: StatusPositionProps) {
   const asset = assetFromString(position.assetId);
   const [initialTimers, setInitialTimers] = useState<number[]>([]);
 
@@ -28,7 +31,10 @@ export default function StatusPosition({ position, onClick }: StatusPositionProp
   return (
     <span className="font-medium text-sm flex flex-col space-y-2 hover:underline cursor-pointer hover:decoration-yellow-700">
       {position.status === PositionStatus.LP_POSITION_INCOMPLETE && (
-        <span onClick={onClick} className="flex items-center bg-yellow-100 text-yellow-700 px-2 py-1 rounded-md shadow-sm animate-pulse">
+        <span
+          onClick={onClick}
+          className="flex items-center bg-yellow-100 text-yellow-700 px-2 py-1 rounded-md shadow-sm animate-pulse"
+        >
           {Number(position.memberDetails?.runePending) > 0
             ? `Awaiting ${asset?.symbol} deposit`
             : "Awaiting RUNE deposit"}
@@ -63,7 +69,10 @@ export default function StatusPosition({ position, onClick }: StatusPositionProp
       )}
 
       {position.status === PositionStatus.LP_POSITION_COMPLETE && (
-        <span onClick={onClick} className="flex items-center bg-green-100 text-green-700 px-2 py-1 rounded-md shadow-sm">
+        <span
+          onClick={onClick}
+          className="flex items-center bg-green-100 text-green-700 px-2 py-1 rounded-md shadow-sm"
+        >
           <span className="mr-2">Active</span>
           <svg
             className="w-4 h-4 text-green-500"

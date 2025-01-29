@@ -7,8 +7,6 @@ interface PoolDetailClientProps {
   pool: PoolDetailType; // Add proper type for your pool
 }
 
-export default function PoolDetailClient({
-  pool,
-}: PoolDetailClientProps) {
+export default function PoolDetailClient({ pool }: PoolDetailClientProps) {
   return <PoolDetail pool={pool} />;
 }

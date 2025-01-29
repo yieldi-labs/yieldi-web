@@ -4,7 +4,11 @@ import { addDollarSignAndSuffix, getAssetSymbol } from "@/app/utils";
 import TokenLogo from "./TokenLogo";
 import StatusPosition from "./StatusPosition";
 import { UIComponents } from "@shared/components";
-import { PositionStats, PositionStatus, PositionType } from "@/utils/lp-monitor/parsePositions";
+import {
+  PositionStats,
+  PositionStatus,
+  PositionType,
+} from "@/utils/lp-monitor/parsePositions";
 
 interface PositionsRow {
   position: PositionStats;
@@ -56,11 +60,16 @@ export default function PositionRow({
           </div>
           {!hideStatus && (
             <div className="hidden md:flex md:px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
-              <StatusPosition position={position} onClick={() => {
-                if (position.status === PositionStatus.LP_POSITION_INCOMPLETE) {
-                  onCompletePosition(position.assetId, position.type)
-                }
-              }} />
+              <StatusPosition
+                position={position}
+                onClick={() => {
+                  if (
+                    position.status === PositionStatus.LP_POSITION_INCOMPLETE
+                  ) {
+                    onCompletePosition(position.assetId, position.type);
+                  }
+                }}
+              />
             </div>
           )}
           <div className="hidden md:flex px-3 py-3 md:py-0 whitespace-nowrap w-1/5">

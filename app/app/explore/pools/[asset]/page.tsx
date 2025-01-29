@@ -26,9 +26,5 @@ export default async function PoolDetailPage({
   )
     return notFound();
 
-  return (
-    <PoolDetailClient
-      pool={poolData.data}
-    />
-  );
+  return <PoolDetailClient pool={poolData.data} />;
 }

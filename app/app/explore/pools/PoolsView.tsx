@@ -12,9 +12,7 @@ export default function PoolsView({ pools }: PoolsViewProps) {
   return (
     <main className="md:mx-16">
       <ExploreNav />
-      <LiquidityPools
-        pools={pools}
-      />
+      <LiquidityPools pools={pools} />
     </main>
   );
 }

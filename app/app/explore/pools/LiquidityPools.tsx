@@ -42,9 +42,7 @@ interface SortConfig {
   direction: SortDirection;
 }
 
-const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
-  pools,
-}) => {
+const LiquidityPools: React.FC<LiquidityPoolsProps> = ({ pools }) => {
   const isMobile = useMobileDetection();
   const { midgardStats } = useAppState();
   const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0;

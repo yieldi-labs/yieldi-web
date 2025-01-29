@@ -35,7 +35,7 @@ export default function PositionsList({
   positions,
   onAdd,
   onRemove,
-  onCompletePosition
+  onCompletePosition,
 }: PositionsList) {
   const { walletsState } = useAppState();
   const numberConnectedWallets = Object.keys(walletsState || {}).length;

@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import { addDollarSignAndSuffix } from "../utils";
 import DashboardHighlightsCard from "./components/DashboardHighlightsCards";
 import PositionsList from "./components/PositionsList";
@@ -23,10 +23,13 @@ import { AddLiquidityStepData } from "../explore/components/AddLiquidityModal";
 import { useAppState } from "@/utils/contexts/context";
 
 export default function DashboardView() {
-  const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{initialStep: LpSteps, stepData:StatusStepData | AddLiquidityStepData | null}>({
+  const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{
+    initialStep: LpSteps;
+    stepData: StatusStepData | AddLiquidityStepData | null;
+  }>({
     initialStep: LpSteps.SELECT_OPTIONS,
-    stepData: null
-  })
+    stepData: null,
+  });
   const [selectedPool, setSelectedPool] = useState<PoolDetail | null>(null);
   const [selectedPosition, setSelectedPosition] =
     useState<PositionStats | null>(null);
@@ -99,27 +102,37 @@ export default function DashboardView() {
           </div>
         ) : (
           <PositionsList
-            positions={allPositionsArray} 
+            positions={allPositionsArray}
             onCompletePosition={(assetId: string, type: PositionType) => {
-              const pool = pools?.find((pool) => pool.asset === assetId)
+              const pool = pools?.find((pool) => pool.asset === assetId);
               const position = (positions as Positions)[assetId][type];
               if (!position || !pool) {
-                throw Error ('Position or pool not found');
+                throw Error("Position or pool not found");
               }
               const assetPriceUSD = parseFloat(pool.assetPriceUSD);
 
-              const assetAmount = baseToAsset(baseAmount(position.memberDetails?.assetPending, 8))
-              const runeAmount = baseToAsset(baseAmount(position.memberDetails?.runePending, 8))
+              const assetAmount = baseToAsset(
+                baseAmount(position.memberDetails?.assetPending, 8),
+              );
+              const runeAmount = baseToAsset(
+                baseAmount(position.memberDetails?.runePending, 8),
+              );
 
-              const valueOfPendingAssetInUsd = assetAmount.times(assetPriceUSD)
-              const valueOfPendingRuneInUsd = runeAmount.times(runePriceUSD)
+              const valueOfPendingAssetInUsd = assetAmount.times(assetPriceUSD);
+              const valueOfPendingRuneInUsd = runeAmount.times(runePriceUSD);
 
-              const amountOfAssetToDeposit = valueOfPendingRuneInUsd.div(assetPriceUSD)
-              const amountOfRuneToDeposit = valueOfPendingAssetInUsd.div(runePriceUSD)
+              const amountOfAssetToDeposit =
+                valueOfPendingRuneInUsd.div(assetPriceUSD);
+              const amountOfRuneToDeposit =
+                valueOfPendingAssetInUsd.div(runePriceUSD);
 
-              const requiredSteps = position.memberDetails?.assetPending === '0'
-              ? [LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET]
-              : [LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE]
+              const requiredSteps =
+                position.memberDetails?.assetPending === "0"
+                  ? [
+                      LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET,
+                      LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET,
+                    ]
+                  : [LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE];
               setAddLiquidityProcessState({
                 initialStep: LpSteps.HANDLE_STATE,
                 stepData: {
@@ -129,15 +142,15 @@ export default function DashboardView() {
                   runeAmount: amountOfRuneToDeposit,
                   runeUsdAmount: valueOfPendingAssetInUsd.amount().toNumber(),
                   positionType: type,
-                  requiredSteps: requiredSteps
-                }
-              })
+                  requiredSteps: requiredSteps,
+                },
+              });
               setShowAddLiquidityModal(true);
             }}
             onAdd={(assetId: string, type: PositionType) => {
-              const pool = pools?.find((pool) => pool.asset === assetId)
+              const pool = pools?.find((pool) => pool.asset === assetId);
               if (!pool) {
-                throw Error ('Pool not found');
+                throw Error("Pool not found");
               }
               setSelectedPool(pool);
               setSelectedPosition(
@@ -149,8 +162,8 @@ export default function DashboardView() {
                   pool,
                   runePriceUSD: runePriceUSD,
                   initialType: type,
-                }
-              })
+                },
+              });
               setShowAddLiquidityModal(true);
             }}
             onRemove={(poolId: string, type: PositionType) => {
@@ -170,7 +183,11 @@ export default function DashboardView() {
             setSelectedPool(null);
             setShowAddLiquidityModal(false);
           }}
-          stepData={addLiquidityProcessState.stepData as AddLiquidityStepData | StatusStepData}
+          stepData={
+            addLiquidityProcessState.stepData as
+              | AddLiquidityStepData
+              | StatusStepData
+          }
         />
       )}
       {showRemoveLiquidityModal &&
