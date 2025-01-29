@@ -68,8 +68,8 @@ export default function AddLiquidityModal({
     initialType === PositionType.SYM,
   );
   const [inputChanging, setInputChanging] = useState<InputChanging>("asset");
-
   const { positions, markPositionAsPending } = useLiquidityPositions();
+  const inputChangeConstraint = 0.01; // 1%
 
   const poolNativeDecimal = parseInt(pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
@@ -89,19 +89,42 @@ export default function AddLiquidityModal({
       const newUsdValue =
         parseFloat(assetAmount) * parseFloat(pool.assetPriceUSD);
       const newRuneAmount = newUsdValue / runePriceUSD;
-      setRuneAmount(newRuneAmount.toFixed(6));
+      // Prevents changing input value when focusing on the other input without changing the value
+      if (
+        Math.abs((newRuneAmount - parseFloat(runeAmount)) / newRuneAmount) >
+        inputChangeConstraint
+      ) {
+        setRuneAmount(newRuneAmount.toFixed(6));
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assetAmount, pool.assetPriceUSD, runePriceUSD]);
+  }, [
+    assetAmount,
+    runeAmount,
+    pool.assetPriceUSD,
+    runePriceUSD,
+    inputChanging,
+  ]);
 
   useEffect(() => {
     if (runeAmount && inputChanging === "rune") {
       const newUsdValue = parseFloat(runeAmount) * runePriceUSD;
       const newAssetAmount = newUsdValue / parseFloat(pool.assetPriceUSD);
-      setAssetAmount(newAssetAmount.toFixed(poolNativeDecimal));
+      // Prevents changing input value when focusing on the other input without changing the value
+      if (
+        Math.abs((newAssetAmount - parseFloat(assetAmount)) / newAssetAmount) >
+        inputChangeConstraint
+      ) {
+        setAssetAmount(newAssetAmount.toFixed(poolNativeDecimal));
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runeAmount, pool.assetPriceUSD, runePriceUSD, poolNativeDecimal]);
+  }, [
+    runeAmount,
+    assetAmount,
+    pool.assetPriceUSD,
+    runePriceUSD,
+    poolNativeDecimal,
+    inputChanging,
+  ]);
 
   const handleAssetValueChange = (values: NumberFormatValues) => {
     setAssetAmount(values.value);
