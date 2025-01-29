@@ -61,7 +61,7 @@ export interface Positions {
 export const positionsTransformer = async (
   addresses: string[],
   pools: PoolDetails,
-  options: { LIQUIDITYLOCKUPBLOCKS: number },
+  options: { LIQUIDITYLOCKUPBLOCKS: number }
 ) => {
   const defaultLockupPeriodInSecond = options.LIQUIDITYLOCKUPBLOCKS * 6; // six second per block
   const result: Positions = {};
@@ -86,7 +86,7 @@ export const positionsTransformer = async (
     }
 
     const pool = pools?.find(
-      (p) => p.asset === memberPool.pool.replace("/", "."),
+      (p) => p.asset === memberPool.pool.replace("/", ".")
     );
     if (!pool) throw Error("Position on invalid liquidity pool");
 
@@ -98,17 +98,17 @@ export const positionsTransformer = async (
     let runeAdded = 0;
 
     const userPoolPercentage = BigNumber(memberPool.liquidityUnits).div(
-      pool.units,
+      pool.units
     );
     const assetToRedeem = baseAmount(
-      BigNumber(pool.assetDepth).times(userPoolPercentage),
+      BigNumber(pool.assetDepth).times(userPoolPercentage)
     );
     const runeToRedeem = baseAmount(
-      BigNumber(pool.runeDepth).times(userPoolPercentage),
+      BigNumber(pool.runeDepth).times(userPoolPercentage)
     );
 
     const redeemValueAssetInUsd = baseToAsset(assetToRedeem).times(
-      pool.assetPriceUSD,
+      pool.assetPriceUSD
     );
     const redeemValueRuneInUsd = baseToAsset(runeToRedeem)
       .div(pool.assetPrice)
@@ -117,10 +117,10 @@ export const positionsTransformer = async (
       redeemValueAssetInUsd.plus(redeemValueRuneInUsd);
 
     const depositValueAsset = baseToAsset(
-      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn),
+      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn)
     );
     const depositValueRune = baseToAsset(
-      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn),
+      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn)
     );
 
     totalAddedValueInUsd = depositValueAsset
@@ -129,7 +129,7 @@ export const positionsTransformer = async (
     gainInUsd = totalRedeemValueInUsd.minus(totalAddedValueInUsd);
 
     totalAddedValueInAsset = depositValueAsset.plus(
-      depositValueRune.div(pool.assetPrice),
+      depositValueRune.div(pool.assetPrice)
     );
     gainInAsset = baseToAsset(assetToRedeem)
       .plus(baseToAsset(runeToRedeem).div(pool.assetPrice))
@@ -143,20 +143,22 @@ export const positionsTransformer = async (
         action.pool === memberPool.pool &&
         action.status === ActionStatus.PENDING;
       const isThorchainTx = Boolean(action.chain === "THOR");
+      const splitMemo = action.memo.split(":");
+      const isDualLpAction = splitMemo[2] !== "";
       if (type === PositionType.SYM) {
         return isThorchainTx && isPending;
       } else {
-        return !isThorchainTx && isPending;
+        return !isThorchainTx && !isDualLpAction && isPending;
       }
     });
 
     const timestamp = new Date().getTime();
     const lastAddedTimestamp = new Date(
-      Number(memberPool.dateLastAdded) * 1000,
+      Number(memberPool.dateLastAdded) * 1000
     ).getTime();
     const liquidityLockUpRemainingInSeconds = Math.ceil(
       (lastAddedTimestamp + defaultLockupPeriodInSecond * 1000 - timestamp) /
-        1000,
+        1000
     );
 
     result[key][type] = {
@@ -189,7 +191,7 @@ export const positionsTransformer = async (
   });
 
   const allPendingActions = actions.filter(
-    (action) => action.status === ActionStatus.PENDING,
+    (action) => action.status === ActionStatus.PENDING
   );
 
   allPendingActions.forEach((action) => {
@@ -198,27 +200,32 @@ export const positionsTransformer = async (
     if (!result[action.pool]) {
       result[action.pool] = { SYM: null, ASYM: null };
     }
-    const pendingActionType =
-      action.chain === "THOR" ? PositionType.SYM : PositionType.ASYM;
-    result[action.pool][pendingActionType] = {
-      assetId: action.pool,
-      type: pendingActionType,
-      status: determinePositionStatus([action]),
-      deposit: {
-        usd: 0,
-        totalInAsset: 0,
-        assetAdded: 0,
-        runeAdded: 0,
-      },
-      gain: {
-        usd: 0,
-        asset: 0,
-        percentage: "0",
-      },
-      liquidityLockUpRemainingInSeconds: 0,
-      pool,
-      pendingActions: [action],
-    };
+    const splitMemo = action.memo.split(":");
+    const isDualLpAction = splitMemo[2] !== "";
+    const pendingActionType = isDualLpAction
+      ? PositionType.SYM
+      : PositionType.ASYM;
+    if (!result[action.pool][pendingActionType]) {
+      result[action.pool][pendingActionType] = {
+        assetId: action.pool,
+        type: pendingActionType,
+        status: determinePositionStatus([action]),
+        deposit: {
+          usd: 0,
+          totalInAsset: 0,
+          assetAdded: 0,
+          runeAdded: 0,
+        },
+        gain: {
+          usd: 0,
+          asset: 0,
+          percentage: "0",
+        },
+        liquidityLockUpRemainingInSeconds: 0,
+        pool,
+        pendingActions: [action],
+      }; 
+    }
   });
 
   return result;
@@ -236,8 +243,14 @@ const determinePositionType = (memberPool: MemberPool): PositionType => {
 
 const determinePositionStatus = (
   actionsPending: ActionData[],
-  memberPool?: MemberPool,
+  memberPool?: MemberPool
 ) => {
+  if (
+    Number(memberPool?.assetPending) > 0 ||
+    Number(memberPool?.runePending) > 0
+  ) {
+    return PositionStatus.LP_POSITION_INCOMPLETE;
+  }
   if (actionsPending.length > 0) {
     if (actionsPending[0].type === ActionType.ADD_LIQUIDITY) {
       return PositionStatus.LP_POSITION_DEPOSIT_PENDING;
@@ -245,10 +258,5 @@ const determinePositionStatus = (
       return PositionStatus.LP_POSITION_WITHDRAWAL_PENDING;
     }
   }
-  if (
-    Number(memberPool?.assetPending) > 0 ||
-    Number(memberPool?.runePending) > 0
-  )
-    return PositionStatus.LP_POSITION_INCOMPLETE;
   return PositionStatus.LP_POSITION_COMPLETE;
 };

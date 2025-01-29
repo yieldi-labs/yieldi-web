@@ -17,6 +17,7 @@ interface PositionsList {
   positions: PositionStats[];
   onAdd: (assetId: string, type: PositionType) => void;
   onRemove: (poolId: string, type: PositionType) => void;
+  onCompletePosition: (poolId: string, type: PositionType) => void;
 }
 
 enum PoolSortKey {
@@ -34,6 +35,7 @@ export default function PositionsList({
   positions,
   onAdd,
   onRemove,
+  onCompletePosition
 }: PositionsList) {
   const { walletsState } = useAppState();
   const numberConnectedWallets = Object.keys(walletsState || {}).length;
@@ -180,6 +182,7 @@ export default function PositionsList({
               position={position}
               onAdd={onAdd}
               onRemove={onRemove}
+              onCompletePosition={onCompletePosition}
               reasonToDisableAdd={isActionDisabled(position, chainKey, "add")}
               reasonToDisableRemove={isActionDisabled(
                 position,

@@ -128,41 +128,44 @@ export default function StatusModal({
         });
       });
 
-      const result = await addLiquidity({
-        asset: stepData.pool.asset,
-        assetDecimals: Number(stepData.pool.nativeDecimal),
-        amount: parsedAssetAmount,
-        runeAmount: parsedRuneAmount,
-        pairedAddress,
-        emitError: (error) => {
-          console.error(error);
-          onClose();
-        },
-        emitNewHash: (hash, stepToUpdate) => {
-          setAssetTxHash(hash);
-          setStepStatus((prev) => {
-            let updatedStepIndex = -2;
-            return prev.map((step, index) => {
-              if (index === updatedStepIndex + 1) {
-                return {
-                  ...prev[index],
-                  status: LpSubstepsStatus.PENDING,
-                };
-              }
-              if (step.step === stepToUpdate) {
-                updatedStepIndex = index;
-                return {
-                  ...step,
-                  status: LpSubstepsStatus.SUCCESS,
-                };
-              }
-              return step;
+      let hashAssetDeposit = null
+      if (parsedAssetAmount > 0) {
+        hashAssetDeposit = await addLiquidity({
+          asset: stepData.pool.asset,
+          assetDecimals: Number(stepData.pool.nativeDecimal),
+          amount: parsedAssetAmount,
+          runeAmount: parsedRuneAmount,
+          pairedAddress,
+          emitError: (error) => {
+            console.error(error);
+            onClose();
+          },
+          emitNewHash: (hash, stepToUpdate) => {
+            setAssetTxHash(hash);
+            setStepStatus((prev) => {
+              let updatedStepIndex = -2;
+              return prev.map((step, index) => {
+                if (index === updatedStepIndex + 1) {
+                  return {
+                    ...prev[index],
+                    status: LpSubstepsStatus.PENDING,
+                  };
+                }
+                if (step.step === stepToUpdate) {
+                  updatedStepIndex = index;
+                  return {
+                    ...step,
+                    status: LpSubstepsStatus.SUCCESS,
+                  };
+                }
+                return step;
+              });
             });
-          });
-        },
-      });
+          },
+        });
+      }
 
-      if (isDualSided && result) {
+      if (isDualSided && parsedRuneAmount > 0 && (hashAssetDeposit || parsedAssetAmount <= 0)) {
         pairedAddress = getAssetWallet(stepData.pool.asset).address;
         await addLiquidity({
           asset: "THOR.RUNE",

@@ -29,7 +29,6 @@ export default async function PoolDetailPage({
   return (
     <PoolDetailClient
       pool={poolData.data}
-      runePriceUSD={parseFloat(statsData.data.runePriceUSD)}
     />
   );
 }

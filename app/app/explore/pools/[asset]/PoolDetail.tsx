@@ -31,11 +31,10 @@ import AddLiquidityManager, {
 
 interface PoolDetailProps {
   pool: IPoolDetail;
-  runePriceUSD: number;
 }
 
-export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
-  const { walletsState, toggleWalletModal } = useAppState();
+export default function PoolDetail({ pool }: PoolDetailProps) {
+  const { walletsState, toggleWalletModal, mimirParameters } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
@@ -50,6 +49,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     walletsState && walletsState[chainKey] ? walletsState![chainKey] : null;
 
   const { positions, isPending, error } = useLiquidityPositions();
+  const runePriceUSD = Number(mimirParameters?.runePriceUSD) || 0;
 
   useEffect(() => {
     if (!initialLoadComplete && !isPending) {
@@ -160,12 +160,13 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           <PositionRow
             key={position.memberDetails?.liquidityUnits}
             position={position}
-            onAdd={() => {}}
+            onAdd={() => { } }
             onRemove={() => handleRemove(position)}
             hideAddButton={true}
             hideStatus={true}
             reasonToDisableAdd={null}
-            reasonToDisableRemove={null}
+            reasonToDisableRemove={null} 
+            onCompletePosition={() => {}}  // TODO: Complete this flow        
           />
         );
       });

@@ -32,6 +32,7 @@ import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { useQuery } from "@tanstack/react-query";
 import { mimir } from "@/thornode/services.gen";
 import { MimirResponse } from "@/thornode";
+import { getStats, StatsData } from "@/midgard";
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
@@ -52,6 +53,7 @@ interface AppStateContextType {
   undetected: WalletType[];
   isWalletConnected: (chainKey: ChainKey) => boolean;
   mimirParameters: MimirResponse | undefined;
+  midgardStats: StatsData | undefined;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -102,6 +104,18 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       const data = await mimir();
       if (!data.data) {
         throw Error("No mimir parameters found");
+      }
+      return data.data;
+    },
+  });
+
+  const { data: midgardStats } = useQuery({
+    queryKey: ["midgard-stats"],
+    retry: false,
+    queryFn: async () => {
+      const data = await getStats();
+      if (!data.data) {
+        throw Error("No midgard stats found");
       }
       return data.data;
     },
@@ -584,6 +598,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         undetected,
         isWalletConnected,
         mimirParameters,
+        midgardStats
       }}
     >
       {children}

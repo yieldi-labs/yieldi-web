@@ -19,6 +19,7 @@ export interface ActionData {
   pendingDelayInSeconds: number;
   pool: string;
   chain: string;
+  memo: string
 }
 
 export const actionsTransformer = async (
@@ -66,6 +67,7 @@ export const actionsTransformer = async (
       pendingDelayInSeconds:
         status?.data?.stages.outbound_delay?.remaining_delay_seconds || 0,
       pool: action.pools[0],
+      memo: status?.data?.tx?.memo || "-",
     };
   });
 
