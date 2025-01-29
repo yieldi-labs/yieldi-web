@@ -61,7 +61,7 @@ export interface Positions {
 export const positionsTransformer = async (
   addresses: string[],
   pools: PoolDetails,
-  options: { LIQUIDITYLOCKUPBLOCKS: number },
+  options: { LIQUIDITYLOCKUPBLOCKS: number }
 ) => {
   const defaultLockupPeriodInSecond = options.LIQUIDITYLOCKUPBLOCKS * 6; // six second per block
   const result: Positions = {};
@@ -86,7 +86,7 @@ export const positionsTransformer = async (
     }
 
     const pool = pools?.find(
-      (p) => p.asset === memberPool.pool.replace("/", "."),
+      (p) => p.asset === memberPool.pool.replace("/", ".")
     );
     if (!pool) throw Error("Position on invalid liquidity pool");
 
@@ -98,17 +98,17 @@ export const positionsTransformer = async (
     let runeAdded = 0;
 
     const userPoolPercentage = BigNumber(memberPool.liquidityUnits).div(
-      pool.units,
+      pool.units
     );
     const assetToRedeem = baseAmount(
-      BigNumber(pool.assetDepth).times(userPoolPercentage),
+      BigNumber(pool.assetDepth).times(userPoolPercentage)
     );
     const runeToRedeem = baseAmount(
-      BigNumber(pool.runeDepth).times(userPoolPercentage),
+      BigNumber(pool.runeDepth).times(userPoolPercentage)
     );
 
     const redeemValueAssetInUsd = baseToAsset(assetToRedeem).times(
-      pool.assetPriceUSD,
+      pool.assetPriceUSD
     );
     const redeemValueRuneInUsd = baseToAsset(runeToRedeem)
       .div(pool.assetPrice)
@@ -117,10 +117,10 @@ export const positionsTransformer = async (
       redeemValueAssetInUsd.plus(redeemValueRuneInUsd);
 
     const depositValueAsset = baseToAsset(
-      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn),
+      baseAmount(memberPool.assetAdded).minus(memberPool.assetWithdrawn)
     );
     const depositValueRune = baseToAsset(
-      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn),
+      baseAmount(memberPool.runeAdded).minus(memberPool.runeWithdrawn)
     );
 
     totalAddedValueInUsd = depositValueAsset
@@ -129,7 +129,7 @@ export const positionsTransformer = async (
     gainInUsd = totalRedeemValueInUsd.minus(totalAddedValueInUsd);
 
     totalAddedValueInAsset = depositValueAsset.plus(
-      depositValueRune.div(pool.assetPrice),
+      depositValueRune.div(pool.assetPrice)
     );
     gainInAsset = baseToAsset(assetToRedeem)
       .plus(baseToAsset(runeToRedeem).div(pool.assetPrice))
@@ -154,11 +154,11 @@ export const positionsTransformer = async (
 
     const timestamp = new Date().getTime();
     const lastAddedTimestamp = new Date(
-      Number(memberPool.dateLastAdded) * 1000,
+      Number(memberPool.dateLastAdded) * 1000
     ).getTime();
     const liquidityLockUpRemainingInSeconds = Math.ceil(
       (lastAddedTimestamp + defaultLockupPeriodInSecond * 1000 - timestamp) /
-        1000,
+        1000
     );
 
     result[key][type] = {
@@ -191,7 +191,7 @@ export const positionsTransformer = async (
   });
 
   const allPendingActions = actions.filter(
-    (action) => action.status === ActionStatus.PENDING,
+    (action) => action.status === ActionStatus.PENDING
   );
 
   allPendingActions.forEach((action) => {
@@ -243,7 +243,7 @@ const determinePositionType = (memberPool: MemberPool): PositionType => {
 
 const determinePositionStatus = (
   actionsPending: ActionData[],
-  memberPool?: MemberPool,
+  memberPool?: MemberPool
 ) => {
   if (
     Number(memberPool?.assetPending) > 0 ||
