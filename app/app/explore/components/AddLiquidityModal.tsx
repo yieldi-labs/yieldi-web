@@ -110,8 +110,9 @@ export default function AddLiquidityModal({
 
   useEffect(() => {
     if (runeAmount && inputChanging === "rune") {
-      const newUsdValue = parseFloat(runeAmount) * runePriceUSD;
-      const newAssetAmount = newUsdValue / parseFloat(pool.assetPriceUSD);
+      const newUsdValue = parseFloat(runeAmount) * stepData.runePriceUSD;
+      const newAssetAmount =
+        newUsdValue / parseFloat(stepData.pool.assetPriceUSD);
       // Prevents changing input value when focusing on the other input without changing the value
       if (
         Math.abs((newAssetAmount - parseFloat(assetAmount)) / newAssetAmount) >
