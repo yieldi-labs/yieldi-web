@@ -454,6 +454,12 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   provider: vultisigEthProvider || window.vultisig?.ethereum,
                   walletId: WalletKey.VULTISIG,
                 }),
+              [ProviderKey.BASE]: async () =>
+                await connectWallet({
+                  id: "vultisig-base",
+                  provider: window.vultisig?.ethereum,
+                  walletId: WalletKey.VULTISIG,
+                }),
               [ProviderKey.THORCHAIN]: async () =>
                 await connectWallet({
                   id: "vultisig-thorchain",

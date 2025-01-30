@@ -167,7 +167,6 @@ export default function DashboardView() {
                     valueOfPendingRuneInUsd.div(assetPriceUSD);
                   const amountOfRuneToDeposit =
                     valueOfPendingAssetInUsd.div(runePriceUSD);
-
                   const requiredSteps =
                     position.memberDetails?.assetPending === "0"
                       ? [

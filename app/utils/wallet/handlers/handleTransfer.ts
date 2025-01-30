@@ -163,7 +163,7 @@ export const depositThorchain = async (
         };
         await wallet.provider.request(
           {
-            method: "deposit",
+            method: "deposit_transaction",
             params: [depositParams],
           },
           (error: Error | null, result: string | null) => {
