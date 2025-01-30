@@ -11,6 +11,7 @@ import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
 import {
   Positions,
   PositionStats,
+  PositionStatus,
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import AddLiquidityManager, {
@@ -103,49 +104,60 @@ export default function DashboardView() {
         ) : (
           <PositionsList
             positions={allPositionsArray}
-            onCompletePosition={(assetId: string, type: PositionType) => {
+            onClickStatus={(assetId: string, type: PositionType) => {
               const pool = pools?.find((pool) => pool.asset === assetId);
               const position = (positions as Positions)[assetId][type];
               if (!position || !pool) {
                 throw Error("Position or pool not found");
               }
-              const assetPriceUSD = parseFloat(pool.assetPriceUSD);
-
-              const assetAmount = baseToAsset(
-                baseAmount(position.memberDetails?.assetPending, 8),
-              );
-              const runeAmount = baseToAsset(
-                baseAmount(position.memberDetails?.runePending, 8),
-              );
-
-              const valueOfPendingAssetInUsd = assetAmount.times(assetPriceUSD);
-              const valueOfPendingRuneInUsd = runeAmount.times(runePriceUSD);
-
-              const amountOfAssetToDeposit =
-                valueOfPendingRuneInUsd.div(assetPriceUSD);
-              const amountOfRuneToDeposit =
-                valueOfPendingAssetInUsd.div(runePriceUSD);
-
-              const requiredSteps =
-                position.memberDetails?.assetPending === "0"
-                  ? [
-                      LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET,
-                      LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET,
-                    ]
-                  : [LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE];
-              setAddLiquidityProcessState({
-                initialStep: LpSteps.HANDLE_STATE,
-                stepData: {
-                  pool,
-                  assetAmount: amountOfAssetToDeposit,
-                  assetUsdAmount: valueOfPendingRuneInUsd.amount().toNumber(),
-                  runeAmount: amountOfRuneToDeposit,
-                  runeUsdAmount: valueOfPendingAssetInUsd.amount().toNumber(),
-                  positionType: type,
-                  requiredSteps: requiredSteps,
-                },
-              });
-              setShowAddLiquidityModal(true);
+              switch (position.status) {
+                case PositionStatus.LP_POSITION_COMPLETE:
+                case PositionStatus.LP_POSITION_DEPOSIT_PENDING:
+                case PositionStatus.LP_POSITION_WITHDRAWAL_PENDING:
+                  window.open(`https://thorchain.net/address/${position.memberDetails?.assetAddress}?tab=lps`, "_blank");
+                  break;
+                case PositionStatus.LP_POSITION_INCOMPLETE:
+                  const assetPriceUSD = parseFloat(pool.assetPriceUSD);
+    
+                  const assetAmount = baseToAsset(
+                    baseAmount(position.memberDetails?.assetPending, 8),
+                  );
+                  const runeAmount = baseToAsset(
+                    baseAmount(position.memberDetails?.runePending, 8),
+                  );
+    
+                  const valueOfPendingAssetInUsd = assetAmount.times(assetPriceUSD);
+                  const valueOfPendingRuneInUsd = runeAmount.times(runePriceUSD);
+    
+                  const amountOfAssetToDeposit =
+                    valueOfPendingRuneInUsd.div(assetPriceUSD);
+                  const amountOfRuneToDeposit =
+                    valueOfPendingAssetInUsd.div(runePriceUSD);
+    
+                  const requiredSteps =
+                    position.memberDetails?.assetPending === "0"
+                      ? [
+                          LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET,
+                          LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET,
+                        ]
+                      : [LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE];
+                  setAddLiquidityProcessState({
+                    initialStep: LpSteps.HANDLE_STATE,
+                    stepData: {
+                      pool,
+                      assetAmount: amountOfAssetToDeposit,
+                      assetUsdAmount: valueOfPendingRuneInUsd.amount().toNumber(),
+                      runeAmount: amountOfRuneToDeposit,
+                      runeUsdAmount: valueOfPendingAssetInUsd.amount().toNumber(),
+                      positionType: type,
+                      requiredSteps: requiredSteps,
+                    },
+                  });
+                  setShowAddLiquidityModal(true);
+                  break;
+                default:
+                  break;
+              }
             }}
             onAdd={(assetId: string, type: PositionType) => {
               const pool = pools?.find((pool) => pool.asset === assetId);

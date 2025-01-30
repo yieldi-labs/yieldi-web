@@ -278,6 +278,7 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
       ChainKey.DOGECOIN,
       ChainKey.LITECOIN,
       ChainKey.GAIACHAIN,
+      ChainKey.BASE,
     ],
     downloadUrl: "https://vultisig.com/",
     icon: <WalletSvg.Vultisig />,

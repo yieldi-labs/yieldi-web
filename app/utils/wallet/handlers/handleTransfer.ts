@@ -152,7 +152,7 @@ export const depositThorchain = async (
     case WalletKey.VULTISIG:
     case WalletKey.CTRL:
     case WalletKey.LEDGER:
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<string>(async (resolve, reject) => {
         const depositParams = {
           asset: AssetRuneNative,
           from: transferParams.from,
@@ -162,9 +162,9 @@ export const depositThorchain = async (
           },
           memo: transferParams.memo,
         };
-        wallet.provider.request(
+        await wallet.provider.request(
           {
-            method: "deposit",
+            method: "deposit_transaction",
             params: [depositParams],
           },
           (error: Error | null, result: string | null) => {

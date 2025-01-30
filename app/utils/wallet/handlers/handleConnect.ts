@@ -106,6 +106,7 @@ export const connectWallet = async (wallet: {
     case "vultisig-avax":
     case "vultisig-bsc":
     case "vultisig-eth":
+    case "vultisig-base":
     case "phantom-avax":
     case "phantom-bsc":
     case "phantom-eth":

@@ -1,23 +1,17 @@
 import React, { useMemo, useState } from "react";
-import { SortableHeader, Timer } from "@shared/components/ui";
+import { SortableHeader, Tooltip } from "@shared/components/ui";
 import { SortDirection } from "@shared/components/ui/types";
 import PositionRow from "./PositionRow";
-import {
-  PositionStats,
-  PositionStatus,
-  PositionType,
-} from "@/utils/lp-monitor/parsePositions";
+import { PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
 import PositionsPlaceholder from "./PositionsPlaceholder";
 import { useAppState } from "@/utils/contexts/context";
-import { ChainKey } from "@/utils/wallet/constants";
-import { assetFromString } from "@xchainjs/xchain-util";
-import { getChainKeyFromChain } from "@/utils/chain";
+import Image from "next/image";
 
 interface PositionsList {
   positions: PositionStats[];
   onAdd: (assetId: string, type: PositionType) => void;
   onRemove: (poolId: string, type: PositionType) => void;
-  onCompletePosition: (poolId: string, type: PositionType) => void;
+  onClickStatus: (poolId: string, type: PositionType) => void;
 }
 
 enum PoolSortKey {
@@ -35,7 +29,7 @@ export default function PositionsList({
   positions,
   onAdd,
   onRemove,
-  onCompletePosition,
+  onClickStatus,
 }: PositionsList) {
   const { walletsState } = useAppState();
   const numberConnectedWallets = Object.keys(walletsState || {}).length;
@@ -44,43 +38,6 @@ export default function PositionsList({
     key: PoolSortKey.PRINCIPAL,
     direction: SortDirection.DESC,
   });
-
-  const isActionDisabled = (
-    position: PositionStats,
-    chainKey: ChainKey,
-    actionn: "add" | "remove",
-  ): string | React.ReactNode | null => {
-    if (
-      position.liquidityLockUpRemainingInSeconds > 0 &&
-      actionn === "remove"
-    ) {
-      return (
-        <div className="w-[300px] flex">
-          <div className="whitespace-normal break-words">
-            <span>
-              Liquidity is currently in the lockup period and cannot be
-              withdrawn. Your liquidity will become withdrawable in:{" "}
-              <Timer
-                initialTimes={[position.liquidityLockUpRemainingInSeconds]}
-              />
-            </span>
-          </div>
-        </div>
-      );
-    } else if (
-      position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
-      position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
-    ) {
-      return "Action in progress";
-    } else if (
-      position.type === PositionType.SYM &&
-      (!walletsState[ChainKey.THORCHAIN] || !walletsState[chainKey])
-    ) {
-      return "Connect wallet";
-    } else {
-      return null;
-    }
-  };
 
   const sortedPositions = useMemo(() => {
     const sortableItems = [...positions];
@@ -149,7 +106,7 @@ export default function PositionsList({
           </div>
           <div className="w-1/2 md:w-1/5">
             <SortableHeader<PoolSortKey>
-              label="Deposit"
+              label="Current value"
               sortKey={PoolSortKey.PRINCIPAL}
               currentSortKey={sortConfig.key}
               sortDirection={sortConfig.direction}
@@ -165,30 +122,47 @@ export default function PositionsList({
               onSort={sortData}
             />
           </div>
-          <div className="hidden md:flex px-3 py-3 w-1/5">Status</div>
+          <div className="hidden md:flex px-3 py-3 w-1/5">
+            <Tooltip
+              content={
+                <p className="w-[300px]">
+                  Status only partially monitors your position. 
+                  <a 
+                    href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-does-my-balance-or-position-status-not-update-correctly-after-a-transaction" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline pl-1"
+                  >
+                    Learn why
+                  </a>
+                </p>
+              }
+            >
+              <div className="flex cursor-pointer">
+                <p className="pr-1">Status</p>
+                <Image
+                  src="/help.svg"
+                  alt="settings"
+                  className="rounded-full mr-1"
+                  width={16}
+                  height={16}
+                  onClick={() => {}}
+                />
+              </div>
+            </Tooltip>
+          </div>
           <div className="hidden md:flex px-3 py-3 w-1/5">Actions</div>
         </div>
       </div>
       <div className="space-y-1.5">
         {sortedPositions.map((position) => {
-          const asset = assetFromString(position.assetId);
-          if (!asset) {
-            throw new Error("Invalid asset");
-          }
-          const chainKey = getChainKeyFromChain(asset?.chain);
           return (
             <PositionRow
               key={`${position.assetId}-${position.type}`}
               position={position}
               onAdd={onAdd}
               onRemove={onRemove}
-              onCompletePosition={onCompletePosition}
-              reasonToDisableAdd={isActionDisabled(position, chainKey, "add")}
-              reasonToDisableRemove={isActionDisabled(
-                position,
-                chainKey,
-                "remove",
-              )}
+              onClickStatus={onClickStatus}
             />
           );
         })}
