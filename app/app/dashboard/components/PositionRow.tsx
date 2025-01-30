@@ -79,7 +79,7 @@ export default function PositionRow({
                   <button
                     disabled={Boolean(reasonToDisableAdd)}
                     onClick={() => onAdd(position.assetId, position.type)}
-                    className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:opacity-50 disabled:cursor-not-allowed "
+                    className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed "
                   >
                     Add
                   </button>
