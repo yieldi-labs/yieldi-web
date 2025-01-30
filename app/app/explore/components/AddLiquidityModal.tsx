@@ -53,23 +53,6 @@ const getSubsteps = (isDualSided: boolean, asset: Asset) => {
   return steps;
 };
 
-const getSubsteps = (isDualSided: boolean, asset: Asset) => {
-  const steps = [];
-
-  if (asset.symbol.indexOf("-") !== -1) {
-    // Not native
-    steps.push(LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET);
-  }
-
-  steps.push(LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
-
-  if (isDualSided) {
-    steps.push(LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE);
-  }
-
-  return steps;
-};
-
 export default function AddLiquidityModal({
   stepData,
   nextStep,
