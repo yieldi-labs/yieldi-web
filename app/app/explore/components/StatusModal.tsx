@@ -57,7 +57,9 @@ export default function StatusModal({
 
   const [assetTxHash, setAssetTxHash] = useState<string | null>(null);
   const [runeTxHash, setRuneTxHash] = useState<string | null>(null);
-  const [requiredWalletsSymbol, setRequiredWalletsSymbol] = useState<string[] | undefined>([]);
+  const [requiredWalletsSymbol, setRequiredWalletsSymbol] = useState<
+    string[] | undefined
+  >([]);
 
   const isInProgress = useRef(false);
 
@@ -203,20 +205,22 @@ export default function StatusModal({
 
     let missingWallets: string[] = [];
     const assetWallet = getAssetWallet(stepData.pool.asset);
-    const runeWallet = getAssetWallet('THOR.RUNE');
+    const runeWallet = getAssetWallet("THOR.RUNE");
 
     if (parsedAssetAmount > 0 && !assetWallet) {
-      missingWallets.push(assetFromString(stepData.pool.asset)?.ticker as string)
+      missingWallets.push(
+        assetFromString(stepData.pool.asset)?.ticker as string,
+      );
     }
 
     if (parsedRuneAmount > 0 && !runeWallet) {
-      missingWallets.push(assetFromString('THOR.RUNE')?.ticker as string)
+      missingWallets.push(assetFromString("THOR.RUNE")?.ticker as string);
     }
-    
+
     if (missingWallets.length === 0) {
       executeLiquidityAddition();
-    } 
-    setRequiredWalletsSymbol(missingWallets)
+    }
+    setRequiredWalletsSymbol(missingWallets);
   }, [
     addLiquidity,
     getAssetWallet,
@@ -237,7 +241,9 @@ export default function StatusModal({
             <span className="text-gray-600 font-medium">Deposit</span>
             <span className="text-gray-900 font-semibold text-lg">
               {addDollarSignAndSuffix(
-                isDualSided  ? stepData.runeUsdAmount + stepData.assetUsdAmount : stepData.assetUsdAmount,
+                isDualSided
+                  ? stepData.runeUsdAmount + stepData.assetUsdAmount
+                  : stepData.assetUsdAmount,
               )}
             </span>
           </div>
@@ -306,15 +312,17 @@ export default function StatusModal({
           </div>
         </div>
 
-        {
-          requiredWalletsSymbol?.length ? <div className="pb-4">
-            <Warn text={`Connect your ${requiredWalletsSymbol.join(' ')} wallet to continue.`} />
-          </div> : null
-        }
+        {requiredWalletsSymbol?.length ? (
+          <div className="pb-4">
+            <Warn
+              text={`Connect your ${requiredWalletsSymbol.join(" ")} wallet to continue.`}
+            />
+          </div>
+        ) : null}
 
         <div className="text-sm text-gray-500 text-center">
-          {`You will be prompted to confirm a ${asset.ticker} transaction on your ${asset.ticker} wallet.
-            Ensure your wallet is connected and has sufficient funds for this
+          {`You will be prompted to confirm transactions on your wallet.
+            Ensure your wallet is connected in the correct network and has sufficient funds for this
             transaction.`}
         </div>
       </div>
