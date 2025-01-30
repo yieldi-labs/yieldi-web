@@ -34,7 +34,7 @@ interface PoolDetailProps {
 }
 
 export default function PoolDetail({ pool }: PoolDetailProps) {
-  const { walletsState, toggleWalletModal, mimirParameters } = useAppState();
+  const { walletsState, toggleWalletModal, midgardStats } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
@@ -49,7 +49,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
     walletsState && walletsState[chainKey] ? walletsState![chainKey] : null;
 
   const { positions, isPending, error } = useLiquidityPositions();
-  const runePriceUSD = Number(mimirParameters?.runePriceUSD) || 0;
+  const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0;
 
   useEffect(() => {
     if (!initialLoadComplete && !isPending) {

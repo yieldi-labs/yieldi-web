@@ -220,7 +220,7 @@ export default function StatusModal({
             <span className="text-gray-600 font-medium">Deposit</span>
             <span className="text-gray-900 font-semibold text-lg">
               {addDollarSignAndSuffix(
-                stepData.runeUsdAmount + stepData.assetUsdAmount,
+                isDualSided  ? stepData.runeUsdAmount + stepData.assetUsdAmount : stepData.assetUsdAmount,
               )}
             </span>
           </div>
