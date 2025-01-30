@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NumberFormatValues } from "react-number-format";
 import {
   getAssetShortSymbol,
@@ -28,13 +28,13 @@ export interface AddLiquidityStepData {
   runePriceUSD: number;
   initialType?: PositionType;
 }
-
 interface AddLiquidityModalProps {
   nextStep: (data: StatusStepData) => void;
   stepData: AddLiquidityStepData;
 }
 
 const MAX_BALANCE_PERCENTAGE = 0.99;
+type InputChanging = "asset" | "rune";
 
 const getSubsteps = (isDualSided: boolean, asset: Asset) => {
   const steps = [];
@@ -57,8 +57,6 @@ export default function AddLiquidityModal({
   stepData,
   nextStep,
 }: AddLiquidityModalProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
   const { walletsState, balanceList, isWalletConnected, mimirParameters } =
     useAppState();
 
@@ -70,6 +68,8 @@ export default function AddLiquidityModal({
   const [isDualSided, setIsDualSided] = useState(
     stepData.initialType === PositionType.SYM,
   );
+  const [inputChanging, setInputChanging] = useState<InputChanging>("asset");
+  const inputChangeConstraint = 0.01; // 1%
 
   const poolNativeDecimal = parseInt(stepData.pool.nativeDecimal);
   const assetMinimalUnit = 1 / 10 ** poolNativeDecimal;
@@ -85,57 +85,52 @@ export default function AddLiquidityModal({
   }, [balanceList, stepData.pool.asset]);
 
   useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const handleValueChange = (values: NumberFormatValues) => {
-    setAssetAmount(values.value);
-
-    if (isDualSided) {
-      const value = parseFloat(values.value);
-      const assetPriceUSD = parseFloat(stepData.pool.assetPriceUSD);
-      const assetUsdValue = value * assetPriceUSD;
-      const runeEquivalent = (assetUsdValue / stepData.runePriceUSD).toFixed(8);
-      const runeMaxUsdValue = runeBalance * stepData.runePriceUSD;
-
-      if (assetUsdValue > runeMaxUsdValue) {
-        const maxAssetAmount = (runeMaxUsdValue / assetPriceUSD).toFixed(
-          poolNativeDecimal,
-        );
-        setAssetAmount(maxAssetAmount);
-        setRuneAmount(runeBalance.toFixed(8));
-      } else {
-        setRuneAmount(runeEquivalent);
+    if (assetAmount && inputChanging === "asset") {
+      const newUsdValue =
+        parseFloat(assetAmount) * parseFloat(stepData.pool.assetPriceUSD);
+      const newRuneAmount = newUsdValue / stepData.runePriceUSD;
+      // Prevents changing input value when focusing on the other input without changing the value
+      const runeAmountChanged = Math.abs(
+        (newRuneAmount - parseFloat(runeAmount)) / newRuneAmount,
+      );
+      if (
+        Number.isNaN(runeAmountChanged) ||
+        runeAmountChanged > inputChangeConstraint
+      ) {
+        setRuneAmount(newRuneAmount.toFixed(6));
       }
     }
+  }, [assetAmount, runeAmount, inputChanging, stepData]);
+
+  useEffect(() => {
+    if (runeAmount && inputChanging === "rune") {
+      const newUsdValue = parseFloat(runeAmount) * stepData.runePriceUSD;
+      const newAssetAmount =
+        newUsdValue / parseFloat(stepData.pool.assetPriceUSD);
+
+      const assetAmountChanged = Math.abs(
+        (newAssetAmount - parseFloat(assetAmount)) / newAssetAmount,
+      );
+      if (
+        Number.isNaN(assetAmountChanged) ||
+        assetAmountChanged > inputChangeConstraint
+      ) {
+        setAssetAmount(newAssetAmount.toFixed(poolNativeDecimal));
+      }
+    }
+  }, [runeAmount, assetAmount, poolNativeDecimal, inputChanging, stepData]);
+
+  const handleAssetValueChange = (values: NumberFormatValues) => {
+    setAssetAmount(values.value);
   };
 
   const handleRuneValueChange = (values: NumberFormatValues) => {
     setRuneAmount(values.value);
-
-    if (isDualSided) {
-      const value = parseFloat(values.value);
-      const runeUsdValue = value * stepData.runePriceUSD;
-      const assetPriceUSD = parseFloat(stepData.pool.assetPriceUSD);
-      const assetEquivalent = (runeUsdValue / assetPriceUSD).toFixed(
-        poolNativeDecimal,
-      );
-      const assetMaxUsdValue = assetBalance * assetPriceUSD;
-
-      if (runeUsdValue > assetMaxUsdValue) {
-        const maxRuneAmount = (
-          assetMaxUsdValue / stepData.runePriceUSD
-        ).toFixed(8);
-        setRuneAmount(maxRuneAmount);
-        setAssetAmount(assetBalance.toFixed(poolNativeDecimal));
-      } else {
-        setAssetAmount(assetEquivalent);
-      }
-    }
   };
 
   const handleAssetPercentageClick = (percentage: number) => {
     if (assetBalance <= 0) return;
+    setInputChanging("asset");
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
@@ -148,6 +143,7 @@ export default function AddLiquidityModal({
 
   const handleRunePercentageClick = (percentage: number) => {
     if (balanceList![ChainKey.THORCHAIN]["THOR.RUNE"].balance <= 0) return;
+    setInputChanging("rune");
 
     const finalPercentage =
       percentage === 1 ? MAX_BALANCE_PERCENTAGE : percentage;
@@ -168,6 +164,12 @@ export default function AddLiquidityModal({
       const runeAmt = parseFloat(runeAmount);
       const runeMaxAllowed =
         runeBalance * MAX_BALANCE_PERCENTAGE - runeMinimalUnit;
+      const assetMaxRuneEquivalent =
+        maxAllowed * parseFloat(stepData.pool.assetPriceUSD);
+      if (runeAmt > assetMaxRuneEquivalent) {
+        return false;
+      }
+
       const isRuneAmountValid = runeAmt > 0 && runeAmt <= runeMaxAllowed;
       return isAssetAmountValid || isRuneAmountValid;
     }
@@ -176,11 +178,12 @@ export default function AddLiquidityModal({
   }, [
     assetAmount,
     assetBalance,
+    assetMinimalUnit,
+    isDualSided,
     runeAmount,
     runeBalance,
-    isDualSided,
-    assetMinimalUnit,
     runeMinimalUnit,
+    stepData,
   ]);
 
   const assetSymbol = getAssetShortSymbol(stepData.pool.asset);
@@ -250,7 +253,7 @@ export default function AddLiquidityModal({
 
         <AssetInput
           value={assetAmount}
-          onValueChange={handleValueChange}
+          onValueChange={handleAssetValueChange}
           assetSymbol={assetSymbol}
           assetUsdValue={usdValue}
           logoPath={getLogoPath(stepData.pool.asset)}
@@ -258,6 +261,7 @@ export default function AddLiquidityModal({
           usdDecimalScale={2}
           assetBalance={assetBalance}
           usdBalance={assetUsdBalance}
+          onFocus={() => setInputChanging("asset")}
         />
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
@@ -286,6 +290,7 @@ export default function AddLiquidityModal({
               usdDecimalScale={2}
               assetBalance={runeBalance}
               usdBalance={runeUsdBalance}
+              onFocus={() => setInputChanging("rune")}
             />
             <div className="flex justify-end gap-2 mb-6">
               {[25, 50, 100].map((percent) => (

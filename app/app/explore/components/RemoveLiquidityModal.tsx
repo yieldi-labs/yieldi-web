@@ -5,10 +5,10 @@ import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail, MemberPool } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
+  DECIMALS,
   disableDueTooSmallAmount,
   getAssetShortSymbol,
   getLogoPath,
-  getPositionDetails,
 } from "@/app/utils";
 import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
@@ -39,7 +39,7 @@ enum WithdrawalType {
   ALL_ASSET = "ALL_ASSET",
 }
 
-const DECIMALS = {
+const DECIMAL_FORMATS = {
   PERCENTAGE: 2,
   USD: 2,
   ASSET: 6,
@@ -76,8 +76,14 @@ export default function RemoveLiquidityModal({
   );
   const chainKey = getChainKeyFromChain(asset?.chain || "");
   const selectedWallet = walletsState![chainKey];
-  const { assetAdded: positionAssetAmount, runeAdded: positionRuneAmount } =
-    getPositionDetails(position);
+
+  const userShare = new BigNumber(position.liquidityUnits).div(pool.units);
+  const positionAssetAmount = new BigNumber(pool.assetDepth)
+    .div(DECIMALS)
+    .times(userShare);
+  const positionRuneAmount = new BigNumber(pool.runeDepth)
+    .div(DECIMALS)
+    .times(userShare);
 
   const assetDepth = parseInt(pool.assetDepth);
   const runeDepth = parseInt(pool.runeDepth);
@@ -85,12 +91,12 @@ export default function RemoveLiquidityModal({
 
   const assetUsdValue = new BigNumber(assetAmount || 0)
     .times(pool.assetPriceUSD)
-    .decimalPlaces(DECIMALS.USD)
+    .decimalPlaces(DECIMAL_FORMATS.USD)
     .toNumber();
 
   const runeUsdValue = new BigNumber(runeAmount || 0)
     .times(runePriceUSD)
-    .decimalPlaces(DECIMALS.USD)
+    .decimalPlaces(DECIMAL_FORMATS.USD)
     .toNumber();
 
   const posAssetAmount = useMemo(
@@ -368,8 +374,8 @@ export default function RemoveLiquidityModal({
             assetSymbol={assetSymbol}
             assetUsdValue={assetUsdValue}
             logoPath={getLogoPath(pool.asset)}
-            assetDecimalScale={DECIMALS.ASSET}
-            usdDecimalScale={DECIMALS.USD}
+            assetDecimalScale={DECIMAL_FORMATS.ASSET}
+            usdDecimalScale={DECIMAL_FORMATS.USD}
             assetBalance={assetBalance}
             usdBalance={assetUsdBalance}
           />
@@ -384,8 +390,8 @@ export default function RemoveLiquidityModal({
             assetSymbol="RUNE"
             assetUsdValue={runeUsdValue}
             logoPath={getLogoPath("THOR.RUNE")}
-            assetDecimalScale={DECIMALS.ASSET}
-            usdDecimalScale={DECIMALS.USD}
+            assetDecimalScale={DECIMAL_FORMATS.ASSET}
+            usdDecimalScale={DECIMAL_FORMATS.USD}
             assetBalance={runeBalance}
             usdBalance={runeUsdBalance}
           />
