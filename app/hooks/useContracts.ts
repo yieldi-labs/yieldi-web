@@ -164,6 +164,7 @@ export function useContracts({
         });
 
         const transferParams: TransactionEvmParams = {
+          feeRate: 50,
           from: walletAddress,
           recipient: router,
           amount: baseAmount(amount.toString(), assetDecimals),

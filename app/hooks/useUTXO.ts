@@ -145,26 +145,27 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       vault,
       amount,
       memo,
+      feeRate,
     }: {
       asset: Asset;
       assetDecimals: number;
       vault: string;
       amount: number;
       memo: string;
+      feeRate?: number;
     }): Promise<string> => {
       if (!wallet?.address) {
         throw new Error("Wallet not initialized");
       }
 
       try {
-        const fees = await getFees();
         const txHash = await transfer({
           asset,
           assetDecimals,
           recipient: vault,
           amount,
           memo,
-          feeRate: fees.fast,
+          feeRate,
         });
         return txHash;
       } catch (err) {
@@ -174,7 +175,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
         throw new Error(errMsg);
       }
     },
-    [getFees, transfer, wallet?.address],
+    [transfer, wallet?.address],
   );
 
   // Remove liquidity from a pool using transfer

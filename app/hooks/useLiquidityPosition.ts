@@ -111,7 +111,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     assetId: pool.asset,
   });
 
-  // Initialize UTXO hooks if needed
+  // Initialize UTXO hooks
   const {
     addLiquidity: addUTXOLiquidity,
     removeLiquidity: removeUTXOLiquidity,
@@ -203,12 +203,16 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         // Handle UTXO chain transactions
         if (isChainType(ChainType.UTXO, parsedAsset)) {
+          const feeRate = inbound?.gas_rate ? parseInt(inbound.gas_rate) : undefined;
+          console.log("feeRate", feeRate);
+          console.log("typeof feeRate", typeof feeRate);
           const utxoHash = await addUTXOLiquidity({
             asset: assetFromString(asset) as Asset,
             assetDecimals,
             vault: inbound.address,
             amount: amount,
             memo: memo,
+            feeRate: feeRate? feeRate : 100, // todo: remove hardcode, 3* just for testing
           });
           if (!utxoHash) {
             emitError("Failed to add liquidity to UTXO chain");
