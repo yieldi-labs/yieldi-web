@@ -9,6 +9,7 @@ import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
 import { AssetRuneNative, RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 import { switchEvmChain } from "@/utils/chain";
+import { error } from "console";
 
 export interface TransactionEvmParams extends TransactionParams {
   data: `0x${string}`;
@@ -163,7 +164,7 @@ export const depositThorchain = async (
         };
         await wallet.provider.request(
           {
-            method: "deposit_transaction",
+            method: "deposit",
             params: [depositParams],
           },
           (error: Error | null, result: string | null) => {
