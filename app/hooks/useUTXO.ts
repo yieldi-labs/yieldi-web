@@ -9,6 +9,8 @@ import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
 import { defaultBchParams } from "@xchainjs/xchain-bitcoincash";
 import { getClient } from "@/utils/wallet/utxoClients/clients";
 import { ThorchainIdentifiers } from "@/utils/wallet/constants";
+import { inboundAddresses, pool } from "@/thornode";
+import { PoolDetail } from "@/midgard";
 
 interface UseUTXOProps {
   chain: ThorchainIdentifiers | null;
@@ -82,6 +84,42 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       throw err;
     }
   }, [client, chain]);
+
+  const calculateFees = async (asset: Asset, amount: number, pool: PoolDetail) => {
+    const inboundAddressesResponse = await inboundAddresses();
+    const inbound = inboundAddressesResponse.data?.find(
+      (i) => i.chain === asset.chain.toUpperCase(),
+    );
+
+    if (!inbound) {
+      throw new Error(`No inbound address found for ${asset.chain}`);
+    }
+
+    if (!inbound.gas_rate) {
+      throw new Error(`No gas rate found for ${asset.chain}`);
+    }
+
+    const gasRate = parseFloat(inbound.gas_rate);
+    const txSize = 250; // Assuming a standard tx size for UTXO chains
+    const OFM = 1.5; // Assuming a default Outbound Fee Multiplier
+
+    const inboundFee = txSize * gasRate;
+    const outboundFee = txSize * gasRate * OFM;
+
+    const liquidityFee = (amount / (amount + parseFloat(pool.assetDepth))) * amount;
+
+    // Convert fees to USD
+    const assetPriceUSD = parseFloat(pool.assetPriceUSD);
+    const inboundFeeUSD = inboundFee * assetPriceUSD;
+    const outboundFeeUSD = outboundFee * assetPriceUSD;
+    const liquidityFeeUSD = liquidityFee * assetPriceUSD;
+
+    return {
+      inboundFee: inboundFeeUSD,
+      outboundFee: outboundFeeUSD,
+      liquidityFee: liquidityFeeUSD,
+    };
+  };
 
   // Transfer using wallet provider
   const transfer = useCallback(

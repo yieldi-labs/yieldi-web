@@ -3,7 +3,7 @@ import { encodeFunctionData, Address, decodeFunctionResult } from "viem";
 import ERC20_ABI from "./erc20.json";
 import ROUTER_ABI from "./routerABI.json";
 import { useAppState } from "@/utils/contexts/context";
-import { assetFromString, baseAmount } from "@xchainjs/xchain-util";
+import { Asset, assetFromString, baseAmount } from "@xchainjs/xchain-util";
 import { getChainKeyFromChain } from "@/utils/chain";
 import {
   TransactionEvmParams,
@@ -12,6 +12,8 @@ import {
 import { WalletState } from "@/utils/interfaces";
 import { constants } from "ethers";
 import { infuraRequest } from "@/infura/client";
+import { inboundAddresses, pool } from "@/thornode";
+import { PoolDetail } from "@/midgard";
 
 interface UseContractProps {
   wallet: WalletState;
@@ -187,6 +189,42 @@ export function useContracts({
     [wallet, walletAddress],
   );
 
+  const calculateFees = async (asset: Asset, amount: number, pool: PoolDetail) => {
+    const inboundAddressesResponse = await inboundAddresses();
+    const inbound = inboundAddressesResponse.data?.find(
+      (i) => i.chain === asset.chain.toUpperCase(),
+    );
+
+    if (!inbound) {
+      throw new Error(`No inbound address found for ${asset.chain}`);
+    }
+
+    if (!inbound.gas_rate) {
+      throw new Error(`No gas rate found for ${asset.chain}`);
+    }
+
+    const gasRate = parseFloat(inbound.gas_rate);
+    const txSize = 21000; // Assuming a standard tx size for EVM chains
+    const OFM = 1.5; // Assuming a default Outbound Fee Multiplier
+
+    const inboundFee = txSize * gasRate * 1e9; // Convert GWEI to WEI
+    const outboundFee = txSize * gasRate * 1e9 * OFM; // Convert GWEI to WEI
+
+    const liquidityFee = (amount / (amount + parseFloat(pool.assetDepth))) * amount;
+
+    // Convert fees to USD
+    const assetPriceUSD = parseFloat(pool.assetPriceUSD);
+    const inboundFeeUSD = inboundFee * assetPriceUSD;
+    const outboundFeeUSD = outboundFee * assetPriceUSD;
+    const liquidityFeeUSD = liquidityFee * assetPriceUSD;
+
+    return {
+      inboundFee: inboundFeeUSD,
+      outboundFee: outboundFeeUSD,
+      liquidityFee: liquidityFeeUSD,
+    };
+  };
+
   return {
     // Token info
     balance,
@@ -200,5 +238,8 @@ export function useContracts({
 
     // Router Functions
     depositWithExpiry,
+
+    // Fee Calculation
+    calculateFees,
   };
 }

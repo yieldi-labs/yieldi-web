@@ -1,4 +1,4 @@
-import { BaseAmount, baseToAsset } from "@xchainjs/xchain-util";
+import { Asset, BaseAmount, baseToAsset } from "@xchainjs/xchain-util";
 import { WalletState } from "../../interfaces";
 import { Client as BitcoinClient } from "@xchainjs/xchain-bitcoin";
 import * as Bitcoin from "bitcoinjs-lib";
@@ -9,6 +9,8 @@ import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
 import { AssetRuneNative, RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 import { switchEvmChain } from "@/utils/chain";
+import { PoolDetail } from "@/midgard";
+import { inboundAddresses } from "@/thornode";
 
 export interface TransactionEvmParams extends TransactionParams {
   data: `0x${string}`;
@@ -299,4 +301,40 @@ export const transferEvm = async (
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }
+};
+
+const calculateFees = async (asset: Asset, amount: number, pool: PoolDetail) => {
+  const inboundAddressesResponse = await inboundAddresses();
+  const inbound = inboundAddressesResponse.data?.find(
+    (i) => i.chain === asset.chain.toUpperCase(),
+  );
+
+  if (!inbound) {
+    throw new Error(`No inbound address found for ${asset.chain}`);
+  }
+
+  if (!inbound.gas_rate) {
+    throw new Error(`No gas rate found for ${asset.chain}`);
+  }
+
+  const gasRate = parseFloat(inbound.gas_rate);
+  const txSize = 250; // Assuming a standard tx size for UTXO chains
+  const OFM = 1.5; // Assuming a default Outbound Fee Multiplier
+
+  const inboundFee = txSize * gasRate;
+  const outboundFee = txSize * gasRate * OFM;
+
+  const liquidityFee = (amount / (amount + parseFloat(pool.assetDepth))) * amount;
+
+  // Convert fees to USD
+  const assetPriceUSD = parseFloat(pool.assetPriceUSD);
+  const inboundFeeUSD = inboundFee * assetPriceUSD;
+  const outboundFeeUSD = outboundFee * assetPriceUSD;
+  const liquidityFeeUSD = liquidityFee * assetPriceUSD;
+
+  return {
+    inboundFee: inboundFeeUSD,
+    outboundFee: outboundFeeUSD,
+    liquidityFee: liquidityFeeUSD,
+  };
 };

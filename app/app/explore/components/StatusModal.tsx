@@ -49,7 +49,7 @@ export default function StatusModal({
   onClose: () => void;
   nextStep: (stepData: ConfirmStepData) => void;
 }) {
-  const { addLiquidity, getAssetWallet } = useLiquidityPosition({
+  const { addLiquidity, getAssetWallet, calculateFees } = useLiquidityPosition({
     pool: stepData.pool,
   });
 
@@ -60,6 +60,8 @@ export default function StatusModal({
   const [requiredWalletsSymbol, setRequiredWalletsSymbol] = useState<
     string[] | undefined
   >([]);
+  const [fees, setFees] = useState({ inboundFee: 0, outboundFee: 0, liquidityFee: 0 });
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   const isInProgress = useRef(false);
 
@@ -77,6 +79,15 @@ export default function StatusModal({
 
   const logoAsset = getLogoPath(stepData.pool.asset);
   const logoRune = getLogoPath("THOR.RUNE");
+
+  useEffect(() => {
+    const fetchFees = async () => {
+      const calculatedFees = await calculateFees(asset, stepData.assetAmount.amount().toNumber(), stepData.pool);
+      setFees(calculatedFees);
+    };
+
+    fetchFees();
+  }, [calculateFees, asset, stepData]);
 
   useEffect(() => {
     if (stepStatus.every((step) => step.status === LpSubstepsStatus.SUCCESS)) {
@@ -101,8 +112,12 @@ export default function StatusModal({
     stepStatus,
   ]);
 
+  const handleConfirm = () => {
+    setIsConfirmed(true);
+  };
+
   useEffect(() => {
-    if (isInProgress.current) return;
+    if (isInProgress.current || !isConfirmed) return;
     isInProgress.current = true;
 
     const parsedAssetAmount = stepData.assetAmount.amount().toNumber();
@@ -225,6 +240,7 @@ export default function StatusModal({
     addLiquidity,
     getAssetWallet,
     isDualSided,
+    isConfirmed,
     onClose,
     stepData.assetAmount,
     stepData.pool.asset,
@@ -310,6 +326,13 @@ export default function StatusModal({
               />
             ))}
           </div>
+
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold">Fees</h3>
+            <p>Inbound Fee: ${fees.inboundFee.toFixed(2)}</p>
+            <p>Outbound Fee: ${fees.outboundFee.toFixed(2)}</p>
+            <p>Liquidity Fee: ${fees.liquidityFee.toFixed(2)}</p>
+          </div>
         </div>
 
         {requiredWalletsSymbol?.length ? (
@@ -319,13 +342,18 @@ export default function StatusModal({
             />
           </div>
         ) : null}
-
-        <div className="text-sm text-gray-500 text-center">
-          {`You will be prompted to confirm transactions on your wallet.
-            Ensure your wallet is connected in the correct network and has sufficient funds for this
-            transaction.`}
         </div>
-      </div>
+
+        {!isConfirmed && (
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={handleConfirm}
+              className="bg-primary w-full text-black font-semibold py-3 px-6 rounded-full hover:opacity-90 transition-opacity"
+            >
+              Confirm
+            </button>
+          </div>
+        )}
     </>
   );
 }
