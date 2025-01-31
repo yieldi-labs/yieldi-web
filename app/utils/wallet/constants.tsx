@@ -107,6 +107,18 @@ export const CHAINS: ChainInfo[] = [
     addressUrl: "https://bscscan.com/address/{wallet}",
     ctrlChainId: "binanceSmartChain",
     type: ChainType.EVM,
+    addChainRequestPayload: {
+      chainId: "0x38",
+      chainName: "Binance Smart Chain",
+      rpcUrls: ["https://bsc-dataseed.binance.org"],
+      iconUrls: [],
+      nativeCurrency: {
+        name: "Binance Smart Chain",
+        symbol: "BNB",
+        decimals: 18,
+      },
+      blockExplorerUrls: ["https://bscscan.com"],
+    },
   },
   {
     icon: Cosmos,

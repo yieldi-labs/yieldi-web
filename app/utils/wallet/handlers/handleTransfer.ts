@@ -9,6 +9,7 @@ import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
 import { AssetRuneNative, RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 import { switchEvmChain } from "@/utils/chain";
+import { error } from "console";
 
 export interface TransactionEvmParams extends TransactionParams {
   data: `0x${string}`;
@@ -149,7 +150,6 @@ export const depositThorchain = async (
   transferParams: DepositParams,
 ): Promise<string> => {
   switch (wallet.walletId) {
-    case WalletKey.VULTISIG:
     case WalletKey.CTRL:
     case WalletKey.LEDGER:
       return new Promise<string>(async (resolve, reject) => {
@@ -164,7 +164,7 @@ export const depositThorchain = async (
         };
         await wallet.provider.request(
           {
-            method: "deposit_transaction",
+            method: "deposit",
             params: [depositParams],
           },
           (error: Error | null, result: string | null) => {
@@ -176,6 +176,30 @@ export const depositThorchain = async (
           },
         );
       });
+    case WalletKey.VULTISIG:
+      const depositParams = {
+        // asset: AssetRuneNative,
+        from: transferParams.from,
+        value: transferParams.amount.amount().toString(),
+        // amount: {
+        //   amount: transferParams.amount.amount().toNumber(),
+        //   decimals: RUNE_DECIMAL,
+        // },
+        memo: transferParams.memo,
+      };
+      const result = ''
+      try {
+        const result = await wallet.provider.request(
+          {
+            method: "deposit_transaction",
+            params: [depositParams],
+          }
+        );
+        return result
+      } catch (e) {
+        console.error('deposit error', e);
+      }
+      return result;
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }
