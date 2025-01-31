@@ -143,10 +143,12 @@ export const positionsTransformer = async (
         action.pool === memberPool.pool &&
         action.status === ActionStatus.PENDING;
       const isThorchainTx = Boolean(action.chain === "THOR");
+      const splitMemo = action.memo.split(":");
+      const isDualLpAction = splitMemo[2] !== "";
       if (type === PositionType.SYM) {
         return isThorchainTx && isPending;
       } else {
-        return !isThorchainTx && isPending;
+        return !isThorchainTx && !isDualLpAction && isPending;
       }
     });
 
@@ -198,27 +200,32 @@ export const positionsTransformer = async (
     if (!result[action.pool]) {
       result[action.pool] = { SYM: null, ASYM: null };
     }
-    const pendingActionType =
-      action.chain === "THOR" ? PositionType.SYM : PositionType.ASYM;
-    result[action.pool][pendingActionType] = {
-      assetId: action.pool,
-      type: pendingActionType,
-      status: determinePositionStatus([action]),
-      deposit: {
-        usd: 0,
-        totalInAsset: 0,
-        assetAdded: 0,
-        runeAdded: 0,
-      },
-      gain: {
-        usd: 0,
-        asset: 0,
-        percentage: "0",
-      },
-      liquidityLockUpRemainingInSeconds: 0,
-      pool,
-      pendingActions: [action],
-    };
+    const splitMemo = action.memo.split(":");
+    const isDualLpAction = splitMemo[2] !== "";
+    const pendingActionType = isDualLpAction
+      ? PositionType.SYM
+      : PositionType.ASYM;
+    if (!result[action.pool][pendingActionType]) {
+      result[action.pool][pendingActionType] = {
+        assetId: action.pool,
+        type: pendingActionType,
+        status: determinePositionStatus([action]),
+        deposit: {
+          usd: 0,
+          totalInAsset: 0,
+          assetAdded: 0,
+          runeAdded: 0,
+        },
+        gain: {
+          usd: 0,
+          asset: 0,
+          percentage: "0",
+        },
+        liquidityLockUpRemainingInSeconds: 0,
+        pool,
+        pendingActions: [action],
+      };
+    }
   });
 
   return result;
@@ -238,6 +245,12 @@ const determinePositionStatus = (
   actionsPending: ActionData[],
   memberPool?: MemberPool,
 ) => {
+  if (
+    Number(memberPool?.assetPending) > 0 ||
+    Number(memberPool?.runePending) > 0
+  ) {
+    return PositionStatus.LP_POSITION_INCOMPLETE;
+  }
   if (actionsPending.length > 0) {
     if (actionsPending[0].type === ActionType.ADD_LIQUIDITY) {
       return PositionStatus.LP_POSITION_DEPOSIT_PENDING;
@@ -245,10 +258,5 @@ const determinePositionStatus = (
       return PositionStatus.LP_POSITION_WITHDRAWAL_PENDING;
     }
   }
-  if (
-    Number(memberPool?.assetPending) > 0 ||
-    Number(memberPool?.runePending) > 0
-  )
-    return PositionStatus.LP_POSITION_INCOMPLETE;
   return PositionStatus.LP_POSITION_COMPLETE;
 };

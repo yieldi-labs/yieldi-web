@@ -15,6 +15,7 @@ import {
 } from "@/hooks/useLiquidityPosition";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import LpSubstepDetail from "./LpSubstepDetail";
+import { Warn } from "@shared/components/ui";
 
 export interface StatusStepData {
   pool: PoolDetail;
@@ -56,6 +57,9 @@ export default function StatusModal({
 
   const [assetTxHash, setAssetTxHash] = useState<string | null>(null);
   const [runeTxHash, setRuneTxHash] = useState<string | null>(null);
+  const [requiredWalletsSymbol, setRequiredWalletsSymbol] = useState<
+    string[] | undefined
+  >([]);
 
   const isInProgress = useRef(false);
 
@@ -101,11 +105,11 @@ export default function StatusModal({
     if (isInProgress.current) return;
     isInProgress.current = true;
 
+    const parsedAssetAmount = stepData.assetAmount.amount().toNumber();
+    const parsedRuneAmount = stepData.runeAmount.amount().toNumber();
+
     const executeLiquidityAddition = async () => {
       let pairedAddress: string | undefined;
-
-      const parsedAssetAmount = stepData.assetAmount.amount().toNumber();
-      const parsedRuneAmount = stepData.runeAmount.amount().toNumber();
 
       if (isDualSided) {
         if (walletsState[ChainKey.THORCHAIN]) {
@@ -128,41 +132,48 @@ export default function StatusModal({
         });
       });
 
-      const result = await addLiquidity({
-        asset: stepData.pool.asset,
-        assetDecimals: Number(stepData.pool.nativeDecimal),
-        amount: parsedAssetAmount,
-        runeAmount: parsedRuneAmount,
-        pairedAddress,
-        emitError: (error) => {
-          console.error(error);
-          onClose();
-        },
-        emitNewHash: (hash, stepToUpdate) => {
-          setAssetTxHash(hash);
-          setStepStatus((prev) => {
-            let updatedStepIndex = -2;
-            return prev.map((step, index) => {
-              if (index === updatedStepIndex + 1) {
-                return {
-                  ...prev[index],
-                  status: LpSubstepsStatus.PENDING,
-                };
-              }
-              if (step.step === stepToUpdate) {
-                updatedStepIndex = index;
-                return {
-                  ...step,
-                  status: LpSubstepsStatus.SUCCESS,
-                };
-              }
-              return step;
+      let hashAssetDeposit = null;
+      if (parsedAssetAmount > 0) {
+        hashAssetDeposit = await addLiquidity({
+          asset: stepData.pool.asset,
+          assetDecimals: Number(stepData.pool.nativeDecimal),
+          amount: parsedAssetAmount,
+          runeAmount: parsedRuneAmount,
+          pairedAddress,
+          emitError: (error) => {
+            console.error(error);
+            onClose();
+          },
+          emitNewHash: (hash, stepToUpdate) => {
+            setAssetTxHash(hash);
+            setStepStatus((prev) => {
+              let updatedStepIndex = -2;
+              return prev.map((step, index) => {
+                if (index === updatedStepIndex + 1) {
+                  return {
+                    ...prev[index],
+                    status: LpSubstepsStatus.PENDING,
+                  };
+                }
+                if (step.step === stepToUpdate) {
+                  updatedStepIndex = index;
+                  return {
+                    ...step,
+                    status: LpSubstepsStatus.SUCCESS,
+                  };
+                }
+                return step;
+              });
             });
-          });
-        },
-      });
+          },
+        });
+      }
 
-      if (isDualSided && result) {
+      if (
+        isDualSided &&
+        parsedRuneAmount > 0 &&
+        (hashAssetDeposit || parsedAssetAmount <= 0)
+      ) {
         pairedAddress = getAssetWallet(stepData.pool.asset).address;
         await addLiquidity({
           asset: "THOR.RUNE",
@@ -192,7 +203,24 @@ export default function StatusModal({
       }
     };
 
-    executeLiquidityAddition();
+    let missingWallets: string[] = [];
+    const assetWallet = getAssetWallet(stepData.pool.asset);
+    const runeWallet = getAssetWallet("THOR.RUNE");
+
+    if (parsedAssetAmount > 0 && !assetWallet) {
+      missingWallets.push(
+        assetFromString(stepData.pool.asset)?.ticker as string,
+      );
+    }
+
+    if (parsedRuneAmount > 0 && !runeWallet) {
+      missingWallets.push(assetFromString("THOR.RUNE")?.ticker as string);
+    }
+
+    if (missingWallets.length === 0) {
+      executeLiquidityAddition();
+    }
+    setRequiredWalletsSymbol(missingWallets);
   }, [
     addLiquidity,
     getAssetWallet,
@@ -213,7 +241,9 @@ export default function StatusModal({
             <span className="text-gray-600 font-medium">Deposit</span>
             <span className="text-gray-900 font-semibold text-lg">
               {addDollarSignAndSuffix(
-                stepData.runeUsdAmount + stepData.assetUsdAmount,
+                isDualSided
+                  ? stepData.runeUsdAmount + stepData.assetUsdAmount
+                  : stepData.assetUsdAmount,
               )}
             </span>
           </div>
@@ -282,9 +312,17 @@ export default function StatusModal({
           </div>
         </div>
 
+        {requiredWalletsSymbol?.length ? (
+          <div className="pb-4">
+            <Warn
+              text={`Connect your ${requiredWalletsSymbol.join(" ")} wallet to continue.`}
+            />
+          </div>
+        ) : null}
+
         <div className="text-sm text-gray-500 text-center">
-          {`You will be prompted to confirm a ${asset.ticker} transaction on your ${asset.ticker} wallet.
-            Ensure your wallet is connected and has sufficient funds for this
+          {`You will be prompted to confirm transactions on your wallet.
+            Ensure your wallet is connected in the correct network and has sufficient funds for this
             transaction.`}
         </div>
       </div>

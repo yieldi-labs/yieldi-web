@@ -16,12 +16,20 @@ import {
 import AddLiquidityManager, {
   LpSteps,
 } from "../explore/components/AddLiquidityManager";
+import { StatusStepData } from "../explore/components/StatusModal";
+import { baseAmount, baseToAsset } from "@xchainjs/xchain-util";
+import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
+import { AddLiquidityStepData } from "../explore/components/AddLiquidityModal";
+import { useAppState } from "@/utils/contexts/context";
 
-interface DashboardViewProps {
-  runePriceUSD: number;
-}
-
-export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
+export default function DashboardView() {
+  const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{
+    initialStep: LpSteps;
+    stepData: StatusStepData | AddLiquidityStepData | null;
+  }>({
+    initialStep: LpSteps.SELECT_OPTIONS,
+    stepData: null,
+  });
   const [selectedPool, setSelectedPool] = useState<PoolDetail | null>(null);
   const [selectedPosition, setSelectedPosition] =
     useState<PositionStats | null>(null);
@@ -30,6 +38,9 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
   const { positions, pools, isPending } = useLiquidityPositions();
+  const { midgardStats } = useAppState();
+
+  const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0; // TODO: Loading state
 
   const allPositionsArray =
     (positions &&
@@ -92,13 +103,67 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
         ) : (
           <PositionsList
             positions={allPositionsArray}
-            onAdd={(assetId: string, type: PositionType) => {
-              setSelectedPool(
-                pools?.find((pool) => pool.asset === assetId) || null,
+            onCompletePosition={(assetId: string, type: PositionType) => {
+              const pool = pools?.find((pool) => pool.asset === assetId);
+              const position = (positions as Positions)[assetId][type];
+              if (!position || !pool) {
+                throw Error("Position or pool not found");
+              }
+              const assetPriceUSD = parseFloat(pool.assetPriceUSD);
+
+              const assetAmount = baseToAsset(
+                baseAmount(position.memberDetails?.assetPending, 8),
               );
+              const runeAmount = baseToAsset(
+                baseAmount(position.memberDetails?.runePending, 8),
+              );
+
+              const valueOfPendingAssetInUsd = assetAmount.times(assetPriceUSD);
+              const valueOfPendingRuneInUsd = runeAmount.times(runePriceUSD);
+
+              const amountOfAssetToDeposit =
+                valueOfPendingRuneInUsd.div(assetPriceUSD);
+              const amountOfRuneToDeposit =
+                valueOfPendingAssetInUsd.div(runePriceUSD);
+
+              const requiredSteps =
+                position.memberDetails?.assetPending === "0"
+                  ? [
+                      LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET,
+                      LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET,
+                    ]
+                  : [LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE];
+              setAddLiquidityProcessState({
+                initialStep: LpSteps.HANDLE_STATE,
+                stepData: {
+                  pool,
+                  assetAmount: amountOfAssetToDeposit,
+                  assetUsdAmount: valueOfPendingRuneInUsd.amount().toNumber(),
+                  runeAmount: amountOfRuneToDeposit,
+                  runeUsdAmount: valueOfPendingAssetInUsd.amount().toNumber(),
+                  positionType: type,
+                  requiredSteps: requiredSteps,
+                },
+              });
+              setShowAddLiquidityModal(true);
+            }}
+            onAdd={(assetId: string, type: PositionType) => {
+              const pool = pools?.find((pool) => pool.asset === assetId);
+              if (!pool) {
+                throw Error("Pool not found");
+              }
+              setSelectedPool(pool);
               setSelectedPosition(
                 (positions as Positions)[assetId][type] || null,
               );
+              setAddLiquidityProcessState({
+                initialStep: LpSteps.SELECT_OPTIONS,
+                stepData: {
+                  pool,
+                  runePriceUSD: runePriceUSD,
+                  initialType: type,
+                },
+              });
               setShowAddLiquidityModal(true);
             }}
             onRemove={(poolId: string, type: PositionType) => {
@@ -111,18 +176,18 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
           />
         )}
       </div>
-      {showAddLiquidityModal && selectedPool && (
+      {showAddLiquidityModal && addLiquidityProcessState.stepData && (
         <AddLiquidityManager
-          initialStep={LpSteps.SELECT_OPTIONS}
+          initialStep={addLiquidityProcessState.initialStep}
           onClose={() => {
             setSelectedPool(null);
             setShowAddLiquidityModal(false);
           }}
-          stepData={{
-            pool: selectedPool,
-            runePriceUSD: runePriceUSD,
-            initialType: selectedPosition?.type,
-          }}
+          stepData={
+            addLiquidityProcessState.stepData as
+              | AddLiquidityStepData
+              | StatusStepData
+          }
         />
       )}
       {showRemoveLiquidityModal &&

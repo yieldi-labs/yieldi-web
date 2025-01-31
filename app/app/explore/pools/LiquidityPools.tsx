@@ -24,10 +24,10 @@ import { SortableHeader } from "@shared/components/ui";
 import Link from "next/link";
 import LiquidityPoolCardMobile from "../components/LiquidityPoolCardMobile";
 import TokenLogo from "@/app/dashboard/components/TokenLogo";
+import { useAppState } from "@/utils/contexts/context";
 
 interface LiquidityPoolsProps {
   pools: PoolDetails;
-  runePriceUSD: number;
 }
 
 enum PoolSortKey {
@@ -42,11 +42,10 @@ interface SortConfig {
   direction: SortDirection;
 }
 
-const LiquidityPools: React.FC<LiquidityPoolsProps> = ({
-  pools,
-  runePriceUSD,
-}) => {
+const LiquidityPools: React.FC<LiquidityPoolsProps> = ({ pools }) => {
   const isMobile = useMobileDetection();
+  const { midgardStats } = useAppState();
+  const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0;
   useBodyOverflow(isMobile);
   const { height: mobileRowHeight, measureRef } = useMeasureHeight({
     isMobile,

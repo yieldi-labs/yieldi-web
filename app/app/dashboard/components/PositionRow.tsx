@@ -4,12 +4,17 @@ import { addDollarSignAndSuffix, getAssetSymbol } from "@/app/utils";
 import TokenLogo from "./TokenLogo";
 import StatusPosition from "./StatusPosition";
 import { UIComponents } from "@shared/components";
-import { PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
+import {
+  PositionStats,
+  PositionStatus,
+  PositionType,
+} from "@/utils/lp-monitor/parsePositions";
 
 interface PositionsRow {
   position: PositionStats;
   onAdd: (assetId: string, type: PositionType) => void;
   onRemove: (poolId: string, type: PositionType) => void;
+  onCompletePosition: (poolId: string, type: PositionType) => void;
   hideAddButton?: boolean;
   hideStatus?: boolean;
   reasonToDisableAdd: string | React.ReactNode;
@@ -20,6 +25,7 @@ export default function PositionRow({
   position,
   onAdd,
   onRemove,
+  onCompletePosition,
   hideAddButton = false,
   hideStatus = false,
   reasonToDisableAdd = null,
@@ -54,7 +60,16 @@ export default function PositionRow({
           </div>
           {!hideStatus && (
             <div className="hidden md:flex md:px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
-              <StatusPosition position={position} />
+              <StatusPosition
+                position={position}
+                onClick={() => {
+                  if (
+                    position.status === PositionStatus.LP_POSITION_INCOMPLETE
+                  ) {
+                    onCompletePosition(position.assetId, position.type);
+                  }
+                }}
+              />
             </div>
           )}
           <div className="hidden md:flex px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
@@ -64,7 +79,7 @@ export default function PositionRow({
                   <button
                     disabled={Boolean(reasonToDisableAdd)}
                     onClick={() => onAdd(position.assetId, position.type)}
-                    className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:opacity-50 disabled:cursor-not-allowed "
+                    className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed "
                   >
                     Add
                   </button>
