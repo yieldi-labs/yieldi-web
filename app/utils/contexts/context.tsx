@@ -224,12 +224,13 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
             );
             SUPPORTED_WALLETS[walletKey].isAvailable = true; // TODO: Not modify a constant exported from other file. We are merging react state with static definitions
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.AVALANCHE]: async () =>
+              [ProviderKey.AVALANCHE]: async () => 
                 await connectWallet({
                   id: "xdefi-avax", // TODO: Remove literal IDs use enum composition
                   provider: ctrlEthProvider || window?.xfi?.ethereum,
                   walletId: WalletKey.CTRL,
-                }),
+                })
+              ,
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "xdefi-bsc",
@@ -457,7 +458,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               [ProviderKey.BASE]: async () =>
                 await connectWallet({
                   id: "vultisig-base",
-                  provider: window.vultisig?.ethereum,
+                  provider: vultisigEthProvider || window.vultisig?.ethereum,
                   walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.THORCHAIN]: async () =>
