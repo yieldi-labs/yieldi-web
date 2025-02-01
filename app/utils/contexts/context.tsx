@@ -33,6 +33,7 @@ import { useQuery } from "@tanstack/react-query";
 import { mimir } from "@/thornode/services.gen";
 import { MimirResponse } from "@/thornode";
 import { getStats, StatsData } from "@/midgard";
+import { detectOverwritedEthProviders } from "../chain";
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
@@ -169,30 +170,32 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       switch (walletKey) {
         case WalletKey.CTRL: {
           if (window.xfi) {
+            const ctrlEthProvider = detectOverwritedEthProviders(WalletKey.CTRL)
             SUPPORTED_WALLETS[walletKey].isAvailable = true; // TODO: Not modify a constant exported from other file. We are merging react state with static definitions
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.AVALANCHE]: async () =>
+              [ProviderKey.AVALANCHE]: async () => 
                 await connectWallet({
                   id: "xdefi-avax", // TODO: Remove literal IDs use enum composition
-                  provider: window?.xfi?.ethereum,
+                  provider: ctrlEthProvider || window?.xfi?.ethereum,
                   walletId: WalletKey.CTRL,
-                }),
+                })
+              ,
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "xdefi-bsc",
-                  provider: window?.xfi?.ethereum,
+                  provider: ctrlEthProvider || window?.xfi?.ethereum,
                   walletId: WalletKey.CTRL,
                 }),
               [ProviderKey.ETHEREUM]: async () =>
                 await connectWallet({
                   id: "xdefi-eth",
-                  provider: window?.xfi?.ethereum,
+                  provider: ctrlEthProvider || window?.xfi?.ethereum,
                   walletId: WalletKey.CTRL,
                 }),
               [ProviderKey.BASE]: async () =>
                 await connectWallet({
                   id: "xdefi-base",
-                  provider: window?.xfi?.ethereum,
+                  provider: ctrlEthProvider || window?.xfi?.ethereum,
                   walletId: WalletKey.CTRL,
                 }),
               [ProviderKey.THORCHAIN]: async () =>
@@ -253,30 +256,31 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         }
         case WalletKey.METAMASK: {
           if (window.ethereum?.isMetaMask) {
+            const metamaskEthProvider = detectOverwritedEthProviders(WalletKey.METAMASK)
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.AVALANCHE]: async () =>
                 await connectWallet({
                   id: "metamask-avax",
-                  provider: window.ethereum,
+                  provider: metamaskEthProvider || window.ethereum,
                   walletId: WalletKey.METAMASK,
                 }),
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "metamask-bsc",
-                  provider: window.ethereum,
+                  provider: metamaskEthProvider || window.ethereum,
                   walletId: WalletKey.METAMASK,
                 }),
               [ProviderKey.ETHEREUM]: async () =>
                 await connectWallet({
                   id: "metamask-eth",
-                  provider: window.ethereum,
+                  provider: metamaskEthProvider || window.ethereum,
                   walletId: WalletKey.METAMASK,
                 }),
               [ProviderKey.BASE]: async () =>
                 await connectWallet({
                   id: "metamask-base",
-                  provider: window.ethereum,
+                  provider: metamaskEthProvider || window.ethereum,
                   walletId: WalletKey.METAMASK,
                 }),
             };
@@ -369,30 +373,31 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         }
         case WalletKey.VULTISIG: {
           if (window.vultisig) {
+            const vultisigEthProvider = detectOverwritedEthProviders(WalletKey.VULTISIG)
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.AVALANCHE]: async () =>
                 await connectWallet({
                   id: "vultisig-avax",
-                  provider: window.vultisig?.ethereum,
+                  provider: vultisigEthProvider || window.vultisig?.ethereum,
                   walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "vultisig-bsc",
-                  provider: window.vultisig?.ethereum,
+                  provider: vultisigEthProvider || window.vultisig?.ethereum,
                   walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.ETHEREUM]: async () =>
                 await connectWallet({
                   id: "vultisig-eth",
-                  provider: window.vultisig?.ethereum,
+                  provider: vultisigEthProvider || window.vultisig?.ethereum,
                   walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.BASE]: async () =>
                 await connectWallet({
                   id: "vultisig-base",
-                  provider: window.vultisig?.ethereum,
+                  provider: vultisigEthProvider || window.vultisig?.ethereum,
                   walletId: WalletKey.VULTISIG,
                 }),
               [ProviderKey.THORCHAIN]: async () =>

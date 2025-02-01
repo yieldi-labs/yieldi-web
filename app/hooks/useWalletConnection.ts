@@ -6,6 +6,7 @@ import {
   WalletType,
 } from "@/utils/interfaces";
 import { useAppState } from "@/utils/contexts/context";
+import { getWalletId } from "@/utils/chain";
 
 export function useWalletConnection() {
   const { setWalletsState, toggleWalletModal, selectedChains, walletsState } =
@@ -72,7 +73,7 @@ export function useWalletConnection() {
       if (!connection || !connection.address) continue;
       newWalletState = updateWalletState(
         newWalletState,
-        wallet.id,
+        getWalletId(chain, connection.provider, wallet.id), // Before conenct important Xdefi can overwrite the provider depends on user preferences so return window.ethereum
         chain.providerType,
         chain.name,
         connection.provider,

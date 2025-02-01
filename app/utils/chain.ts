@@ -195,3 +195,55 @@ export const getChainFromAssetId = (assetId: string): ChainInfo => {
   }
   return chain;
 };
+
+const mapCtrlProvider: Record<WalletKey, string | null> = {
+  [WalletKey.CTRL] : 'Ctrl Wallet',
+  [WalletKey.METAMASK] : 'MetaMask',
+  [WalletKey.VULTISIG] : 'Vultisig',
+  [WalletKey.OKX] : 'OKX Wallet',
+  [WalletKey.PHANTOM] : 'Phantom',
+  [WalletKey.WALLETCONNECT] : null,
+  [WalletKey.LEDGER] : null,
+}
+
+export const detectOverwritedEthProviders = (wallet: WalletKey): any => {
+  const ctrlProviders = window?.ctrlEthProviders
+  if (!ctrlProviders) {
+    return null
+  }
+  const providerId = mapCtrlProvider[wallet]
+  if (!providerId) {
+    return null
+  }
+  if (ctrlProviders[providerId]) {
+    console.log('ctrlProviders[providerId]', ctrlProviders[providerId])
+    return ctrlProviders[providerId].provider
+  }
+  return null
+}
+
+export const getWalletId = (chain: ChainInfo, provider: any, defaultWalletKey: WalletKey) => {
+  if (chain.type === ChainType.EVM) {
+    if (provider?.isPhantom) {
+      return WalletKey.PHANTOM
+    }
+    if (provider?.isVultiConnect) {
+      return WalletKey.VULTISIG
+    }
+    if (provider?.isXDEFI) {
+      return WalletKey.CTRL
+    }
+    if (provider?.isMetaMask) {
+      return WalletKey.METAMASK
+    }
+  }
+  if (chain.type === ChainType.BFT) {
+    if (provider?.isOkxWallet) {
+      return WalletKey.OKX
+    }
+    if (provider?.isXDEFI) {
+      return WalletKey.CTRL
+    }
+  }
+  return defaultWalletKey
+}
