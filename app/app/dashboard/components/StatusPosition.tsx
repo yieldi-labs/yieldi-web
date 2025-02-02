@@ -36,7 +36,7 @@ export default function StatusPosition({
           className="flex items-center bg-yellow-100 text-yellow-700 px-2 py-1 rounded-md shadow-sm animate-pulse"
         >
           {Number(position.memberDetails?.runePending) > 0
-            ? `Awaiting ${asset?.symbol} deposit`
+            ? `Awaiting ${asset?.ticker} deposit`
             : "Awaiting RUNE deposit"}
         </span>
       )}

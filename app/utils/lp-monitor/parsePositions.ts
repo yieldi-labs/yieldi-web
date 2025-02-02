@@ -76,7 +76,16 @@ export const positionsTransformer = async (
 
   const memberPools = memberPoolsResult.data?.pools;
 
-  memberPools?.forEach((memberPool) => {
+  // Filter out positions that does not match with both addresses
+  const filteredMemberPools = memberPools?.filter((memberPool) => {
+    if (memberPool.assetAddress !== '' && memberPool.runeAddress !== '') {
+      const lowerCaseAddresses = addresses.map((address) => address.toLowerCase());
+      return lowerCaseAddresses.includes(memberPool.assetAddress.toLowerCase()) && addresses.includes(memberPool.runeAddress.toLowerCase());
+    }
+    return true
+  });
+
+  filteredMemberPools?.forEach((memberPool) => {
     const type = determinePositionType(memberPool);
 
     const key = memberPool.pool.replace("/", ".");
@@ -205,7 +214,7 @@ export const positionsTransformer = async (
     const pendingActionType = isDualLpAction
       ? PositionType.SYM
       : PositionType.ASYM;
-    if (!result[action.pool][pendingActionType]) {
+    if (!result[action.pool][pendingActionType] && action.pendingDelayInSeconds > 0) {
       result[action.pool][pendingActionType] = {
         assetId: action.pool,
         type: pendingActionType,
