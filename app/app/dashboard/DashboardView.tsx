@@ -152,10 +152,10 @@ export default function DashboardView() {
                   const assetPriceUSD = parseFloat(pool.assetPriceUSD);
 
                   const assetAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.assetPending, 8),
+                    baseAmount(position.memberDetails?.assetPending, 8)
                   );
                   const runeAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.runePending, 8),
+                    baseAmount(position.memberDetails?.runePending, 8)
                   );
 
                   const valueOfPendingAssetInUsd =
@@ -203,7 +203,7 @@ export default function DashboardView() {
               }
               setSelectedPool(pool);
               setSelectedPosition(
-                (positions as Positions)[assetId][type] || null,
+                (positions as Positions)[assetId][type] || null
               );
               setAddLiquidityProcessState({
                 initialStep: LpSteps.SELECT_OPTIONS,
@@ -217,7 +217,7 @@ export default function DashboardView() {
             }}
             onRemove={(poolId: string, type: PositionType) => {
               setSelectedPool(
-                pools?.find((pool) => pool.asset === poolId) || null,
+                pools?.find((pool) => pool.asset === poolId) || null
               );
               setSelectedPosition((positions as Positions)[poolId][type]);
               setShowRemoveLiquidityModal(true);
