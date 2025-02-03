@@ -164,9 +164,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
             onRemove={() => handleRemove(position)}
             hideAddButton={true}
             hideStatus={true}
-            reasonToDisableAdd={null}
-            reasonToDisableRemove={null}
-            onCompletePosition={() => {}} // TODO: Complete this flow
+            onClickStatus={() => {}}
           />
         );
       });
