@@ -9,7 +9,6 @@ import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
 import { AssetRuneNative, RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 import { switchEvmChain } from "@/utils/chain";
-import { error } from "console";
 
 export interface TransactionEvmParams extends TransactionParams {
   data: `0x${string}`;
