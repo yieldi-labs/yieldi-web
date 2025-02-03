@@ -216,7 +216,6 @@ export const detectOverwritedEthProviders = (wallet: WalletKey): any => {
     return null;
   }
   if (ctrlProviders[providerId]) {
-    console.log("ctrlProviders[providerId]", ctrlProviders[providerId]);
     return ctrlProviders[providerId].provider;
   }
   return null;
