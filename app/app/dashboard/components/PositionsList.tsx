@@ -126,10 +126,10 @@ export default function PositionsList({
             <Tooltip
               content={
                 <p className="w-[300px]">
-                  Status only partially monitors your position. 
-                  <a 
-                    href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-does-my-balance-or-position-status-not-update-correctly-after-a-transaction" 
-                    target="_blank" 
+                  Status only partially monitors your position.
+                  <a
+                    href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-does-my-balance-or-position-status-not-update-correctly-after-a-transaction"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 hover:underline pl-1"
                   >

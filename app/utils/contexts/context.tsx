@@ -170,16 +170,17 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       switch (walletKey) {
         case WalletKey.CTRL: {
           if (window.xfi) {
-            const ctrlEthProvider = detectOverwritedEthProviders(WalletKey.CTRL)
+            const ctrlEthProvider = detectOverwritedEthProviders(
+              WalletKey.CTRL,
+            );
             SUPPORTED_WALLETS[walletKey].isAvailable = true; // TODO: Not modify a constant exported from other file. We are merging react state with static definitions
             SUPPORTED_WALLETS[walletKey].chainConnect = {
-              [ProviderKey.AVALANCHE]: async () => 
+              [ProviderKey.AVALANCHE]: async () =>
                 await connectWallet({
                   id: "xdefi-avax", // TODO: Remove literal IDs use enum composition
                   provider: ctrlEthProvider || window?.xfi?.ethereum,
                   walletId: WalletKey.CTRL,
-                })
-              ,
+                }),
               [ProviderKey.BINANCESMARTCHAIN]: async () =>
                 await connectWallet({
                   id: "xdefi-bsc",
@@ -256,7 +257,9 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         }
         case WalletKey.METAMASK: {
           if (window.ethereum?.isMetaMask) {
-            const metamaskEthProvider = detectOverwritedEthProviders(WalletKey.METAMASK)
+            const metamaskEthProvider = detectOverwritedEthProviders(
+              WalletKey.METAMASK,
+            );
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.AVALANCHE]: async () =>
@@ -373,7 +376,9 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         }
         case WalletKey.VULTISIG: {
           if (window.vultisig) {
-            const vultisigEthProvider = detectOverwritedEthProviders(WalletKey.VULTISIG)
+            const vultisigEthProvider = detectOverwritedEthProviders(
+              WalletKey.VULTISIG,
+            );
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.AVALANCHE]: async () =>

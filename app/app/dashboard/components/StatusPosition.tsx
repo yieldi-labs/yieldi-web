@@ -53,7 +53,7 @@ export default function StatusPosition({
                 initialTimers.length > 0 ? (
                   <UIComponents.Timer initialTimes={initialTimers} />
                 ) : (
-                  <span className='text-gray-900'>Processing...</span>
+                  <span className="text-gray-900">Processing...</span>
                 )
               }
             >

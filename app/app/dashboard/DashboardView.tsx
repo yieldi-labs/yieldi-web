@@ -100,7 +100,8 @@ export default function DashboardView() {
           <Tooltip
             content={
               <p className="w-[300px]">
-                If you can’t find your liquidity position, make sure you are connected with both addresses used during the initial deposit.
+                If you can’t find your liquidity position, make sure you are
+                connected with both addresses used during the initial deposit.
                 <a
                   href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-cant-i-find-my-dual-chain-liquidity-position-in-yieldi"
                   target="_blank"
@@ -144,17 +145,17 @@ export default function DashboardView() {
                 case PositionStatus.LP_POSITION_WITHDRAWAL_PENDING:
                   window.open(
                     `https://thorchain.net/address/${position.memberDetails?.assetAddress}?tab=lps`,
-                    "_blank"
+                    "_blank",
                   );
                   break;
                 case PositionStatus.LP_POSITION_INCOMPLETE:
                   const assetPriceUSD = parseFloat(pool.assetPriceUSD);
 
                   const assetAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.assetPending, 8)
+                    baseAmount(position.memberDetails?.assetPending, 8),
                   );
                   const runeAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.runePending, 8)
+                    baseAmount(position.memberDetails?.runePending, 8),
                   );
 
                   const valueOfPendingAssetInUsd =
@@ -203,7 +204,7 @@ export default function DashboardView() {
               }
               setSelectedPool(pool);
               setSelectedPosition(
-                (positions as Positions)[assetId][type] || null
+                (positions as Positions)[assetId][type] || null,
               );
               setAddLiquidityProcessState({
                 initialStep: LpSteps.SELECT_OPTIONS,
@@ -217,7 +218,7 @@ export default function DashboardView() {
             }}
             onRemove={(poolId: string, type: PositionType) => {
               setSelectedPool(
-                pools?.find((pool) => pool.asset === poolId) || null
+                pools?.find((pool) => pool.asset === poolId) || null,
               );
               setSelectedPosition((positions as Positions)[poolId][type]);
               setShowRemoveLiquidityModal(true);

@@ -30,7 +30,7 @@ const isActionDisabled = (
   position: PositionStats,
   chainKey: ChainKey,
   action: ActionType,
-  walletsState: ConnectedWalletsState
+  walletsState: ConnectedWalletsState,
 ): string | React.ReactNode | null => {
   if (
     position.liquidityLockUpRemainingInSeconds > 0 &&
@@ -40,8 +40,8 @@ const isActionDisabled = (
       <div className="w-[300px] flex">
         <div className="whitespace-normal break-words">
           <span>
-            Liquidity is currently in the lockup period and cannot be
-            withdrawn. Your liquidity will become withdrawable in:{" "}
+            Liquidity is currently in the lockup period and cannot be withdrawn.
+            Your liquidity will become withdrawable in:{" "}
             <Timer
               initialTimes={[position.liquidityLockUpRemainingInSeconds]}
             />
@@ -78,8 +78,18 @@ export default function PositionRow({
     throw new Error("Invalid asset");
   }
   const chainKey = getChainKeyFromChain(asset?.chain);
-  const reasonToDisableRemove = isActionDisabled(position, chainKey, ActionType.REMOVE_LIQUIDITY, walletsState);
-  const reasonToDisableAdd = isActionDisabled(position, chainKey, ActionType.ADD_LIQUIDITY, walletsState);
+  const reasonToDisableRemove = isActionDisabled(
+    position,
+    chainKey,
+    ActionType.REMOVE_LIQUIDITY,
+    walletsState,
+  );
+  const reasonToDisableAdd = isActionDisabled(
+    position,
+    chainKey,
+    ActionType.ADD_LIQUIDITY,
+    walletsState,
+  );
   return (
     <TranslucentCard className="rounded-xl mb-1.5">
       <div className="flex items-center w-full">
@@ -102,7 +112,7 @@ export default function PositionRow({
             {Number(position.gain.percentage).toFixed(2)}%
           </div>
           <div className="md:px-3 py-3 md:py-0 whitespace-nowrap w-1/2 md:w-1/5">
-            {addDollarSignAndSuffix(position.deposit.usd+position.gain.usd)}
+            {addDollarSignAndSuffix(position.deposit.usd + position.gain.usd)}
           </div>
           <div className="hidden md:flex md:px-3 py-3 md:py-0 whitespace-nowrap w-1/5">
             {addDollarSignAndSuffix(position.gain.usd)}

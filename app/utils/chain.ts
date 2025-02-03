@@ -197,53 +197,57 @@ export const getChainFromAssetId = (assetId: string): ChainInfo => {
 };
 
 const mapCtrlProvider: Record<WalletKey, string | null> = {
-  [WalletKey.CTRL] : 'Ctrl Wallet',
-  [WalletKey.METAMASK] : 'MetaMask',
-  [WalletKey.VULTISIG] : 'Vultisig',
-  [WalletKey.OKX] : 'OKX Wallet',
-  [WalletKey.PHANTOM] : 'Phantom',
-  [WalletKey.WALLETCONNECT] : null,
-  [WalletKey.LEDGER] : null,
-}
+  [WalletKey.CTRL]: "Ctrl Wallet",
+  [WalletKey.METAMASK]: "MetaMask",
+  [WalletKey.VULTISIG]: "Vultisig",
+  [WalletKey.OKX]: "OKX Wallet",
+  [WalletKey.PHANTOM]: "Phantom",
+  [WalletKey.WALLETCONNECT]: null,
+  [WalletKey.LEDGER]: null,
+};
 
 export const detectOverwritedEthProviders = (wallet: WalletKey): any => {
-  const ctrlProviders = window?.ctrlEthProviders
+  const ctrlProviders = window?.ctrlEthProviders;
   if (!ctrlProviders) {
-    return null
+    return null;
   }
-  const providerId = mapCtrlProvider[wallet]
+  const providerId = mapCtrlProvider[wallet];
   if (!providerId) {
-    return null
+    return null;
   }
   if (ctrlProviders[providerId]) {
-    console.log('ctrlProviders[providerId]', ctrlProviders[providerId])
-    return ctrlProviders[providerId].provider
+    console.log("ctrlProviders[providerId]", ctrlProviders[providerId]);
+    return ctrlProviders[providerId].provider;
   }
-  return null
-}
+  return null;
+};
 
-export const getWalletId = (chain: ChainInfo, provider: any, defaultWalletKey: WalletKey) => {
+export const getWalletId = (
+  chain: ChainInfo,
+  provider: any,
+  defaultWalletKey: WalletKey,
+) => {
   if (chain.type === ChainType.EVM) {
     if (provider?.isPhantom) {
-      return WalletKey.PHANTOM
+      return WalletKey.PHANTOM;
     }
     if (provider?.isVultiConnect) {
-      return WalletKey.VULTISIG
+      return WalletKey.VULTISIG;
     }
     if (provider?.isXDEFI) {
-      return WalletKey.CTRL
+      return WalletKey.CTRL;
     }
     if (provider?.isMetaMask) {
-      return WalletKey.METAMASK
+      return WalletKey.METAMASK;
     }
   }
   if (chain.type === ChainType.BFT) {
     if (provider?.isOkxWallet) {
-      return WalletKey.OKX
+      return WalletKey.OKX;
     }
     if (provider?.isXDEFI) {
-      return WalletKey.CTRL
+      return WalletKey.CTRL;
     }
   }
-  return defaultWalletKey
-}
+  return defaultWalletKey;
+};

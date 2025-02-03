@@ -178,26 +178,19 @@ export const depositThorchain = async (
       });
     case WalletKey.VULTISIG:
       const depositParams = {
-        // asset: AssetRuneNative,
         from: transferParams.from,
         value: transferParams.amount.amount().toString(),
-        // amount: {
-        //   amount: transferParams.amount.amount().toNumber(),
-        //   decimals: RUNE_DECIMAL,
-        // },
         memo: transferParams.memo,
       };
-      const result = ''
+      const result = "";
       try {
-        const result = await wallet.provider.request(
-          {
-            method: "deposit_transaction",
-            params: [depositParams],
-          }
-        );
-        return result
+        const result = await wallet.provider.request({
+          method: "deposit_transaction",
+          params: [depositParams],
+        });
+        return result;
       } catch (e) {
-        console.error('deposit error', e);
+        console.error("deposit error", e);
       }
       return result;
     default:
