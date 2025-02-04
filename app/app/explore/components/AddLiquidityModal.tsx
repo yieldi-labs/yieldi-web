@@ -22,6 +22,7 @@ import {
 } from "@xchainjs/xchain-util";
 import { StatusStepData } from "./StatusModal";
 import { RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
+import { Warn } from "@shared/components/ui";
 
 export interface AddLiquidityStepData {
   pool: IPoolDetail;
@@ -334,6 +335,17 @@ export default function AddLiquidityModal({
                 ? "Small amount"
                 : "Add"}
         </button>
+        <div className="mt-6">
+          <Warn
+            text={`You are about to link your currently connected ${asset.ticker} and RUNE addresses to this liquidity position. Ensure that these are the addresses you want to own the position, as this cannot be changed later.`}
+            link="https://yieldi.gitbook.io/yieldi/basics/integrations#why-do-i-need-to-link-two-addresses-when-providing-liquidity-on-thorchain"
+          />
+        </div>
+        <div className="mt-6">
+          <Warn
+            text={`Liquidity added will be subject to a mandatory lockup period of ${(Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS) * 6) / 3600} hour. During this time, remove liquidity will be unavailable. Unlock time will be displayed in your position summary.`}
+          />
+        </div>
       </div>
     </>
   );

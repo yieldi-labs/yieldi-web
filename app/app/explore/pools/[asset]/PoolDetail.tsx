@@ -164,9 +164,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
             onRemove={() => handleRemove(position)}
             hideAddButton={true}
             hideStatus={true}
-            reasonToDisableAdd={null}
-            reasonToDisableRemove={null}
-            onCompletePosition={() => {}} // TODO: Complete this flow
+            onClickStatus={() => {}}
           />
         );
       });
@@ -263,7 +261,6 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
           <h2 className="my-2 md:mt-0 md:text-2xl font-medium md:mb-6 text-foreground font-gt-america-ext">
             YOUR POSITIONS
           </h2>
-
           <TranslucentCard className="p-2 md:p-6 rounded-2xl flex flex-col shadow-md relative">
             {showLoadingState && (
               <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl">

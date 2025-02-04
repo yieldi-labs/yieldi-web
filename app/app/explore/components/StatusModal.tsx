@@ -213,7 +213,7 @@ export default function StatusModal({
       );
     }
 
-    if (parsedRuneAmount > 0 && !runeWallet) {
+    if (isDualSided && parsedRuneAmount > 0 && !runeWallet) {
       missingWallets.push(assetFromString("THOR.RUNE")?.ticker as string);
     }
 

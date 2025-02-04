@@ -1,6 +1,8 @@
 import { getPools } from "@/midgard";
 import PoolsView from "./PoolsView";
 
+export const revalidate = 60;
+
 export default async function PoolsPage() {
   const [poolsData] = await Promise.all([
     getPools({
