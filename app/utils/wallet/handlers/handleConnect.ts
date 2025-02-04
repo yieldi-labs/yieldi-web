@@ -1,9 +1,15 @@
 import { getLedgerClient } from "../utxoClients/ledgerClients";
-import { ChainKey } from "../constants";
+import { ChainKey, WalletKey } from "../constants";
 import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
+import { getChainInfoFromChainString, switchEvmChain } from "@/utils/chain";
 
-export const connectWallet = async (wallet: any): Promise<any> => {
+export const connectWallet = async (wallet: {
+  id: string;
+  provider: any;
+  subchain?: string;
+  walletId: WalletKey;
+}): Promise<any> => {
   let accounts: any;
   let address = "";
 
@@ -29,7 +35,30 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         address: accounts[0],
       };
     case "xdefi-kujira":
-    case "xdefi-cosmos":
+    case "xdefi-cosmos": {
+      const chainId = wallet.subchain || "cosmoshub-4";
+
+      if (!wallet.provider) {
+        throw new Error("XDEFI Keplr provider not found");
+      }
+
+      // Enable the chain
+      await wallet.provider.enable(chainId);
+
+      // Get the offline signer
+      const offlineSigner = wallet.provider.getOfflineSigner(chainId);
+      const accounts = await offlineSigner.getAccounts();
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No Cosmos accounts found");
+      }
+
+      return {
+        provider: window.keplr, // Before conenct important Xdefi can overwrite the provider depends on user preferences so return window.ethereum
+        address: accounts[0].address,
+        offlineSigner,
+      };
+    }
     case "okx-cosmos": {
       const chainId = wallet.subchain || "cosmoshub-4";
 
@@ -49,7 +78,7 @@ export const connectWallet = async (wallet: any): Promise<any> => {
       }
 
       return {
-        provider: wallet.provider,
+        provider: window.keplr,
         address: accounts[0].address,
         offlineSigner,
       };
@@ -92,18 +121,24 @@ export const connectWallet = async (wallet: any): Promise<any> => {
     case "xdefi-avax":
     case "xdefi-bsc":
     case "xdefi-eth":
-    case "metamask-avax":
-    case "metamask-bsc":
-    case "metamask-eth":
-    case "vultisig-avax":
-    case "vultisig-bsc":
-    case "vultisig-eth":
-    case "phantom-avax":
-    case "phantom-bsc":
-    case "phantom-eth":
-    case "okx-avax":
-    case "okx-bsc":
-    case "okx-eth":
+    case "xdefi-base":
+      const [, chainIdentifier] = wallet.id.split("-");
+      const chain = getChainInfoFromChainString(chainIdentifier);
+
+      if (!chain) {
+        throw new Error(`Chain not found: ${chainIdentifier}`);
+      }
+
+      await switchEvmChain(wallet, chain.chainId as string);
+
+      const currentChainId = await wallet.provider.request({
+        method: "eth_chainId",
+      });
+
+      // Security measure to avoid sending a transaction through the wrong network
+      if (currentChainId.toLowerCase() !== chain.chainId?.toLowerCase()) {
+        throw new Error("Incorrect chain conection attempt");
+      }
       if (!wallet.provider.connect || wallet.provider.isConnected()) {
         let accounts = [];
         accounts = await wallet.provider.request({ method: "eth_accounts" });
@@ -117,11 +152,59 @@ export const connectWallet = async (wallet: any): Promise<any> => {
         const { accounts } = await wallet.provider.connect();
         address = accounts[0];
       }
-
       return {
-        provider: wallet.provider,
+        provider: window.ethereum, // Before conenct important Xdefi can overwrite the provider depends on user preferences so return window.ethereum
         address,
       };
+    case "metamask-avax":
+    case "metamask-bsc":
+    case "metamask-eth":
+    case "metamask-base":
+    case "phantom-avax":
+    case "phantom-bsc":
+    case "phantom-eth":
+    case "okx-avax":
+    case "okx-bsc":
+    case "okx-eth":
+    case "vultisig-avax":
+    case "vultisig-bsc":
+    case "vultisig-eth":
+    case "vultisig-base": {
+      const [, chainIdentifier] = wallet.id.split("-");
+      const chain = getChainInfoFromChainString(chainIdentifier);
+
+      if (!chain) {
+        throw new Error(`Chain not found: ${chainIdentifier}`);
+      }
+
+      await switchEvmChain(wallet, chain.chainId as string);
+
+      const currentChainId = await wallet.provider.request({
+        method: "eth_chainId",
+      });
+
+      // Security measure to avoid sending a transaction through the wrong network
+      if (currentChainId.toLowerCase() !== chain.chainId?.toLowerCase()) {
+        throw new Error("Incorrect chain conection attempt");
+      }
+      if (!wallet.provider.connect || wallet.provider.isConnected()) {
+        let accounts = [];
+        accounts = await wallet.provider.request({ method: "eth_accounts" });
+        if (accounts.length <= 0) {
+          accounts = await wallet.provider.request({
+            method: "eth_requestAccounts",
+          });
+        }
+        address = accounts[0];
+      } else {
+        const { accounts } = await wallet.provider.connect();
+        address = accounts[0];
+      }
+      return {
+        provider: wallet.provider, // Before conenct important Xdefi can overwrite the provider depends on user preferences so return window.ethereum
+        address,
+      };
+    }
     case "walletconnect-avax":
     case "walletconnect-bsc":
     case "walletconnect-eth":

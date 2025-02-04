@@ -27,7 +27,7 @@ async function waitForTransaction(
     const checkReceipt = async () => {
       try {
         const receipt = await infuraRequest(
-          wallet.chainType,
+          wallet.ChainInfo,
           "eth_getTransactionReceipt",
           [txHash],
         );
@@ -38,7 +38,7 @@ async function waitForTransaction(
             resolve(txHash);
           }
         } else {
-          setTimeout(checkReceipt, 1000);
+          setTimeout(checkReceipt, 8000);
         }
       } catch (error) {
         reject(error);
@@ -77,7 +77,7 @@ export function useContracts({
           args: [walletAddress, spender],
         });
 
-        const result = await infuraRequest(wallet.chainType, "eth_call", [
+        const result = await infuraRequest(wallet.ChainInfo, "eth_call", [
           {
             to: tokenAddress,
             data,
@@ -97,7 +97,7 @@ export function useContracts({
         return BigInt(0);
       }
     },
-    [tokenAddress, wallet.chainType, walletAddress],
+    [tokenAddress, wallet.ChainInfo, walletAddress],
   );
 
   const approveSpending = useCallback(
@@ -105,6 +105,7 @@ export function useContracts({
       spender: Address,
       asset: Address,
       assetDecimals: number,
+      chainId: string,
       amount: bigint = BigInt(constants.MaxUint256.toString()),
     ) => {
       if (!tokenAddress || !walletAddress) {
@@ -124,6 +125,7 @@ export function useContracts({
           amount: baseAmount(amount.toString(), assetDecimals),
           assetAddress: asset,
           data: data,
+          chainId,
         };
 
         const hash = await transferEvm(wallet, transferParams);
@@ -148,6 +150,7 @@ export function useContracts({
       amount: bigint,
       memo: string,
       expiration: bigint,
+      chainId: string,
     ) => {
       if (!walletAddress || !wallet.provider) {
         throw new Error("Wallet or provider not available");
@@ -166,6 +169,7 @@ export function useContracts({
           amount: baseAmount(amount.toString(), assetDecimals),
           assetAddress: asset,
           memo: memo,
+          chainId,
           data: data,
         };
 

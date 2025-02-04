@@ -12,31 +12,29 @@ import {
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
-import AddLiquidityModal from "@/app/explore/components/AddLiquidityModal";
 import RemoveLiquidityModal from "@/app/explore/components/RemoveLiquidityModal";
 import { TopCard } from "@/app/components/TopCard";
 import { useAppState } from "@/utils/contexts/context";
-import {
-  getChainKeyFromChain,
-  isSupportedChain,
-  parseAssetString,
-} from "@/utils/chain";
+import { getChainKeyFromChain, isSupportedChain } from "@/utils/chain";
 import { emptyPositionStats } from "@/hooks/usePositionStats";
 import PositionRow from "@/app/dashboard/components/PositionRow";
 import {
   Positions,
   PositionStats,
   PositionStatus,
-} from "@/hooks/dataTransformers/positionsTransformer";
+} from "@/utils/lp-monitor/parsePositions";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
+import { assetFromString } from "@xchainjs/xchain-util";
+import AddLiquidityManager, {
+  LpSteps,
+} from "../../components/AddLiquidityManager";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
-  runePriceUSD: number;
 }
 
-export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
-  const { walletsState, toggleWalletModal } = useAppState();
+export default function PoolDetail({ pool }: PoolDetailProps) {
+  const { walletsState, toggleWalletModal, midgardStats } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
@@ -44,13 +42,14 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     useState<PositionStats | null>(null);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   // Get chain from pool asset
-  const [assetChain] = parseAssetString(pool.asset);
-  const isChainSupported = isSupportedChain(assetChain);
-  const chainKey = getChainKeyFromChain(assetChain);
+  const asset = assetFromString(pool.asset);
+  const isChainSupported = isSupportedChain(asset?.chain || "");
+  const chainKey = getChainKeyFromChain(asset?.chain || "");
   const wallet =
     walletsState && walletsState[chainKey] ? walletsState![chainKey] : null;
 
   const { positions, isPending, error } = useLiquidityPositions();
+  const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0;
 
   useEffect(() => {
     if (!initialLoadComplete && !isPending) {
@@ -119,8 +118,8 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     !positions || !(positions as Positions)[pool.asset]
       ? emptyPositionStats()
       : [
-          (positions as Positions)[pool.asset].SLP,
-          (positions as Positions)[pool.asset].DLP,
+          (positions as Positions)[pool.asset].ASYM,
+          (positions as Positions)[pool.asset].SYM,
         ]
           .filter((position) => position !== null)
           .reduce((total, position) => {
@@ -143,6 +142,8 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
                 asset: total.gain.asset + position.gain.asset,
                 percentage: total.gain.percentage,
               },
+              pendingActions: total.pendingActions,
+              liquidityLockUpRemainingInSeconds: 0,
               pool: total.pool,
               memberDetails: total.memberDetails,
             };
@@ -157,12 +158,13 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         position = position as PositionStats;
         return (
           <PositionRow
-            key={position.memberDetails.liquidityUnits}
+            key={position.memberDetails?.liquidityUnits}
             position={position}
             onAdd={() => {}}
             onRemove={() => handleRemove(position)}
             hideAddButton={true}
             hideStatus={true}
+            onClickStatus={() => {}}
           />
         );
       });
@@ -200,7 +202,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         <div className="text-gray-700 font-medium text-lg mb-2">POSITIONS</div>
         {positions &&
           positions[pool.asset] &&
-          (positions[pool.asset].SLP || positions[pool.asset].DLP) && (
+          (positions[pool.asset].ASYM || positions[pool.asset].SYM) && (
             <>
               <div className="flex items-center w-full px-3 py-2 text-sm text-center">
                 <div className="py-3 md:w-1/5 w-1/2"></div>
@@ -259,7 +261,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           <h2 className="my-2 md:mt-0 md:text-2xl font-medium md:mb-6 text-foreground font-gt-america-ext">
             YOUR POSITIONS
           </h2>
-
           <TranslucentCard className="p-2 md:p-6 rounded-2xl flex flex-col shadow-md relative">
             {showLoadingState && (
               <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl">
@@ -284,10 +285,13 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
         )}
 
       {showAddLiquidityModal && (
-        <AddLiquidityModal
-          pool={pool}
-          runePriceUSD={runePriceUSD}
+        <AddLiquidityManager
+          initialStep={LpSteps.SELECT_OPTIONS}
           onClose={handleAddLiquidityClose}
+          stepData={{
+            pool: pool,
+            runePriceUSD: runePriceUSD,
+          }}
         />
       )}
 

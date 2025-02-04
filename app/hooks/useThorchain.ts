@@ -5,7 +5,6 @@ import {
   RUNE_DECIMAL,
 } from "@xchainjs/xchain-thorchain";
 import { assetToBase, assetAmount } from "@xchainjs/xchain-util";
-import { PoolDetail } from "@/midgard";
 import { WalletState } from "@/utils/interfaces";
 import { depositThorchain } from "@/utils/wallet/handlers/handleTransfer";
 
@@ -14,8 +13,6 @@ interface UseThorchainProps {
 }
 
 interface TransferParams {
-  pool: PoolDetail;
-  recipient: string;
   amount: number;
   memo?: string;
   feeRate?: number;
@@ -66,7 +63,7 @@ export function useThorchain({ wallet }: UseThorchainProps) {
       try {
         const from = wallet.address;
         const finalAmount = assetToBase(assetAmount(amount, RUNE_DECIMAL));
-        return depositThorchain(wallet, {
+        return await depositThorchain(wallet, {
           from: from,
           amount: finalAmount,
           memo,

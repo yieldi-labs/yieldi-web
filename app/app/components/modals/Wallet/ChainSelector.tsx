@@ -1,14 +1,13 @@
-import { cloneElement } from "react";
 import { UIComponents } from "@shared/components";
-import { ChainType } from "@/utils/interfaces";
+import { ChainInfo } from "@/utils/interfaces";
 import React from "react";
 import { useAppState } from "@/utils/contexts/context";
 import { isChainSupportedByWallet } from "@/utils/wallet/utils";
 
 interface ChainSelectorProps {
-  chains: ChainType[];
-  selectedChains: ChainType[];
-  onChainSelect: (chains: ChainType[]) => void;
+  chains: ChainInfo[];
+  selectedChains: ChainInfo[];
+  onChainSelect: (chains: ChainInfo[]) => void;
   blockUnselect: boolean;
   enableMultiselect: boolean;
 }
@@ -20,7 +19,7 @@ export function ChainSelector({
   enableMultiselect = true,
 }: ChainSelectorProps) {
   const { selectedChains, selectedWallet } = useAppState();
-  const handleSelect = (chainKey: ChainType) => {
+  const handleSelect = (chainKey: ChainInfo) => {
     if (!enableMultiselect) {
       onChainSelect([chainKey]);
     } else {
@@ -61,10 +60,8 @@ export function ChainSelector({
               !isChainSupportedByWallet(chain, selectedWallet) && !blockUnselect
             }
           >
-            <UIComponents.Tooltip text={chain.name}>
-              {React.isValidElement(chain.icon)
-                ? cloneElement(chain.icon)
-                : null}
+            <UIComponents.Tooltip content={<>{chain.name}</>}>
+              <chain.icon />
             </UIComponents.Tooltip>
           </button>
         ))}

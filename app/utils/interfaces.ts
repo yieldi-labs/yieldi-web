@@ -1,4 +1,9 @@
-import { ChainKey, ProviderKey, WalletKey } from "@/utils/wallet/constants";
+import {
+  ChainKey,
+  ProviderKey,
+  ThorchainIdentifiers,
+  WalletKey,
+} from "@/utils/wallet/constants";
 import { SVGProps } from "react";
 
 export type TokenData = {
@@ -15,40 +20,11 @@ export type TokenData = {
 export type TokenRecord = Record<string, TokenData>;
 export type WalletTokensData = Record<ChainKey, TokenRecord>;
 
-export interface WalletOption {
-  id: string;
-  name: string;
-  icon: JSX.Element;
-  connect?: any;
-  downloadUrl?: string;
-  disabled?: boolean;
-}
-
-export interface ChainConfig {
-  id: string;
-  chainId?: number;
-  name: string;
-  icon: JSX.Element;
-  wallets: WalletOption[];
-}
-
-export interface LiquidityProvider {
-  rune_address?: string;
-  asset_address?: string;
-  last_add_height: number;
-  last_withdraw_height?: number;
-  units: string;
-  pending_rune: string;
-  pending_asset: string;
-  rune_deposit_value: string;
-  asset_deposit_value: string;
-}
-
 export interface WalletState {
   provider: any;
   address: string;
   providerType: ProviderKey;
-  chainType: ChainKey;
+  ChainInfo: ChainKey;
   walletId: WalletKey;
 }
 
@@ -72,13 +48,35 @@ export interface WalletType {
   };
 }
 
-export interface ChainType {
-  icon: SVGProps<SVGSVGElement>;
+export interface AddChainRequestPayload {
+  chainId: string;
+  chainName: string;
+  rpcUrls: string[];
+  iconUrls: string[];
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+  blockExplorerUrls: string[];
+}
+
+export enum ChainType {
+  EVM = "EVM",
+  UTXO = "UTXO",
+  BFT = "BFT",
+}
+
+export interface ChainInfo {
+  icon: (props: SVGProps<SVGSVGElement>) => React.JSX.Element;
   name: ChainKey;
   providerType: ProviderKey;
   chainId?: string;
-  thorchainIdentifier: string;
+  thorchainIdentifier: ThorchainIdentifiers;
   nativeAsset: string;
+  nativeDecimals: number;
   addressUrl: string;
   ctrlChainId: string;
+  type: ChainType;
+  addChainRequestPayload?: AddChainRequestPayload;
 }

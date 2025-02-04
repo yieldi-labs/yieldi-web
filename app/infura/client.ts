@@ -4,6 +4,7 @@ const INFURA_ENDPOINTS: Partial<Record<ChainKey, string>> = {
   [ChainKey.AVALANCHE]: process.env.NEXT_PUBLIC_AVALANCHE_RPC_URL as string,
   [ChainKey.ETHEREUM]: process.env.NEXT_PUBLIC_ETHEREUM_RPC_URL as string,
   [ChainKey.BSCCHAIN]: process.env.NEXT_PUBLIC_BSCCHAIN_RPC_URL as string,
+  [ChainKey.BASE]: process.env.NEXT_PUBLIC_BASE_RPC_URL as string,
 };
 
 export async function infuraRequest(

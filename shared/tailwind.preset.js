@@ -20,7 +20,7 @@ module.exports = {
           100: "#F5F6F6",
           700: "#585E62",
           800: "#424648",
-          900: "#3A3D3F",
+          900: "#4E4846",
         },
         background: "var(--background)",
         foreground: "var(--foreground)",
@@ -32,6 +32,11 @@ module.exports = {
         highlight: "#A1FD59",
         secondaryBtn: "#627EEA",
         red: "#ff6656",
+        warn: {
+          DEFAULT: "#FFD737", 
+          dark: "#F09242",
+          light: "#FFD73733"
+        },
         blue: {
           DEFAULT: "#627EEA",
           100: "#627EEA26"

@@ -3,21 +3,15 @@ import { defaultBTCParams } from "@xchainjs/xchain-bitcoin";
 import { defaultDogeParams } from "@xchainjs/xchain-doge";
 import { defaultLtcParams } from "@xchainjs/xchain-litecoin";
 import { Network } from "@xchainjs/xchain-client";
-import {
-  assetToBase,
-  assetAmount,
-  assetFromString,
-  Asset,
-} from "@xchainjs/xchain-util";
-import { PoolDetail } from "@/midgard";
+import { assetToBase, assetAmount, Asset } from "@xchainjs/xchain-util";
 import { WalletState } from "@/utils/interfaces";
 import { transferUTXO } from "@/utils/wallet/handlers/handleTransfer";
 import { defaultBchParams } from "@xchainjs/xchain-bitcoincash";
 import { getClient } from "@/utils/wallet/utxoClients/clients";
-type UTXOChain = "BTC" | "DOGE" | "LTC" | "BCH";
+import { ThorchainIdentifiers } from "@/utils/wallet/constants";
 
 interface UseUTXOProps {
-  chain: UTXOChain;
+  chain: ThorchainIdentifiers | null;
   wallet?: WalletState | null;
 }
 
@@ -28,7 +22,8 @@ interface UTXOMetadata {
 }
 
 interface TransferParams {
-  pool: PoolDetail;
+  asset: Asset;
+  assetDecimals: number;
   recipient: string;
   amount: number;
   memo?: string;
@@ -47,19 +42,19 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
     network: Network.Mainnet,
     explorerUrl: (() => {
       switch (chain) {
-        case "BTC":
+        case ThorchainIdentifiers.BTC:
           return defaultBTCParams.explorerProviders[
             Network.Mainnet
           ].getExplorerUrl();
-        case "DOGE":
+        case ThorchainIdentifiers.DOGE:
           return defaultDogeParams.explorerProviders[
             Network.Mainnet
           ].getExplorerUrl();
-        case "LTC":
+        case ThorchainIdentifiers.LTC:
           return defaultLtcParams.explorerProviders[
             Network.Mainnet
           ].getExplorerUrl();
-        case "BCH":
+        case ThorchainIdentifiers.BCH:
           return defaultBchParams.explorerProviders[
             Network.Mainnet
           ].getExplorerUrl();
@@ -91,7 +86,8 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   // Transfer using wallet provider
   const transfer = useCallback(
     async ({
-      pool,
+      asset,
+      assetDecimals,
       recipient,
       amount,
       memo = "",
@@ -107,9 +103,7 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       try {
         const fees = feeRate || (await getFees()).fastest;
         const from = wallet.address;
-        const nativeDecimal = parseInt(pool.nativeDecimal);
-        const finalAmount = assetToBase(assetAmount(amount, nativeDecimal));
-        const asset = assetFromString(pool.asset);
+        const finalAmount = assetToBase(assetAmount(amount, assetDecimals));
         if (!asset) {
           throw Error("Invalid asset");
         }
@@ -146,12 +140,14 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   // Add liquidity to a pool using transfer
   const addLiquidity = useCallback(
     async ({
-      pool,
+      asset,
+      assetDecimals,
       vault,
       amount,
       memo,
     }: {
-      pool: PoolDetail;
+      asset: Asset;
+      assetDecimals: number;
       vault: string;
       amount: number;
       memo: string;
@@ -163,7 +159,8 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       try {
         const fees = await getFees();
         const txHash = await transfer({
-          pool,
+          asset,
+          assetDecimals,
           recipient: vault,
           amount,
           memo,
@@ -183,12 +180,14 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
   // Remove liquidity from a pool using transfer
   const removeLiquidity = useCallback(
     async ({
-      pool,
+      asset,
+      assetDecimals,
       vault,
       amount,
       memo,
     }: {
-      pool: PoolDetail;
+      asset: Asset;
+      assetDecimals: number;
       vault: string;
       amount: number;
       memo: string;
@@ -199,7 +198,8 @@ export function useUTXO({ chain, wallet }: UseUTXOProps) {
       try {
         const fees = await getFees();
         const result = await transfer({
-          pool,
+          asset,
+          assetDecimals,
           recipient: vault,
           amount,
           memo,

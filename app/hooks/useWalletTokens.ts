@@ -25,6 +25,7 @@ const initialWalletTokensData: WalletTokensData = {
   [ChainKey.GAIACHAIN]: {},
   [ChainKey.LITECOIN]: {},
   [ChainKey.THORCHAIN]: {},
+  [ChainKey.BASE]: {},
 };
 
 export const useWalletTokens = (walletsState: ConnectedWalletsState) => {

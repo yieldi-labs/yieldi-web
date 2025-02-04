@@ -8,10 +8,12 @@ import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
 import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
 import { AssetRuneNative, RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
+import { switchEvmChain } from "@/utils/chain";
 
 export interface TransactionEvmParams extends TransactionParams {
   data: `0x${string}`;
   assetAddress: `0x${string}`;
+  chainId: string;
 }
 
 interface TransactionParams extends DepositParams {
@@ -123,16 +125,16 @@ export const transferUTXO = async (
         return txHash;
       case WalletKey.LEDGER:
         const ledgerClient = getLedgerClient(
-          wallet.chainType as UTXOChain,
+          wallet.ChainInfo as UTXOChain,
           wallet.provider,
         );
-        const btcHash = await ledgerClient.transfer({
+        const utxoHash = await ledgerClient.transfer({
           amount: transferParams.amount,
           recipient: transferParams.recipient,
           memo: transferParams.memo,
           feeRate: transferParams.feeRate,
         });
-        return btcHash;
+        return utxoHash;
       default:
         throw Error(`Unknown walletId UTXO transfer: ${wallet.walletId}`);
     }
@@ -147,10 +149,9 @@ export const depositThorchain = async (
   transferParams: DepositParams,
 ): Promise<string> => {
   switch (wallet.walletId) {
-    case WalletKey.VULTISIG:
     case WalletKey.CTRL:
     case WalletKey.LEDGER:
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<string>(async (resolve, reject) => {
         const depositParams = {
           asset: AssetRuneNative,
           from: transferParams.from,
@@ -160,7 +161,7 @@ export const depositThorchain = async (
           },
           memo: transferParams.memo,
         };
-        wallet.provider.request(
+        await wallet.provider.request(
           {
             method: "deposit",
             params: [depositParams],
@@ -174,6 +175,23 @@ export const depositThorchain = async (
           },
         );
       });
+    case WalletKey.VULTISIG:
+      const depositParams = {
+        from: transferParams.from,
+        value: transferParams.amount.amount().toString(),
+        memo: transferParams.memo,
+      };
+      const result = "";
+      try {
+        const result = await wallet.provider.request({
+          method: "deposit_transaction",
+          params: [depositParams],
+        });
+        return result;
+      } catch (e) {
+        console.error("deposit error", e);
+      }
+      return result;
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }
@@ -247,6 +265,20 @@ export const transferEvm = async (
     case WalletKey.PHANTOM:
     case WalletKey.VULTISIG:
     case WalletKey.WALLETCONNECT:
+      await switchEvmChain(wallet, transferParams.chainId as string);
+
+      const currentChainId = await wallet.provider.request({
+        method: "eth_chainId",
+      });
+
+      // Security measure to avoid sending a transaction through the wrong network
+      if (
+        currentChainId.toLowerCase() !== transferParams.chainId.toLowerCase()
+      ) {
+        throw new Error("Incorrect chain broadcast attempt");
+      }
+
+      // TODO: Enserue chainId before proceed
       const txHash = await wallet.provider.request({
         method: "eth_sendTransaction",
         params: [
@@ -264,7 +296,7 @@ export const transferEvm = async (
       });
       return txHash;
     case WalletKey.LEDGER:
-      const client = getEvmLedgerClient(wallet.chainType, wallet.provider);
+      const client = getEvmLedgerClient(wallet.ChainInfo, wallet.provider);
       const gasLimit = await client.estimateGasLimit({
         recipient: transferParams.recipient,
         amount: transferParams.amount,

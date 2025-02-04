@@ -5,23 +5,25 @@ import Modal from "@/app/modal";
 import { PoolDetail as IPoolDetail, MemberPool } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
+  DECIMALS,
+  disableDueTooSmallAmount,
   getAssetShortSymbol,
   getLogoPath,
-  getPositionDetails,
 } from "@/app/utils";
 import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
 import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
-import { getChainKeyFromChain, parseAssetString } from "@/utils/chain";
+import { getChainKeyFromChain } from "@/utils/chain";
 import {
   PositionStatus,
   PositionType,
-} from "@/hooks/dataTransformers/positionsTransformer";
+} from "@/utils/lp-monitor/parsePositions";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { Slider } from "@shared/components/ui";
 import AssetInput from "./AssetInput";
 import ToggleButtonGroup from "./ToggleButtonGroup";
+import { assetFromString } from "@xchainjs/xchain-util";
 
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;
@@ -37,7 +39,7 @@ enum WithdrawalType {
   ALL_ASSET = "ALL_ASSET",
 }
 
-const DECIMALS = {
+const DECIMAL_FORMATS = {
   PERCENTAGE: 2,
   USD: 2,
   ASSET: 6,
@@ -53,11 +55,9 @@ export default function RemoveLiquidityModal({
   const { error: liquidityError, removeLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState } = useAppState();
-  const [assetChain] = useMemo(
-    () => parseAssetString(pool.asset),
-    [pool.asset],
-  );
+  const { toggleWalletModal, walletsState, mimirParameters } = useAppState();
+
+  const asset = assetFromString(pool.asset);
 
   const { positions, markPositionAsPending } = useLiquidityPositions();
   const [assetAmount, setAssetAmount] = useState("");
@@ -70,14 +70,20 @@ export default function RemoveLiquidityModal({
     null,
   );
   const [withdrawalType, setWithdrawalType] = useState<WithdrawalType>(
-    positionType === PositionType.SLP
+    positionType === PositionType.ASYM
       ? WithdrawalType.ALL_ASSET
       : WithdrawalType.SPLIT,
   );
-  const chainKey = getChainKeyFromChain(assetChain);
+  const chainKey = getChainKeyFromChain(asset?.chain || "");
   const selectedWallet = walletsState![chainKey];
-  const { assetAdded: positionAssetAmount, runeAdded: positionRuneAmount } =
-    getPositionDetails(position);
+
+  const userShare = new BigNumber(position.liquidityUnits).div(pool.units);
+  const positionAssetAmount = new BigNumber(pool.assetDepth)
+    .div(DECIMALS)
+    .times(userShare);
+  const positionRuneAmount = new BigNumber(pool.runeDepth)
+    .div(DECIMALS)
+    .times(userShare);
 
   const assetDepth = parseInt(pool.assetDepth);
   const runeDepth = parseInt(pool.runeDepth);
@@ -85,12 +91,12 @@ export default function RemoveLiquidityModal({
 
   const assetUsdValue = new BigNumber(assetAmount || 0)
     .times(pool.assetPriceUSD)
-    .decimalPlaces(DECIMALS.USD)
+    .decimalPlaces(DECIMAL_FORMATS.USD)
     .toNumber();
 
   const runeUsdValue = new BigNumber(runeAmount || 0)
     .times(runePriceUSD)
-    .decimalPlaces(DECIMALS.USD)
+    .decimalPlaces(DECIMAL_FORMATS.USD)
     .toNumber();
 
   const posAssetAmount = useMemo(
@@ -227,11 +233,10 @@ export default function RemoveLiquidityModal({
     try {
       setIsSubmitting(true);
 
-      const asset =
-        positionType === PositionType.SLP ? pool.asset : "THOR.RUNE";
+      const assetId =
+        positionType === PositionType.ASYM ? pool.asset : "THOR.RUNE";
       const hash = await removeLiquidity({
-        asset,
-        assetDecimals: Number(pool.nativeDecimal),
+        assetIdToStartAction: assetId,
         percentage,
         address: selectedWallet.address,
         withdrawAsset:
@@ -243,7 +248,7 @@ export default function RemoveLiquidityModal({
       });
 
       if (hash) {
-        if (positionType === PositionType.SLP) {
+        if (positionType === PositionType.ASYM) {
           setAssetTxHash(hash);
         } else {
           setRuneTxHash(hash);
@@ -292,9 +297,12 @@ export default function RemoveLiquidityModal({
 
     return (
       <TransactionConfirmationModal
-        position={positions[pool.asset][positionType]!}
-        assetHash={assetTxHash}
-        runeHash={runeTxHash}
+        stepData={{
+          pool,
+          positionType,
+          assetHash: assetTxHash,
+          runeHash: runeTxHash,
+        }}
         onClose={() => {
           setAssetTxHash(null);
           setRuneTxHash(null);
@@ -331,6 +339,12 @@ export default function RemoveLiquidityModal({
       ? new BigNumber(runeBalance).times(new BigNumber(runePriceUSD)).toNumber()
       : posRuneUsdValue.toNumber();
 
+  const isDisableDueTooSmallAmount = disableDueTooSmallAmount(
+    Number(mimirParameters?.MINIMUML1OUTBOUNDFEEUSD || 0),
+    assetUsdValue,
+    runeUsdValue,
+  );
+
   return (
     <Modal onClose={() => onClose(false)} title="Remove">
       <div className="p-2 w-m">
@@ -339,7 +353,7 @@ export default function RemoveLiquidityModal({
         )}
 
         {/* Withdrawal Options */}
-        {positionType === PositionType.DLP && (
+        {positionType === PositionType.SYM && (
           <ToggleButtonGroup
             options={[
               { label: `${assetSymbol} + RUNE`, value: WithdrawalType.SPLIT },
@@ -360,8 +374,8 @@ export default function RemoveLiquidityModal({
             assetSymbol={assetSymbol}
             assetUsdValue={assetUsdValue}
             logoPath={getLogoPath(pool.asset)}
-            assetDecimalScale={DECIMALS.ASSET}
-            usdDecimalScale={DECIMALS.USD}
+            assetDecimalScale={DECIMAL_FORMATS.ASSET}
+            usdDecimalScale={DECIMAL_FORMATS.USD}
             assetBalance={assetBalance}
             usdBalance={assetUsdBalance}
           />
@@ -376,8 +390,8 @@ export default function RemoveLiquidityModal({
             assetSymbol="RUNE"
             assetUsdValue={runeUsdValue}
             logoPath={getLogoPath("THOR.RUNE")}
-            assetDecimalScale={DECIMALS.ASSET}
-            usdDecimalScale={DECIMALS.USD}
+            assetDecimalScale={DECIMAL_FORMATS.ASSET}
+            usdDecimalScale={DECIMAL_FORMATS.USD}
             assetBalance={runeBalance}
             usdBalance={runeUsdBalance}
           />
@@ -415,10 +429,14 @@ export default function RemoveLiquidityModal({
 
         <button
           onClick={handleRemoveLiquidity}
-          disabled={!isEnabled()}
+          disabled={!isEnabled() || isDisableDueTooSmallAmount}
           className="w-full bg-red text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? "Submitting Transaction..." : "Remove"}
+          {isSubmitting
+            ? "Submitting Transaction..."
+            : isDisableDueTooSmallAmount
+              ? "Small amount"
+              : "Remove"}
         </button>
       </div>
     </Modal>

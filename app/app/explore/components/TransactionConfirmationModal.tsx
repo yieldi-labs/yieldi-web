@@ -1,14 +1,19 @@
 import Loader from "@/app/components/Loader";
 import Modal from "@/app/modal";
+import { PoolDetail } from "@/midgard";
+import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import {
-  PositionStats,
   PositionStatus,
-} from "@/hooks/dataTransformers/positionsTransformer";
+  PositionType,
+} from "@/utils/lp-monitor/parsePositions";
 
 interface TransactionConfirmationModalProps {
-  position: PositionStats;
-  assetHash?: string | null;
-  runeHash?: string | null;
+  stepData: {
+    pool: PoolDetail;
+    positionType: PositionType;
+    assetHash?: string | null;
+    runeHash?: string | null;
+  };
   onClose: () => void;
 }
 
@@ -47,12 +52,21 @@ const ExplorerLink = ({ url, text }: ExplorerLinkProps) => {
 };
 
 export default function TransactionConfirmationModal({
-  position,
-  assetHash,
-  runeHash,
+  stepData,
   onClose,
 }: TransactionConfirmationModalProps) {
-  if (!position || !position.pool) return null;
+  const { positions } = useLiquidityPositions();
+
+  if (
+    !positions ||
+    !positions[stepData.pool.asset] ||
+    !positions[stepData.pool.asset][stepData.positionType]
+  ) {
+    return null;
+  }
+
+  const position = positions[stepData.pool.asset][stepData.positionType];
+
   const chainName = position ? position.assetId.split(".")[0] : "";
 
   const createExplorerLinks = (hash: string | null, chainName: string) => {
@@ -71,8 +85,12 @@ export default function TransactionConfirmationModal({
   };
 
   const links = {
-    asset: assetHash ? createExplorerLinks(assetHash, chainName) : [],
-    rune: runeHash ? createExplorerLinks(runeHash, "Rune") : [],
+    asset: stepData.assetHash
+      ? createExplorerLinks(stepData.assetHash, chainName)
+      : [],
+    rune: stepData.runeHash
+      ? createExplorerLinks(stepData.runeHash, "Rune")
+      : [],
   };
 
   return (
@@ -113,8 +131,12 @@ export default function TransactionConfirmationModal({
         </div>
 
         <div className="mt-4 text-sm text-gray-500 truncate max-w-full">
-          {assetHash && <p>{`${chainName} Transaction Hash: ${assetHash}`}</p>}
-          {runeHash && <p>{`Rune Transaction Hash: ${runeHash}`}</p>}
+          {stepData.assetHash && (
+            <p>{`${chainName} Transaction Hash: ${stepData.assetHash}`}</p>
+          )}
+          {stepData.runeHash && (
+            <p>{`Rune Transaction Hash: ${stepData.runeHash}`}</p>
+          )}
         </div>
       </div>
     </Modal>

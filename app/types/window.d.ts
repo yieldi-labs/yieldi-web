@@ -14,12 +14,14 @@ declare global {
     };
     phantom?: any;
     okxwallet?: any;
+    keplr?: any;
     vultisig?: {
       ethereum?: any;
       thorchain?: any;
       cosmos?: any;
     };
     thorchain?: any;
+    ctrlEthProviders?: Record<string, any>;
   }
 }
 

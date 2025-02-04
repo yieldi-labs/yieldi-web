@@ -2,30 +2,6 @@ import { MemberPool, PoolDetail } from "@/midgard";
 import { CHAINS } from "@/utils/wallet/constants";
 import { assetFromString } from "@xchainjs/xchain-util";
 
-export enum SupportedChain {
-  Avalanche = "AVAX",
-  BinanceSmartChain = "BSC",
-  Bitcoin = "BTC",
-  BitcoinCash = "BCH",
-  Cosmos = "GAIA",
-  Dogecoin = "DOGE",
-  Ethereum = "ETH",
-  Litecoin = "LTC",
-  // Maya = "MAYA",
-  // Optimism = "OP",
-  // Polkadot = "DOT",
-  // Chainflip = "FLIP",
-  // Polygon = "MATIC",
-  // Radix = "XRD",
-  THORChain = "THOR",
-  // Solana = "SOL",
-}
-
-export function formatAddress(a: undefined | null | string) {
-  if (!a) return "-";
-  return a.slice(0, 6) + "…" + a.slice(-4);
-}
-
 export function formatNumber(
   amount: string | number,
   decimals = 8,
@@ -43,6 +19,9 @@ export function formatNumber(
 }
 
 export const addDollarSignAndSuffix = (value: number) => {
+  if (value === 0) {
+    return "-";
+  }
   if (value >= 1e6) {
     return `$${formatNumber(value / 1e6, 2, 2)}M`;
   } else if (value >= 1e3) {
@@ -100,12 +79,16 @@ export const getLogoPath = (asset: string): string => {
   return `https://storage.googleapis.com/token-list-swapkit-dev/images/${assetLower}.png`;
 };
 
-export const getNetworkLogoPath = (assetString: string): string => {
+export const getNetworkLogoPath = (assetString: string) => {
   const asset = assetFromString(assetString);
   const chain = CHAINS.find(
-    (chain) => chain.thorchainIdentifier === asset?.chain.toLowerCase(),
+    (chain) =>
+      chain.thorchainIdentifier.toLowerCase() === asset?.chain.toLowerCase(),
   );
-  return `https://storage.googleapis.com/token-list-swapkit-dev/images/${chain?.thorchainIdentifier}.${chain?.nativeAsset}.png`;
+  if (!chain) {
+    throw `Chain not found for asset ${assetString}`;
+  }
+  return chain.icon;
 };
 
 export const getAssetCanonicalSymbol = (asset: string) => {
@@ -163,4 +146,18 @@ export const getPositionDetails = (position: MemberPool): PositionDetails => {
     assetAdded,
     runeAdded,
   };
+};
+
+export const disableDueTooSmallAmount = (
+  currentMinOutboundFee: number,
+  usdAssetAmount: number,
+  usdRuneAmount: number,
+): boolean => {
+  const MIN_OUTBOUND_FEE_MULTIPLIER = 3; // Random multiplier to stay sage despite of refund or other things happen. Real calcs are more complex than that. https://dev.thorchain.org/concepts/fees.html#outbound-fee
+  const minOutboundInDollars = currentMinOutboundFee / 10e7;
+  const totalAmountInDollarsOfAction = usdAssetAmount + usdRuneAmount;
+  return (
+    minOutboundInDollars * MIN_OUTBOUND_FEE_MULTIPLIER >
+    totalAmountInDollarsOfAction
+  );
 };

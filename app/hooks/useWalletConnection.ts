@@ -1,17 +1,12 @@
 "use client";
+import { ChainKey, ProviderKey, WalletKey } from "@/utils/wallet/constants";
 import {
-  ChainKey,
-  CHAINS,
-  ProviderKey,
-  WalletKey,
-} from "@/utils/wallet/constants";
-import {
-  ChainType,
+  ChainInfo,
   ConnectedWalletsState,
   WalletType,
 } from "@/utils/interfaces";
-import { useCallback } from "react";
 import { useAppState } from "@/utils/contexts/context";
+import { getWalletId } from "@/utils/chain";
 
 export function useWalletConnection() {
   const { setWalletsState, toggleWalletModal, selectedChains, walletsState } =
@@ -19,7 +14,7 @@ export function useWalletConnection() {
 
   const handleProviderConnection = async (
     wallet: WalletType,
-    chain: ChainType,
+    chain: ChainInfo,
   ) => {
     if (!wallet.chainConnect[chain.providerType]) {
       throw new Error(`Chain ${chain.name} Not Supported!`);
@@ -45,57 +40,20 @@ export function useWalletConnection() {
     prevState: ConnectedWalletsState,
     walletId: WalletKey,
     providerType: ProviderKey,
-    chainType: ChainKey,
+    ChainInfo: ChainKey,
     provider: any,
     address: string,
   ): ConnectedWalletsState => {
     return {
       ...prevState,
-      [chainType]: {
+      [ChainInfo]: {
         provider,
         walletId,
         address,
-        chainType,
+        ChainInfo,
         providerType,
       },
     };
-  };
-
-  const saveNetworkAddressToLocalStorage = (
-    chainKey: ChainKey,
-    address: string,
-  ) => {
-    if (typeof window !== "undefined" && localStorage) {
-      localStorage.setItem(`wallet-${chainKey}-address`, address);
-    }
-  };
-
-  const getNetworkAddressFromLocalStorage = (chainKey: ChainKey) => {
-    if (typeof window !== "undefined" && localStorage) {
-      return localStorage.getItem(`wallet-${chainKey}-address`);
-    }
-    return null;
-  };
-
-  const getAllNetworkAddressesFromLocalStorage = useCallback((): string[] => {
-    const addresses: string[] = [];
-    if (typeof window !== "undefined" && localStorage) {
-      for (const config of CHAINS) {
-        const address = localStorage.getItem(
-          `wallet-${config.thorchainIdentifier}-address`,
-        );
-        if (!address) continue;
-        addresses.push(address);
-      }
-    }
-    return addresses;
-  }, []);
-
-  const hasThorAddressInLocalStorage = () => {
-    if (typeof window !== "undefined" && localStorage) {
-      return !!localStorage.getItem(`wallet-${ChainKey.THORCHAIN}-address`);
-    }
-    return false;
   };
 
   const handleConnect = async (wallet: WalletType) => {
@@ -113,10 +71,9 @@ export function useWalletConnection() {
       }
       const connection = await handleProviderConnection(wallet, chain);
       if (!connection || !connection.address) continue;
-      saveNetworkAddressToLocalStorage(chain.name, connection.address);
       newWalletState = updateWalletState(
         newWalletState,
-        wallet.id,
+        getWalletId(chain, connection.provider, wallet.id), // Before conenct important Xdefi can overwrite the provider depends on user preferences so return window.ethereum
         chain.providerType,
         chain.name,
         connection.provider,
@@ -130,8 +87,5 @@ export function useWalletConnection() {
 
   return {
     handleConnect,
-    getNetworkAddressFromLocalStorage,
-    getAllNetworkAddressesFromLocalStorage,
-    hasThorAddressInLocalStorage,
   };
 }
