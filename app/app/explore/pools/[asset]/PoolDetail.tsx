@@ -31,11 +31,10 @@ import AddLiquidityManager, {
 
 interface PoolDetailProps {
   pool: IPoolDetail;
-  runePriceUSD: number;
 }
 
-export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
-  const { walletsState, toggleWalletModal } = useAppState();
+export default function PoolDetail({ pool }: PoolDetailProps) {
+  const { walletsState, toggleWalletModal, midgardStats } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
@@ -50,6 +49,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
     walletsState && walletsState[chainKey] ? walletsState![chainKey] : null;
 
   const { positions, isPending, error } = useLiquidityPositions();
+  const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0;
 
   useEffect(() => {
     if (!initialLoadComplete && !isPending) {
@@ -164,8 +164,7 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
             onRemove={() => handleRemove(position)}
             hideAddButton={true}
             hideStatus={true}
-            reasonToDisableAdd={null}
-            reasonToDisableRemove={null}
+            onClickStatus={() => {}}
           />
         );
       });
@@ -262,7 +261,6 @@ export default function PoolDetail({ pool, runePriceUSD }: PoolDetailProps) {
           <h2 className="my-2 md:mt-0 md:text-2xl font-medium md:mb-6 text-foreground font-gt-america-ext">
             YOUR POSITIONS
           </h2>
-
           <TranslucentCard className="p-2 md:p-6 rounded-2xl flex flex-col shadow-md relative">
             {showLoadingState && (
               <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl">

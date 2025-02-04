@@ -8,20 +8,31 @@ import { PoolDetail } from "@/midgard";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import Loader from "../components/Loader";
 import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
+import Image from "next/image";
 import {
   Positions,
   PositionStats,
+  PositionStatus,
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import AddLiquidityManager, {
   LpSteps,
 } from "../explore/components/AddLiquidityManager";
+import { StatusStepData } from "../explore/components/StatusModal";
+import { baseAmount, baseToAsset } from "@xchainjs/xchain-util";
+import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
+import { AddLiquidityStepData } from "../explore/components/AddLiquidityModal";
+import { useAppState } from "@/utils/contexts/context";
+import { Tooltip } from "@shared/components/ui";
 
-interface DashboardViewProps {
-  runePriceUSD: number;
-}
-
-export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
+export default function DashboardView() {
+  const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{
+    initialStep: LpSteps;
+    stepData: StatusStepData | AddLiquidityStepData | null;
+  }>({
+    initialStep: LpSteps.SELECT_OPTIONS,
+    stepData: null,
+  });
   const [selectedPool, setSelectedPool] = useState<PoolDetail | null>(null);
   const [selectedPosition, setSelectedPosition] =
     useState<PositionStats | null>(null);
@@ -30,6 +41,9 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
   const { positions, pools, isPending } = useLiquidityPositions();
+  const { midgardStats } = useAppState();
+
+  const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0; // TODO: Loading state
 
   const allPositionsArray =
     (positions &&
@@ -81,7 +95,34 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
         </div>
       </div>
       <div className="flex flex-col">
-        <h2 className={titleStyle}>Your positions</h2>
+        <div className="flex align-center">
+          <h2 className={titleStyle}>Your positions</h2>
+          <Tooltip
+            content={
+              <p className="w-[300px]">
+                If you can’t find your liquidity position, make sure you are
+                connected with both addresses used during the initial deposit.
+                <a
+                  href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-cant-i-find-my-dual-chain-liquidity-position-in-yieldi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline pl-1"
+                >
+                  Learn why
+                </a>
+              </p>
+            }
+          >
+            <Image
+              src="/help.svg"
+              alt="settings"
+              className="rounded-full ml-2 mt-1 cursor-pointer"
+              width={24}
+              height={24}
+              onClick={() => {}}
+            />
+          </Tooltip>
+        </div>
         <div className="w-2/3 text-neutral-800 text-sm font-normal leading-tight mb-7">
           Manage your active positions and track your earnings.
         </div>
@@ -92,13 +133,87 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
         ) : (
           <PositionsList
             positions={allPositionsArray}
+            onClickStatus={(assetId: string, type: PositionType) => {
+              const pool = pools?.find((pool) => pool.asset === assetId);
+              const position = (positions as Positions)[assetId][type];
+              if (!position || !pool) {
+                throw Error("Position or pool not found");
+              }
+              switch (position.status) {
+                case PositionStatus.LP_POSITION_COMPLETE:
+                case PositionStatus.LP_POSITION_DEPOSIT_PENDING:
+                case PositionStatus.LP_POSITION_WITHDRAWAL_PENDING:
+                  window.open(
+                    `https://thorchain.net/address/${position.memberDetails?.assetAddress}?tab=lps`,
+                    "_blank",
+                  );
+                  break;
+                case PositionStatus.LP_POSITION_INCOMPLETE:
+                  const assetPriceUSD = parseFloat(pool.assetPriceUSD);
+
+                  const assetAmount = baseToAsset(
+                    baseAmount(position.memberDetails?.assetPending, 8),
+                  );
+                  const runeAmount = baseToAsset(
+                    baseAmount(position.memberDetails?.runePending, 8),
+                  );
+
+                  const valueOfPendingAssetInUsd =
+                    assetAmount.times(assetPriceUSD);
+                  const valueOfPendingRuneInUsd =
+                    runeAmount.times(runePriceUSD);
+
+                  const amountOfAssetToDeposit =
+                    valueOfPendingRuneInUsd.div(assetPriceUSD);
+                  const amountOfRuneToDeposit =
+                    valueOfPendingAssetInUsd.div(runePriceUSD);
+
+                  const requiredSteps =
+                    position.memberDetails?.assetPending === "0"
+                      ? [
+                          LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET,
+                          LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET,
+                        ]
+                      : [LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE];
+                  setAddLiquidityProcessState({
+                    initialStep: LpSteps.HANDLE_STATE,
+                    stepData: {
+                      pool,
+                      assetAmount: amountOfAssetToDeposit,
+                      assetUsdAmount: valueOfPendingRuneInUsd
+                        .amount()
+                        .toNumber(),
+                      runeAmount: amountOfRuneToDeposit,
+                      runeUsdAmount: valueOfPendingAssetInUsd
+                        .amount()
+                        .toNumber(),
+                      positionType: type,
+                      requiredSteps: requiredSteps,
+                    },
+                  });
+                  setShowAddLiquidityModal(true);
+                  break;
+                default:
+                  break;
+              }
+            }}
             onAdd={(assetId: string, type: PositionType) => {
-              setSelectedPool(
-                pools?.find((pool) => pool.asset === assetId) || null,
-              );
+              const pool = pools?.find((pool) => pool.asset === assetId);
+              if (!pool) {
+                throw Error("Pool not found");
+              }
+              setSelectedPool(pool);
               setSelectedPosition(
                 (positions as Positions)[assetId][type] || null,
               );
+              setAddLiquidityProcessState({
+                initialStep: LpSteps.SELECT_OPTIONS,
+                stepData: {
+                  pool,
+                  runePriceUSD: runePriceUSD,
+                  initialType: type,
+                },
+              });
               setShowAddLiquidityModal(true);
             }}
             onRemove={(poolId: string, type: PositionType) => {
@@ -111,18 +226,18 @@ export default function DashboardView({ runePriceUSD }: DashboardViewProps) {
           />
         )}
       </div>
-      {showAddLiquidityModal && selectedPool && (
+      {showAddLiquidityModal && addLiquidityProcessState.stepData && (
         <AddLiquidityManager
-          initialStep={LpSteps.SELECT_OPTIONS}
+          initialStep={addLiquidityProcessState.initialStep}
           onClose={() => {
             setSelectedPool(null);
             setShowAddLiquidityModal(false);
           }}
-          stepData={{
-            pool: selectedPool,
-            runePriceUSD: runePriceUSD,
-            initialType: selectedPosition?.type,
-          }}
+          stepData={
+            addLiquidityProcessState.stepData as
+              | AddLiquidityStepData
+              | StatusStepData
+          }
         />
       )}
       {showRemoveLiquidityModal &&

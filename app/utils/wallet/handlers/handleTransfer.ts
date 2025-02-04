@@ -149,10 +149,9 @@ export const depositThorchain = async (
   transferParams: DepositParams,
 ): Promise<string> => {
   switch (wallet.walletId) {
-    case WalletKey.VULTISIG:
     case WalletKey.CTRL:
     case WalletKey.LEDGER:
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<string>(async (resolve, reject) => {
         const depositParams = {
           asset: AssetRuneNative,
           from: transferParams.from,
@@ -162,7 +161,7 @@ export const depositThorchain = async (
           },
           memo: transferParams.memo,
         };
-        wallet.provider.request(
+        await wallet.provider.request(
           {
             method: "deposit",
             params: [depositParams],
@@ -176,6 +175,23 @@ export const depositThorchain = async (
           },
         );
       });
+    case WalletKey.VULTISIG:
+      const depositParams = {
+        from: transferParams.from,
+        value: transferParams.amount.amount().toString(),
+        memo: transferParams.memo,
+      };
+      const result = "";
+      try {
+        const result = await wallet.provider.request({
+          method: "deposit_transaction",
+          params: [depositParams],
+        });
+        return result;
+      } catch (e) {
+        console.error("deposit error", e);
+      }
+      return result;
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }

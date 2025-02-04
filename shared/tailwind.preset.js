@@ -32,6 +32,11 @@ module.exports = {
         highlight: "#A1FD59",
         secondaryBtn: "#627EEA",
         red: "#ff6656",
+        warn: {
+          DEFAULT: "#FFD737", 
+          dark: "#F09242",
+          light: "#FFD73733"
+        },
         blue: {
           DEFAULT: "#627EEA",
           100: "#627EEA26"

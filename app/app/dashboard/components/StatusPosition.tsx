@@ -9,9 +9,13 @@ import { UIComponents } from "@shared/components";
 
 interface StatusPositionProps {
   position: PositionStats;
+  onClick: () => void;
 }
 
-export default function StatusPosition({ position }: StatusPositionProps) {
+export default function StatusPosition({
+  position,
+  onClick,
+}: StatusPositionProps) {
   const asset = assetFromString(position.assetId);
   const [initialTimers, setInitialTimers] = useState<number[]>([]);
 
@@ -25,18 +29,21 @@ export default function StatusPosition({ position }: StatusPositionProps) {
   }, [position.pendingActions]);
 
   return (
-    <span className="font-medium text-sm flex flex-col space-y-2">
+    <span className="font-medium text-sm flex flex-col space-y-2 hover:underline cursor-pointer hover:decoration-yellow-700">
       {position.status === PositionStatus.LP_POSITION_INCOMPLETE && (
-        <span className="flex items-center bg-yellow-100 text-yellow-700 px-2 py-1 rounded-md shadow-sm animate-pulse">
+        <span
+          onClick={onClick}
+          className="flex items-center bg-yellow-100 text-yellow-700 px-2 py-1 rounded-md shadow-sm animate-pulse"
+        >
           {Number(position.memberDetails?.runePending) > 0
-            ? `Awaiting ${asset?.symbol} deposit`
+            ? `Awaiting ${asset?.ticker} deposit`
             : "Awaiting RUNE deposit"}
         </span>
       )}
 
       {(position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING ||
         position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING) && (
-        <div className="flex flex-col space-y-2">
+        <div onClick={onClick} className="flex flex-col space-y-2">
           <span className="flex items-center bg-blue-100 text-blue px-2 py-1 rounded-md shadow-sm">
             <span className="mr-2">
               <Loader sizeInPixels={4} color="blue" />
@@ -46,7 +53,7 @@ export default function StatusPosition({ position }: StatusPositionProps) {
                 initialTimers.length > 0 ? (
                   <UIComponents.Timer initialTimes={initialTimers} />
                 ) : (
-                  <>Processing...</>
+                  <span className="text-gray-900">Processing...</span>
                 )
               }
             >
@@ -62,7 +69,10 @@ export default function StatusPosition({ position }: StatusPositionProps) {
       )}
 
       {position.status === PositionStatus.LP_POSITION_COMPLETE && (
-        <span className="flex items-center bg-green-100 text-green-700 px-2 py-1 rounded-md shadow-sm">
+        <span
+          onClick={onClick}
+          className="flex items-center bg-green-100 text-green-700 px-2 py-1 rounded-md shadow-sm"
+        >
           <span className="mr-2">Active</span>
           <svg
             className="w-4 h-4 text-green-500"

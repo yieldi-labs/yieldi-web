@@ -26,10 +26,5 @@ export default async function PoolDetailPage({
   )
     return notFound();
 
-  return (
-    <PoolDetailClient
-      pool={poolData.data}
-      runePriceUSD={parseFloat(statsData.data.runePriceUSD)}
-    />
-  );
+  return <PoolDetailClient pool={poolData.data} />;
 }
