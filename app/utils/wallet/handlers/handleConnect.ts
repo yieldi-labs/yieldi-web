@@ -24,7 +24,9 @@ export const connectWallet = async (wallet: {
         method: "get_accounts",
       });
       if (requestedAccounts && requestedAccounts.length > 0) {
-        accounts = requestedAccounts.filter((account: string | null) => account !== null);
+        accounts = requestedAccounts.filter(
+          (account: string | null) => account !== null,
+        );
       }
       if (!accounts || accounts.length <= 0) {
         const connectedAcount = await wallet.provider.request({
