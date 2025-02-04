@@ -18,22 +18,40 @@ export const connectWallet = async (wallet: {
     case "vultisig-utxo":
     case "vultisig-bch":
     case "vultisig-doge":
-    case "vultisig-ltc":
-    case "vultisig-cosmos":
+    case "vultisig-ltc": {
       accounts = [];
-      accounts = await wallet.provider.request({
+      const requestedAccounts = await wallet.provider.request({
         method: "get_accounts",
       });
-      if (accounts.length <= 0) {
+      if (requestedAccounts && requestedAccounts.length > 0) {
+        accounts = requestedAccounts.filter((account: string | null) => account !== null);
+      }
+      if (!accounts || accounts.length <= 0) {
         const connectedAcount = await wallet.provider.request({
           method: "request_accounts",
         });
-        accounts.push(connectedAcount);
+        accounts.push(connectedAcount[0]);
       }
       return {
         provider: wallet.provider,
         address: accounts[0],
       };
+    }
+    case "vultisig-cosmos": {
+      let account = await wallet.provider.request({
+        method: "get_accounts",
+      });
+      if (!account) {
+        const connectedAcount = await wallet.provider.request({
+          method: "request_accounts",
+        });
+        account = connectedAcount[0].address;
+      }
+      return {
+        provider: wallet.provider,
+        address: account,
+      };
+    }
     case "xdefi-kujira":
     case "xdefi-cosmos": {
       const chainId = wallet.subchain || "cosmoshub-4";
