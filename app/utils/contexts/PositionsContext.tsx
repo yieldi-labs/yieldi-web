@@ -7,6 +7,8 @@ import {
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { PoolDetails } from "@/midgard";
+import { useAppState } from "./context";
+
 interface LiquidityPositionsContextType {
   positions: Positions | undefined;
   pools: PoolDetails | undefined;
@@ -29,6 +31,8 @@ export const LiquidityPositionsProvider = ({
 }: {
   children: ReactNode;
 }) => {
+  const { walletsState, mimirParameters, poolsData } = useAppState();
+
   const {
     positions,
     pools,
@@ -36,7 +40,11 @@ export const LiquidityPositionsProvider = ({
     isPending,
     error,
     cleanPositions,
-  } = usePositionStats({});
+  } = usePositionStats({
+    walletsState,
+    mimirParameters,
+    poolsData,
+  });
 
   return (
     <LiquidityPositionsContext.Provider

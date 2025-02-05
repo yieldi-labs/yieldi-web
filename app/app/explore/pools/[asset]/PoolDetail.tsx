@@ -28,13 +28,19 @@ import { assetFromString } from "@xchainjs/xchain-util";
 import AddLiquidityManager, {
   LpSteps,
 } from "../../components/AddLiquidityManager";
+import { Warn } from "@shared/components/ui";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
 }
 
 export default function PoolDetail({ pool }: PoolDetailProps) {
-  const { walletsState, toggleWalletModal, midgardStats } = useAppState();
+  const {
+    walletsState,
+    toggleWalletModal,
+    midgardStats,
+    isLiquidityCapReached,
+  } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
@@ -102,14 +108,24 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
     }
 
     return (
-      <button
-        className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
-                 hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-        onClick={() => setShowAddLiquidityModal(true)}
-        disabled={showLoadingState}
-      >
-        {showLoadingState ? "Loading..." : "Add"}
-      </button>
+      <>
+        <button
+          disabled={showLoadingState || isLiquidityCapReached}
+          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
+                  hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => setShowAddLiquidityModal(true)}
+        >
+          {showLoadingState ? "Loading..." : "Add"}
+        </button>
+        {isLiquidityCapReached ? (
+          <div className="mt-6 w-full">
+            <Warn
+              text={`Liquidity deposits are temporarily disabled due to network limits.`}
+              link="https://yieldi.gitbook.io/yieldi/basics/integrations#why-cant-i-add-more-liquidity"
+            />
+          </div>
+        ) : null}
+      </>
     );
   };
 

@@ -30,10 +30,17 @@ import { mainnet, avalanche, bsc } from "@reown/appkit/networks";
 import UniversalProvider from "@walletconnect/universal-provider";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import { useQuery } from "@tanstack/react-query";
-import { mimir } from "@/thornode/services.gen";
-import { MimirResponse } from "@/thornode";
-import { getStats, StatsData } from "@/midgard";
+import {
+  MimirResponse,
+  NetworkResponse,
+  VaultsResponse,
+  asgard,
+  mimir,
+  network,
+} from "@/thornode";
+import { getPools, getStats, PoolDetails, StatsData } from "@/midgard";
 import { detectOverwritedEthProviders } from "../chain";
+import { baseAmount } from "@xchainjs/xchain-util";
 
 interface AppStateContextType {
   isWalletModalOpen: boolean;
@@ -55,6 +62,10 @@ interface AppStateContextType {
   isWalletConnected: (chainKey: ChainKey) => boolean;
   mimirParameters: MimirResponse | undefined;
   midgardStats: StatsData | undefined;
+  thornodeNetwork: NetworkResponse | undefined;
+  asgardVaults: VaultsResponse | undefined;
+  poolsData: PoolDetails | undefined;
+  isLiquidityCapReached: boolean;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -87,6 +98,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   const [undetected, setUndetected] = useState<WalletType[]>([]);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false);
+  const [isLiquidityCapReached, setIsLiquidityCapReached] = useState(false);
   const [walletsState, setWalletsState] = useState<ConnectedWalletsState>({}); // TODO: We should remove complex objects as wallet providers from provider state. It can not be passed as props
   const toggleWalletModal = () => {
     setIsWalletModalOpen((prevState) => !prevState);
@@ -117,6 +129,42 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       const data = await getStats();
       if (!data.data) {
         throw Error("No midgard stats found");
+      }
+      return data.data;
+    },
+  });
+
+  const { data: thornodeNetwork } = useQuery({
+    queryKey: ["thornode-network"],
+    retry: false,
+    queryFn: async () => {
+      const data = await network();
+      if (!data.data) {
+        throw Error("No thornode network data");
+      }
+      return data.data;
+    },
+  });
+
+  const { data: asgardVaults } = useQuery({
+    queryKey: ["asgard-vaults"],
+    retry: false,
+    queryFn: async () => {
+      const data = await asgard();
+      if (!data.data) {
+        throw Error("No asgard vaults data");
+      }
+      return data.data;
+    },
+  });
+
+  const { data: poolsData } = useQuery({
+    queryKey: ["thorchain-pools"],
+    retry: false,
+    queryFn: async () => {
+      const data = await getPools();
+      if (!data.data) {
+        throw Error("No asgard vaults data");
       }
       return data.data;
     },
@@ -593,6 +641,31 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     return Boolean(walletsState[chainKey]?.address);
   };
 
+  useEffect(() => {
+    if (asgardVaults && poolsData && thornodeNetwork) {
+      let vaultsLiquidityRune = baseAmount(0);
+      asgardVaults?.forEach((vault) => {
+        vault.coins.forEach((coin) => {
+          const findPool = poolsData.find((pool) => pool.asset === coin.asset);
+          if (!findPool) {
+            return;
+          }
+          vaultsLiquidityRune = vaultsLiquidityRune.plus(
+            baseAmount(coin.amount).times(findPool.assetPrice),
+          );
+        });
+      });
+      if (
+        Number(thornodeNetwork?.effective_security_bond) >
+        vaultsLiquidityRune.amount().toNumber()
+      ) {
+        setIsLiquidityCapReached(false);
+      } else {
+        setIsLiquidityCapReached(true);
+      }
+    }
+  }, [asgardVaults, poolsData, thornodeNetwork]);
+
   return (
     <AppStateContext.Provider
       value={{
@@ -615,6 +688,10 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         isWalletConnected,
         mimirParameters,
         midgardStats,
+        thornodeNetwork,
+        asgardVaults,
+        poolsData,
+        isLiquidityCapReached,
       }}
     >
       {children}

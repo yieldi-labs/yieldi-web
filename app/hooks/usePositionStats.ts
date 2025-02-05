@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getPools, MemberPool, PoolDetail, PoolDetails } from "@/midgard";
+import { MemberPool, PoolDetail, PoolDetails } from "@/midgard";
 import {
   Positions,
   PositionStats,
@@ -8,19 +8,23 @@ import {
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { useCallback, useEffect, useState } from "react";
-import { useAppState } from "@/utils/contexts/context";
 import { ethers } from "ethers";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
+import { MimirResponse } from "@/thornode";
+import { ConnectedWalletsState } from "@/utils/interfaces";
 
 interface UsePositionStatsProps {
   defaultRefetchInterval?: number;
+  walletsState: ConnectedWalletsState;
+  mimirParameters: MimirResponse | undefined;
+  poolsData: PoolDetails | undefined;
 }
 
 interface PositionsCache {
   positions: Positions;
-  pools: PoolDetails;
+  pools: PoolDetails; // TODO: Remove from this context. Extract from main context
 }
 
 export function emptyPositionStats(
@@ -51,6 +55,9 @@ export function emptyPositionStats(
 
 export function usePositionStats({
   defaultRefetchInterval = 30000,
+  walletsState,
+  mimirParameters,
+  poolsData,
 }: UsePositionStatsProps) {
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     PositionsCache | undefined
@@ -59,7 +66,6 @@ export function usePositionStats({
   const [currentRefetchInterval, setRefetchInterval] = useState<
     number | undefined
   >(defaultRefetchInterval);
-  const { walletsState, mimirParameters } = useAppState();
 
   const { isFetching: isPending, error } = useQuery({
     queryKey: ["position-stats", Object.keys(walletsState).length],
@@ -83,16 +89,13 @@ export function usePositionStats({
           arrayAddresses.indexOf(address) === index,
       );
 
-      const resultPools = await getPools();
-      const pools = resultPools.data;
-
-      if (!pools) {
+      if (!poolsData) {
         throw Error("No pools available");
       }
 
       const genericPositionsDataStructure = await positionsTransformer(
         uniqueAddresses,
-        pools,
+        poolsData,
         {
           LIQUIDITYLOCKUPBLOCKS: Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS),
         },
@@ -122,10 +125,10 @@ export function usePositionStats({
 
       setCurrentPositionsStats({
         positions: filteredPositions,
-        pools: pools || [],
+        pools: poolsData || [],
       });
 
-      return { positions: genericPositionsDataStructure, pools };
+      return { positions: genericPositionsDataStructure, pools: poolsData };
     },
   });
 
