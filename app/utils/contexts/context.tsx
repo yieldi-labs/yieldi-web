@@ -66,6 +66,7 @@ interface AppStateContextType {
   asgardVaults: VaultsResponse | undefined;
   poolsData: PoolDetails | undefined;
   isLiquidityCapReached: boolean;
+  pools: PoolDetails | undefined;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -164,7 +165,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     queryFn: async () => {
       const data = await getPools();
       if (!data.data) {
-        throw Error("No asgard vaults data");
+        throw Error("No thornode pools data");
       }
       return data.data;
     },
@@ -692,6 +693,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         asgardVaults,
         poolsData,
         isLiquidityCapReached,
+        pools: poolsData,
       }}
     >
       {children}

@@ -22,11 +22,6 @@ interface UsePositionStatsProps {
   poolsData: PoolDetails | undefined;
 }
 
-interface PositionsCache {
-  positions: Positions;
-  pools: PoolDetails; // TODO: Remove from this context. Extract from main context
-}
-
 export function emptyPositionStats(
   asset = "BTC.BTC",
   positionType = PositionType.SYM,
@@ -60,7 +55,7 @@ export function usePositionStats({
   poolsData,
 }: UsePositionStatsProps) {
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
-    PositionsCache | undefined
+    Positions | undefined
   >();
 
   const [currentRefetchInterval, setRefetchInterval] = useState<
@@ -123,24 +118,20 @@ export function usePositionStats({
         return positions;
       }, {});
 
-      setCurrentPositionsStats({
-        positions: filteredPositions,
-        pools: poolsData || [],
-      });
+      setCurrentPositionsStats(filteredPositions);
 
       return { positions: genericPositionsDataStructure, pools: poolsData };
     },
   });
 
   useEffect(() => {
-    const hasPendingPositions = Object.values(
-      currentPositionsStats?.positions || {},
-    ).some((positions) =>
-      Object.values(positions).some(
-        (position) =>
-          position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
-          position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
-      ),
+    const hasPendingPositions = Object.values(currentPositionsStats || {}).some(
+      (positions) =>
+        Object.values(positions).some(
+          (position) =>
+            position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
+            position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
+        ),
     );
 
     if (hasPendingPositions) {
@@ -164,29 +155,30 @@ export function usePositionStats({
           throw Error("Pool or positions does not exist");
         }
 
-        if (!updatedPositions.positions[pooldId]) {
-          updatedPositions.positions[pooldId] = { SYM: null, ASYM: null };
+        if (!updatedPositions[pooldId]) {
+          updatedPositions[pooldId] = { SYM: null, ASYM: null };
         }
 
-        if (!updatedPositions.positions[pooldId][positionType]) {
-          updatedPositions.positions[pooldId][positionType] =
-            emptyPositionStats(pooldId, positionType);
+        if (!updatedPositions[pooldId][positionType]) {
+          updatedPositions[pooldId][positionType] = emptyPositionStats(
+            pooldId,
+            positionType,
+          );
         } else {
-          updatedPositions.positions[pooldId][positionType] = {
-            ...updatedPositions.positions[pooldId][positionType],
+          updatedPositions[pooldId][positionType] = {
+            ...updatedPositions[pooldId][positionType],
             status: status,
           };
         }
         setRefetchInterval(defaultRefetchInterval + 1); // Reset refech interval to improve UX
-        return updatedPositions as PositionsCache;
+        return updatedPositions;
       });
     },
     [defaultRefetchInterval],
   );
 
   return {
-    positions: currentPositionsStats?.positions,
-    pools: currentPositionsStats?.pools,
+    positions: currentPositionsStats,
     markPositionAsPending,
     cleanPositions,
     isPending,
