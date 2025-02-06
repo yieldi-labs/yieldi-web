@@ -29,6 +29,7 @@ import AddLiquidityManager, {
   LpSteps,
 } from "../../components/AddLiquidityManager";
 import { Warn } from "@shared/components/ui";
+import { showToast, ToastType } from "@/app/errorToast";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -54,7 +55,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
   const wallet =
     walletsState && walletsState[chainKey] ? walletsState![chainKey] : null;
 
-  const { positions, isPending, error } = useLiquidityPositions();
+  const { positions, isPending, positionsError } = useLiquidityPositions();
   const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0;
 
   useEffect(() => {
@@ -83,6 +84,15 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
   const handleAddLiquidityClose = () => {
     setShowAddLiquidityModal(false);
   };
+
+  useEffect(() => {
+    if (positionsError) {
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to load your liquidity positions. Please try again.",
+      });
+    }
+  }, [positionsError]);
 
   const renderActionButton = () => {
     if (!wallet) {
@@ -309,12 +319,6 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
             runePriceUSD: runePriceUSD,
           }}
         />
-      )}
-
-      {error && (
-        <div className="fixed bottom-4 right-4 bg-red text-white p-4 rounded-lg">
-          {error.message}
-        </div>
       )}
     </div>
   );

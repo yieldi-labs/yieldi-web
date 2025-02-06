@@ -25,13 +25,17 @@ module.exports = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         foreground2: "#6D655D",
-        primary: { DEFAULT: "#A1FD59", dark: "#332B29", light: "#514a47" },
+        primary: { DEFAULT: "#A1FD59", dark: "#6FF706", light: "#D9FEBC" },
         secondary: "#F5F1EB",
         accent: { DEFAULT: "#72BACA", dark: "#71bac9" },
         dark: "#003944",
         highlight: "#A1FD59",
         secondaryBtn: "#627EEA",
-        red: "#ff6656",
+        red: {
+          dark: "#BF2212",
+          DEFAULT: "#FF6656",
+          light: "#FFADA4"
+        },
         warn: {
           DEFAULT: "#FFD737", 
           dark: "#F09242",
@@ -39,7 +43,7 @@ module.exports = {
         },
         blue: {
           DEFAULT: "#627EEA",
-          100: "#627EEA26"
+          light: "#627EEA26"
         },
         border: {
           DEFAULT: "#524B48",

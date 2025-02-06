@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { addDollarSignAndSuffix } from "../utils";
 import DashboardHighlightsCard from "./components/DashboardHighlightsCards";
 import PositionsList from "./components/PositionsList";
@@ -24,6 +24,7 @@ import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
 import { AddLiquidityStepData } from "../explore/components/AddLiquidityModal";
 import { useAppState } from "@/utils/contexts/context";
 import { Tooltip } from "@shared/components/ui";
+import { showToast, ToastType } from "../errorToast";
 
 export default function DashboardView() {
   const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{
@@ -40,7 +41,7 @@ export default function DashboardView() {
     useState(false);
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
-  const { positions, isPending } = useLiquidityPositions();
+  const { positions, isPending, positionsError } = useLiquidityPositions();
   const { midgardStats, pools } = useAppState();
 
   const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0; // TODO: Loading state
@@ -66,6 +67,15 @@ export default function DashboardView() {
 
   const titleStyle =
     "my-2 md:mb-4 md:mt-0 md:text-2xl font-medium md:mb-6 text-neutral-900 md:text-neutral font-gt-america-ext uppercase";
+
+  useEffect(() => {
+    if (positionsError) {
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to load your liquidity positions. Please try again.",
+      });
+    }
+  }, [positionsError]);
 
   return (
     <main className="md:mx-16 space-y-3 md:space-y-5">
@@ -167,7 +177,6 @@ export default function DashboardView() {
                     valueOfPendingRuneInUsd.div(assetPriceUSD);
                   const amountOfRuneToDeposit =
                     valueOfPendingAssetInUsd.div(runePriceUSD);
-
                   const requiredSteps =
                     position.memberDetails?.assetPending === "0"
                       ? [

@@ -329,15 +329,17 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       percentage,
       withdrawAsset,
     }: RemoveLiquidityParams) => {
-      const wallet = getAssetWallet(assetIdToStartAction);
-      if (!wallet?.address) {
-        throw new Error("Wallet not connected");
-      }
-      const assetIdToStartActionParsed = assetFromString(assetIdToStartAction);
-      if (!assetIdToStartActionParsed) {
-        throw new Error("Invalid asset");
-      }
       try {
+        const wallet = getAssetWallet(assetIdToStartAction);
+        if (!wallet?.address) {
+          throw new Error("Wallet not connected");
+        }
+        const assetIdToStartActionParsed =
+          assetFromString(assetIdToStartAction);
+        if (!assetIdToStartActionParsed) {
+          throw new Error("Invalid asset");
+        }
+
         setLoading(true);
         setError(null);
 

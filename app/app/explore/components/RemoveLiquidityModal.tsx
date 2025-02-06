@@ -12,7 +12,6 @@ import {
 } from "@/app/utils";
 import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
-import ErrorCard from "@/app/errorCard";
 import { twMerge } from "tailwind-merge";
 import { getChainKeyFromChain } from "@/utils/chain";
 import {
@@ -24,6 +23,7 @@ import { Slider } from "@shared/components/ui";
 import AssetInput from "./AssetInput";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import { assetFromString } from "@xchainjs/xchain-util";
+import { showToast, ToastType } from "@/app/errorToast";
 
 interface RemoveLiquidityModalProps {
   pool: IPoolDetail;
@@ -59,7 +59,8 @@ export default function RemoveLiquidityModal({
 
   const asset = assetFromString(pool.asset);
 
-  const { positions, markPositionAsPending } = useLiquidityPositions();
+  const { positions, markPositionAsPending, positionsError } =
+    useLiquidityPositions();
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [percentage, setPercentage] = useState(0);
@@ -118,6 +119,21 @@ export default function RemoveLiquidityModal({
   const totalRuneAmount = posRuneAmount.plus(
     posAssetAmount.div(assetRuneRatio),
   );
+
+  useEffect(() => {
+    if (liquidityError) {
+      showToast({ type: ToastType.ERROR, text: liquidityError });
+    }
+  }, [liquidityError]);
+
+  useEffect(() => {
+    if (positionsError) {
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to load your liquidity positions. Please try again.",
+      });
+    }
+  }, [positionsError]);
 
   const handlePercentageClick = (percent: number) => {
     if (withdrawalType === WithdrawalType.ALL_ASSET) {
@@ -348,10 +364,6 @@ export default function RemoveLiquidityModal({
   return (
     <Modal onClose={() => onClose(false)} title="Remove">
       <div className="p-2 w-m">
-        {liquidityError && (
-          <ErrorCard className="mb-4">{liquidityError}</ErrorCard>
-        )}
-
         {/* Withdrawal Options */}
         {positionType === PositionType.SYM && (
           <ToggleButtonGroup
