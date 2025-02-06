@@ -40,8 +40,8 @@ export default function DashboardView() {
     useState(false);
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
-  const { positions, pools, isPending } = useLiquidityPositions();
-  const { midgardStats } = useAppState();
+  const { positions, isPending } = useLiquidityPositions();
+  const { midgardStats, pools } = useAppState();
 
   const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0; // TODO: Loading state
 
@@ -108,7 +108,7 @@ export default function DashboardView() {
                   rel="noopener noreferrer"
                   className="text-blue-500 hover:underline pl-1"
                 >
-                  Learn why
+                  Learn more
                 </a>
               </p>
             }

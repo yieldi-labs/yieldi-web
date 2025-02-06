@@ -179,7 +179,7 @@ export const depositThorchain = async (
       const depositParams = {
         from: transferParams.from,
         value: transferParams.amount.amount().toString(),
-        memo: transferParams.memo,
+        data: transferParams.memo,
       };
       const result = "";
       try {
