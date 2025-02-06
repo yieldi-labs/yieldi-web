@@ -70,9 +70,12 @@ export default function DashboardView() {
 
   useEffect(() => {
     if (positionsError) {
-      showToast({ type: ToastType.ERROR, text: "Failed to load your liquidity positions. Please try again." });
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to load your liquidity positions. Please try again.",
+      });
     }
-  }, [positionsError])
+  }, [positionsError]);
 
   return (
     <main className="md:mx-16 space-y-3 md:space-y-5">

@@ -10,7 +10,7 @@ import "./styles/globals.css";
 import { LiquidityPositionsProvider } from "@/utils/contexts/PositionsContext";
 import WalletDrawer from "./components/wallet-drawer";
 
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
 
 export default function RootLayout({
   children,

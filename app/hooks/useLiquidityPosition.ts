@@ -334,7 +334,8 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         if (!wallet?.address) {
           throw new Error("Wallet not connected");
         }
-        const assetIdToStartActionParsed = assetFromString(assetIdToStartAction);
+        const assetIdToStartActionParsed =
+          assetFromString(assetIdToStartAction);
         if (!assetIdToStartActionParsed) {
           throw new Error("Invalid asset");
         }

@@ -52,15 +52,17 @@ export default function WalletModal() {
 
   const handleConnectWallet = async () => {
     if (!selectedWallet) return; // Evita ejecutar si no hay wallet seleccionada
-  
+
     try {
       await handleConnect(selectedWallet);
     } catch (error) {
       console.error(error);
-      showToast({ type: ToastType.ERROR ,text: "Failed to connect the wallet. Please try again." });
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to connect the wallet. Please try again.",
+      });
     }
   };
-  
 
   if (!isWalletModalOpen) return null;
 

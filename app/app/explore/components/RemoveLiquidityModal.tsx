@@ -59,7 +59,8 @@ export default function RemoveLiquidityModal({
 
   const asset = assetFromString(pool.asset);
 
-  const { positions, markPositionAsPending, positionsError } = useLiquidityPositions();
+  const { positions, markPositionAsPending, positionsError } =
+    useLiquidityPositions();
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [percentage, setPercentage] = useState(0);
@@ -121,15 +122,18 @@ export default function RemoveLiquidityModal({
 
   useEffect(() => {
     if (liquidityError) {
-      showToast({ type: ToastType.ERROR, text: liquidityError })
+      showToast({ type: ToastType.ERROR, text: liquidityError });
     }
-  }, [liquidityError])
+  }, [liquidityError]);
 
   useEffect(() => {
     if (positionsError) {
-      showToast({ type: ToastType.ERROR, text: "Failed to load your liquidity positions. Please try again." });
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to load your liquidity positions. Please try again.",
+      });
     }
-  }, [positionsError])
+  }, [positionsError]);
 
   const handlePercentageClick = (percent: number) => {
     if (withdrawalType === WithdrawalType.ALL_ASSET) {

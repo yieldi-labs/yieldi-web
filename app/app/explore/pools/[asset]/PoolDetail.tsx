@@ -87,9 +87,12 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
 
   useEffect(() => {
     if (positionsError) {
-      showToast({ type: ToastType.ERROR, text: "Failed to load your liquidity positions. Please try again." });
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to load your liquidity positions. Please try again.",
+      });
     }
-  }, [positionsError])
+  }, [positionsError]);
 
   const renderActionButton = () => {
     if (!wallet) {
