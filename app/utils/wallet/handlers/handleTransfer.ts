@@ -187,6 +187,9 @@ export const depositThorchain = async (
           method: "deposit_transaction",
           params: [depositParams],
         });
+        if (Object.keys(result).length === 0 && result.constructor === Object) {
+          throw Error("User cancel action"); // vulticonnect returns {} when user cancel action
+        }
         return result;
       } catch (e) {
         console.error("deposit error", e);
