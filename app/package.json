@@ -64,6 +64,8 @@
     "@hey-api/client-fetch": "^0.4.2",
     "@hey-api/openapi-ts": "^0.53.11",
     "@ledgerhq/hw-transport-mocker": "^6.29.4",
+    "@sentry/cli": "^2.41.1",
+    "@sentry/nextjs": "^8.54.0",
     "@testing-library/jest-dom": "^6.6.2",
     "@testing-library/react": "^16.0.1",
     "@types/jest": "^29.5.14",
