@@ -153,7 +153,7 @@ export const disableDueTooSmallAmount = (
   usdAssetAmount: number,
   usdRuneAmount: number,
 ): boolean => {
-  const MIN_OUTBOUND_FEE_MULTIPLIER = 3; // Random multiplier to stay sage despite of refund or other things happen. Real calcs are more complex than that. https://dev.thorchain.org/concepts/fees.html#outbound-fee
+  const MIN_OUTBOUND_FEE_MULTIPLIER = 1; // Random multiplier to stay sage despite of refund or other things happen. Real calcs are more complex than that. https://dev.thorchain.org/concepts/fees.html#outbound-fee
   const minOutboundInDollars = currentMinOutboundFee / 10e7;
   const totalAmountInDollarsOfAction = usdAssetAmount + usdRuneAmount;
   return (

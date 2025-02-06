@@ -17,7 +17,7 @@ interface LiquidityPositionsContextType {
   ) => void;
   cleanPositions: () => void;
   isPending: boolean;
-  error: Error | null;
+  positionsError: Error | null;
 }
 
 const LiquidityPositionsContext = createContext<
@@ -45,7 +45,7 @@ export const LiquidityPositionsProvider = ({
         markPositionAsPending,
         cleanPositions,
         isPending,
-        error,
+        positionsError: error,
       }}
     >
       {children}
