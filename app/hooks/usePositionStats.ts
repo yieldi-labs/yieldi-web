@@ -149,7 +149,6 @@ export function usePositionStats({
   const markPositionAsPending = useCallback(
     (pooldId: string, positionType: PositionType, status: PositionStatus) => {
       setCurrentPositionsStats((prev) => {
-
         if (!prev) {
           throw Error("Pool or positions does not exist");
         }

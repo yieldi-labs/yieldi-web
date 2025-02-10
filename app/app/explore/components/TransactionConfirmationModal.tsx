@@ -76,7 +76,7 @@ export default function TransactionConfirmationModal({
           {
             url: `${getAddressUrl()}${hash}`,
             text: `View ${chainName} transaction on THORChain.net`,
-          }
+          },
         ]
       : [];
   };

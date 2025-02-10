@@ -7,7 +7,7 @@ const midgardAPI = defineConfig({
     lint: "eslint",
     path: "midgard",
   },
-  plugins: ['@hey-api/client-fetch'],
+  plugins: ["@hey-api/client-fetch"],
 });
 
 const thornodeAPI = defineConfig({
@@ -17,7 +17,7 @@ const thornodeAPI = defineConfig({
     lint: "eslint",
     path: "thornode",
   },
-  plugins: ['@hey-api/client-fetch'],
+  plugins: ["@hey-api/client-fetch"],
 });
 
 const midgardStagenetAPI = defineConfig({
@@ -27,7 +27,7 @@ const midgardStagenetAPI = defineConfig({
     lint: "eslint",
     path: "midgard",
   },
-  plugins: ['@hey-api/client-fetch'],
+  plugins: ["@hey-api/client-fetch"],
 });
 
 const thornodeStagenetAPI = defineConfig({
@@ -37,13 +37,13 @@ const thornodeStagenetAPI = defineConfig({
     lint: "eslint",
     path: "thornode",
   },
-  plugins: ['@hey-api/client-fetch'],
+  plugins: ["@hey-api/client-fetch"],
 });
 
 let configExport;
 switch (process.env.API_SPEC) {
   case "midgard": {
-    if (process.env.IS_STAGENET){
+    if (process.env.IS_STAGENET) {
       configExport = midgardStagenetAPI;
     } else {
       configExport = midgardAPI;
@@ -51,7 +51,7 @@ switch (process.env.API_SPEC) {
     break;
   }
   case "thornode": {
-    if (process.env.IS_STAGENET){
+    if (process.env.IS_STAGENET) {
       configExport = thornodeStagenetAPI;
     } else {
       configExport = thornodeAPI;
