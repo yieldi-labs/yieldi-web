@@ -199,7 +199,7 @@ export type BorrowerPool = {
     target_assets: Array<string>;
 };
 
-export type Borrowers = Array<(string)>;
+export type Borrowers = Array<string>;
 
 export type ChurnItem = {
     /**
@@ -670,7 +670,7 @@ export type MemberPool = {
     runeWithdrawn: string;
 };
 
-export type Members = Array<(string)>;
+export type Members = Array<string>;
 
 export type Metadata = {
     addLiquidity?: AddLiquidityMetadata;
