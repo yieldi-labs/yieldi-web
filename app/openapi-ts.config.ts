@@ -1,29 +1,23 @@
 import { defineConfig } from "@hey-api/openapi-ts";
 
 const midgardAPI = defineConfig({
-  client: "@hey-api/client-fetch",
-  input: "./midgard-schema.json",
+  input: "https://midgard.ninerealms.com/v2/swagger.json",
   output: {
     format: "prettier",
     lint: "eslint",
     path: "midgard",
   },
-  schemas: {
-    type: "json",
-  },
+  plugins: ['@hey-api/client-fetch'],
 });
 
 const thornodeAPI = defineConfig({
-  client: "@hey-api/client-fetch",
-  input: "./thornode-schema.json",
+  input: "https://thornode.ninerealms.com/thorchain/doc/openapi.yaml",
   output: {
     format: "prettier",
     lint: "eslint",
     path: "thornode",
   },
-  schemas: {
-    type: "json",
-  },
+  plugins: ['@hey-api/client-fetch'],
 });
 
 let configExport;

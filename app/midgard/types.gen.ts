@@ -24,30 +24,18 @@ export type Action = {
     /**
      * Pools involved in the action
      */
-    pools: Array<(string)>;
+    pools: Array<string>;
     /**
      * Indicates if the action is completed or if related outbound transactions are still
-     * pending.
+     * pending, failed to be processed.
      *
      */
-    status: 'success' | 'pending';
+    status: 'success' | 'pending' | 'failed';
     /**
      * Type of action
      */
     type: 'swap' | 'addLiquidity' | 'withdraw' | 'donate' | 'refund' | 'switch' | 'thorname' | 'send' | 'runePoolDeposit' | 'runePoolWithdraw';
 };
-
-/**
- * Indicates if the action is completed or if related outbound transactions are still
- * pending.
- *
- */
-export type status = 'success' | 'pending';
-
-/**
- * Type of action
- */
-export type type = 'swap' | 'addLiquidity' | 'withdraw' | 'donate' | 'refund' | 'switch' | 'thorname' | 'send' | 'runePoolDeposit' | 'runePoolWithdraw';
 
 /**
  * action query metadata
@@ -208,7 +196,7 @@ export type BorrowerPool = {
      * Int64, Unix timestamp for the last time borrower repayment occurred
      */
     last_repay_loan_timestamp: string;
-    target_assets: Array<(string)>;
+    target_assets: Array<string>;
 };
 
 export type Borrowers = Array<(string)>;
@@ -511,17 +499,17 @@ export type Health = {
      * True means healthy. False means Midgard is still catching up to the chain
      */
     inSync: boolean;
-    lastAggregated: HeightTS;
-    lastCommitted: HeightTS;
-    lastFetched: HeightTS;
-    lastThorNode: HeightTS;
+    lastAggregated: HeightTs;
+    lastCommitted: HeightTs;
+    lastFetched: HeightTs;
+    lastThorNode: HeightTs;
     /**
      * Int64, the current block count
      */
     scannerHeight: string;
 };
 
-export type HeightTS = {
+export type HeightTs = {
     /**
      * Block height
      */
@@ -533,7 +521,7 @@ export type HeightTS = {
 };
 
 export type KnownPools = {
-    [key: string]: (string);
+    [key: string]: string;
 };
 
 export type LiquidityHistory = {
@@ -702,7 +690,7 @@ export type Network = {
      * Array of rune amounts (e8) bonded by each active node.
      *
      */
-    activeBonds: Array<(string)>;
+    activeBonds: Array<string>;
     /**
      * Int64, Number of active nodes
      */
@@ -743,7 +731,7 @@ export type Network = {
      * Array of rune amounts (e8) bonded by each standby node.
      *
      */
-    standbyBonds: Array<(string)>;
+    standbyBonds: Array<string>;
     /**
      * Int64, Number of standby nodes, some of them might become active at the next churn.
      *
@@ -1067,16 +1055,16 @@ export type PoolStatsDetail = {
 /**
  * List details of all the RUNEPools identified with the given addresses
  */
-export type RUNEPoolDetails = Array<RUNEPoolProvider>;
+export type RunePoolDetails = Array<RunePoolProvider>;
 
-export type RUNEPoolHistory = {
-    intervals: RUNEPoolHistoryIntervals;
-    meta: RUNEPoolHistoryMeta;
+export type RunePoolHistory = {
+    intervals: RunePoolHistoryIntervals;
+    meta: RunePoolHistoryMeta;
 };
 
-export type RUNEPoolHistoryIntervals = Array<RUNEPoolHistoryItem>;
+export type RunePoolHistoryIntervals = Array<RunePoolHistoryItem>;
 
-export type RUNEPoolHistoryItem = {
+export type RunePoolHistoryItem = {
     /**
      * Int64, Number of RUNEPool members in the pool at the end of the interval
      */
@@ -1100,7 +1088,7 @@ export type RUNEPoolHistoryItem = {
     units: string;
 };
 
-export type RUNEPoolHistoryMeta = {
+export type RunePoolHistoryMeta = {
     /**
      * Int64, Number of RUNEPool member in the RUNEPool vault at the end of the interval at time endTime
      */
@@ -1129,7 +1117,7 @@ export type RUNEPoolHistoryMeta = {
     startUnits: string;
 };
 
-export type RUNEPoolProvider = {
+export type RunePoolProvider = {
     /**
      * Int64, Unix timestamp for the first time member deposited into the RUNEPool
      */
@@ -1247,7 +1235,7 @@ export type ReserveMeta = {
     startTime: string;
 };
 
-export type ReverseTHORNames = Array<(string)>;
+export type ReverseThorNames = Array<string>;
 
 export type RunePoolDepositMetadata = {
     /**
@@ -1282,6 +1270,50 @@ export type RunePoolWithdrawMetadata = {
      *
      */
     units: string;
+};
+
+export type RunePriceHistory = {
+    intervals: RunePriceIntervals;
+    meta: RunePriceMeta;
+};
+
+export type RunePriceIntervals = Array<RunePriceItem>;
+
+export type RunePriceItem = {
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64(e8), The price of Rune based on the USD pools at the the interval
+     *
+     */
+    runePriceUSD: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+};
+
+export type RunePriceMeta = {
+    /**
+     * Int64(e8), The price of Rune based on the USD pools at the end of the interval
+     *
+     */
+    endRunePriceUSD: string;
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64(e8), The price of Rune based on the USD pools at the start of the interval
+     *
+     */
+    startRunePriceUSD: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
 };
 
 export type SaverDetails = {
@@ -1404,10 +1436,18 @@ export type SaversHistoryMeta = {
 
 export type SendMetadata = {
     /**
+     * failed transaction code
+     */
+    code: string;
+    /**
      * Transaction memo of the send action
      */
     memo: string;
     networkFees: NetworkFees;
+    /**
+     * failed transaction code
+     */
+    reason: string;
 };
 
 export type StatsData = {
@@ -1500,11 +1540,11 @@ export type StreamingSwapMeta = {
     /**
      * Array of failed swaps reasons in streaming swap.
      */
-    failedSwapReasons?: Array<(string)>;
+    failedSwapReasons?: Array<string>;
     /**
      * Array of failed swaps index in streaming swap.
      */
-    failedSwaps?: Array<(string)>;
+    failedSwaps?: Array<string>;
     inCoin: Coin;
     /**
      * Int64, Number of blocks between swpas. (Blocks/Swap) E.g. 1 means every block.
@@ -1542,6 +1582,29 @@ export type SwapHistoryItem = {
      * Int64, The end time of bucket in unix timestamp
      */
     endTime: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
+     * from asset to secured asset.
+     * Big swaps have the same weight as small swaps
+     *
+     */
+    fromSecuredAverageSlip: string;
+    /**
+     * Int64, count of swaps from secured asset to rune
+     */
+    fromSecuredCount: string;
+    /**
+     * Int64(e8), the fees collected from swaps from rune to secured asset (in rune)
+     */
+    fromSecuredFees: string;
+    /**
+     * Int64(e8), volume of swaps from rune to secured asset denoted in rune
+     */
+    fromSecuredVolume: string;
+    /**
+     * Int64(e2), volume of swaps from secured asset to rune denoted in USD price of the rune in each swap
+     */
+    fromSecuredVolumeUSD: string;
     /**
      * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
      * from asset to trade asset.
@@ -1670,6 +1733,29 @@ export type SwapHistoryItem = {
     toRuneVolumeUSD: string;
     /**
      * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
+     * from rune to secured asset.
+     * Big swaps have the same weight as small swaps
+     *
+     */
+    toSecuredAverageSlip: string;
+    /**
+     * Int64, count of swaps from rune to secured asset
+     */
+    toSecuredCount: string;
+    /**
+     * Int64(e8), the fees collected from swaps from rune to secured asset (in rune)
+     */
+    toSecuredFees: string;
+    /**
+     * Int64(e8), volume of swaps from secured asset to rune denoted in rune
+     */
+    toSecuredVolume: string;
+    /**
+     * Int64(e2), volume of swaps from rune to secured asset denoted in USD price of the rune in each swap
+     */
+    toSecuredVolumeUSD: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
      * from rune to trade asset.
      * Big swaps have the same weight as small swaps
      *
@@ -1764,11 +1850,11 @@ export type SwapMetadata = {
     txType: string;
 };
 
-export type THORNameDetails = {
+export type ThorNameDetails = {
     /**
      * List details of all chains and their addresses for a given THORName
      */
-    entries: Array<THORNameEntry>;
+    entries: Array<ThorNameEntry>;
     /**
      * Int64, THORChain block height in which THORName expires
      */
@@ -1779,7 +1865,7 @@ export type THORNameDetails = {
     owner: string;
 };
 
-export type THORNameEntry = {
+export type ThorNameEntry = {
     /**
      * address on blockchain
      */
@@ -1790,14 +1876,14 @@ export type THORNameEntry = {
     chain: string;
 };
 
-export type TVLHistory = {
-    intervals: TVLHistoryIntervals;
-    meta: TVLHistoryItem;
+export type TvlHistory = {
+    intervals: TvlHistoryIntervals;
+    meta: TvlHistoryItem;
 };
 
-export type TVLHistoryIntervals = Array<TVLHistoryItem>;
+export type TvlHistoryIntervals = Array<TvlHistoryItem>;
 
-export type TVLHistoryItem = {
+export type TvlHistoryItem = {
     /**
      * Int64, The end time of bucket in unix timestamp
      */
@@ -1929,6 +2015,8 @@ export type WithdrawMetadata = {
 };
 
 export type GetActionsData = {
+    body?: never;
+    path?: never;
     query?: {
         /**
          * Comma separated list. Address of sender or recipient of any in/out transaction related
@@ -1937,10 +2025,9 @@ export type GetActionsData = {
          */
         address?: string;
         /**
-         * Comma separated list. Affiliate address of the action (swap, refund)
-         *
+         * ID of any in/out tx related to the action
          */
-        affiliate?: string;
+        txid?: string;
         /**
          * Comma separated list. Any asset that is part of the action (CHAIN.SYMBOL)
          * Additionally, synth, nosynth, and norune filters can be used for swap, add/withdraw actions.
@@ -1948,41 +2035,11 @@ export type GetActionsData = {
          */
         asset?: string;
         /**
-         * if this is given, the actions newer than the height will be given
+         * One or more comma separated unique types of action
+         * (swap, addLiquidity, withdraw, donate, refund, switch, thorname, runePoolDeposit, runePoolWithdraw)
+         *
          */
-        fromHeight?: number;
-        /**
-         * if this is given, the actions newer than the timestamp will be given
-         */
-        fromTimestamp?: number;
-        /**
-         * if this is given, the actions older than the height will be given
-         */
-        height?: number;
-        /**
-         * number of actions returned, default is 50
-         */
-        limit?: number;
-        /**
-         * if this is given, the actions for the next page will be given
-         */
-        nextPageToken?: number;
-        /**
-         * pagination offset, default is 0
-         */
-        offset?: number;
-        /**
-         * if this is given, the actions for the previous page will be given
-         */
-        prevPageToken?: number;
-        /**
-         * if this is given, the actions older than the timestamp will be given
-         */
-        timestamp?: number;
-        /**
-         * ID of any in/out tx related to the action
-         */
-        txid?: string;
+        type?: string;
         /**
          * One or more comma separated transaction type of the action, it's the tx type parsed
          * from memo. For example: Loan is a swap event but it's considered as loan tx type
@@ -1995,29 +2052,67 @@ export type GetActionsData = {
          */
         txType?: string;
         /**
-         * One or more comma separated unique types of action
-         * (swap, addLiquidity, withdraw, donate, refund, switch, thorname, runePoolDeposit, runePoolWithdraw)
+         * Comma separated list. Affiliate address of the action (swap, refund)
          *
          */
-        type?: string;
+        affiliate?: string;
+        /**
+         * number of actions returned, default is 50
+         */
+        limit?: number;
+        /**
+         * pagination offset, default is 0
+         */
+        offset?: number;
+        /**
+         * if this is given, the actions for the next page will be given
+         */
+        nextPageToken?: number;
+        /**
+         * if this is given, the actions older than the timestamp will be given
+         */
+        timestamp?: number;
+        /**
+         * if this is given, the actions older than the height will be given
+         */
+        height?: number;
+        /**
+         * if this is given, the actions for the previous page will be given
+         */
+        prevPageToken?: number;
+        /**
+         * if this is given, the actions newer than the timestamp will be given
+         */
+        fromTimestamp?: number;
+        /**
+         * if this is given, the actions newer than the height will be given
+         */
+        fromHeight?: number;
+    };
+    url: '/v2/actions';
+};
+
+export type GetActionsResponses = {
+    /**
+     * Returns an array of actions for the given filters.
+     */
+    200: {
+        actions: Array<Action>;
+        /**
+         * Int64, number of results matching the given filters. It may be -1 if
+         * Midgard is having trouble counting the results and has to cancel the count query
+         * (temporary fix). Also, if new action parameters is used it won't be returned.
+         *
+         */
+        count?: string;
+        meta: ActionMeta;
     };
 };
 
-export type GetActionsResponse = ({
-    actions: Array<Action>;
-    /**
-     * Int64, number of results matching the given filters. It may be -1 if
-     * Midgard is having trouble counting the results and has to cancel the count query
-     * (temporary fix). Also, if new action parameters is used it won't be returned.
-     *
-     */
-    count?: string;
-    meta: ActionMeta;
-});
-
-export type GetActionsError = unknown;
+export type GetActionsResponse = GetActionsResponses[keyof GetActionsResponses];
 
 export type GetBalanceData = {
+    body?: never;
     path: {
         /**
          * Rune address.
@@ -2026,21 +2121,28 @@ export type GetBalanceData = {
     };
     query?: {
         /**
-         * Block height (if provided, timestamp must not be provided)
-         */
-        height?: number;
-        /**
          * Unix timestamp as seconds since 1970 (if provided, height must not be provided)
          */
         timestamp?: number;
+        /**
+         * Block height (if provided, timestamp must not be provided)
+         */
+        height?: number;
     };
+    url: '/v2/balance/{address}';
 };
 
-export type GetBalanceResponse = (Balance);
+export type GetBalanceResponses = {
+    /**
+     * object containing balance details for a given address
+     */
+    200: Balance;
+};
 
-export type GetBalanceError = unknown;
+export type GetBalanceResponse = GetBalanceResponses[keyof GetBalanceResponses];
 
 export type GetBorrowerDetailData = {
+    body?: never;
     path: {
         /**
          * Address to match borrower, an asset address is given.
@@ -2049,38 +2151,88 @@ export type GetBorrowerDetailData = {
          */
         address: string;
     };
+    query?: never;
+    url: '/v2/borrower/{address}';
 };
 
-export type GetBorrowerDetailResponse = (BorrowerDetails);
+export type GetBorrowerDetailResponses = {
+    /**
+     * object containing loan data for a specific borrower
+     */
+    200: BorrowerDetails;
+};
 
-export type GetBorrowerDetailError = unknown;
+export type GetBorrowerDetailResponse = GetBorrowerDetailResponses[keyof GetBorrowerDetailResponses];
 
 export type GetBorrowersAddressesData = {
+    body?: never;
+    path?: never;
     query?: {
         /**
          * Return only borrowers getting loan against this asset as collateral.
          */
         asset?: string;
     };
+    url: '/v2/borrowers';
 };
 
-export type GetBorrowersAddressesResponse = (Borrowers);
+export type GetBorrowersAddressesResponses = {
+    /**
+     * array of all the borrowers
+     */
+    200: Borrowers;
+};
 
-export type GetBorrowersAddressesError = unknown;
+export type GetBorrowersAddressesResponse = GetBorrowersAddressesResponses[keyof GetBorrowersAddressesResponses];
 
-export type GetChurnsResponse = (Churns);
+export type GetChurnsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v2/churns';
+};
 
-export type GetChurnsError = unknown;
+export type GetChurnsResponses = {
+    /**
+     * Array containing the last occurred churns in block height and timestamp
+     */
+    200: Churns;
+};
 
-export type GetDocsResponse = (unknown);
+export type GetChurnsResponse = GetChurnsResponses[keyof GetChurnsResponses];
 
-export type GetDocsError = unknown;
+export type GetDocsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v2/doc';
+};
 
-export type GetHealthResponse = (Health);
+export type GetDocsResponses = {
+    /**
+     * swagger/OpenAPI 3.0 spec generated docs
+     */
+    200: unknown;
+};
 
-export type GetHealthError = unknown;
+export type GetHealthData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v2/health';
+};
+
+export type GetHealthResponses = {
+    /**
+     * Returns health status for Midgard
+     */
+    200: Health;
+};
+
+export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
 
 export type GetDepthHistoryData = {
+    body?: never;
     path: {
         /**
          * Return stats for this single pool.
@@ -2089,112 +2241,211 @@ export type GetDepthHistoryData = {
     };
     query?: {
         /**
-         * Number of intervals to return. Should be between [1..400].
-         */
-        count?: number;
-        /**
-         * Start time of the query as unix timestamp
-         */
-        from?: number;
-        /**
          * Interval of calculations
          */
         interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
         /**
          * End time of the query as unix timestamp. If only count is given, defaults to now.
          *
          */
         to?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
     };
+    url: '/v2/history/depths/{pool}';
 };
 
-export type GetDepthHistoryResponse = (DepthHistory);
+export type GetDepthHistoryResponses = {
+    /**
+     * Depth and price history
+     */
+    200: DepthHistory;
+};
 
-export type GetDepthHistoryError = unknown;
+export type GetDepthHistoryResponse = GetDepthHistoryResponses[keyof GetDepthHistoryResponses];
 
 export type GetEarningsHistoryData = {
+    body?: never;
+    path?: never;
     query?: {
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
         /**
          * Number of intervals to return. Should be between [1..400].
          */
         count?: number;
         /**
-         * Start time of the query as unix timestamp
-         */
-        from?: number;
-        /**
-         * Interval of calculations
-         */
-        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
-        /**
          * End time of the query as unix timestamp. If only count is given, defaults to now.
          *
          */
         to?: number;
-    };
-};
-
-export type GetEarningsHistoryResponse = (EarningsHistory);
-
-export type GetEarningsHistoryError = unknown;
-
-export type GetLiquidityHistoryData = {
-    query?: {
-        /**
-         * Number of intervals to return. Should be between [1..400]
-         */
-        count?: number;
         /**
          * Start time of the query as unix timestamp
          */
         from?: number;
-        /**
-         * Interval of calculations
-         */
-        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+    };
+    url: '/v2/history/earnings';
+};
+
+export type GetEarningsHistoryResponses = {
+    /**
+     * earnings history
+     */
+    200: EarningsHistory;
+};
+
+export type GetEarningsHistoryResponse = GetEarningsHistoryResponses[keyof GetEarningsHistoryResponses];
+
+export type GetLiquidityHistoryData = {
+    body?: never;
+    path?: never;
+    query?: {
         /**
          * Return stats for given pool. Returns sum of all pools if missing
          */
         pool?: string;
         /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * Number of intervals to return. Should be between [1..400]
+         */
+        count?: number;
+        /**
          * End time of the query as unix timestamp. If only count is given, defaults to now
          *
          */
         to?: number;
-    };
-};
-
-export type GetLiquidityHistoryResponse = (LiquidityHistory);
-
-export type GetLiquidityHistoryError = unknown;
-
-export type GetRunePoolHistoryData = {
-    query?: {
-        /**
-         * Number of intervals to return. Should be between [1..400].
-         */
-        count?: number;
         /**
          * Start time of the query as unix timestamp
          */
         from?: number;
+    };
+    url: '/v2/history/liquidity_changes';
+};
+
+export type GetLiquidityHistoryResponses = {
+    /**
+     * Withdrawals and deposits history
+     */
+    200: LiquidityHistory;
+};
+
+export type GetLiquidityHistoryResponse = GetLiquidityHistoryResponses[keyof GetLiquidityHistoryResponses];
+
+export type GetReserveHistoryData = {
+    body?: never;
+    path?: never;
+    query?: {
         /**
          * Interval of calculations
          */
         interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
         /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
          * End time of the query as unix timestamp. If only count is given, defaults to now.
          *
          */
         to?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
     };
+    url: '/v2/history/reserve';
 };
 
-export type GetRunePoolHistoryResponse = (RUNEPoolHistory);
+export type GetReserveHistoryResponses = {
+    /**
+     * Reserve
+     */
+    200: ReserveHistory;
+};
 
-export type GetRunePoolHistoryError = unknown;
+export type GetReserveHistoryResponse = GetReserveHistoryResponses[keyof GetReserveHistoryResponses];
+
+export type GetRunePriceHistoryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+    };
+    url: '/v2/history/rune';
+};
+
+export type GetRunePriceHistoryResponses = {
+    /**
+     * Returns rune price history in USD based on the time bucket given
+     */
+    200: RunePriceHistory;
+};
+
+export type GetRunePriceHistoryResponse = GetRunePriceHistoryResponses[keyof GetRunePriceHistoryResponses];
+
+export type GetRunePoolHistoryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+    };
+    url: '/v2/history/runepool';
+};
+
+export type GetRunePoolHistoryResponses = {
+    /**
+     * Members and Units history of RUNEPool
+     */
+    200: RunePoolHistory;
+};
+
+export type GetRunePoolHistoryResponse = GetRunePoolHistoryResponses[keyof GetRunePoolHistoryResponses];
 
 export type GetSaversHistoryData = {
+    body?: never;
     path: {
         /**
          * Return stats for this single pool.
@@ -2203,90 +2454,125 @@ export type GetSaversHistoryData = {
     };
     query?: {
         /**
-         * Number of intervals to return. Should be between [1..400].
-         */
-        count?: number;
-        /**
-         * Start time of the query as unix timestamp
-         */
-        from?: number;
-        /**
          * Interval of calculations
          */
         interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
         /**
          * End time of the query as unix timestamp. If only count is given, defaults to now.
          *
          */
         to?: number;
-    };
-};
-
-export type GetSaversHistoryResponse = (SaversHistory);
-
-export type GetSaversHistoryError = unknown;
-
-export type GetSwapHistoryData = {
-    query?: {
-        /**
-         * Number of intervals to return. Should be between [1..400].
-         */
-        count?: number;
         /**
          * Start time of the query as unix timestamp
          */
         from?: number;
-        /**
-         * Interval of calculations
-         */
-        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+    };
+    url: '/v2/history/savers/{pool}';
+};
+
+export type GetSaversHistoryResponses = {
+    /**
+     * Depth and Units history of savers
+     */
+    200: SaversHistory;
+};
+
+export type GetSaversHistoryResponse = GetSaversHistoryResponses[keyof GetSaversHistoryResponses];
+
+export type GetSwapHistoryData = {
+    body?: never;
+    path?: never;
+    query?: {
         /**
          * Return history given pool. Returns sum of all pools if missing.
          */
         pool?: string;
         /**
-         * End time of the query as unix timestamp. If only count is given, defaults to now.
-         *
+         * Interval of calculations
          */
-        to?: number;
-    };
-};
-
-export type GetSwapHistoryResponse = (SwapHistory);
-
-export type GetSwapHistoryError = unknown;
-
-export type GetTvlHistoryData = {
-    query?: {
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
         /**
          * Number of intervals to return. Should be between [1..400].
          */
         count?: number;
         /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+        /**
          * Start time of the query as unix timestamp
          */
         from?: number;
+    };
+    url: '/v2/history/swaps';
+};
+
+export type GetSwapHistoryResponses = {
+    /**
+     * Swap count, volume, fee and slip history
+     */
+    200: SwapHistory;
+};
+
+export type GetSwapHistoryResponse = GetSwapHistoryResponses[keyof GetSwapHistoryResponses];
+
+export type GetTvlHistoryData = {
+    body?: never;
+    path?: never;
+    query?: {
         /**
          * Interval of calculations
          */
         interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
         /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
          * End time of the query as unix timestamp. If only count is given, defaults to now.
          *
          */
         to?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
     };
+    url: '/v2/history/tvl';
 };
 
-export type GetTvlHistoryResponse = (TVLHistory);
+export type GetTvlHistoryResponses = {
+    /**
+     * Total pool depths, total bonds, and total value locked history
+     */
+    200: TvlHistory;
+};
 
-export type GetTvlHistoryError = unknown;
+export type GetTvlHistoryResponse = GetTvlHistoryResponses[keyof GetTvlHistoryResponses];
 
-export type GetKnownPoolsResponse = (KnownPools);
+export type GetKnownPoolsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v2/knownpools';
+};
 
-export type GetKnownPoolsError = unknown;
+export type GetKnownPoolsResponses = {
+    /**
+     * Object containing known pools to status mapping
+     */
+    200: KnownPools;
+};
+
+export type GetKnownPoolsResponse = GetKnownPoolsResponses[keyof GetKnownPoolsResponses];
 
 export type GetMemberDetailData = {
+    body?: never;
     path: {
         /**
          * Address to match liquidity providers. Either a rune or an asset address may be given.
@@ -2302,34 +2588,73 @@ export type GetMemberDetailData = {
          */
         showSavers?: boolean;
     };
+    url: '/v2/member/{address}';
 };
 
-export type GetMemberDetailResponse = (MemberDetails);
+export type GetMemberDetailResponses = {
+    /**
+     * object containing liquidity provider data for a specific member
+     */
+    200: MemberDetails;
+};
 
-export type GetMemberDetailError = unknown;
+export type GetMemberDetailResponse = GetMemberDetailResponses[keyof GetMemberDetailResponses];
 
 export type GetMembersAdressesData = {
+    body?: never;
+    path?: never;
     query?: {
         /**
          * Return only members present in the pool.
          */
         pool?: string;
     };
+    url: '/v2/members';
 };
 
-export type GetMembersAdressesResponse = (Members);
+export type GetMembersAdressesResponses = {
+    /**
+     * array of all the members
+     */
+    200: Members;
+};
 
-export type GetMembersAdressesError = unknown;
+export type GetMembersAdressesResponse = GetMembersAdressesResponses[keyof GetMembersAdressesResponses];
 
-export type GetNetworkDataResponse = (Network);
+export type GetNetworkDataData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v2/network';
+};
 
-export type GetNetworkDataError = unknown;
+export type GetNetworkDataResponses = {
+    /**
+     * Returns an object containing Network data
+     */
+    200: Network;
+};
 
-export type GetNodesResponse = (Nodes);
+export type GetNetworkDataResponse = GetNetworkDataResponses[keyof GetNetworkDataResponses];
 
-export type GetNodesError = unknown;
+export type GetNodesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v2/nodes';
+};
+
+export type GetNodesResponses = {
+    /**
+     * Returns an object containing Node public key data
+     */
+    200: Nodes;
+};
+
+export type GetNodesResponse = GetNodesResponses[keyof GetNodesResponses];
 
 export type GetPoolData = {
+    body?: never;
     path: {
         /**
          * pool name
@@ -2344,13 +2669,20 @@ export type GetPoolData = {
          */
         period?: '1h' | '24h' | '7d' | '14d' | '30d' | '90d' | '100d' | '180d' | '365d' | 'all';
     };
+    url: '/v2/pool/{asset}';
 };
 
-export type GetPoolResponse = (PoolDetail);
+export type GetPoolResponses = {
+    /**
+     * Object containing details for one pool
+     */
+    200: PoolDetail;
+};
 
-export type GetPoolError = unknown;
+export type GetPoolResponse = GetPoolResponses[keyof GetPoolResponses];
 
 export type GetPoolStatsData = {
+    body?: never;
     path: {
         /**
          * pool name
@@ -2365,58 +2697,47 @@ export type GetPoolStatsData = {
          */
         period?: '1h' | '24h' | '7d' | '14d' | '30d' | '90d' | '100d' | '180d' | '365d' | 'all';
     };
+    url: '/v2/pool/{asset}/stats';
 };
 
-export type GetPoolStatsResponse = (PoolStatsDetail);
+export type GetPoolStatsResponses = {
+    /**
+     * Stats for one pool.
+     */
+    200: PoolStatsDetail;
+};
 
-export type GetPoolStatsError = unknown;
+export type GetPoolStatsResponse = GetPoolStatsResponses[keyof GetPoolStatsResponses];
 
 export type GetPoolsData = {
+    body?: never;
+    path?: never;
     query?: {
+        /**
+         * Filter for only pools with this status
+         */
+        status?: 'available' | 'staged' | 'suspended';
         /**
          * Specifies the base interval from which annualPercentageRate and poolAPY is extrapolated.
          * Default is 14d.
          *
          */
         period?: '1h' | '24h' | '7d' | '14d' | '30d' | '90d' | '100d' | '180d' | '365d' | 'all';
-        /**
-         * Filter for only pools with this status
-         */
-        status?: 'available' | 'staged' | 'suspended';
     };
+    url: '/v2/pools';
 };
 
-export type GetPoolsResponse = (PoolDetails);
-
-export type GetPoolsError = unknown;
-
-export type GetReserveHistoryData = {
-    query?: {
-        /**
-         * Number of intervals to return. Should be between [1..400].
-         */
-        count?: number;
-        /**
-         * Start time of the query as unix timestamp
-         */
-        from?: number;
-        /**
-         * Interval of calculations
-         */
-        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
-        /**
-         * End time of the query as unix timestamp. If only count is given, defaults to now.
-         *
-         */
-        to?: number;
-    };
+export type GetPoolsResponses = {
+    /**
+     * Array of pool details
+     */
+    200: PoolDetails;
 };
 
-export type GetReserveHistoryResponse = (ReserveHistory);
-
-export type GetReserveHistoryError = unknown;
+export type GetPoolsResponse = GetPoolsResponses[keyof GetPoolsResponses];
 
 export type GetRunePoolDetailData = {
+    body?: never;
     path: {
         /**
          * Address to match the RUNEPool. multiple rune addresses can be given.
@@ -2424,13 +2745,21 @@ export type GetRunePoolDetailData = {
          */
         address: string;
     };
+    query?: never;
+    url: '/v2/runepool/{address}';
 };
 
-export type GetRunePoolDetailResponse = (RUNEPoolDetails);
+export type GetRunePoolDetailResponses = {
+    /**
+     * object containing RUNEPool data for a specific members
+     */
+    200: RunePoolDetails;
+};
 
-export type GetRunePoolDetailError = unknown;
+export type GetRunePoolDetailResponse = GetRunePoolDetailResponses[keyof GetRunePoolDetailResponses];
 
 export type GetSaverDetailData = {
+    body?: never;
     path: {
         /**
          * Address to match the saver. an asset address should be given.
@@ -2438,55 +2767,112 @@ export type GetSaverDetailData = {
          */
         address: string;
     };
+    query?: never;
+    url: '/v2/saver/{address}';
 };
 
-export type GetSaverDetailResponse = (SaverDetails);
+export type GetSaverDetailResponses = {
+    /**
+     * object containing saver data for a specific member
+     */
+    200: SaverDetails;
+};
 
-export type GetSaverDetailError = unknown;
+export type GetSaverDetailResponse = GetSaverDetailResponses[keyof GetSaverDetailResponses];
 
-export type GetStatsResponse = (StatsData);
+export type GetStatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v2/stats';
+};
 
-export type GetStatsError = unknown;
+export type GetStatsResponses = {
+    /**
+     * object containing global THORChain data
+     */
+    200: StatsData;
+};
 
-export type GetSwaggerResponse = (unknown);
+export type GetStatsResponse = GetStatsResponses[keyof GetStatsResponses];
 
-export type GetSwaggerError = unknown;
+export type GetSwaggerData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v2/swagger.json';
+};
+
+export type GetSwaggerResponses = {
+    /**
+     * human and machine readable swagger/openapi specification
+     */
+    200: unknown;
+};
 
 export type GetThorNameDetailData = {
+    body?: never;
     path: {
         /**
          * a THORName
          */
         name: string;
     };
+    query?: never;
+    url: '/v2/thorname/lookup/{name}';
 };
 
-export type GetThorNameDetailResponse = (THORNameDetails);
+export type GetThorNameDetailResponses = {
+    /**
+     * object containing THORName data for a specific name
+     */
+    200: ThorNameDetails;
+};
 
-export type GetThorNameDetailError = unknown;
+export type GetThorNameDetailResponse = GetThorNameDetailResponses[keyof GetThorNameDetailResponses];
 
 export type GetThorNamesOwnerByAddressData = {
+    body?: never;
     path: {
         /**
          * Address which owns a THORName.
          */
         address: string;
     };
+    query?: never;
+    url: '/v2/thorname/owner/{address}';
 };
 
-export type GetThorNamesOwnerByAddressResponse = (ReverseTHORNames);
+export type GetThorNamesOwnerByAddressResponses = {
+    /**
+     * object containing a list of THORName names for a specific address
+     */
+    200: ReverseThorNames;
+};
 
-export type GetThorNamesOwnerByAddressError = unknown;
+export type GetThorNamesOwnerByAddressResponse = GetThorNamesOwnerByAddressResponses[keyof GetThorNamesOwnerByAddressResponses];
 
 export type GetThorNamesByAddressData = {
+    body?: never;
     path: {
         /**
          * Address to match THORNames against.
          */
         address: string;
     };
+    query?: never;
+    url: '/v2/thorname/rlookup/{address}';
 };
 
-export type GetThorNamesByAddressResponse = (ReverseTHORNames);
+export type GetThorNamesByAddressResponses = {
+    /**
+     * object containing a list of THORName names for a specific address
+     */
+    200: ReverseThorNames;
+};
 
-export type GetThorNamesByAddressError = unknown;
+export type GetThorNamesByAddressResponse = GetThorNamesByAddressResponses[keyof GetThorNamesByAddressResponses];
+
+export type ClientOptions = {
+    baseUrl: 'https://midgard.ninerealms.com' | (string & {});
+};
