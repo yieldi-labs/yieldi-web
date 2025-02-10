@@ -43,19 +43,19 @@ const thornodeStagenetAPI = defineConfig({
 let configExport;
 switch (process.env.API_SPEC) {
   case "midgard": {
-    configExport = midgardAPI;
+    if (process.env.IS_STAGENET){
+      configExport = midgardStagenetAPI;
+    } else {
+      configExport = midgardAPI;
+    }
     break;
   }
   case "thornode": {
-    configExport = thornodeAPI;
-    break;
-  }
-  case "midgard-stagenet": {
-    configExport = midgardStagenetAPI;
-    break;
-  }
-  case "thornode-stagenet": {
-    configExport = thornodeStagenetAPI;
+    if (process.env.IS_STAGENET){
+      configExport = thornodeStagenetAPI;
+    } else {
+      configExport = thornodeAPI;
+    }
     break;
   }
   default:
