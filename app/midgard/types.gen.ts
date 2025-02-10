@@ -4,47 +4,37 @@
  * action details among with related transactions
  */
 export type Action = {
-  /**
-   * Int64, nano timestamp of the block at which the action was registered
-   */
-  date: string;
-  /**
-   * Int64, height of the block at which the action was registered
-   */
-  height: string;
-  /**
-   * Inbound transactions related to the action
-   */
-  in: Array<Transaction>;
-  metadata: Metadata;
-  /**
-   * Outbound transactions related to the action
-   */
-  out: Array<Transaction>;
-  /**
-   * Pools involved in the action
-   */
-  pools: Array<string>;
-  /**
-   * Indicates if the action is completed or if related outbound transactions are still
-   * pending.
-   *
-   */
-  status: "success" | "pending";
-  /**
-   * Type of action
-   */
-  type:
-    | "swap"
-    | "addLiquidity"
-    | "withdraw"
-    | "donate"
-    | "refund"
-    | "switch"
-    | "thorname"
-    | "send"
-    | "runePoolDeposit"
-    | "runePoolWithdraw";
+    /**
+     * Int64, nano timestamp of the block at which the action was registered
+     */
+    date: string;
+    /**
+     * Int64, height of the block at which the action was registered
+     */
+    height: string;
+    /**
+     * Inbound transactions related to the action
+     */
+    in: Array<Transaction>;
+    metadata: Metadata;
+    /**
+     * Outbound transactions related to the action
+     */
+    out: Array<Transaction>;
+    /**
+     * Pools involved in the action
+     */
+    pools: Array<(string)>;
+    /**
+     * Indicates if the action is completed or if related outbound transactions are still
+     * pending.
+     *
+     */
+    status: 'success' | 'pending';
+    /**
+     * Type of action
+     */
+    type: 'swap' | 'addLiquidity' | 'withdraw' | 'donate' | 'refund' | 'switch' | 'thorname' | 'send' | 'runePoolDeposit' | 'runePoolWithdraw';
 };
 
 /**
@@ -52,196 +42,186 @@ export type Action = {
  * pending.
  *
  */
-export type status = "success" | "pending";
+export type status = 'success' | 'pending';
 
 /**
  * Type of action
  */
-export type type =
-  | "swap"
-  | "addLiquidity"
-  | "withdraw"
-  | "donate"
-  | "refund"
-  | "switch"
-  | "thorname"
-  | "send"
-  | "runePoolDeposit"
-  | "runePoolWithdraw";
+export type type = 'swap' | 'addLiquidity' | 'withdraw' | 'donate' | 'refund' | 'switch' | 'thorname' | 'send' | 'runePoolDeposit' | 'runePoolWithdraw';
 
 /**
  * action query metadata
  */
 export type ActionMeta = {
-  /**
-   * Int64, The last action event_id that can be used for pagination.
-   * This token is needed to be given for next page.
-   *
-   */
-  nextPageToken: string;
-  /**
-   * Int64, The first action event_id that can be used for previous pagination.
-   * This token is needed to be given for previous page.
-   *
-   */
-  prevPageToken: string;
+    /**
+     * Int64, The last action event_id that can be used for pagination.
+     * This token is needed to be given for next page.
+     *
+     */
+    nextPageToken: string;
+    /**
+     * Int64, The first action event_id that can be used for previous pagination.
+     * This token is needed to be given for previous page.
+     *
+     */
+    prevPageToken: string;
 };
 
 export type AddLiquidityMetadata = {
-  /**
-   * Affiliate fee address of the addLiquidity
-   */
-  affiliateAddress: string;
-  /**
-   * Int64 (Basis points, 0-1000, where 1000=10%)
-   */
-  affiliateFee: string;
-  /**
-   * Int64, amount of liquidity units assigned to the member as result of the liquidity
-   * deposit
-   *
-   */
-  liquidityUnits: string;
-  /**
-   * Transaction memo of the addLiquidity action
-   */
-  memo: string;
+    /**
+     * Affiliate fee address of the addLiquidity
+     */
+    affiliateAddress: string;
+    /**
+     * Int64 (Basis points, 0-1000, where 1000=10%)
+     */
+    affiliateFee: string;
+    /**
+     * Int64, amount of liquidity units assigned to the member as result of the liquidity
+     * deposit
+     *
+     */
+    liquidityUnits: string;
+    /**
+     * Transaction memo of the addLiquidity action
+     */
+    memo: string;
 };
 
 export type Balance = {
-  coins: Coins;
-  /**
-   * full timestamp (nanoseconds since 1970) of the block at which the returned balance snapshot was valid
-   */
-  date: string;
-  /**
-   * height of the block at which the returned balance snapshot was valid
-   */
-  height: string;
+    coins: Coins;
+    /**
+     * full timestamp (nanoseconds since 1970) of the block at which the returned balance snapshot was valid
+     */
+    date: string;
+    /**
+     * height of the block at which the returned balance snapshot was valid
+     */
+    height: string;
 };
 
 export type BlockRewards = {
-  blockReward: string;
-  bondReward: string;
-  poolReward: string;
+    blockReward: string;
+    bondReward: string;
+    poolReward: string;
 };
 
 export type BondMetadata = {
-  /**
-   * node operator fee
-   */
-  fee?: string;
-  /**
-   * Transaction memo of bond event
-   */
-  memo: string;
-  /**
-   * node address
-   */
-  nodeAddress: string;
-  /**
-   * bond provider address
-   */
-  provider?: string;
+    /**
+     * node operator fee
+     */
+    fee?: string;
+    /**
+     * Transaction memo of bond event
+     */
+    memo: string;
+    /**
+     * node address
+     */
+    nodeAddress: string;
+    /**
+     * bond provider address
+     */
+    provider?: string;
 };
 
 export type BondMetrics = {
-  /**
-   * Int64(e8), Average bond of active nodes
-   */
-  averageActiveBond: string;
-  /**
-   * Int64(e8), Average bond of standby nodes
-   */
-  averageStandbyBond: string;
-  /**
-   * Int64(e8), Highest effective bond for nodes
-   */
-  bondHardCap: string;
-  /**
-   * Int64(e8), Maxinum bond of active nodes
-   */
-  maximumActiveBond: string;
-  /**
-   * Int64(e8), Maximum bond of standby nodes
-   */
-  maximumStandbyBond: string;
-  /**
-   * Int64(e8), Median bond of active nodes
-   */
-  medianActiveBond: string;
-  /**
-   * Int64(e8), Median bond of standby nodes
-   */
-  medianStandbyBond: string;
-  /**
-   * Int64(e8), Minimum bond of active nodes
-   */
-  minimumActiveBond: string;
-  /**
-   * Int64(e8), Minimum bond of standby nodes
-   */
-  minimumStandbyBond: string;
-  /**
-   * Int64(e8), Total bond of active nodes
-   */
-  totalActiveBond: string;
-  /**
-   * Int64(e8), Total bond of standby nodes
-   */
-  totalStandbyBond: string;
+    /**
+     * Int64(e8), Average bond of active nodes
+     */
+    averageActiveBond: string;
+    /**
+     * Int64(e8), Average bond of standby nodes
+     */
+    averageStandbyBond: string;
+    /**
+     * Int64(e8), Highest effective bond for nodes
+     */
+    bondHardCap: string;
+    /**
+     * Int64(e8), Maxinum bond of active nodes
+     */
+    maximumActiveBond: string;
+    /**
+     * Int64(e8), Maximum bond of standby nodes
+     */
+    maximumStandbyBond: string;
+    /**
+     * Int64(e8), Median bond of active nodes
+     */
+    medianActiveBond: string;
+    /**
+     * Int64(e8), Median bond of standby nodes
+     */
+    medianStandbyBond: string;
+    /**
+     * Int64(e8), Minimum bond of active nodes
+     */
+    minimumActiveBond: string;
+    /**
+     * Int64(e8), Minimum bond of standby nodes
+     */
+    minimumStandbyBond: string;
+    /**
+     * Int64(e8), Total bond of active nodes
+     */
+    totalActiveBond: string;
+    /**
+     * Int64(e8), Total bond of standby nodes
+     */
+    totalStandbyBond: string;
 };
 
 export type BorrowerDetails = {
-  /**
-   * List details of all the loans identified with the given address
-   */
-  pools: Array<BorrowerPool>;
+    /**
+     * List details of all the loans identified with the given address
+     */
+    pools: Array<BorrowerPool>;
 };
 
 export type BorrowerPool = {
-  /**
-   * The asset that the borrower used as collateral
-   */
-  collateral_asset: string;
-  /**
-   * Int64(e8), The total amount of collateral that user deposited
-   */
-  collateral_deposited: string;
-  /**
-   * Int64(e8), The total amount of collateral the system paid back to the user
-   */
-  collateral_withdrawn: string;
-  /**
-   * Int64(e8), The total amount of debt issued as debt for user. denominated in TOR.
-   */
-  debt_issued_tor: string;
-  /**
-   * Int64(e8), The total amount of debt that the user paid back. denominated in TOR.
-   */
-  debt_repaid_tor: string;
-  /**
-   * Int64, Unix timestamp for the last time borrower opened a loan
-   */
-  last_open_loan_timestamp: string;
-  /**
-   * Int64, Unix timestamp for the last time borrower repayment occurred
-   */
-  last_repay_loan_timestamp: string;
-  target_assets: Array<string>;
+    /**
+     * The asset that the borrower used as collateral
+     */
+    collateral_asset: string;
+    /**
+     * Int64(e8), The total amount of collateral that user deposited
+     */
+    collateral_deposited: string;
+    /**
+     * Int64(e8), The total amount of collateral the system paid back to the user
+     */
+    collateral_withdrawn: string;
+    /**
+     * Int64(e8), The total amount of debt issued as debt for user. denominated in TOR.
+     */
+    debt_issued_tor: string;
+    /**
+     * Int64(e8), The total amount of debt that the user paid back. denominated in TOR.
+     */
+    debt_repaid_tor: string;
+    /**
+     * Int64, Unix timestamp for the last time borrower opened a loan
+     */
+    last_open_loan_timestamp: string;
+    /**
+     * Int64, Unix timestamp for the last time borrower repayment occurred
+     */
+    last_repay_loan_timestamp: string;
+    target_assets: Array<(string)>;
 };
 
-export type Borrowers = Array<string>;
+export type Borrowers = Array<(string)>;
 
 export type ChurnItem = {
-  /**
-   * full timestamp (nanoseconds since 1970) of the block at which the churn occurred
-   */
-  date: string;
-  /**
-   * height of the block at which the churn occurred
-   */
-  height: string;
+    /**
+     * full timestamp (nanoseconds since 1970) of the block at which the churn occurred
+     */
+    date: string;
+    /**
+     * height of the block at which the churn occurred
+     */
+    height: string;
 };
 
 export type Churns = Array<ChurnItem>;
@@ -250,535 +230,535 @@ export type Churns = Array<ChurnItem>;
  * Represents a digital currency amount
  */
 export type Coin = {
-  /**
-   * Int64(e8), asset Amount.
-   */
-  amount: string;
-  /**
-   * Asset in CHAIN.SYMBOL format
-   */
-  asset: string;
+    /**
+     * Int64(e8), asset Amount.
+     */
+    amount: string;
+    /**
+     * Asset in CHAIN.SYMBOL format
+     */
+    asset: string;
 };
 
 export type Coins = Array<Coin>;
 
 export type DepthHistory = {
-  intervals: DepthHistoryIntervals;
-  meta: DepthHistoryMeta;
+    intervals: DepthHistoryIntervals;
+    meta: DepthHistoryMeta;
 };
 
 export type DepthHistoryIntervals = Array<DepthHistoryItem>;
 
 export type DepthHistoryItem = {
-  /**
-   * Int64(e8), the amount of Asset in the pool at the end of the interval
-   */
-  assetDepth: string;
-  /**
-   * Float, price of asset in rune. I.e. rune amount / asset amount
-   */
-  assetPrice: string;
-  /**
-   * Float, the price of asset in USD (based on the deepest USD pool).
-   */
-  assetPriceUSD: string;
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Int64, Liquidity Units in the pool at the end of the interval
-   */
-  liquidityUnits: string;
-  /**
-   * Float, The liquidity unit value index. Sqrt(assetDepth * runeDepth)/liquidity units
-   *
-   */
-  luvi: string;
-  /**
-   * Int64, Number of liquidity members in the pool at the end of the interval
-   */
-  membersCount: string;
-  /**
-   * Int64(e8), the amount of Rune in the pool at the end of the interval
-   */
-  runeDepth: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-  /**
-   * Int64, Synth supply in the pool at the end of the interval
-   */
-  synthSupply: string;
-  /**
-   * Int64, Synth Units in the pool at the end of the interval
-   */
-  synthUnits: string;
-  /**
-   * Int64, Total Units (synthUnits + liquidityUnits) in the pool at the end of the interval
-   *
-   */
-  units: string;
+    /**
+     * Int64(e8), the amount of Asset in the pool at the end of the interval
+     */
+    assetDepth: string;
+    /**
+     * Float, price of asset in rune. I.e. rune amount / asset amount
+     */
+    assetPrice: string;
+    /**
+     * Float, the price of asset in USD (based on the deepest USD pool).
+     */
+    assetPriceUSD: string;
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64, Liquidity Units in the pool at the end of the interval
+     */
+    liquidityUnits: string;
+    /**
+     * Float, The liquidity unit value index. Sqrt(assetDepth * runeDepth)/liquidity units
+     *
+     */
+    luvi: string;
+    /**
+     * Int64, Number of liquidity members in the pool at the end of the interval
+     */
+    membersCount: string;
+    /**
+     * Int64(e8), the amount of Rune in the pool at the end of the interval
+     */
+    runeDepth: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+    /**
+     * Int64, Synth supply in the pool at the end of the interval
+     */
+    synthSupply: string;
+    /**
+     * Int64, Synth Units in the pool at the end of the interval
+     */
+    synthUnits: string;
+    /**
+     * Int64, Total Units (synthUnits + liquidityUnits) in the pool at the end of the interval
+     *
+     */
+    units: string;
 };
 
 export type DepthHistoryItemPool = {
-  /**
-   * asset for the given pool
-   */
-  pool: string;
-  /**
-   * Int64(e8) in rune, the total value in the pool (both assets and rune) at the end of the interval.
-   * Note: this is twice of the pool's Rune depth. (as pools are symmetrically balance)
-   *
-   */
-  totalDepth: string;
+    /**
+     * asset for the given pool
+     */
+    pool: string;
+    /**
+     * Int64(e8) in rune, the total value in the pool (both assets and rune) at the end of the interval.
+     * Note: this is twice of the pool's Rune depth. (as pools are symmetrically balance)
+     *
+     */
+    totalDepth: string;
 };
 
 export type DepthHistoryMeta = {
-  /**
-   * Int64(e8), the amount of Asset in the pool at the end of the interval at time endTime
-   *
-   */
-  endAssetDepth: string;
-  /**
-   * Int64, Liquidity Units in the pool at the end of the interval at time endTime
-   */
-  endLPUnits: string;
-  /**
-   * Int64, Number of liquidity members in the pool at the end of the interval at time endTime
-   */
-  endMemberCount: string;
-  /**
-   * Int64(e8), the amount of Rune in the pool at the end of the interval at time endTime
-   *
-   */
-  endRuneDepth: string;
-  /**
-   * Int64, Synth Units in the pool at the end of the interval at time endTime
-   */
-  endSynthUnits: string;
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Float, The liquidity unit value index increase between startTime and endTime
-   *
-   */
-  luviIncrease: string;
-  /**
-   * Float, The impermanent loss between the first and last depth item
-   */
-  priceShiftLoss: string;
-  /**
-   * Int64(e8), the amount of Asset in the pool at the start of the interval at time
-   * startTime
-   *
-   */
-  startAssetDepth: string;
-  /**
-   * Int64, Liquidity Units in the pool at the start of the interval at time startTime
-   *
-   */
-  startLPUnits: string;
-  /**
-   * Int64, Number of liquidity member in the pool at the start of the interval at time startTime
-   *
-   */
-  startMemberCount: string;
-  /**
-   * Int64(e8), the amount of Rune in the pool at the start of the interval at time startTime
-   *
-   */
-  startRuneDepth: string;
-  /**
-   * Int64, Synth Units in the pool at the start of the interval at time startTime
-   *
-   */
-  startSynthUnits: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
+    /**
+     * Int64(e8), the amount of Asset in the pool at the end of the interval at time endTime
+     *
+     */
+    endAssetDepth: string;
+    /**
+     * Int64, Liquidity Units in the pool at the end of the interval at time endTime
+     */
+    endLPUnits: string;
+    /**
+     * Int64, Number of liquidity members in the pool at the end of the interval at time endTime
+     */
+    endMemberCount: string;
+    /**
+     * Int64(e8), the amount of Rune in the pool at the end of the interval at time endTime
+     *
+     */
+    endRuneDepth: string;
+    /**
+     * Int64, Synth Units in the pool at the end of the interval at time endTime
+     */
+    endSynthUnits: string;
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Float, The liquidity unit value index increase between startTime and endTime
+     *
+     */
+    luviIncrease: string;
+    /**
+     * Float, The impermanent loss between the first and last depth item
+     */
+    priceShiftLoss: string;
+    /**
+     * Int64(e8), the amount of Asset in the pool at the start of the interval at time
+     * startTime
+     *
+     */
+    startAssetDepth: string;
+    /**
+     * Int64, Liquidity Units in the pool at the start of the interval at time startTime
+     *
+     */
+    startLPUnits: string;
+    /**
+     * Int64, Number of liquidity member in the pool at the start of the interval at time startTime
+     *
+     */
+    startMemberCount: string;
+    /**
+     * Int64(e8), the amount of Rune in the pool at the start of the interval at time startTime
+     *
+     */
+    startRuneDepth: string;
+    /**
+     * Int64, Synth Units in the pool at the start of the interval at time startTime
+     *
+     */
+    startSynthUnits: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
 };
 
 export type EarningsHistory = {
-  intervals: EarningsHistoryIntervals;
-  meta: EarningsHistoryItem;
+    intervals: EarningsHistoryIntervals;
+    meta: EarningsHistoryItem;
 };
 
 export type EarningsHistoryIntervals = Array<EarningsHistoryItem>;
 
 export type EarningsHistoryItem = {
-  /**
-   * float64, Average amount of active nodes during the time interval
-   */
-  avgNodeCount: string;
-  /**
-   * Int64(e8), Total block rewards emitted during the time interval
-   */
-  blockRewards: string;
-  /**
-   * Int64(e8), Share of earnings sent to nodes during the time interval
-   */
-  bondingEarnings: string;
-  /**
-   * Int64(e8), System income generated during the time interval. It is the sum of
-   * liquidity fees and block rewards
-   *
-   */
-  earnings: string;
-  /**
-   * Int64, The end time of interval in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Int64(e8), Share of earnings sent to pools during the time interval
-   */
-  liquidityEarnings: string;
-  /**
-   * Int64(e8), Total liquidity fees, converted to RUNE, collected during the time interval
-   *
-   */
-  liquidityFees: string;
-  /**
-   * Earnings data for each pool for the time interval
-   */
-  pools: Array<EarningsHistoryItemPool>;
-  /**
-   * Float, the price of Rune based on the deepest USD pool at the end of the interval.
-   *
-   */
-  runePriceUSD: string;
-  /**
-   * Int64, The beginning time of interval in unix timestamp
-   */
-  startTime: string;
+    /**
+     * float64, Average amount of active nodes during the time interval
+     */
+    avgNodeCount: string;
+    /**
+     * Int64(e8), Total block rewards emitted during the time interval
+     */
+    blockRewards: string;
+    /**
+     * Int64(e8), Share of earnings sent to nodes during the time interval
+     */
+    bondingEarnings: string;
+    /**
+     * Int64(e8), System income generated during the time interval. It is the sum of
+     * liquidity fees and block rewards
+     *
+     */
+    earnings: string;
+    /**
+     * Int64, The end time of interval in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64(e8), Share of earnings sent to pools during the time interval
+     */
+    liquidityEarnings: string;
+    /**
+     * Int64(e8), Total liquidity fees, converted to RUNE, collected during the time interval
+     *
+     */
+    liquidityFees: string;
+    /**
+     * Earnings data for each pool for the time interval
+     */
+    pools: Array<EarningsHistoryItemPool>;
+    /**
+     * Float, the price of Rune based on the deepest USD pool at the end of the interval.
+     *
+     */
+    runePriceUSD: string;
+    /**
+     * Int64, The beginning time of interval in unix timestamp
+     */
+    startTime: string;
 };
 
 /**
  * pool earnings data during the time interval
  */
 export type EarningsHistoryItemPool = {
-  /**
-   * Int64(e8), liquidity fees collected in the pool's asset
-   */
-  assetLiquidityFees: string;
-  /**
-   * Int64(e8), total earnings in RUNE (totalLiquidityFees + rewards)
-   */
-  earnings: string;
-  /**
-   * asset for the given pool
-   */
-  pool: string;
-  /**
-   * Int64(e8), RUNE amount sent to (positive) or taken from (negative) the pool as
-   * a result of balancing it's share of system income each block
-   *
-   */
-  rewards: string;
-  /**
-   * Int64(e8), liquidity fees collected in RUNE
-   */
-  runeLiquidityFees: string;
-  /**
-   * Int64(e8), total saver reward collected by the pool, shown in pool's ASSET
-   *
-   */
-  saverEarning: string;
-  /**
-   * Int64(e8), total liquidity fees (assetFees + runeFees) collected, shown in RUNE
-   *
-   */
-  totalLiquidityFeesRune: string;
+    /**
+     * Int64(e8), liquidity fees collected in the pool's asset
+     */
+    assetLiquidityFees: string;
+    /**
+     * Int64(e8), total earnings in RUNE (totalLiquidityFees + rewards)
+     */
+    earnings: string;
+    /**
+     * asset for the given pool
+     */
+    pool: string;
+    /**
+     * Int64(e8), RUNE amount sent to (positive) or taken from (negative) the pool as
+     * a result of balancing it's share of system income each block
+     *
+     */
+    rewards: string;
+    /**
+     * Int64(e8), liquidity fees collected in RUNE
+     */
+    runeLiquidityFees: string;
+    /**
+     * Int64(e8), total saver reward collected by the pool, shown in pool's ASSET
+     *
+     */
+    saverEarning: string;
+    /**
+     * Int64(e8), total liquidity fees (assetFees + runeFees) collected, shown in RUNE
+     *
+     */
+    totalLiquidityFeesRune: string;
 };
 
 export type FailedMetadata = {
-  /**
-   * failed transaction code
-   */
-  code: string;
-  /**
-   * failed transaction memo
-   */
-  memo: string;
-  /**
-   * failed transaction code
-   */
-  reason: string;
+    /**
+     * failed transaction code
+     */
+    code: string;
+    /**
+     * failed transaction memo
+     */
+    memo: string;
+    /**
+     * failed transaction code
+     */
+    reason: string;
 };
 
 export type GenesisInf = {
-  /**
-   * Genesis Block hash
-   */
-  hash: string;
-  /**
-   * Genesis Block height
-   */
-  height: number;
+    /**
+     * Genesis Block hash
+     */
+    hash: string;
+    /**
+     * Genesis Block height
+     */
+    height: number;
 };
 
 export type Health = {
-  /**
-   * True means healthy, connected to database
-   */
-  database: boolean;
-  genesisInfo?: GenesisInf;
-  /**
-   * True means healthy. False means Midgard is still catching up to the chain
-   */
-  inSync: boolean;
-  lastAggregated: HeightTS;
-  lastCommitted: HeightTS;
-  lastFetched: HeightTS;
-  lastThorNode: HeightTS;
-  /**
-   * Int64, the current block count
-   */
-  scannerHeight: string;
+    /**
+     * True means healthy, connected to database
+     */
+    database: boolean;
+    genesisInfo?: GenesisInf;
+    /**
+     * True means healthy. False means Midgard is still catching up to the chain
+     */
+    inSync: boolean;
+    lastAggregated: HeightTS;
+    lastCommitted: HeightTS;
+    lastFetched: HeightTS;
+    lastThorNode: HeightTS;
+    /**
+     * Int64, the current block count
+     */
+    scannerHeight: string;
 };
 
 export type HeightTS = {
-  /**
-   * Block height
-   */
-  height: number;
-  /**
-   * Block timestamp (seconds since epoch)
-   */
-  timestamp: number;
+    /**
+     * Block height
+     */
+    height: number;
+    /**
+     * Block timestamp (seconds since epoch)
+     */
+    timestamp: number;
 };
 
 export type KnownPools = {
-  [key: string]: string;
+    [key: string]: (string);
 };
 
 export type LiquidityHistory = {
-  intervals: LiquidityHistoryIntervals;
-  meta: LiquidityHistoryItem;
+    intervals: LiquidityHistoryIntervals;
+    meta: LiquidityHistoryItem;
 };
 
 export type LiquidityHistoryIntervals = Array<LiquidityHistoryItem>;
 
 export type LiquidityHistoryItem = {
-  /**
-   * Int64(e8), total assets deposited during the time interval.
-   * Denoted in Rune using the price at deposit time.
-   *
-   */
-  addAssetLiquidityVolume: string;
-  /**
-   * Int64, number of deposits during the time interval.
-   *
-   */
-  addLiquidityCount: string;
-  /**
-   * Int64(e8), total of rune and asset deposits.
-   * Denoted in Rune (using the price at deposit time).
-   *
-   */
-  addLiquidityVolume: string;
-  /**
-   * Int64(e8), total Rune deposited during the time interval.
-   *
-   */
-  addRuneLiquidityVolume: string;
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Int64(e8), net liquidity changes (withdrawals - deposits) during the time interval
-   *
-   */
-  net: string;
-  /**
-   * Float, the price of Rune based on the deepest USD pool at the end of the interval.
-   *
-   */
-  runePriceUSD: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-  /**
-   * Int64(e8), total assets withdrawn during the time interval.
-   * Denoted in Rune using the price at withdraw time.
-   *
-   */
-  withdrawAssetVolume: string;
-  /**
-   * Int64, number of withdraw during the time interval.
-   *
-   */
-  withdrawCount: string;
-  /**
-   * Int64(e8), total Rune withdrawn during the time interval.
-   *
-   */
-  withdrawRuneVolume: string;
-  /**
-   * Int64(e8), total of rune and asset withdrawals.
-   * Denoted in Rune (using the price at withdraw time).
-   *
-   */
-  withdrawVolume: string;
+    /**
+     * Int64(e8), total assets deposited during the time interval.
+     * Denoted in Rune using the price at deposit time.
+     *
+     */
+    addAssetLiquidityVolume: string;
+    /**
+     * Int64, number of deposits during the time interval.
+     *
+     */
+    addLiquidityCount: string;
+    /**
+     * Int64(e8), total of rune and asset deposits.
+     * Denoted in Rune (using the price at deposit time).
+     *
+     */
+    addLiquidityVolume: string;
+    /**
+     * Int64(e8), total Rune deposited during the time interval.
+     *
+     */
+    addRuneLiquidityVolume: string;
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64(e8), net liquidity changes (withdrawals - deposits) during the time interval
+     *
+     */
+    net: string;
+    /**
+     * Float, the price of Rune based on the deepest USD pool at the end of the interval.
+     *
+     */
+    runePriceUSD: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+    /**
+     * Int64(e8), total assets withdrawn during the time interval.
+     * Denoted in Rune using the price at withdraw time.
+     *
+     */
+    withdrawAssetVolume: string;
+    /**
+     * Int64, number of withdraw during the time interval.
+     *
+     */
+    withdrawCount: string;
+    /**
+     * Int64(e8), total Rune withdrawn during the time interval.
+     *
+     */
+    withdrawRuneVolume: string;
+    /**
+     * Int64(e8), total of rune and asset withdrawals.
+     * Denoted in Rune (using the price at withdraw time).
+     *
+     */
+    withdrawVolume: string;
 };
 
 export type MemberDetails = {
-  /**
-   * List details of all the liquidity providers identified with the given address
-   */
-  pools: Array<MemberPool>;
+    /**
+     * List details of all the liquidity providers identified with the given address
+     */
+    pools: Array<MemberPool>;
 };
 
 export type MemberPool = {
-  /**
-   * Int64(e8), total asset added to the pool by member
-   */
-  assetAdded: string;
-  /**
-   * asset address used by the member
-   */
-  assetAddress: string;
-  /**
-   * Int64(e8), total asset that is currently deposited to the pool by member.
-   * This field is same as the `asset_deposit_value` field in thornode. Mainly can be used
-   * for tracking, mainly Growth Percentage
-   *
-   */
-  assetDeposit: string;
-  /**
-   * Int64(e8), asset sent but not added yet, it will be added when the rune pair arrives
-   *
-   */
-  assetPending: string;
-  /**
-   * Int64(e8), total asset withdrawn from the pool by member
-   */
-  assetWithdrawn: string;
-  /**
-   * Int64, Unix timestamp for the first time member deposited into the pool
-   */
-  dateFirstAdded: string;
-  /**
-   * Int64, Unix timestamp for the last time member deposited into the pool
-   */
-  dateLastAdded: string;
-  /**
-   * Int64, pool liquidity units that belong the the member
-   */
-  liquidityUnits: string;
-  /**
-   * Pool rest of the data refers to
-   */
-  pool: string;
-  /**
-   * Int64(e8), total Rune added to the pool by member
-   */
-  runeAdded: string;
-  /**
-   * Rune address used by the member
-   */
-  runeAddress: string;
-  /**
-   * Int64(e8), total Rune that is currently deposited to the pool by member.
-   * This field is same as the `rune_deposit_value` field in thornode. Mainly can be used
-   * for tracking, mainly Growth Percentage
-   *
-   */
-  runeDeposit: string;
-  /**
-   * Int64(e8), Rune sent but not added yet, it will be added when the asset pair arrives
-   *
-   */
-  runePending: string;
-  /**
-   * Int64(e8), total Rune withdrawn from the pool by member
-   */
-  runeWithdrawn: string;
+    /**
+     * Int64(e8), total asset added to the pool by member
+     */
+    assetAdded: string;
+    /**
+     * asset address used by the member
+     */
+    assetAddress: string;
+    /**
+     * Int64(e8), total asset that is currently deposited to the pool by member.
+     * This field is same as the `asset_deposit_value` field in thornode. Mainly can be used
+     * for tracking, mainly Growth Percentage
+     *
+     */
+    assetDeposit: string;
+    /**
+     * Int64(e8), asset sent but not added yet, it will be added when the rune pair arrives
+     *
+     */
+    assetPending: string;
+    /**
+     * Int64(e8), total asset withdrawn from the pool by member
+     */
+    assetWithdrawn: string;
+    /**
+     * Int64, Unix timestamp for the first time member deposited into the pool
+     */
+    dateFirstAdded: string;
+    /**
+     * Int64, Unix timestamp for the last time member deposited into the pool
+     */
+    dateLastAdded: string;
+    /**
+     * Int64, pool liquidity units that belong the the member
+     */
+    liquidityUnits: string;
+    /**
+     * Pool rest of the data refers to
+     */
+    pool: string;
+    /**
+     * Int64(e8), total Rune added to the pool by member
+     */
+    runeAdded: string;
+    /**
+     * Rune address used by the member
+     */
+    runeAddress: string;
+    /**
+     * Int64(e8), total Rune that is currently deposited to the pool by member.
+     * This field is same as the `rune_deposit_value` field in thornode. Mainly can be used
+     * for tracking, mainly Growth Percentage
+     *
+     */
+    runeDeposit: string;
+    /**
+     * Int64(e8), Rune sent but not added yet, it will be added when the asset pair arrives
+     *
+     */
+    runePending: string;
+    /**
+     * Int64(e8), total Rune withdrawn from the pool by member
+     */
+    runeWithdrawn: string;
 };
 
-export type Members = Array<string>;
+export type Members = Array<(string)>;
 
 export type Metadata = {
-  addLiquidity?: AddLiquidityMetadata;
-  bond?: BondMetadata;
-  failed?: FailedMetadata;
-  refund?: RefundMetadata;
-  runePoolDeposit?: RunePoolDepositMetadata;
-  runePoolWithdraw?: RunePoolWithdrawMetadata;
-  send?: SendMetadata;
-  swap?: SwapMetadata;
-  thorname?: ThornameMetadata;
-  withdraw?: WithdrawMetadata;
+    addLiquidity?: AddLiquidityMetadata;
+    bond?: BondMetadata;
+    failed?: FailedMetadata;
+    refund?: RefundMetadata;
+    runePoolDeposit?: RunePoolDepositMetadata;
+    runePoolWithdraw?: RunePoolWithdrawMetadata;
+    send?: SendMetadata;
+    swap?: SwapMetadata;
+    thorname?: ThornameMetadata;
+    withdraw?: WithdrawMetadata;
 };
 
 export type Network = {
-  /**
-   * Array of rune amounts (e8) bonded by each active node.
-   *
-   */
-  activeBonds: Array<string>;
-  /**
-   * Int64, Number of active nodes
-   */
-  activeNodeCount: string;
-  blockRewards: BlockRewards;
-  bondMetrics: BondMetrics;
-  /**
-   * Float, E.g. 0.01 = 1%. Estimate of the compounded bonding earnings based on the current
-   * reserve size, emmission curve, blocks per year and pool share factor =
-   * (WeeklyBondIncome/BondAmount + 1)^52 - 1
-   *
-   */
-  bondingAPY: string;
-  /**
-   * Float, E.g. 0.01 = 1%. Estimate of the compounded  liquidity provider earnings based
-   * on the current reserve size, emmission curve, blocks per year and pool share factor =
-   * (WeeklyLiquidityIncome/(totalPooledRune*2) + 1)^52 - 1
-   *
-   */
-  liquidityAPY: string;
-  /**
-   * Int64, height (block number) of the next churn.
-   */
-  nextChurnHeight: string;
-  /**
-   * Int64, the remaining time of pool activation (in blocks)
-   */
-  poolActivationCountdown: string;
-  /**
-   * Float [0..1], the ratio which is used to split earnings between liquidity provider and
-   * nodes.
-   * LPIncome = rewards * poolShareFactor ;
-   * BondIncome :=  rewards * (1 - poolShareFactor)
-   *
-   */
-  poolShareFactor: string;
-  /**
-   * Array of rune amounts (e8) bonded by each standby node.
-   *
-   */
-  standbyBonds: Array<string>;
-  /**
-   * Int64, Number of standby nodes, some of them might become active at the next churn.
-   *
-   */
-  standbyNodeCount: string;
-  /**
-   * Int64(e8), total Rune in all pools. Because asset and Rune value is the same amount in
-   * every pool (by definition), the total amount pooled is totalPooledRune*2.
-   *
-   */
-  totalPooledRune: string;
-  /**
-   * Int64(e8), Current size of the Reserve.
-   */
-  totalReserve: string;
+    /**
+     * Array of rune amounts (e8) bonded by each active node.
+     *
+     */
+    activeBonds: Array<(string)>;
+    /**
+     * Int64, Number of active nodes
+     */
+    activeNodeCount: string;
+    blockRewards: BlockRewards;
+    bondMetrics: BondMetrics;
+    /**
+     * Float, E.g. 0.01 = 1%. Estimate of the compounded bonding earnings based on the current
+     * reserve size, emmission curve, blocks per year and pool share factor =
+     * (WeeklyBondIncome/BondAmount + 1)^52 - 1
+     *
+     */
+    bondingAPY: string;
+    /**
+     * Float, E.g. 0.01 = 1%. Estimate of the compounded  liquidity provider earnings based
+     * on the current reserve size, emmission curve, blocks per year and pool share factor =
+     * (WeeklyLiquidityIncome/(totalPooledRune*2) + 1)^52 - 1
+     *
+     */
+    liquidityAPY: string;
+    /**
+     * Int64, height (block number) of the next churn.
+     */
+    nextChurnHeight: string;
+    /**
+     * Int64, the remaining time of pool activation (in blocks)
+     */
+    poolActivationCountdown: string;
+    /**
+     * Float [0..1], the ratio which is used to split earnings between liquidity provider and
+     * nodes.
+     * LPIncome = rewards * poolShareFactor ;
+     * BondIncome :=  rewards * (1 - poolShareFactor)
+     *
+     */
+    poolShareFactor: string;
+    /**
+     * Array of rune amounts (e8) bonded by each standby node.
+     *
+     */
+    standbyBonds: Array<(string)>;
+    /**
+     * Int64, Number of standby nodes, some of them might become active at the next churn.
+     *
+     */
+    standbyNodeCount: string;
+    /**
+     * Int64(e8), total Rune in all pools. Because asset and Rune value is the same amount in
+     * every pool (by definition), the total amount pooled is totalPooledRune*2.
+     *
+     */
+    totalPooledRune: string;
+    /**
+     * Int64(e8), Current size of the Reserve.
+     */
+    totalReserve: string;
 };
 
 /**
@@ -789,299 +769,299 @@ export type Network = {
 export type NetworkFees = Array<Coin>;
 
 export type Node = {
-  /**
-   * ed25519 public key
-   */
-  ed25519: string;
-  /**
-   * node thorchain address
-   */
-  nodeAddress: string;
-  /**
-   * secp256k1 public key
-   */
-  secp256k1: string;
+    /**
+     * ed25519 public key
+     */
+    ed25519: string;
+    /**
+     * node thorchain address
+     */
+    nodeAddress: string;
+    /**
+     * secp256k1 public key
+     */
+    secp256k1: string;
 };
 
 export type Nodes = Array<Node>;
 
 export type PoolDetail = {
-  /**
-   * Float, Annual Percentage Yield of earning to depth (earning/depth) estimated from a period
-   * (configurable by the period parameter, default is 14) E.g. 0.1 means 10% yearly return.
-   *
-   */
-  annualPercentageRate: string;
-  asset: string;
-  /**
-   * Int64(e8), the amount of Asset in the pool.
-   */
-  assetDepth: string;
-  /**
-   * Float, price of asset in rune. I.e. rune amount / asset amount.
-   */
-  assetPrice: string;
-  /**
-   * Float, the price of asset in USD (based on the deepest USD pool).
-   */
-  assetPriceUSD: string;
-  /**
-   * Int64(e8), The earning that has been recorded from the pool asset's Liquidity Fees
-   * and Rewards in RUNE. The earnings shown are from the period parameter default being 14 days
-   * (configurable by the period parameter).
-   *
-   */
-  earnings: string;
-  /**
-   * Float, The estimation of earnings during the time interval expanded through a year
-   * compared to the current pool depth.
-   * E.g. 0.1 means the pool based on this interval earnings can earn 10% of its pool during a year.
-   *
-   */
-  earningsAnnualAsPercentOfDepth: string;
-  /**
-   * Int64, Liquidity Units in the pool.
-   */
-  liquidityUnits: string;
-  /**
-   * Float, Annual yield estimated (compounding) from a period (default being 14d)
-   * configurable by the period parameter. Calculated from Liquidity Unit Value Index (LUVI).
-   * Due to Impermanent Loss and Synths Leverage this might be negative.
-   *
-   */
-  lpLuvi: string;
-  /**
-   * Int64, The native decimal number of the pool asset. (If the value is "-1", it means midgard doesn't know the pool native decimal)
-   */
-  nativeDecimal: string;
-  /**
-   * Float, Annual Percentage Yield of earning to depth (earning/depth) estimated from a period
-   * (configurable by the period parameter, default is 14) E.g. 0.1 means 10% yearly return.
-   *
-   */
-  poolAPY: string;
-  /**
-   * Int64(e8), the amount of Rune in the pool.
-   */
-  runeDepth: string;
-  /**
-   * Float, Annual Return estimated linearly (not compounded) for savers from
-   * a period of typically the last 30 or 100 days (configurable by the period parameter,
-   * default is 14). E.g. 0.1 means 10% yearly return.
-   * If the savers period has not yet been reached, It will show zero instead.
-   *
-   */
-  saversAPR: string;
-  /**
-   * Int64, Total synth locked in saver vault.
-   */
-  saversDepth: string;
-  /**
-   * Int64, Units tracking savers vault ownership.
-   */
-  saversUnits: string;
-  /**
-   * Float, the proportion of overall yield that is given to savers based on its size
-   * (relative to dual side LPs) and the SynthYieldBasisPoints. E.g. 0.1 means 10% of the yield
-   * goes to the savers.
-   *
-   */
-  saversYieldShare?: string;
-  /**
-   * The state of the pool, e.g. Available, Staged.
-   */
-  status: string;
-  /**
-   * Int64, Synth supply in the pool.
-   */
-  synthSupply: string;
-  /**
-   * Int64, Synth Units in the pool.
-   */
-  synthUnits: string;
-  /**
-   * Int64, Total collateral of the pool created by the borrowers.
-   */
-  totalCollateral: string;
-  /**
-   * Int64, Total debt of the pool by the borrowers.
-   */
-  totalDebtTor: string;
-  /**
-   * Int64, Total Units (synthUnits + liquidityUnits) in the pool.
-   */
-  units: string;
-  /**
-   * Int64(e8), the total volume of swaps in the last 24h to and from Rune denoted in Rune.
-   * It includes synth mint or burn.
-   *
-   */
-  volume24h: string;
+    /**
+     * Float, Annual Percentage Yield of earning to depth (earning/depth) estimated from a period
+     * (configurable by the period parameter, default is 14) E.g. 0.1 means 10% yearly return.
+     *
+     */
+    annualPercentageRate: string;
+    asset: string;
+    /**
+     * Int64(e8), the amount of Asset in the pool.
+     */
+    assetDepth: string;
+    /**
+     * Float, price of asset in rune. I.e. rune amount / asset amount.
+     */
+    assetPrice: string;
+    /**
+     * Float, the price of asset in USD (based on the deepest USD pool).
+     */
+    assetPriceUSD: string;
+    /**
+     * Int64(e8), The earning that has been recorded from the pool asset's Liquidity Fees
+     * and Rewards in RUNE. The earnings shown are from the period parameter default being 14 days
+     * (configurable by the period parameter).
+     *
+     */
+    earnings: string;
+    /**
+     * Float, The estimation of earnings during the time interval expanded through a year
+     * compared to the current pool depth.
+     * E.g. 0.1 means the pool based on this interval earnings can earn 10% of its pool during a year.
+     *
+     */
+    earningsAnnualAsPercentOfDepth: string;
+    /**
+     * Int64, Liquidity Units in the pool.
+     */
+    liquidityUnits: string;
+    /**
+     * Float, Annual yield estimated (compounding) from a period (default being 14d)
+     * configurable by the period parameter. Calculated from Liquidity Unit Value Index (LUVI).
+     * Due to Impermanent Loss and Synths Leverage this might be negative.
+     *
+     */
+    lpLuvi: string;
+    /**
+     * Int64, The native decimal number of the pool asset. (If the value is "-1", it means midgard doesn't know the pool native decimal)
+     */
+    nativeDecimal: string;
+    /**
+     * Float, Annual Percentage Yield of earning to depth (earning/depth) estimated from a period
+     * (configurable by the period parameter, default is 14) E.g. 0.1 means 10% yearly return.
+     *
+     */
+    poolAPY: string;
+    /**
+     * Int64(e8), the amount of Rune in the pool.
+     */
+    runeDepth: string;
+    /**
+     * Float, Annual Return estimated linearly (not compounded) for savers from
+     * a period of typically the last 30 or 100 days (configurable by the period parameter,
+     * default is 14). E.g. 0.1 means 10% yearly return.
+     * If the savers period has not yet been reached, It will show zero instead.
+     *
+     */
+    saversAPR: string;
+    /**
+     * Int64, Total synth locked in saver vault.
+     */
+    saversDepth: string;
+    /**
+     * Int64, Units tracking savers vault ownership.
+     */
+    saversUnits: string;
+    /**
+     * Float, the proportion of overall yield that is given to savers based on its size
+     * (relative to dual side LPs) and the SynthYieldBasisPoints. E.g. 0.1 means 10% of the yield
+     * goes to the savers.
+     *
+     */
+    saversYieldShare?: string;
+    /**
+     * The state of the pool, e.g. Available, Staged.
+     */
+    status: string;
+    /**
+     * Int64, Synth supply in the pool.
+     */
+    synthSupply: string;
+    /**
+     * Int64, Synth Units in the pool.
+     */
+    synthUnits: string;
+    /**
+     * Int64, Total collateral of the pool created by the borrowers.
+     */
+    totalCollateral: string;
+    /**
+     * Int64, Total debt of the pool by the borrowers.
+     */
+    totalDebtTor: string;
+    /**
+     * Int64, Total Units (synthUnits + liquidityUnits) in the pool.
+     */
+    units: string;
+    /**
+     * Int64(e8), the total volume of swaps in the last 24h to and from Rune denoted in Rune.
+     * It includes synth mint or burn.
+     *
+     */
+    volume24h: string;
 };
 
 export type PoolDetails = Array<PoolDetail>;
 
 export type PoolStatsDetail = {
-  /**
-   * Int64(e8), same as history/liquidity_changes:addAssetLiquidityVolume
-   */
-  addAssetLiquidityVolume: string;
-  /**
-   * Int64, same as history/liquidity_changes:addLiquidityCount
-   */
-  addLiquidityCount: string;
-  /**
-   * Int64(e8), same as history/liquidity_changes:addLiquidityVolume
-   */
-  addLiquidityVolume: string;
-  /**
-   * Int64(e8), same as history/liquidity_changes:addRuneLiquidityVolume
-   */
-  addRuneLiquidityVolume: string;
-  /**
-   * deprecated now it's only showing zero util being deleted.
-   */
-  annualPercentageRate: string;
-  asset: string;
-  /**
-   * Int64(e8), the amount of Asset in the pool
-   */
-  assetDepth: string;
-  /**
-   * Float, price of asset in rune. I.e. rune amount / asset amount
-   */
-  assetPrice: string;
-  /**
-   * Float, the price of asset in USD (based on the deepest USD pool).
-   */
-  assetPriceUSD: string;
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), same as history/swaps:averageSlip
-   *
-   */
-  averageSlip: string;
-  /**
-   * Int64(e8), The earning that has been recorded from the pool asset's Liquidity Fees
-   * and Rewards in RUNE. The earnings shown are from the period parameter default being 14 days
-   * (configurable by the period parameter).
-   *
-   */
-  earnings: string;
-  /**
-   * Float, The estimation of earnings during the time interval expanded through a year
-   * compared to the current pool depth.
-   * E.g. 0.1 means the pool based on this interval earnings can earn 10% of its pool during a year.
-   *
-   */
-  earningsAnnualAsPercentOfDepth: string;
-  /**
-   * Int64, Liquidity Units in the pool
-   */
-  liquidityUnits: string;
-  /**
-   * deprecated now it's only showing zero util being deleted.
-   */
-  poolAPY: string;
-  /**
-   * Int64(e8), the amount of Rune in the pool
-   */
-  runeDepth: string;
-  /**
-   * Float, Annual Return estimated linearly (not compounded) for savers from
-   * a period of typically the last 30 or 100 days (configurable by the period parameter,
-   * default is 14). E.g. 0.1 means 10% yearly return.
-   * If the savers period has not yet been reached, It will show zero instead.
-   *
-   */
-  saversAPR: string;
-  /**
-   * The state of the pool, e.g. Available, Staged
-   */
-  status: string;
-  /**
-   * Int64, same as history/swaps:totalCount
-   */
-  swapCount: string;
-  /**
-   * Int64(e8), same as history/swaps:totalVolume
-   */
-  swapVolume: string;
-  /**
-   * Int64, Synth supply in the pool
-   */
-  synthSupply: string;
-  /**
-   * Int64, Synth Units in the pool
-   */
-  synthUnits: string;
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), same as
-   * history/swaps:toAssetAverageSlip
-   *
-   */
-  toAssetAverageSlip: string;
-  /**
-   * Int64, same as history/swaps:toAssetCount
-   */
-  toAssetCount: string;
-  /**
-   * Int64(e8), same as history/swaps:toAssetFees
-   */
-  toAssetFees: string;
-  /**
-   * Int64(e8), same as history/swaps:toAssetVolume
-   */
-  toAssetVolume: string;
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), same as
-   * history/swaps:toRuneAverageSlip
-   *
-   */
-  toRuneAverageSlip: string;
-  /**
-   * Int64, same as history/swaps:toRuneCount
-   */
-  toRuneCount: string;
-  /**
-   * Int64(e8), same as history/swaps:toRuneFees
-   */
-  toRuneFees: string;
-  /**
-   * Int64(e8), same as history/swaps:toRuneVolume
-   */
-  toRuneVolume: string;
-  /**
-   * Int64(e8), same as history/swaps:totalFees
-   */
-  totalFees: string;
-  /**
-   * Int64, same as len(history/members?pool=POOL)
-   */
-  uniqueMemberCount: string;
-  /**
-   * Deprecated, it's always 0.
-   */
-  uniqueSwapperCount: string;
-  /**
-   * Int64, Total Units (synthUnits + liquidityUnits) in the pool
-   */
-  units: string;
-  /**
-   * Int64(e8), same as history/liquidity_changes:withdrawAssetVolume
-   */
-  withdrawAssetVolume: string;
-  /**
-   * Int64, same as history/liquidity_changes:withdrawCount
-   */
-  withdrawCount: string;
-  /**
-   * Int64(e8), same as history/liquidity_changes:withdrawRuneVolume
-   */
-  withdrawRuneVolume: string;
-  /**
-   * Int64(e8), same as history/liquidity_changes:withdrawVolume
-   */
-  withdrawVolume: string;
+    /**
+     * Int64(e8), same as history/liquidity_changes:addAssetLiquidityVolume
+     */
+    addAssetLiquidityVolume: string;
+    /**
+     * Int64, same as history/liquidity_changes:addLiquidityCount
+     */
+    addLiquidityCount: string;
+    /**
+     * Int64(e8), same as history/liquidity_changes:addLiquidityVolume
+     */
+    addLiquidityVolume: string;
+    /**
+     * Int64(e8), same as history/liquidity_changes:addRuneLiquidityVolume
+     */
+    addRuneLiquidityVolume: string;
+    /**
+     * deprecated now it's only showing zero util being deleted.
+     */
+    annualPercentageRate: string;
+    asset: string;
+    /**
+     * Int64(e8), the amount of Asset in the pool
+     */
+    assetDepth: string;
+    /**
+     * Float, price of asset in rune. I.e. rune amount / asset amount
+     */
+    assetPrice: string;
+    /**
+     * Float, the price of asset in USD (based on the deepest USD pool).
+     */
+    assetPriceUSD: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), same as history/swaps:averageSlip
+     *
+     */
+    averageSlip: string;
+    /**
+     * Int64(e8), The earning that has been recorded from the pool asset's Liquidity Fees
+     * and Rewards in RUNE. The earnings shown are from the period parameter default being 14 days
+     * (configurable by the period parameter).
+     *
+     */
+    earnings: string;
+    /**
+     * Float, The estimation of earnings during the time interval expanded through a year
+     * compared to the current pool depth.
+     * E.g. 0.1 means the pool based on this interval earnings can earn 10% of its pool during a year.
+     *
+     */
+    earningsAnnualAsPercentOfDepth: string;
+    /**
+     * Int64, Liquidity Units in the pool
+     */
+    liquidityUnits: string;
+    /**
+     * deprecated now it's only showing zero util being deleted.
+     */
+    poolAPY: string;
+    /**
+     * Int64(e8), the amount of Rune in the pool
+     */
+    runeDepth: string;
+    /**
+     * Float, Annual Return estimated linearly (not compounded) for savers from
+     * a period of typically the last 30 or 100 days (configurable by the period parameter,
+     * default is 14). E.g. 0.1 means 10% yearly return.
+     * If the savers period has not yet been reached, It will show zero instead.
+     *
+     */
+    saversAPR: string;
+    /**
+     * The state of the pool, e.g. Available, Staged
+     */
+    status: string;
+    /**
+     * Int64, same as history/swaps:totalCount
+     */
+    swapCount: string;
+    /**
+     * Int64(e8), same as history/swaps:totalVolume
+     */
+    swapVolume: string;
+    /**
+     * Int64, Synth supply in the pool
+     */
+    synthSupply: string;
+    /**
+     * Int64, Synth Units in the pool
+     */
+    synthUnits: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), same as
+     * history/swaps:toAssetAverageSlip
+     *
+     */
+    toAssetAverageSlip: string;
+    /**
+     * Int64, same as history/swaps:toAssetCount
+     */
+    toAssetCount: string;
+    /**
+     * Int64(e8), same as history/swaps:toAssetFees
+     */
+    toAssetFees: string;
+    /**
+     * Int64(e8), same as history/swaps:toAssetVolume
+     */
+    toAssetVolume: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), same as
+     * history/swaps:toRuneAverageSlip
+     *
+     */
+    toRuneAverageSlip: string;
+    /**
+     * Int64, same as history/swaps:toRuneCount
+     */
+    toRuneCount: string;
+    /**
+     * Int64(e8), same as history/swaps:toRuneFees
+     */
+    toRuneFees: string;
+    /**
+     * Int64(e8), same as history/swaps:toRuneVolume
+     */
+    toRuneVolume: string;
+    /**
+     * Int64(e8), same as history/swaps:totalFees
+     */
+    totalFees: string;
+    /**
+     * Int64, same as len(history/members?pool=POOL)
+     */
+    uniqueMemberCount: string;
+    /**
+     * Deprecated, it's always 0.
+     */
+    uniqueSwapperCount: string;
+    /**
+     * Int64, Total Units (synthUnits + liquidityUnits) in the pool
+     */
+    units: string;
+    /**
+     * Int64(e8), same as history/liquidity_changes:withdrawAssetVolume
+     */
+    withdrawAssetVolume: string;
+    /**
+     * Int64, same as history/liquidity_changes:withdrawCount
+     */
+    withdrawCount: string;
+    /**
+     * Int64(e8), same as history/liquidity_changes:withdrawRuneVolume
+     */
+    withdrawRuneVolume: string;
+    /**
+     * Int64(e8), same as history/liquidity_changes:withdrawVolume
+     */
+    withdrawVolume: string;
 };
 
 /**
@@ -1090,1453 +1070,1423 @@ export type PoolStatsDetail = {
 export type RUNEPoolDetails = Array<RUNEPoolProvider>;
 
 export type RUNEPoolHistory = {
-  intervals: RUNEPoolHistoryIntervals;
-  meta: RUNEPoolHistoryMeta;
+    intervals: RUNEPoolHistoryIntervals;
+    meta: RUNEPoolHistoryMeta;
 };
 
 export type RUNEPoolHistoryIntervals = Array<RUNEPoolHistoryItem>;
 
 export type RUNEPoolHistoryItem = {
-  /**
-   * Int64, Number of RUNEPool members in the pool at the end of the interval
-   */
-  count: string;
-  /**
-   * Int64(e8), The depth in the RUNEPool vault at the end of the interval
-   */
-  depth?: string;
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-  /**
-   * Int64, Units in the RUNEPool vault at the end of the interval
-   *
-   */
-  units: string;
+    /**
+     * Int64, Number of RUNEPool members in the pool at the end of the interval
+     */
+    count: string;
+    /**
+     * Int64(e8), The depth in the RUNEPool vault at the end of the interval
+     */
+    depth?: string;
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+    /**
+     * Int64, Units in the RUNEPool vault at the end of the interval
+     *
+     */
+    units: string;
 };
 
 export type RUNEPoolHistoryMeta = {
-  /**
-   * Int64, Number of RUNEPool member in the RUNEPool vault at the end of the interval at time endTime
-   */
-  endCount: string;
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Int64,  Units in the RUNEPool vault at the end of the interval at time endTime
-   */
-  endUnits: string;
-  /**
-   * Int64, Number of RUNEPool member in the RUNEPool vault at the start of the interval at time startTime
-   *
-   */
-  startCount: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-  /**
-   * Int64,  Units in the RUNEPool vault at the start of the interval at time startTime
-   *
-   */
-  startUnits: string;
+    /**
+     * Int64, Number of RUNEPool member in the RUNEPool vault at the end of the interval at time endTime
+     */
+    endCount: string;
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64,  Units in the RUNEPool vault at the end of the interval at time endTime
+     */
+    endUnits: string;
+    /**
+     * Int64, Number of RUNEPool member in the RUNEPool vault at the start of the interval at time startTime
+     *
+     */
+    startCount: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+    /**
+     * Int64,  Units in the RUNEPool vault at the start of the interval at time startTime
+     *
+     */
+    startUnits: string;
 };
 
 export type RUNEPoolProvider = {
-  /**
-   * Int64, Unix timestamp for the first time member deposited into the RUNEPool
-   */
-  dateFirstAdded: string;
-  /**
-   * Int64, Unix timestamp for the last time member deposited into the RUNEPool
-   */
-  dateLastAdded: string;
-  /**
-   * Int64(e8), total asset added in the RUNEPool by member
-   */
-  runeAdded: string;
-  /**
-   * address used by the member
-   */
-  runeAddress: string;
-  /**
-   * Int64(e8), total asset that is currently deposited by the member
-   */
-  runeDeposit: string;
-  /**
-   * Int64(e8), total asset withdrawn from the RUNEPool by the member
-   */
-  runeWithdrawn: string;
-  /**
-   * Int64, units that belong the the member
-   */
-  units: string;
+    /**
+     * Int64, Unix timestamp for the first time member deposited into the RUNEPool
+     */
+    dateFirstAdded: string;
+    /**
+     * Int64, Unix timestamp for the last time member deposited into the RUNEPool
+     */
+    dateLastAdded: string;
+    /**
+     * Int64(e8), total asset added in the RUNEPool by member
+     */
+    runeAdded: string;
+    /**
+     * address used by the member
+     */
+    runeAddress: string;
+    /**
+     * Int64(e8), total asset that is currently deposited by the member
+     */
+    runeDeposit: string;
+    /**
+     * Int64(e8), total asset withdrawn from the RUNEPool by the member
+     */
+    runeWithdrawn: string;
+    /**
+     * Int64, units that belong the the member
+     */
+    units: string;
 };
 
 export type RefundMetadata = {
-  /**
-   * Affiliate fee address of the swap, empty if fee swap
-   */
-  affiliateAddress: string;
-  /**
-   * Int64 (Basis points, 0-1000, where 1000=10%)
-   */
-  affiliateFee: string;
-  /**
-   * Transaction memo of the refund action
-   */
-  memo: string;
-  networkFees: NetworkFees;
-  /**
-   * Reason for the refund
-   */
-  reason: string;
-  /**
-   * The type of the transaction given from its Memo
-   * Type of Transaction type:
-   * "unknown", "add", "withdraw", "swap", "limitOrder", "outbound", "donate",
-   * "bond", "unbond", "leave", "yggdrasilFund", "yggdrasilReturn", "reserve",
-   * "refund", "migrate", "ragnarok", "switch", "noOp", "consolidate", "thorname",
-   * "loanOpen", "loanRepayment"
-   *
-   */
-  txType: string;
-};
-
-export type ReserveHistory = {
-  intervals: ReserveIntervals;
-  meta: ReserveMeta;
-};
-
-export type ReserveIntervals = Array<ReserveItem>;
-
-export type ReserveItem = {
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Int64(e8), fee made from outbound
-   */
-  gasFeeOutbound: string;
-  /**
-   * Int64(e8), RUNE paid to the pool for compensating the gas fees
-   */
-  gasReimbursement: string;
-  /**
-   * Int64(e8), RUNE paid to the system on deposit, send messages
-   *
-   */
-  networkFee: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-};
-
-export type ReserveMeta = {
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Int64(e8), fee made from outbound
-   *
-   */
-  gasFeeOutbound: string;
-  /**
-   * Int64(e8), RUNE paid to the pool for compensating the gas fees
-   *
-   */
-  gasReimbursement: string;
-  /**
-   * Int64(e8), RUNE paid to the system on deposit, send messages
-   *
-   */
-  networkFee: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-};
-
-export type ReverseTHORNames = Array<string>;
-
-export type RunePoolDepositMetadata = {
-  /**
-   * Int64, amount of units assigned to the member as result of the
-   * deposit
-   *
-   */
-  units: string;
-};
-
-export type RunePoolWithdrawMetadata = {
-  /**
-   * Transaction affiliate address
-   */
-  affiliateAddress: string;
-  /**
-   * Int64, Transaction affiliate amount in rune
-   */
-  affiliateAmount: string;
-  /**
-   * Transaction affiliate basis point
-   */
-  affiliateBasisPoint: string;
-  /**
-   * Int64 (Basis points, 0-10000, where 10000=100%), percentage of total ownership
-   * withdrawn
-   *
-   */
-  basisPoints: string;
-  /**
-   * Int64, amount of units removed from the member as result of the withdrawal
-   *
-   */
-  units: string;
-};
-
-export type SaverDetails = {
-  /**
-   * List details of all the savers identified with the given address
-   */
-  pools: Array<SaverPool>;
-};
-
-export type SaverPool = {
-  /**
-   * Int64(e8), total asset added in the saver pool by member
-   */
-  assetAdded: string;
-  /**
-   * saver address used by the member
-   */
-  assetAddress: string;
-  /**
-   * Int64(e8), total asset that is currently deposited by the member
-   */
-  assetDeposit: string;
-  /**
-   * Int64(e8), total asset can be redeemed from the saver pool by member
-   */
-  assetRedeem: string;
-  /**
-   * Int64(e8), total asset withdrawn from the saver pool by member
-   */
-  assetWithdrawn: string;
-  /**
-   * Int64, Unix timestamp for the first time member deposited into the saver pool
-   */
-  dateFirstAdded: string;
-  /**
-   * Int64, Unix timestamp for the last time member deposited into the saver pool
-   */
-  dateLastAdded: string;
-  /**
-   * The Pool rest of the data are referring to (only those pools can show up which have a corresponding saver pool)
-   */
-  pool: string;
-  /**
-   * Int64, saver liquidity units that belong the the member
-   */
-  saverUnits: string;
-};
-
-export type SaversHistory = {
-  intervals: SaversHistoryIntervals;
-  meta: SaversHistoryMeta;
-};
-
-export type SaversHistoryIntervals = Array<SaversHistoryItem>;
-
-export type SaversHistoryItem = {
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Int64, Number of saver members in the pool at the end of the interval
-   */
-  saversCount: string;
-  /**
-   * Int64(e8), The depth in the savers vault at the end of the interval
-   */
-  saversDepth: string;
-  /**
-   * Int64, Savers Units in the saver vault at the end of the interval
-   *
-   */
-  saversUnits: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-};
-
-export type SaversHistoryMeta = {
-  /**
-   * Int64, Number of savers member in the savers vault at the end of the interval at time endTime
-   */
-  endSaversCount: string;
-  /**
-   * Int64(e8), The depth in the savers vault at the end of the interval at time
-   * endTime
-   *
-   */
-  endSaversDepth: string;
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Int64, Savers Units in the savers vault at the end of the interval at time endTime
-   */
-  endUnits: string;
-  /**
-   * Int64, Number of savers member in the savers vault at the start of the interval at time startTime
-   *
-   */
-  startSaversCount: string;
-  /**
-   * Int64(e8), The depth in savers vault at the start of the interval at time
-   * startTime
-   *
-   */
-  startSaversDepth: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-  /**
-   * Int64, Savers Units in the savers vault at the start of the interval at time startTime
-   *
-   */
-  startUnits: string;
-};
-
-export type SendMetadata = {
-  /**
-   * Transaction memo of the send action
-   */
-  memo: string;
-  networkFees: NetworkFees;
-};
-
-export type StatsData = {
-  /**
-   * Int64, number of deposits since beginning.
-   */
-  addLiquidityCount: string;
-  /**
-   * Int64(e8), total of deposits since beginning.
-   *
-   */
-  addLiquidityVolume: string;
-  /**
-   * Deprecated, it's always 0.
-   */
-  dailyActiveUsers: string;
-  /**
-   * Deprecated, it's always 0.
-   */
-  monthlyActiveUsers: string;
-  /**
-   * Int64(e8), current total Rune in the pools.
-   */
-  runeDepth: string;
-  /**
-   * Float, the price of Rune based on the deepest USD pool.
-   */
-  runePriceUSD: string;
-  /**
-   * Int64, number of swaps (including synths) since beginning.
-   */
-  swapCount: string;
-  /**
-   * Int64(e8), number of swaps (including synths) in the last 24h.
-   */
-  swapCount24h: string;
-  /**
-   * Int64, number of swaps (including synths) in the last 30d.
-   */
-  swapCount30d: string;
-  /**
-   * Int64(e8), total volume of swaps (including synths) denoted in Rune since beginning.
-   *
-   */
-  swapVolume: string;
-  /**
-   * Int64(e8), amount of native rune switched from erc20 or bep2 rune.
-   */
-  switchedRune: string;
-  /**
-   * Int64, number of swaps from Synth to Rune since beginning.
-   */
-  synthBurnCount: string;
-  /**
-   * Int64, number of swaps from Rune to Synth since beginning.
-   */
-  synthMintCount: string;
-  /**
-   * Int64, number of swaps from Rune to Asset since beginning.
-   */
-  toAssetCount: string;
-  /**
-   * Int64, number of swaps from Asset to Rune since beginning.
-   */
-  toRuneCount: string;
-  /**
-   * Deprecated, it's always 0.
-   */
-  uniqueSwapperCount: string;
-  /**
-   * Int64, number of withdraws since beginning.
-   */
-  withdrawCount: string;
-  /**
-   * Int64(e8), total of withdraws since beginning.
-   *
-   */
-  withdrawVolume: string;
-};
-
-/**
- * Streaming Metadata associated with the action if it was streaming swap
- */
-export type StreamingSwapMeta = {
-  /**
-   * Int64, Number of swaps events which already happened.
-   */
-  count: string;
-  depositedCoin: Coin;
-  /**
-   * Array of failed swaps reasons in streaming swap.
-   */
-  failedSwapReasons?: Array<string>;
-  /**
-   * Array of failed swaps index in streaming swap.
-   */
-  failedSwaps?: Array<string>;
-  inCoin: Coin;
-  /**
-   * Int64, Number of blocks between swpas. (Blocks/Swap) E.g. 1 means every block.
-   */
-  interval: string;
-  /**
-   * Int64, The last blockheight the final swap happened (not outbound). This field will be missing until the final swap happens.
-   *
-   */
-  lastHeight: string;
-  outCoin: Coin;
-  /**
-   * Int64,  Number of swaps which thorchain is planning to execute. Total count at the end might be less.
-   *
-   */
-  quantity: string;
-};
-
-export type SwapHistory = {
-  intervals: SwapHistoryIntervals;
-  meta: SwapHistoryItem;
-};
-
-export type SwapHistoryIntervals = Array<SwapHistoryItem>;
-
-export type SwapHistoryItem = {
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), the weighted average (by count)
-   * of toAssetAverageSlip, toRuneAverageSlip, synthMintAverageSlip, synthRedeemAverageSlip.
-   * Big swaps have the same weight as small swaps.
-   *
-   */
-  averageSlip: string;
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-   * from asset to trade asset.
-   * Big swaps have the same weight as small swaps
-   *
-   */
-  fromTradeAverageSlip: string;
-  /**
-   * Int64, count of swaps from trade asset to rune
-   */
-  fromTradeCount: string;
-  /**
-   * Int64(e8), the fees collected from swaps from rune to trade asset (in rune)
-   */
-  fromTradeFees: string;
-  /**
-   * Int64(e8), volume of swaps from rune to trade asset denoted in rune
-   */
-  fromTradeVolume: string;
-  /**
-   * Int64(e2), volume of swaps from trade asset to rune denoted in USD price of the rune in each swap
-   */
-  fromTradeVolumeUSD: string;
-  /**
-   * Float, the price of Rune based on the deepest USD pool at the end of the interval.
-   *
-   */
-  runePriceUSD: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-   * from rune to synthetic asset.
-   * Big swaps have the same weight as small swaps
-   *
-   */
-  synthMintAverageSlip: string;
-  /**
-   * Int64, count of rune to synthetic asset swaps
-   */
-  synthMintCount: string;
-  /**
-   * Int64(e8), the fees collected from swaps from rune to synthetic asset (in rune)
-   *
-   */
-  synthMintFees: string;
-  /**
-   * Int64(e8), volume of swaps from rune to synthetic asset denoted in rune
-   */
-  synthMintVolume: string;
-  /**
-   * Int64(e2), volume of swaps from rune to synthetic asset denoted in USD price of the rune in each swap
-   */
-  synthMintVolumeUSD: string;
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-   * from synthetic asset to rune.
-   * Big swaps have the same weight as small swaps
-   *
-   */
-  synthRedeemAverageSlip: string;
-  /**
-   * Int64, count of synthetic asset to rune swaps
-   */
-  synthRedeemCount: string;
-  /**
-   * Int64(e8), the fees collected from swaps from synthetic asset to rune (in rune)
-   *
-   */
-  synthRedeemFees: string;
-  /**
-   * Int64(e8), volume of swaps from synthetic asset to rune denoted in rune
-   */
-  synthRedeemVolume: string;
-  /**
-   * Int64(e2), volume of swaps from synthetic asset to rune denoted in USD price of the rune in each swap
-   */
-  synthRedeemVolumeUSD: string;
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-   * from rune to asset.
-   * Big swaps have the same weight as small swaps
-   *
-   */
-  toAssetAverageSlip: string;
-  /**
-   * Int64, count of swaps from rune to asset
-   */
-  toAssetCount: string;
-  /**
-   * Int64(e8), the fees collected from swaps from rune to asset (in rune)
-   */
-  toAssetFees: string;
-  /**
-   * Int64(e8), volume of swaps from rune to asset denoted in rune
-   */
-  toAssetVolume: string;
-  /**
-   * Int64(e2), volume of swaps from rune to asset denoted in USD price of the rune in each swap
-   */
-  toAssetVolumeUSD: string;
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-   * from asset to rune.
-   * Big swaps have the same weight as small swaps
-   *
-   */
-  toRuneAverageSlip: string;
-  /**
-   * Int64, count of swaps from asset to rune
-   */
-  toRuneCount: string;
-  /**
-   * Int64(e8), the fees collected from swaps from asset to rune (in rune)
-   */
-  toRuneFees: string;
-  /**
-   * Int64(e8), volume of swaps from asset to rune denoted in rune
-   */
-  toRuneVolume: string;
-  /**
-   * Int64(e2), volume of swaps from asset to rune denoted in USD price of the rune in each swap
-   */
-  toRuneVolumeUSD: string;
-  /**
-   * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
-   * from rune to trade asset.
-   * Big swaps have the same weight as small swaps
-   *
-   */
-  toTradeAverageSlip: string;
-  /**
-   * Int64, count of swaps from rune to trade asset
-   */
-  toTradeCount: string;
-  /**
-   * Int64(e8), the fees collected from swaps from rune to trade asset (in rune)
-   */
-  toTradeFees: string;
-  /**
-   * Int64(e8), volume of swaps from trade asset to rune denoted in rune
-   */
-  toTradeVolume: string;
-  /**
-   * Int64(e2), volume of swaps from rune to trade asset denoted in USD price of the rune in each swap
-   */
-  toTradeVolumeUSD: string;
-  /**
-   * Int64, toAssetCount + toRuneCount + synthMintCount + synthRedeemCount
-   */
-  totalCount: string;
-  /**
-   * Int64(e8), toAssetFees + toRuneFees + synthMintFees + synthRedeemFees
-   */
-  totalFees: string;
-  /**
-   * Int64(e8),
-   * toAssetVolume + toRuneVolume + synthMintVolume + synthRedeemVolume (denoted in rune)
-   *
-   */
-  totalVolume: string;
-  /**
-   * Int64(e2),
-   * toAssetVolume + toRuneVolume + synthMintVolume + synthRedeemVolume (denoted in USD price of the rune in each swap)
-   *
-   */
-  totalVolumeUSD: string;
-};
-
-export type SwapMetadata = {
-  /**
-   * Affiliate fee address of the swap, empty if fee swap
-   */
-  affiliateAddress: string;
-  /**
-   * Int64 (Basis points, 0-1000, where 1000=10%)
-   */
-  affiliateFee: string;
-  /**
-   * in asset price usd at the first interval
-   */
-  inPriceUSD: string;
-  /**
-   * indicate whether this action was streaming
-   */
-  isStreamingSwap: boolean;
-  /**
-   * Int64(e8), RUNE amount charged as swap liquidity fee
-   */
-  liquidityFee: string;
-  /**
-   * Transaction memo of the swap action
-   */
-  memo: string;
-  networkFees: NetworkFees;
-  /**
-   * out asset price usd at the first interval
-   */
-  outPriceUSD: string;
-  streamingSwapMeta?: StreamingSwapMeta;
-  /**
-   * Int64 (Basis points, 0-10000, where 10000=100%), swap slip percentage
-   */
-  swapSlip: string;
-  /**
-   * Int64(e8), minimum output amount specified for the swap
-   */
-  swapTarget: string;
-  /**
-   * The type of the transaction given from its Memo.
-   * Type of Transaction:
-   * "unknown", "add", "withdraw", "swap", "limitOrder", "outbound", "donate",
-   * "bond", "unbond", "leave", "yggdrasilFund", "yggdrasilReturn", "reserve",
-   * "refund", "migrate", "ragnarok", "switch", "noOp", "consolidate", "thorname",
-   * "loanOpen", "loanRepayment"
-   *
-   */
-  txType: string;
-};
-
-export type THORNameDetails = {
-  /**
-   * List details of all chains and their addresses for a given THORName
-   */
-  entries: Array<THORNameEntry>;
-  /**
-   * Int64, THORChain block height in which THORName expires
-   */
-  expire: string;
-  /**
-   * owner's THOR address
-   */
-  owner: string;
-};
-
-export type THORNameEntry = {
-  /**
-   * address on blockchain
-   */
-  address: string;
-  /**
-   * blockchain
-   */
-  chain: string;
-};
-
-export type TVLHistory = {
-  intervals: TVLHistoryIntervals;
-  meta: TVLHistoryItem;
-};
-
-export type TVLHistoryIntervals = Array<TVLHistoryItem>;
-
-export type TVLHistoryItem = {
-  /**
-   * Int64, The end time of bucket in unix timestamp
-   */
-  endTime: string;
-  poolsDepth: Array<DepthHistoryItemPool>;
-  /**
-   * Float, the price of Rune based on the deepest USD pool at the end of the interval.
-   *
-   */
-  runePriceUSD: string;
-  /**
-   * Int64, The beginning time of bucket in unix timestamp
-   */
-  startTime: string;
-  /**
-   * Int64(e8), the total amount of bonds (both active and standby) at the end of
-   * the interval
-   *
-   */
-  totalValueBonded?: string;
-  /**
-   * Int64(e8), total value locked in the chain (in rune)
-   * This equals `totalPooledValue + totalBondedValue`, as it combines the liquidity
-   * pools and bonds of the nodes.
-   *
-   */
-  totalValueLocked?: string;
-  /**
-   * Int64(e8) in rune, the total pooled value (both assets and rune) in all of the pools at
-   * the end of the interval.
-   * Note: this is twice the aggregate Rune depth of all pools.
-   *
-   */
-  totalValuePooled: string;
-};
-
-export type ThornameMetadata = {
-  /**
-   * The CHAIN address thorname has been registered to.
-   */
-  address: string;
-  /**
-   * The thorname's chain.
-   */
-  chain: string;
-  /**
-   * Int64, THORChain block height in which THORName expires.
-   */
-  expire: string;
-  /**
-   * Int64, the amount of funding for the THORName registration.
-   */
-  fundAmount: string;
-  /**
-   * Transaction memo of thorname deposit message.
-   */
-  memo: string;
-  /**
-   * owner's THOR address.
-   */
-  owner: string;
-  /**
-   * Int64, the registration fee paid.
-   */
-  registrationFee: string;
-  /**
-   * The thorname registered to the address.
-   */
-  thorname: string;
-  /**
-   * The type of the transaction given from its Memo.
-   */
-  txType: string;
-};
-
-/**
- * Transaction data
- */
-export type Transaction = {
-  /**
-   * Sender address
-   */
-  address: string;
-  /**
-   * if transactions flaged as affiliate
-   */
-  affiliate?: boolean;
-  coins: Coins;
-  /**
-   * The thorchain height that the outbound transaction occurred.
-   *
-   */
-  height?: string;
-  /**
-   * Transaction id hash. Some transactions (such as outbound transactions made in the
-   * native asset) may have a zero value.
-   *
-   */
-  txID: string;
-};
-
-export type WithdrawMetadata = {
-  /**
-   * Decimal (-1.0 <=> 1.0), indicates how asymmetrical the withdrawal was. 0 means
-   * totally symmetrical
-   *
-   */
-  asymmetry: string;
-  /**
-   * Int64 (Basis points, 0-10000, where 10000=100%), percentage of total pool ownership
-   * withdrawn
-   *
-   */
-  basisPoints: string;
-  /**
-   * Int64, additional Rune paid out because of impermanent loss protection
-   */
-  impermanentLossProtection: string;
-  /**
-   * Int64, amount of liquidity units removed from the member as result of the withdrawal
-   *
-   */
-  liquidityUnits: string;
-  /**
-   * Transaction memo of the withdraw action
-   */
-  memo: string;
-  networkFees: NetworkFees;
-};
-
-export type GetActionsData = {
-  query?: {
     /**
-     * Comma separated list. Address of sender or recipient of any in/out transaction related
-     * to the action.
-     *
+     * Affiliate fee address of the swap, empty if fee swap
      */
-    address?: string;
+    affiliateAddress: string;
     /**
-     * Comma separated list. Affiliate address of the action (swap, refund)
-     *
+     * Int64 (Basis points, 0-1000, where 1000=10%)
      */
-    affiliate?: string;
+    affiliateFee: string;
     /**
-     * Comma separated list. Any asset that is part of the action (CHAIN.SYMBOL)
-     * Additionally, synth, nosynth, and norune filters can be used for swap, add/withdraw actions.
-     *
+     * Transaction memo of the refund action
      */
-    asset?: string;
+    memo: string;
+    networkFees: NetworkFees;
     /**
-     * if this is given, the actions newer than the height will be given
+     * Reason for the refund
      */
-    fromHeight?: number;
+    reason: string;
     /**
-     * if this is given, the actions newer than the timestamp will be given
-     */
-    fromTimestamp?: number;
-    /**
-     * if this is given, the actions older than the height will be given
-     */
-    height?: number;
-    /**
-     * number of actions returned, default is 50
-     */
-    limit?: number;
-    /**
-     * if this is given, the actions for the next page will be given
-     */
-    nextPageToken?: number;
-    /**
-     * pagination offset, default is 0
-     */
-    offset?: number;
-    /**
-     * if this is given, the actions for the previous page will be given
-     */
-    prevPageToken?: number;
-    /**
-     * if this is given, the actions older than the timestamp will be given
-     */
-    timestamp?: number;
-    /**
-     * ID of any in/out tx related to the action
-     */
-    txid?: string;
-    /**
-     * One or more comma separated transaction type of the action, it's the tx type parsed
-     * from memo. For example: Loan is a swap event but it's considered as loan tx type
-     * Type of Transactions:
+     * The type of the transaction given from its Memo
+     * Type of Transaction type:
      * "unknown", "add", "withdraw", "swap", "limitOrder", "outbound", "donate",
      * "bond", "unbond", "leave", "yggdrasilFund", "yggdrasilReturn", "reserve",
      * "refund", "migrate", "ragnarok", "switch", "noOp", "consolidate", "thorname",
      * "loanOpen", "loanRepayment"
      *
      */
-    txType?: string;
-    /**
-     * One or more comma separated unique types of action
-     * (swap, addLiquidity, withdraw, donate, refund, switch, thorname, runePoolDeposit, runePoolWithdraw)
-     *
-     */
-    type?: string;
-  };
+    txType: string;
 };
 
-export type GetActionsResponse = {
-  actions: Array<Action>;
-  /**
-   * Int64, number of results matching the given filters. It may be -1 if
-   * Midgard is having trouble counting the results and has to cancel the count query
-   * (temporary fix). Also, if new action parameters is used it won't be returned.
-   *
-   */
-  count?: string;
-  meta: ActionMeta;
+export type ReserveHistory = {
+    intervals: ReserveIntervals;
+    meta: ReserveMeta;
 };
+
+export type ReserveIntervals = Array<ReserveItem>;
+
+export type ReserveItem = {
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64(e8), fee made from outbound
+     */
+    gasFeeOutbound: string;
+    /**
+     * Int64(e8), RUNE paid to the pool for compensating the gas fees
+     */
+    gasReimbursement: string;
+    /**
+     * Int64(e8), RUNE paid to the system on deposit, send messages
+     *
+     */
+    networkFee: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+};
+
+export type ReserveMeta = {
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64(e8), fee made from outbound
+     *
+     */
+    gasFeeOutbound: string;
+    /**
+     * Int64(e8), RUNE paid to the pool for compensating the gas fees
+     *
+     */
+    gasReimbursement: string;
+    /**
+     * Int64(e8), RUNE paid to the system on deposit, send messages
+     *
+     */
+    networkFee: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+};
+
+export type ReverseTHORNames = Array<(string)>;
+
+export type RunePoolDepositMetadata = {
+    /**
+     * Int64, amount of units assigned to the member as result of the
+     * deposit
+     *
+     */
+    units: string;
+};
+
+export type RunePoolWithdrawMetadata = {
+    /**
+     * Transaction affiliate address
+     */
+    affiliateAddress: string;
+    /**
+     * Int64, Transaction affiliate amount in rune
+     */
+    affiliateAmount: string;
+    /**
+     * Transaction affiliate basis point
+     */
+    affiliateBasisPoint: string;
+    /**
+     * Int64 (Basis points, 0-10000, where 10000=100%), percentage of total ownership
+     * withdrawn
+     *
+     */
+    basisPoints: string;
+    /**
+     * Int64, amount of units removed from the member as result of the withdrawal
+     *
+     */
+    units: string;
+};
+
+export type SaverDetails = {
+    /**
+     * List details of all the savers identified with the given address
+     */
+    pools: Array<SaverPool>;
+};
+
+export type SaverPool = {
+    /**
+     * Int64(e8), total asset added in the saver pool by member
+     */
+    assetAdded: string;
+    /**
+     * saver address used by the member
+     */
+    assetAddress: string;
+    /**
+     * Int64(e8), total asset that is currently deposited by the member
+     */
+    assetDeposit: string;
+    /**
+     * Int64(e8), total asset can be redeemed from the saver pool by member
+     */
+    assetRedeem: string;
+    /**
+     * Int64(e8), total asset withdrawn from the saver pool by member
+     */
+    assetWithdrawn: string;
+    /**
+     * Int64, Unix timestamp for the first time member deposited into the saver pool
+     */
+    dateFirstAdded: string;
+    /**
+     * Int64, Unix timestamp for the last time member deposited into the saver pool
+     */
+    dateLastAdded: string;
+    /**
+     * The Pool rest of the data are referring to (only those pools can show up which have a corresponding saver pool)
+     */
+    pool: string;
+    /**
+     * Int64, saver liquidity units that belong the the member
+     */
+    saverUnits: string;
+};
+
+export type SaversHistory = {
+    intervals: SaversHistoryIntervals;
+    meta: SaversHistoryMeta;
+};
+
+export type SaversHistoryIntervals = Array<SaversHistoryItem>;
+
+export type SaversHistoryItem = {
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64, Number of saver members in the pool at the end of the interval
+     */
+    saversCount: string;
+    /**
+     * Int64(e8), The depth in the savers vault at the end of the interval
+     */
+    saversDepth: string;
+    /**
+     * Int64, Savers Units in the saver vault at the end of the interval
+     *
+     */
+    saversUnits: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+};
+
+export type SaversHistoryMeta = {
+    /**
+     * Int64, Number of savers member in the savers vault at the end of the interval at time endTime
+     */
+    endSaversCount: string;
+    /**
+     * Int64(e8), The depth in the savers vault at the end of the interval at time
+     * endTime
+     *
+     */
+    endSaversDepth: string;
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Int64, Savers Units in the savers vault at the end of the interval at time endTime
+     */
+    endUnits: string;
+    /**
+     * Int64, Number of savers member in the savers vault at the start of the interval at time startTime
+     *
+     */
+    startSaversCount: string;
+    /**
+     * Int64(e8), The depth in savers vault at the start of the interval at time
+     * startTime
+     *
+     */
+    startSaversDepth: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+    /**
+     * Int64, Savers Units in the savers vault at the start of the interval at time startTime
+     *
+     */
+    startUnits: string;
+};
+
+export type SendMetadata = {
+    /**
+     * Transaction memo of the send action
+     */
+    memo: string;
+    networkFees: NetworkFees;
+};
+
+export type StatsData = {
+    /**
+     * Int64, number of deposits since beginning.
+     */
+    addLiquidityCount: string;
+    /**
+     * Int64(e8), total of deposits since beginning.
+     *
+     */
+    addLiquidityVolume: string;
+    /**
+     * Deprecated, it's always 0.
+     */
+    dailyActiveUsers: string;
+    /**
+     * Deprecated, it's always 0.
+     */
+    monthlyActiveUsers: string;
+    /**
+     * Int64(e8), current total Rune in the pools.
+     */
+    runeDepth: string;
+    /**
+     * Float, the price of Rune based on the deepest USD pool.
+     */
+    runePriceUSD: string;
+    /**
+     * Int64, number of swaps (including synths) since beginning.
+     */
+    swapCount: string;
+    /**
+     * Int64(e8), number of swaps (including synths) in the last 24h.
+     */
+    swapCount24h: string;
+    /**
+     * Int64, number of swaps (including synths) in the last 30d.
+     */
+    swapCount30d: string;
+    /**
+     * Int64(e8), total volume of swaps (including synths) denoted in Rune since beginning.
+     *
+     */
+    swapVolume: string;
+    /**
+     * Int64(e8), amount of native rune switched from erc20 or bep2 rune.
+     */
+    switchedRune: string;
+    /**
+     * Int64, number of swaps from Synth to Rune since beginning.
+     */
+    synthBurnCount: string;
+    /**
+     * Int64, number of swaps from Rune to Synth since beginning.
+     */
+    synthMintCount: string;
+    /**
+     * Int64, number of swaps from Rune to Asset since beginning.
+     */
+    toAssetCount: string;
+    /**
+     * Int64, number of swaps from Asset to Rune since beginning.
+     */
+    toRuneCount: string;
+    /**
+     * Deprecated, it's always 0.
+     */
+    uniqueSwapperCount: string;
+    /**
+     * Int64, number of withdraws since beginning.
+     */
+    withdrawCount: string;
+    /**
+     * Int64(e8), total of withdraws since beginning.
+     *
+     */
+    withdrawVolume: string;
+};
+
+/**
+ * Streaming Metadata associated with the action if it was streaming swap
+ */
+export type StreamingSwapMeta = {
+    /**
+     * Int64, Number of swaps events which already happened.
+     */
+    count: string;
+    depositedCoin: Coin;
+    /**
+     * Array of failed swaps reasons in streaming swap.
+     */
+    failedSwapReasons?: Array<(string)>;
+    /**
+     * Array of failed swaps index in streaming swap.
+     */
+    failedSwaps?: Array<(string)>;
+    inCoin: Coin;
+    /**
+     * Int64, Number of blocks between swpas. (Blocks/Swap) E.g. 1 means every block.
+     */
+    interval: string;
+    /**
+     * Int64, The last blockheight the final swap happened (not outbound). This field will be missing until the final swap happens.
+     *
+     */
+    lastHeight: string;
+    outCoin: Coin;
+    /**
+     * Int64,  Number of swaps which thorchain is planning to execute. Total count at the end might be less.
+     *
+     */
+    quantity: string;
+};
+
+export type SwapHistory = {
+    intervals: SwapHistoryIntervals;
+    meta: SwapHistoryItem;
+};
+
+export type SwapHistoryIntervals = Array<SwapHistoryItem>;
+
+export type SwapHistoryItem = {
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), the weighted average (by count)
+     * of toAssetAverageSlip, toRuneAverageSlip, synthMintAverageSlip, synthRedeemAverageSlip.
+     * Big swaps have the same weight as small swaps.
+     *
+     */
+    averageSlip: string;
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
+     * from asset to trade asset.
+     * Big swaps have the same weight as small swaps
+     *
+     */
+    fromTradeAverageSlip: string;
+    /**
+     * Int64, count of swaps from trade asset to rune
+     */
+    fromTradeCount: string;
+    /**
+     * Int64(e8), the fees collected from swaps from rune to trade asset (in rune)
+     */
+    fromTradeFees: string;
+    /**
+     * Int64(e8), volume of swaps from rune to trade asset denoted in rune
+     */
+    fromTradeVolume: string;
+    /**
+     * Int64(e2), volume of swaps from trade asset to rune denoted in USD price of the rune in each swap
+     */
+    fromTradeVolumeUSD: string;
+    /**
+     * Float, the price of Rune based on the deepest USD pool at the end of the interval.
+     *
+     */
+    runePriceUSD: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
+     * from rune to synthetic asset.
+     * Big swaps have the same weight as small swaps
+     *
+     */
+    synthMintAverageSlip: string;
+    /**
+     * Int64, count of rune to synthetic asset swaps
+     */
+    synthMintCount: string;
+    /**
+     * Int64(e8), the fees collected from swaps from rune to synthetic asset (in rune)
+     *
+     */
+    synthMintFees: string;
+    /**
+     * Int64(e8), volume of swaps from rune to synthetic asset denoted in rune
+     */
+    synthMintVolume: string;
+    /**
+     * Int64(e2), volume of swaps from rune to synthetic asset denoted in USD price of the rune in each swap
+     */
+    synthMintVolumeUSD: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
+     * from synthetic asset to rune.
+     * Big swaps have the same weight as small swaps
+     *
+     */
+    synthRedeemAverageSlip: string;
+    /**
+     * Int64, count of synthetic asset to rune swaps
+     */
+    synthRedeemCount: string;
+    /**
+     * Int64(e8), the fees collected from swaps from synthetic asset to rune (in rune)
+     *
+     */
+    synthRedeemFees: string;
+    /**
+     * Int64(e8), volume of swaps from synthetic asset to rune denoted in rune
+     */
+    synthRedeemVolume: string;
+    /**
+     * Int64(e2), volume of swaps from synthetic asset to rune denoted in USD price of the rune in each swap
+     */
+    synthRedeemVolumeUSD: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
+     * from rune to asset.
+     * Big swaps have the same weight as small swaps
+     *
+     */
+    toAssetAverageSlip: string;
+    /**
+     * Int64, count of swaps from rune to asset
+     */
+    toAssetCount: string;
+    /**
+     * Int64(e8), the fees collected from swaps from rune to asset (in rune)
+     */
+    toAssetFees: string;
+    /**
+     * Int64(e8), volume of swaps from rune to asset denoted in rune
+     */
+    toAssetVolume: string;
+    /**
+     * Int64(e2), volume of swaps from rune to asset denoted in USD price of the rune in each swap
+     */
+    toAssetVolumeUSD: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
+     * from asset to rune.
+     * Big swaps have the same weight as small swaps
+     *
+     */
+    toRuneAverageSlip: string;
+    /**
+     * Int64, count of swaps from asset to rune
+     */
+    toRuneCount: string;
+    /**
+     * Int64(e8), the fees collected from swaps from asset to rune (in rune)
+     */
+    toRuneFees: string;
+    /**
+     * Int64(e8), volume of swaps from asset to rune denoted in rune
+     */
+    toRuneVolume: string;
+    /**
+     * Int64(e2), volume of swaps from asset to rune denoted in USD price of the rune in each swap
+     */
+    toRuneVolumeUSD: string;
+    /**
+     * Float64 (Basis points, 0-10000, where 10000=100%), the average slip for swaps
+     * from rune to trade asset.
+     * Big swaps have the same weight as small swaps
+     *
+     */
+    toTradeAverageSlip: string;
+    /**
+     * Int64, count of swaps from rune to trade asset
+     */
+    toTradeCount: string;
+    /**
+     * Int64(e8), the fees collected from swaps from rune to trade asset (in rune)
+     */
+    toTradeFees: string;
+    /**
+     * Int64(e8), volume of swaps from trade asset to rune denoted in rune
+     */
+    toTradeVolume: string;
+    /**
+     * Int64(e2), volume of swaps from rune to trade asset denoted in USD price of the rune in each swap
+     */
+    toTradeVolumeUSD: string;
+    /**
+     * Int64, toAssetCount + toRuneCount + synthMintCount + synthRedeemCount
+     */
+    totalCount: string;
+    /**
+     * Int64(e8), toAssetFees + toRuneFees + synthMintFees + synthRedeemFees
+     */
+    totalFees: string;
+    /**
+     * Int64(e8),
+     * toAssetVolume + toRuneVolume + synthMintVolume + synthRedeemVolume (denoted in rune)
+     *
+     */
+    totalVolume: string;
+    /**
+     * Int64(e2),
+     * toAssetVolume + toRuneVolume + synthMintVolume + synthRedeemVolume (denoted in USD price of the rune in each swap)
+     *
+     */
+    totalVolumeUSD: string;
+};
+
+export type SwapMetadata = {
+    /**
+     * Affiliate fee address of the swap, empty if fee swap
+     */
+    affiliateAddress: string;
+    /**
+     * Int64 (Basis points, 0-1000, where 1000=10%)
+     */
+    affiliateFee: string;
+    /**
+     * in asset price usd at the first interval
+     */
+    inPriceUSD: string;
+    /**
+     * indicate whether this action was streaming
+     */
+    isStreamingSwap: boolean;
+    /**
+     * Int64(e8), RUNE amount charged as swap liquidity fee
+     */
+    liquidityFee: string;
+    /**
+     * Transaction memo of the swap action
+     */
+    memo: string;
+    networkFees: NetworkFees;
+    /**
+     * out asset price usd at the first interval
+     */
+    outPriceUSD: string;
+    streamingSwapMeta?: StreamingSwapMeta;
+    /**
+     * Int64 (Basis points, 0-10000, where 10000=100%), swap slip percentage
+     */
+    swapSlip: string;
+    /**
+     * Int64(e8), minimum output amount specified for the swap
+     */
+    swapTarget: string;
+    /**
+     * The type of the transaction given from its Memo.
+     * Type of Transaction:
+     * "unknown", "add", "withdraw", "swap", "limitOrder", "outbound", "donate",
+     * "bond", "unbond", "leave", "yggdrasilFund", "yggdrasilReturn", "reserve",
+     * "refund", "migrate", "ragnarok", "switch", "noOp", "consolidate", "thorname",
+     * "loanOpen", "loanRepayment"
+     *
+     */
+    txType: string;
+};
+
+export type THORNameDetails = {
+    /**
+     * List details of all chains and their addresses for a given THORName
+     */
+    entries: Array<THORNameEntry>;
+    /**
+     * Int64, THORChain block height in which THORName expires
+     */
+    expire: string;
+    /**
+     * owner's THOR address
+     */
+    owner: string;
+};
+
+export type THORNameEntry = {
+    /**
+     * address on blockchain
+     */
+    address: string;
+    /**
+     * blockchain
+     */
+    chain: string;
+};
+
+export type TVLHistory = {
+    intervals: TVLHistoryIntervals;
+    meta: TVLHistoryItem;
+};
+
+export type TVLHistoryIntervals = Array<TVLHistoryItem>;
+
+export type TVLHistoryItem = {
+    /**
+     * Int64, The end time of bucket in unix timestamp
+     */
+    endTime: string;
+    poolsDepth: Array<DepthHistoryItemPool>;
+    /**
+     * Float, the price of Rune based on the deepest USD pool at the end of the interval.
+     *
+     */
+    runePriceUSD: string;
+    /**
+     * Int64, The beginning time of bucket in unix timestamp
+     */
+    startTime: string;
+    /**
+     * Int64(e8), the total amount of bonds (both active and standby) at the end of
+     * the interval
+     *
+     */
+    totalValueBonded?: string;
+    /**
+     * Int64(e8), total value locked in the chain (in rune)
+     * This equals `totalPooledValue + totalBondedValue`, as it combines the liquidity
+     * pools and bonds of the nodes.
+     *
+     */
+    totalValueLocked?: string;
+    /**
+     * Int64(e8) in rune, the total pooled value (both assets and rune) in all of the pools at
+     * the end of the interval.
+     * Note: this is twice the aggregate Rune depth of all pools.
+     *
+     */
+    totalValuePooled: string;
+};
+
+export type ThornameMetadata = {
+    /**
+     * The CHAIN address thorname has been registered to.
+     */
+    address: string;
+    /**
+     * The thorname's chain.
+     */
+    chain: string;
+    /**
+     * Int64, THORChain block height in which THORName expires.
+     */
+    expire: string;
+    /**
+     * Int64, the amount of funding for the THORName registration.
+     */
+    fundAmount: string;
+    /**
+     * Transaction memo of thorname deposit message.
+     */
+    memo: string;
+    /**
+     * owner's THOR address.
+     */
+    owner: string;
+    /**
+     * Int64, the registration fee paid.
+     */
+    registrationFee: string;
+    /**
+     * The thorname registered to the address.
+     */
+    thorname: string;
+    /**
+     * The type of the transaction given from its Memo.
+     */
+    txType: string;
+};
+
+/**
+ * Transaction data
+ */
+export type Transaction = {
+    /**
+     * Sender address
+     */
+    address: string;
+    /**
+     * if transactions flaged as affiliate
+     */
+    affiliate?: boolean;
+    coins: Coins;
+    /**
+     * The thorchain height that the outbound transaction occurred.
+     *
+     */
+    height?: string;
+    /**
+     * Transaction id hash. Some transactions (such as outbound transactions made in the
+     * native asset) may have a zero value.
+     *
+     */
+    txID: string;
+};
+
+export type WithdrawMetadata = {
+    /**
+     * Decimal (-1.0 <=> 1.0), indicates how asymmetrical the withdrawal was. 0 means
+     * totally symmetrical
+     *
+     */
+    asymmetry: string;
+    /**
+     * Int64 (Basis points, 0-10000, where 10000=100%), percentage of total pool ownership
+     * withdrawn
+     *
+     */
+    basisPoints: string;
+    /**
+     * Int64, additional Rune paid out because of impermanent loss protection
+     */
+    impermanentLossProtection: string;
+    /**
+     * Int64, amount of liquidity units removed from the member as result of the withdrawal
+     *
+     */
+    liquidityUnits: string;
+    /**
+     * Transaction memo of the withdraw action
+     */
+    memo: string;
+    networkFees: NetworkFees;
+};
+
+export type GetActionsData = {
+    query?: {
+        /**
+         * Comma separated list. Address of sender or recipient of any in/out transaction related
+         * to the action.
+         *
+         */
+        address?: string;
+        /**
+         * Comma separated list. Affiliate address of the action (swap, refund)
+         *
+         */
+        affiliate?: string;
+        /**
+         * Comma separated list. Any asset that is part of the action (CHAIN.SYMBOL)
+         * Additionally, synth, nosynth, and norune filters can be used for swap, add/withdraw actions.
+         *
+         */
+        asset?: string;
+        /**
+         * if this is given, the actions newer than the height will be given
+         */
+        fromHeight?: number;
+        /**
+         * if this is given, the actions newer than the timestamp will be given
+         */
+        fromTimestamp?: number;
+        /**
+         * if this is given, the actions older than the height will be given
+         */
+        height?: number;
+        /**
+         * number of actions returned, default is 50
+         */
+        limit?: number;
+        /**
+         * if this is given, the actions for the next page will be given
+         */
+        nextPageToken?: number;
+        /**
+         * pagination offset, default is 0
+         */
+        offset?: number;
+        /**
+         * if this is given, the actions for the previous page will be given
+         */
+        prevPageToken?: number;
+        /**
+         * if this is given, the actions older than the timestamp will be given
+         */
+        timestamp?: number;
+        /**
+         * ID of any in/out tx related to the action
+         */
+        txid?: string;
+        /**
+         * One or more comma separated transaction type of the action, it's the tx type parsed
+         * from memo. For example: Loan is a swap event but it's considered as loan tx type
+         * Type of Transactions:
+         * "unknown", "add", "withdraw", "swap", "limitOrder", "outbound", "donate",
+         * "bond", "unbond", "leave", "yggdrasilFund", "yggdrasilReturn", "reserve",
+         * "refund", "migrate", "ragnarok", "switch", "noOp", "consolidate", "thorname",
+         * "loanOpen", "loanRepayment"
+         *
+         */
+        txType?: string;
+        /**
+         * One or more comma separated unique types of action
+         * (swap, addLiquidity, withdraw, donate, refund, switch, thorname, runePoolDeposit, runePoolWithdraw)
+         *
+         */
+        type?: string;
+    };
+};
+
+export type GetActionsResponse = ({
+    actions: Array<Action>;
+    /**
+     * Int64, number of results matching the given filters. It may be -1 if
+     * Midgard is having trouble counting the results and has to cancel the count query
+     * (temporary fix). Also, if new action parameters is used it won't be returned.
+     *
+     */
+    count?: string;
+    meta: ActionMeta;
+});
 
 export type GetActionsError = unknown;
 
 export type GetBalanceData = {
-  path: {
-    /**
-     * Rune address.
-     */
-    address: string;
-  };
-  query?: {
-    /**
-     * Block height (if provided, timestamp must not be provided)
-     */
-    height?: number;
-    /**
-     * Unix timestamp as seconds since 1970 (if provided, height must not be provided)
-     */
-    timestamp?: number;
-  };
+    path: {
+        /**
+         * Rune address.
+         */
+        address: string;
+    };
+    query?: {
+        /**
+         * Block height (if provided, timestamp must not be provided)
+         */
+        height?: number;
+        /**
+         * Unix timestamp as seconds since 1970 (if provided, height must not be provided)
+         */
+        timestamp?: number;
+    };
 };
 
-export type GetBalanceResponse = Balance;
+export type GetBalanceResponse = (Balance);
 
 export type GetBalanceError = unknown;
 
 export type GetBorrowerDetailData = {
-  path: {
-    /**
-     * Address to match borrower, an asset address is given.
-     * Query can also be multiple addresses should be separated by comma (',')
-     *
-     */
-    address: string;
-  };
+    path: {
+        /**
+         * Address to match borrower, an asset address is given.
+         * Query can also be multiple addresses should be separated by comma (',')
+         *
+         */
+        address: string;
+    };
 };
 
-export type GetBorrowerDetailResponse = BorrowerDetails;
+export type GetBorrowerDetailResponse = (BorrowerDetails);
 
 export type GetBorrowerDetailError = unknown;
 
 export type GetBorrowersAddressesData = {
-  query?: {
-    /**
-     * Return only borrowers getting loan against this asset as collateral.
-     */
-    asset?: string;
-  };
+    query?: {
+        /**
+         * Return only borrowers getting loan against this asset as collateral.
+         */
+        asset?: string;
+    };
 };
 
-export type GetBorrowersAddressesResponse = Borrowers;
+export type GetBorrowersAddressesResponse = (Borrowers);
 
 export type GetBorrowersAddressesError = unknown;
 
-export type GetChurnsResponse = Churns;
+export type GetChurnsResponse = (Churns);
 
 export type GetChurnsError = unknown;
 
-export type GetDocsResponse = unknown;
+export type GetDocsResponse = (unknown);
 
 export type GetDocsError = unknown;
 
-export type GetHealthResponse = Health;
+export type GetHealthResponse = (Health);
 
 export type GetHealthError = unknown;
 
 export type GetDepthHistoryData = {
-  path: {
-    /**
-     * Return stats for this single pool.
-     */
-    pool: string;
-  };
-  query?: {
-    /**
-     * Number of intervals to return. Should be between [1..400].
-     */
-    count?: number;
-    /**
-     * Start time of the query as unix timestamp
-     */
-    from?: number;
-    /**
-     * Interval of calculations
-     */
-    interval?: "5min" | "hour" | "day" | "week" | "month" | "quarter" | "year";
-    /**
-     * End time of the query as unix timestamp. If only count is given, defaults to now.
-     *
-     */
-    to?: number;
-  };
+    path: {
+        /**
+         * Return stats for this single pool.
+         */
+        pool: string;
+    };
+    query?: {
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+    };
 };
 
-export type GetDepthHistoryResponse = DepthHistory;
+export type GetDepthHistoryResponse = (DepthHistory);
 
 export type GetDepthHistoryError = unknown;
 
 export type GetEarningsHistoryData = {
-  query?: {
-    /**
-     * Number of intervals to return. Should be between [1..400].
-     */
-    count?: number;
-    /**
-     * Start time of the query as unix timestamp
-     */
-    from?: number;
-    /**
-     * Interval of calculations
-     */
-    interval?: "5min" | "hour" | "day" | "week" | "month" | "quarter" | "year";
-    /**
-     * End time of the query as unix timestamp. If only count is given, defaults to now.
-     *
-     */
-    to?: number;
-  };
+    query?: {
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+    };
 };
 
-export type GetEarningsHistoryResponse = EarningsHistory;
+export type GetEarningsHistoryResponse = (EarningsHistory);
 
 export type GetEarningsHistoryError = unknown;
 
 export type GetLiquidityHistoryData = {
-  query?: {
-    /**
-     * Number of intervals to return. Should be between [1..400]
-     */
-    count?: number;
-    /**
-     * Start time of the query as unix timestamp
-     */
-    from?: number;
-    /**
-     * Interval of calculations
-     */
-    interval?: "5min" | "hour" | "day" | "week" | "month" | "quarter" | "year";
-    /**
-     * Return stats for given pool. Returns sum of all pools if missing
-     */
-    pool?: string;
-    /**
-     * End time of the query as unix timestamp. If only count is given, defaults to now
-     *
-     */
-    to?: number;
-  };
+    query?: {
+        /**
+         * Number of intervals to return. Should be between [1..400]
+         */
+        count?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * Return stats for given pool. Returns sum of all pools if missing
+         */
+        pool?: string;
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now
+         *
+         */
+        to?: number;
+    };
 };
 
-export type GetLiquidityHistoryResponse = LiquidityHistory;
+export type GetLiquidityHistoryResponse = (LiquidityHistory);
 
 export type GetLiquidityHistoryError = unknown;
 
 export type GetRunePoolHistoryData = {
-  query?: {
-    /**
-     * Number of intervals to return. Should be between [1..400].
-     */
-    count?: number;
-    /**
-     * Start time of the query as unix timestamp
-     */
-    from?: number;
-    /**
-     * Interval of calculations
-     */
-    interval?: "5min" | "hour" | "day" | "week" | "month" | "quarter" | "year";
-    /**
-     * End time of the query as unix timestamp. If only count is given, defaults to now.
-     *
-     */
-    to?: number;
-  };
+    query?: {
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+    };
 };
 
-export type GetRunePoolHistoryResponse = RUNEPoolHistory;
+export type GetRunePoolHistoryResponse = (RUNEPoolHistory);
 
 export type GetRunePoolHistoryError = unknown;
 
 export type GetSaversHistoryData = {
-  path: {
-    /**
-     * Return stats for this single pool.
-     */
-    pool: string;
-  };
-  query?: {
-    /**
-     * Number of intervals to return. Should be between [1..400].
-     */
-    count?: number;
-    /**
-     * Start time of the query as unix timestamp
-     */
-    from?: number;
-    /**
-     * Interval of calculations
-     */
-    interval?: "5min" | "hour" | "day" | "week" | "month" | "quarter" | "year";
-    /**
-     * End time of the query as unix timestamp. If only count is given, defaults to now.
-     *
-     */
-    to?: number;
-  };
+    path: {
+        /**
+         * Return stats for this single pool.
+         */
+        pool: string;
+    };
+    query?: {
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+    };
 };
 
-export type GetSaversHistoryResponse = SaversHistory;
+export type GetSaversHistoryResponse = (SaversHistory);
 
 export type GetSaversHistoryError = unknown;
 
 export type GetSwapHistoryData = {
-  query?: {
-    /**
-     * Number of intervals to return. Should be between [1..400].
-     */
-    count?: number;
-    /**
-     * Start time of the query as unix timestamp
-     */
-    from?: number;
-    /**
-     * Interval of calculations
-     */
-    interval?: "5min" | "hour" | "day" | "week" | "month" | "quarter" | "year";
-    /**
-     * Return history given pool. Returns sum of all pools if missing.
-     */
-    pool?: string;
-    /**
-     * End time of the query as unix timestamp. If only count is given, defaults to now.
-     *
-     */
-    to?: number;
-  };
+    query?: {
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * Return history given pool. Returns sum of all pools if missing.
+         */
+        pool?: string;
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+    };
 };
 
-export type GetSwapHistoryResponse = SwapHistory;
+export type GetSwapHistoryResponse = (SwapHistory);
 
 export type GetSwapHistoryError = unknown;
 
 export type GetTvlHistoryData = {
-  query?: {
-    /**
-     * Number of intervals to return. Should be between [1..400].
-     */
-    count?: number;
-    /**
-     * Start time of the query as unix timestamp
-     */
-    from?: number;
-    /**
-     * Interval of calculations
-     */
-    interval?: "5min" | "hour" | "day" | "week" | "month" | "quarter" | "year";
-    /**
-     * End time of the query as unix timestamp. If only count is given, defaults to now.
-     *
-     */
-    to?: number;
-  };
+    query?: {
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+    };
 };
 
-export type GetTvlHistoryResponse = TVLHistory;
+export type GetTvlHistoryResponse = (TVLHistory);
 
 export type GetTvlHistoryError = unknown;
 
-export type GetKnownPoolsResponse = KnownPools;
+export type GetKnownPoolsResponse = (KnownPools);
 
 export type GetKnownPoolsError = unknown;
 
 export type GetMemberDetailData = {
-  path: {
-    /**
-     * Address to match liquidity providers. Either a rune or an asset address may be given.
-     * Query can also be multiple addresses should be separated by comma (',')
-     *
-     */
-    address: string;
-  };
-  query?: {
-    /**
-     * A flag to show saver vault membership details, the default is false.
-     *
-     */
-    showSavers?: boolean;
-  };
+    path: {
+        /**
+         * Address to match liquidity providers. Either a rune or an asset address may be given.
+         * Query can also be multiple addresses should be separated by comma (',')
+         *
+         */
+        address: string;
+    };
+    query?: {
+        /**
+         * A flag to show saver vault membership details, the default is false.
+         *
+         */
+        showSavers?: boolean;
+    };
 };
 
-export type GetMemberDetailResponse = MemberDetails;
+export type GetMemberDetailResponse = (MemberDetails);
 
 export type GetMemberDetailError = unknown;
 
 export type GetMembersAdressesData = {
-  query?: {
-    /**
-     * Return only members present in the pool.
-     */
-    pool?: string;
-  };
+    query?: {
+        /**
+         * Return only members present in the pool.
+         */
+        pool?: string;
+    };
 };
 
-export type GetMembersAdressesResponse = Members;
+export type GetMembersAdressesResponse = (Members);
 
 export type GetMembersAdressesError = unknown;
 
-export type GetNetworkDataResponse = Network;
+export type GetNetworkDataResponse = (Network);
 
 export type GetNetworkDataError = unknown;
 
-export type GetNodesResponse = Nodes;
+export type GetNodesResponse = (Nodes);
 
 export type GetNodesError = unknown;
 
 export type GetPoolData = {
-  path: {
-    /**
-     * pool name
-     */
-    asset: string;
-  };
-  query?: {
-    /**
-     * Specifies the base interval from which APY is extrapolated.
-     * Default is 14d.
-     *
-     */
-    period?:
-      | "1h"
-      | "24h"
-      | "7d"
-      | "14d"
-      | "30d"
-      | "90d"
-      | "100d"
-      | "180d"
-      | "365d"
-      | "all";
-  };
+    path: {
+        /**
+         * pool name
+         */
+        asset: string;
+    };
+    query?: {
+        /**
+         * Specifies the base interval from which APY is extrapolated.
+         * Default is 14d.
+         *
+         */
+        period?: '1h' | '24h' | '7d' | '14d' | '30d' | '90d' | '100d' | '180d' | '365d' | 'all';
+    };
 };
 
-export type GetPoolResponse = PoolDetail;
+export type GetPoolResponse = (PoolDetail);
 
 export type GetPoolError = unknown;
 
 export type GetPoolStatsData = {
-  path: {
-    /**
-     * pool name
-     */
-    asset: string;
-  };
-  query?: {
-    /**
-     * Restricts aggregation type fields to the last period only.
-     * Default is 14d.
-     *
-     */
-    period?:
-      | "1h"
-      | "24h"
-      | "7d"
-      | "14d"
-      | "30d"
-      | "90d"
-      | "100d"
-      | "180d"
-      | "365d"
-      | "all";
-  };
+    path: {
+        /**
+         * pool name
+         */
+        asset: string;
+    };
+    query?: {
+        /**
+         * Restricts aggregation type fields to the last period only.
+         * Default is 14d.
+         *
+         */
+        period?: '1h' | '24h' | '7d' | '14d' | '30d' | '90d' | '100d' | '180d' | '365d' | 'all';
+    };
 };
 
-export type GetPoolStatsResponse = PoolStatsDetail;
+export type GetPoolStatsResponse = (PoolStatsDetail);
 
 export type GetPoolStatsError = unknown;
 
 export type GetPoolsData = {
-  query?: {
-    /**
-     * Specifies the base interval from which annualPercentageRate and poolAPY is extrapolated.
-     * Default is 14d.
-     *
-     */
-    period?:
-      | "1h"
-      | "24h"
-      | "7d"
-      | "14d"
-      | "30d"
-      | "90d"
-      | "100d"
-      | "180d"
-      | "365d"
-      | "all";
-    /**
-     * Filter for only pools with this status
-     */
-    status?: "available" | "staged" | "suspended";
-  };
+    query?: {
+        /**
+         * Specifies the base interval from which annualPercentageRate and poolAPY is extrapolated.
+         * Default is 14d.
+         *
+         */
+        period?: '1h' | '24h' | '7d' | '14d' | '30d' | '90d' | '100d' | '180d' | '365d' | 'all';
+        /**
+         * Filter for only pools with this status
+         */
+        status?: 'available' | 'staged' | 'suspended';
+    };
 };
 
-export type GetPoolsResponse = PoolDetails;
+export type GetPoolsResponse = (PoolDetails);
 
 export type GetPoolsError = unknown;
 
 export type GetReserveHistoryData = {
-  query?: {
-    /**
-     * Number of intervals to return. Should be between [1..400].
-     */
-    count?: number;
-    /**
-     * Start time of the query as unix timestamp
-     */
-    from?: number;
-    /**
-     * Interval of calculations
-     */
-    interval?: "5min" | "hour" | "day" | "week" | "month" | "quarter" | "year";
-    /**
-     * End time of the query as unix timestamp. If only count is given, defaults to now.
-     *
-     */
-    to?: number;
-  };
+    query?: {
+        /**
+         * Number of intervals to return. Should be between [1..400].
+         */
+        count?: number;
+        /**
+         * Start time of the query as unix timestamp
+         */
+        from?: number;
+        /**
+         * Interval of calculations
+         */
+        interval?: '5min' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year';
+        /**
+         * End time of the query as unix timestamp. If only count is given, defaults to now.
+         *
+         */
+        to?: number;
+    };
 };
 
-export type GetReserveHistoryResponse = ReserveHistory;
+export type GetReserveHistoryResponse = (ReserveHistory);
 
 export type GetReserveHistoryError = unknown;
 
 export type GetRunePoolDetailData = {
-  path: {
-    /**
-     * Address to match the RUNEPool. multiple rune addresses can be given.
-     *
-     */
-    address: string;
-  };
+    path: {
+        /**
+         * Address to match the RUNEPool. multiple rune addresses can be given.
+         *
+         */
+        address: string;
+    };
 };
 
-export type GetRunePoolDetailResponse = RUNEPoolDetails;
+export type GetRunePoolDetailResponse = (RUNEPoolDetails);
 
 export type GetRunePoolDetailError = unknown;
 
 export type GetSaverDetailData = {
-  path: {
-    /**
-     * Address to match the saver. an asset address should be given.
-     *
-     */
-    address: string;
-  };
+    path: {
+        /**
+         * Address to match the saver. an asset address should be given.
+         *
+         */
+        address: string;
+    };
 };
 
-export type GetSaverDetailResponse = SaverDetails;
+export type GetSaverDetailResponse = (SaverDetails);
 
 export type GetSaverDetailError = unknown;
 
-export type GetStatsResponse = StatsData;
+export type GetStatsResponse = (StatsData);
 
 export type GetStatsError = unknown;
 
-export type GetSwaggerResponse = unknown;
+export type GetSwaggerResponse = (unknown);
 
 export type GetSwaggerError = unknown;
 
 export type GetThorNameDetailData = {
-  path: {
-    /**
-     * a THORName
-     */
-    name: string;
-  };
+    path: {
+        /**
+         * a THORName
+         */
+        name: string;
+    };
 };
 
-export type GetThorNameDetailResponse = THORNameDetails;
+export type GetThorNameDetailResponse = (THORNameDetails);
 
 export type GetThorNameDetailError = unknown;
 
 export type GetThorNamesOwnerByAddressData = {
-  path: {
-    /**
-     * Address which owns a THORName.
-     */
-    address: string;
-  };
+    path: {
+        /**
+         * Address which owns a THORName.
+         */
+        address: string;
+    };
 };
 
-export type GetThorNamesOwnerByAddressResponse = ReverseTHORNames;
+export type GetThorNamesOwnerByAddressResponse = (ReverseTHORNames);
 
 export type GetThorNamesOwnerByAddressError = unknown;
 
 export type GetThorNamesByAddressData = {
-  path: {
-    /**
-     * Address to match THORNames against.
-     */
-    address: string;
-  };
+    path: {
+        /**
+         * Address to match THORNames against.
+         */
+        address: string;
+    };
 };
 
-export type GetThorNamesByAddressResponse = ReverseTHORNames;
+export type GetThorNamesByAddressResponse = (ReverseTHORNames);
 
 export type GetThorNamesByAddressError = unknown;
