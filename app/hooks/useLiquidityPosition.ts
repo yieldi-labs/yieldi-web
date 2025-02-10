@@ -54,7 +54,10 @@ interface UseLiquidityPositionProps {
   pool: PoolDetail;
 }
 
-const affiliate = "yi";
+let affiliate = "yi";
+if (process.env.NEXT_PUBLIC_IS_STAGENET) {
+  affiliate = "";
+}
 const feeBps = 0;
 
 export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {

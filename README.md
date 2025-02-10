@@ -33,6 +33,16 @@ For detailed information, see [App README](app/README.md) and [Landing Page READ
    NEXT_PUBLIC_WALLETCONNECT_PROJECTID=your_walletconnect_project_id
    ```
 
+3. Build api clientes
+   For `stagenet`
+   ```
+   pnpm run openapi:gen:stagenet
+   ```
+   For `mainnet`
+      ```
+   pnpm run openapi:gen
+   ```
+
 4. Run development servers:
    ```
    cd app && npm run dev
