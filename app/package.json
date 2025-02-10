@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "pnpm run openapi:gen && next build",
+    "build": "next build",
     "dev": "next dev",
     "format": "prettier --write .",
     "lint": "npm run lint:prettier && npm run lint:next && npm run lint:tsc",
