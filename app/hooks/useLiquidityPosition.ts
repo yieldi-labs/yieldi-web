@@ -54,7 +54,10 @@ interface UseLiquidityPositionProps {
   pool: PoolDetail;
 }
 
-const affiliate = "yi";
+let affiliate = "yi";
+if (process.env.NEXT_PUBLIC_IS_STAGENET) {
+  affiliate = ""; // TODO: Register affiliate on stagenet
+}
 const feeBps = 0;
 
 export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
@@ -302,9 +305,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         return txHash;
       } catch (err) {
         console.error("Failed to add liquidity:", err);
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to add liquidity";
-        emitError(errorMessage);
       } finally {
         setLoading(false);
       }

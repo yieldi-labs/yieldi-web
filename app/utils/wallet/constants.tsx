@@ -46,6 +46,7 @@ export enum WalletKey {
   VULTISIG = "vultisig",
   WALLETCONNECT = "walletConnect",
   LEDGER = "ledger",
+  LEAP = "leap",
 }
 
 export enum ThorchainIdentifiers {
@@ -225,6 +226,7 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
     hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
+    hasSupportStagenet: false,
     chainConnect: {},
   },
   [WalletKey.METAMASK]: {
@@ -243,6 +245,7 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
     hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
+    hasSupportStagenet: false,
     chainConnect: {},
   },
   [WalletKey.OKX]: {
@@ -262,6 +265,7 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
     hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
+    hasSupportStagenet: false,
     chainConnect: {},
   },
   [WalletKey.PHANTOM]: {
@@ -275,6 +279,7 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
     hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
+    hasSupportStagenet: false,
     chainConnect: {},
   },
   [WalletKey.VULTISIG]: {
@@ -299,6 +304,7 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
     hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
+    hasSupportStagenet: false,
     chainConnect: {},
   },
   [WalletKey.WALLETCONNECT]: {
@@ -312,6 +318,7 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
     hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: false,
     hasSupportToSelectChains: false,
+    hasSupportStagenet: false,
     chainConnect: {},
   },
   [WalletKey.LEDGER]: {
@@ -335,6 +342,21 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
     hasSupportMultichain: false,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
+    hasSupportStagenet: false,
+    chainConnect: {},
+  },
+  [WalletKey.LEAP]: {
+    id: WalletKey.LEAP,
+    name: "Leap",
+    chains: [ChainKey.THORCHAIN, ChainKey.GAIACHAIN],
+    downloadUrl: "https://www.leapwallet.io/",
+    icon: <WalletSvg.Leap />,
+    isAvailable: false,
+    isHardware: false,
+    hasSupportMultichain: true,
+    hasSupportToAddConectionToExistingConnection: true,
+    hasSupportToSelectChains: true,
+    hasSupportStagenet: true,
     chainConnect: {},
   },
 };

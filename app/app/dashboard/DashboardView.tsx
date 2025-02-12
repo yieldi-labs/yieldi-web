@@ -25,6 +25,7 @@ import { AddLiquidityStepData } from "../explore/components/AddLiquidityModal";
 import { useAppState } from "@/utils/contexts/context";
 import { Tooltip } from "@shared/components/ui";
 import { showToast, ToastType } from "../errorToast";
+import { getAddressUrl } from "@/utils/wallet/utils";
 
 export default function DashboardView() {
   const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{
@@ -137,7 +138,7 @@ export default function DashboardView() {
           Manage your active positions and track your earnings.
         </div>
         {isPending && !positions ? (
-          <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl md:mx-16">
+          <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
             <Loader />
           </div>
         ) : (
@@ -154,7 +155,7 @@ export default function DashboardView() {
                 case PositionStatus.LP_POSITION_DEPOSIT_PENDING:
                 case PositionStatus.LP_POSITION_WITHDRAWAL_PENDING:
                   window.open(
-                    `https://thorchain.net/address/${position.memberDetails?.assetAddress}?tab=lps`,
+                    `${getAddressUrl()}${position.memberDetails?.assetAddress}?tab=lps`,
                     "_blank",
                   );
                   break;

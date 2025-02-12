@@ -16,15 +16,16 @@
     "openapi:gen": "npm run openapi:gen:midgard && npm run openapi:gen:thornode",
     "openapi:gen:midgard": "API_SPEC=midgard npx @hey-api/openapi-ts",
     "openapi:gen:thornode": "API_SPEC=thornode npx @hey-api/openapi-ts",
-    "openapi:pull": "npm run openapi:pull:midgard && npm run openapi:pull:thornode",
-    "openapi:pull:midgard": "curl https://midgard.ninerealms.com/v2/swagger.json | jq -S . > midgard-schema.json",
-    "openapi:pull:thornode": "curl https://thornode.ninerealms.com/thorchain/doc/openapi.json | jq -S . > thornode-schema.json",
+    "openapi:gen:stagenet": "npm run openapi:gen:midgard:stagenet && npm run openapi:gen:thornode:stagenet",
+    "openapi:gen:midgard:stagenet": "IS_STAGENET=true API_SPEC=midgard npx @hey-api/openapi-ts",
+    "openapi:gen:thornode:stagenet": "IS_STAGENET=true API_SPEC=thornode npx @hey-api/openapi-ts",
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@cosmjs/proto-signing": "0.32.4",
     "@cosmjs/stargate": "^0.32.4",
     "@ledgerhq/hw-app-eth": "^6.40.3",
     "@ledgerhq/hw-transport": "^6.31.4",
@@ -38,6 +39,7 @@
     "@xchainjs/xchain-bsc": "^1.0.12",
     "@xchainjs/xchain-client": "^1.0.7",
     "@xchainjs/xchain-cosmos": "^2.0.11",
+    "@xchainjs/xchain-cosmos-sdk": "^1.0.12",
     "@xchainjs/xchain-doge": "^1.0.7",
     "@xchainjs/xchain-ethereum": "^1.0.12",
     "@xchainjs/xchain-litecoin": "^1.0.7",
@@ -61,8 +63,8 @@
     "viem": "^2.21.29"
   },
   "devDependencies": {
-    "@hey-api/client-fetch": "^0.4.2",
-    "@hey-api/openapi-ts": "^0.53.11",
+    "@hey-api/client-fetch": "^0.8.1",
+    "@hey-api/openapi-ts": "^0.64.3",
     "@ledgerhq/hw-transport-mocker": "^6.29.4",
     "@sentry/cli": "^2.41.1",
     "@sentry/nextjs": "^8.54.0",

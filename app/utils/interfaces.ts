@@ -42,6 +42,7 @@ export interface WalletType {
   hasSupportMultichain: boolean;
   hasSupportToAddConectionToExistingConnection: boolean;
   hasSupportToSelectChains: boolean;
+  hasSupportStagenet: boolean;
   downloadUrl: string;
   chainConnect: {
     [key in ProviderKey]?: () => Promise<{ provider: any; address: string }>;

@@ -26,3 +26,17 @@ export const isChainSupportedByWallet = (
   const isSupported = selectedWallet.chains.includes(chain.name);
   return isSupported;
 };
+
+export const getTransactionUrl = () => {
+  if (process.env.NEXT_PUBLIC_IS_STAGENET) {
+    return "https://stagenet.thorchain.net/tx/";
+  }
+  return "https://thorchain.net/tx/";
+};
+
+export const getAddressUrl = () => {
+  if (process.env.NEXT_PUBLIC_IS_STAGENET) {
+    return "https://stagenet.thorchain.net/address/";
+  }
+  return "https://thorchain.net/address/";
+};

@@ -94,24 +94,26 @@ export default function WalletModal() {
               isWalletValidForChain={isWalletValidForAllChains}
               onWalletSelect={handleWalletSelect}
             />
-            <div
-              onClick={() => {
-                handleWalletSelect(SUPPORTED_WALLETS[WalletKey.LEDGER]);
-                setShowHardwareWallets(true);
-              }}
-              className={twMerge(
-                "flex items-center justify-between",
-                "bg-white rounded-2xl p-4",
-                "border-2 border-transparent",
-                "hover:border-primary cursor-pointer",
-                "transition-all duration-75",
-              )}
-            >
-              <h3 className="text-sm text-neutral-900 font-medium font-gt-america">
-                Hardware Wallets
-              </h3>
-              <IconSvg.Wallet />
-            </div>
+            {!process.env.NEXT_PUBLIC_IS_STAGENET && (
+              <div
+                onClick={() => {
+                  handleWalletSelect(SUPPORTED_WALLETS[WalletKey.LEDGER]);
+                  setShowHardwareWallets(true);
+                }}
+                className={twMerge(
+                  "flex items-center justify-between",
+                  "bg-white rounded-2xl p-4",
+                  "border-2 border-transparent",
+                  "hover:border-primary cursor-pointer",
+                  "transition-all duration-75",
+                )}
+              >
+                <h3 className="text-sm text-neutral-900 font-medium font-gt-america">
+                  Hardware Wallets
+                </h3>
+                <IconSvg.Wallet />
+              </div>
+            )}
           </>
         ) : (
           <HardwareWallets

@@ -149,29 +149,27 @@ export function usePositionStats({
   const markPositionAsPending = useCallback(
     (pooldId: string, positionType: PositionType, status: PositionStatus) => {
       setCurrentPositionsStats((prev) => {
-        const updatedPositions = { ...prev };
-
-        if (!updatedPositions.positions) {
+        if (!prev) {
           throw Error("Pool or positions does not exist");
         }
 
-        if (!updatedPositions[pooldId]) {
-          updatedPositions[pooldId] = { SYM: null, ASYM: null };
+        if (!prev[pooldId]) {
+          prev[pooldId] = { SYM: null, ASYM: null };
         }
 
-        if (!updatedPositions[pooldId][positionType]) {
-          updatedPositions[pooldId][positionType] = emptyPositionStats(
+        if (!prev[pooldId][positionType]) {
+          prev[pooldId][positionType] = emptyPositionStats(
             pooldId,
             positionType,
           );
         } else {
-          updatedPositions[pooldId][positionType] = {
-            ...updatedPositions[pooldId][positionType],
+          prev[pooldId][positionType] = {
+            ...prev[pooldId][positionType],
             status: status,
           };
         }
         setRefetchInterval(defaultRefetchInterval + 1); // Reset refech interval to improve UX
-        return updatedPositions;
+        return prev;
       });
     },
     [defaultRefetchInterval],
