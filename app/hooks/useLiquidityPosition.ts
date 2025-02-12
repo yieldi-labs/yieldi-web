@@ -135,7 +135,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       emitNewHash,
       emitError,
     }: AddLiquidityParams) => {
-      console.log('Adding...')
       if (!getAssetWallet(asset)?.address) {
         emitError("Wallet not connected");
         throw new Error("Wallet not connected");

@@ -41,7 +41,7 @@ interface DepositParams {
 export const transferUTXO = async (
   wallet: WalletState,
   transferParams: TransactionParams,
-  clientBuilder?: BitcoinClient
+  clientBuilder?: BitcoinClient,
 ): Promise<string> => {
   try {
     switch (wallet.walletId) {
@@ -83,7 +83,7 @@ export const transferUTXO = async (
               } else {
                 resolve(result);
               }
-            }
+            },
           );
         });
       case WalletKey.PHANTOM:
@@ -99,7 +99,7 @@ export const transferUTXO = async (
         });
         const fromHexString = (hexString: any) =>
           Uint8Array.from(
-            hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16))
+            hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16)),
           );
         const psbtUnsigned = Bitcoin.Psbt.fromBase64(rawUnsignedTx);
         const signedPSBTBytes: Uint8Array = await wallet.provider.signPSBT(
@@ -111,7 +111,7 @@ export const transferUTXO = async (
                 signingIndexes: inputs.map((input) => input.index),
               },
             ],
-          }
+          },
         );
 
         const psbtSigned = Bitcoin.Psbt.fromBuffer(signedPSBTBytes);
@@ -137,7 +137,7 @@ export const transferUTXO = async (
       case WalletKey.LEDGER:
         const ledgerClient = getLedgerClient(
           wallet.ChainInfo as UTXOChain,
-          wallet.provider
+          wallet.provider,
         );
         const utxoHash = await ledgerClient.transfer({
           amount: transferParams.amount,
@@ -157,7 +157,7 @@ export const transferUTXO = async (
 
 export const depositThorchain = async (
   wallet: WalletState,
-  transferParams: DepositParams
+  transferParams: DepositParams,
 ): Promise<string> => {
   switch (wallet.walletId) {
     case WalletKey.CTRL:
@@ -183,7 +183,7 @@ export const depositThorchain = async (
             } else {
               resolve(result || "");
             }
-          }
+          },
         );
       });
     case WalletKey.VULTISIG:
@@ -207,9 +207,13 @@ export const depositThorchain = async (
       }
       return result;
     case WalletKey.LEAP: {
-      const subchain = process.env.NEXT_PUBLIC_IS_STAGENET ? "thorchain-stagenet-2" : "thorchain-1"
+      const subchain = process.env.NEXT_PUBLIC_IS_STAGENET
+        ? "thorchain-stagenet-2"
+        : "thorchain-1";
       const offlineSigner = wallet.provider.getOfflineSigner(subchain);
-      const rpc = process.env.NEXT_PUBLIC_IS_STAGENET ? "https://stagenet-rpc.ninerealms.com/" : "https://rpc.ninerealms.com/"
+      const rpc = process.env.NEXT_PUBLIC_IS_STAGENET
+        ? "https://stagenet-rpc.ninerealms.com/"
+        : "https://rpc.ninerealms.com/";
 
       let result: any;
 
@@ -222,7 +226,7 @@ export const depositThorchain = async (
         offlineSigner,
         {
           registry,
-        }
+        },
       );
 
       const coin = {
@@ -248,7 +252,7 @@ export const depositThorchain = async (
         transferParams.from,
         [msgDeposit],
         fee,
-        transferParams.memo
+        transferParams.memo,
       );
 
       return result.transactionHash;
@@ -260,7 +264,7 @@ export const depositThorchain = async (
 
 export const transferCosmos = async (
   wallet: WalletState,
-  transferParams: TransactionParams
+  transferParams: TransactionParams,
 ): Promise<string> => {
   switch (wallet.walletId) {
     case WalletKey.CTRL:
@@ -277,7 +281,7 @@ export const transferCosmos = async (
         offlineSigner,
         {
           gasPrice,
-        }
+        },
       );
       const coin = {
         denom: "uatom",
@@ -289,7 +293,7 @@ export const transferCosmos = async (
         transferParams.recipient,
         [coin],
         "auto",
-        transferParams.memo
+        transferParams.memo,
       );
       return result.transactionHash;
     case WalletKey.VULTISIG:
@@ -318,7 +322,7 @@ export const transferCosmos = async (
 
 export const transferEvm = async (
   wallet: WalletState,
-  transferParams: TransactionEvmParams
+  transferParams: TransactionEvmParams,
 ): Promise<any> => {
   switch (wallet.walletId) {
     case WalletKey.CTRL:

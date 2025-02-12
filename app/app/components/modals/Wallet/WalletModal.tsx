@@ -94,7 +94,7 @@ export default function WalletModal() {
               isWalletValidForChain={isWalletValidForAllChains}
               onWalletSelect={handleWalletSelect}
             />
-            { !process.env.NEXT_PUBLIC_IS_STAGENET && 
+            {!process.env.NEXT_PUBLIC_IS_STAGENET && (
               <div
                 onClick={() => {
                   handleWalletSelect(SUPPORTED_WALLETS[WalletKey.LEDGER]);
@@ -113,7 +113,7 @@ export default function WalletModal() {
                 </h3>
                 <IconSvg.Wallet />
               </div>
-            }
+            )}
           </>
         ) : (
           <HardwareWallets

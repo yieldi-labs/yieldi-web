@@ -39,7 +39,10 @@ import {
   network,
 } from "@/thornode";
 import { getPools, getStats, PoolDetails, StatsData } from "@/midgard";
-import { detectOverwritedEthProviders, detectOverwritedThorchainProviders } from "../chain";
+import {
+  detectOverwritedEthProviders,
+  detectOverwritedThorchainProviders,
+} from "../chain";
 import { baseAmount } from "@xchainjs/xchain-util";
 
 interface AppStateContextType {
@@ -522,7 +525,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           break;
         case WalletKey.LEAP:
           if (window.leap) {
-            const leapProvider = detectOverwritedThorchainProviders(walletKey)
+            const leapProvider = detectOverwritedThorchainProviders(walletKey);
             SUPPORTED_WALLETS[walletKey].isAvailable = true;
             SUPPORTED_WALLETS[walletKey].chainConnect = {
               [ProviderKey.THORCHAIN]: async () =>
@@ -530,7 +533,9 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   id: "leap-thorchain",
                   provider: leapProvider || window.leap,
                   walletId: WalletKey.LEAP,
-                  subchain: process.env.NEXT_PUBLIC_IS_STAGENET ? "thorchain-stagenet-2" : "thorchain-1",
+                  subchain: process.env.NEXT_PUBLIC_IS_STAGENET
+                    ? "thorchain-stagenet-2"
+                    : "thorchain-1",
                 }),
               [ProviderKey.COSMOS]: async () =>
                 await connectWallet({
@@ -628,8 +633,11 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     const processedWallets = new Set<WalletKey>();
 
     const processWallet = (wallet: WalletType) => {
-      if (processedWallets.has(wallet.id) || (process.env.NEXT_PUBLIC_IS_STAGENET && !wallet.hasSupportStagenet)) {
-        return
+      if (
+        processedWallets.has(wallet.id) ||
+        (process.env.NEXT_PUBLIC_IS_STAGENET && !wallet.hasSupportStagenet)
+      ) {
+        return;
       }
       if (wallet.isAvailable) {
         detected.push(wallet);

@@ -143,7 +143,6 @@ export default function StatusModal({
           runeAmount: parsedRuneAmount,
           pairedAddress,
           emitError: (error) => {
-            console.log('*liquidityError', error)
             showToast({ text: error, type: ToastType.ERROR });
             setStepStatus((prev) => {
               return prev.map((step) => {
@@ -195,7 +194,7 @@ export default function StatusModal({
           pairedAddress,
           runeAmount: parsedRuneAmount,
           emitError: (error) => {
-            console.log('**liquidityError', error)
+            console.log("**liquidityError", error);
             showToast({ text: error, type: ToastType.ERROR });
             setStepStatus((prev) => {
               return prev.map((step) => {
