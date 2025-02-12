@@ -202,6 +202,7 @@ const mapCtrlProvider: Record<WalletKey, string | null> = {
   [WalletKey.VULTISIG]: "Vultisig",
   [WalletKey.OKX]: "OKX Wallet",
   [WalletKey.PHANTOM]: "Phantom",
+  [WalletKey.LEAP]: "Leap Wallet",
   [WalletKey.WALLETCONNECT]: null,
   [WalletKey.LEDGER]: null,
 };
@@ -217,6 +218,21 @@ export const detectOverwritedEthProviders = (wallet: WalletKey): any => {
   }
   if (ctrlProviders[providerId]) {
     return ctrlProviders[providerId].provider;
+  }
+  return null;
+};
+
+export const detectOverwritedThorchainProviders = (wallet: WalletKey): any => {
+  const KeplProviders = window?.ctrlKeplrProviders;
+  if (!KeplProviders) {
+    return null;
+  }
+  const providerId = mapCtrlProvider[wallet];
+  if (!providerId) {
+    return null;
+  }
+  if (KeplProviders[providerId]) {
+    return KeplProviders[providerId].provider;
   }
   return null;
 };
@@ -241,6 +257,9 @@ export const getWalletId = (
     }
   }
   if (chain.type === ChainType.BFT) {
+    if (provider?.isOkxWallet) {
+      return WalletKey.OKX;
+    }
     if (provider?.isOkxWallet) {
       return WalletKey.OKX;
     }

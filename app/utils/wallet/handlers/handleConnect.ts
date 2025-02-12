@@ -103,6 +103,26 @@ export const connectWallet = async (wallet: {
         offlineSigner,
       };
     }
+    case "leap-cosmos": {
+      const chainId = wallet.subchain || "cosmoshub-4";
+
+      // Enable the chain
+      await wallet.provider.enable(chainId);
+
+      // Get the offline signer
+      const offlineSigner = wallet.provider.getOfflineSigner(chainId);
+      const accounts = await offlineSigner.getAccounts();
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No Cosmos accounts found");
+      }
+
+      return {
+        provider: wallet.provider,
+        address: accounts[0].address,
+        offlineSigner,
+      };
+    }
     case "xdefi-thorchain":
     case "xdefi-maya":
     case "xdefi-bch":
@@ -305,6 +325,22 @@ export const connectWallet = async (wallet: {
         provider: wallet.provider,
         address: addressCosmos,
       };
+    case "leap-thorchain": {
+      await wallet.provider.enable('thorchain-stagenet-2')
+
+      // Get the offline signer
+      const offlineSigner = wallet.provider.getOfflineSigner('thorchain-stagenet-2');
+      const accounts = await offlineSigner.getAccounts();
+
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No Cosmos accounts found");
+      }
+
+      return {
+        provider: window.keplr,
+        address: accounts[0].address
+      };
+    }
     default:
       console.error(`Unknown UTXO wallet: ${wallet.id}`);
   }

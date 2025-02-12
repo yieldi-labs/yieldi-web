@@ -25,6 +25,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@cosmjs/proto-signing": "0.32.4",
     "@cosmjs/stargate": "^0.32.4",
     "@ledgerhq/hw-app-eth": "^6.40.3",
     "@ledgerhq/hw-transport": "^6.31.4",
@@ -38,6 +39,7 @@
     "@xchainjs/xchain-bsc": "^1.0.12",
     "@xchainjs/xchain-client": "^1.0.7",
     "@xchainjs/xchain-cosmos": "^2.0.11",
+    "@xchainjs/xchain-cosmos-sdk": "^1.0.12",
     "@xchainjs/xchain-doge": "^1.0.7",
     "@xchainjs/xchain-ethereum": "^1.0.12",
     "@xchainjs/xchain-litecoin": "^1.0.7",

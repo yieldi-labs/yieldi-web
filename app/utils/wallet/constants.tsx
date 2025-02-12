@@ -46,6 +46,7 @@ export enum WalletKey {
   VULTISIG = "vultisig",
   WALLETCONNECT = "walletConnect",
   LEDGER = "ledger",
+  LEAP = "leap",
 }
 
 export enum ThorchainIdentifiers {
@@ -333,6 +334,22 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
     isAvailable: false,
     isHardware: true,
     hasSupportMultichain: false,
+    hasSupportToAddConectionToExistingConnection: true,
+    hasSupportToSelectChains: true,
+    chainConnect: {},
+  },
+  [WalletKey.LEAP]: {
+    id: WalletKey.LEAP,
+    name: "Leap",
+    chains: [
+      ChainKey.THORCHAIN,
+      ChainKey.GAIACHAIN
+    ],
+    downloadUrl: "https://www.leapwallet.io/",
+    icon: <WalletSvg.Ledger />,
+    isAvailable: false,
+    isHardware: false,
+    hasSupportMultichain: true,
     hasSupportToAddConectionToExistingConnection: true,
     hasSupportToSelectChains: true,
     chainConnect: {},

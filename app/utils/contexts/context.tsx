@@ -39,7 +39,7 @@ import {
   network,
 } from "@/thornode";
 import { getPools, getStats, PoolDetails, StatsData } from "@/midgard";
-import { detectOverwritedEthProviders } from "../chain";
+import { detectOverwritedEthProviders, detectOverwritedThorchainProviders } from "../chain";
 import { baseAmount } from "@xchainjs/xchain-util";
 
 interface AppStateContextType {
@@ -520,6 +520,26 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
               }),
           };
           break;
+        case WalletKey.LEAP:
+          if (window.leap) {
+            const leapProvider = detectOverwritedThorchainProviders(walletKey)
+            SUPPORTED_WALLETS[walletKey].isAvailable = true;
+            SUPPORTED_WALLETS[walletKey].chainConnect = {
+              [ProviderKey.THORCHAIN]: async () =>
+                await connectWallet({
+                  id: "leap-thorchain",
+                  provider: leapProvider || window.leap,
+                  walletId: WalletKey.LEAP,
+                }),
+              [ProviderKey.COSMOS]: async () =>
+                await connectWallet({
+                  id: "leap-cosmos",
+                  provider: leapProvider || window.leap,
+                  walletId: WalletKey.LEAP,
+                }),
+            };
+            break;
+          }
         case WalletKey.LEDGER:
           SUPPORTED_WALLETS[walletKey].isAvailable = true;
           SUPPORTED_WALLETS[walletKey].chainConnect = {

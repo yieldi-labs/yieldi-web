@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@cosmjs/proto-signing':
+        specifier: 0.32.4
+        version: 0.32.4
       '@cosmjs/stargate':
         specifier: ^0.32.4
         version: 0.32.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -47,6 +50,9 @@ importers:
       '@xchainjs/xchain-cosmos':
         specifier: ^2.0.11
         version: 2.0.11(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@xchainjs/xchain-cosmos-sdk':
+        specifier: ^1.0.12
+        version: 1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@xchainjs/xchain-doge':
         specifier: ^1.0.7
         version: 1.0.7
@@ -1912,6 +1918,9 @@ packages:
   '@xchainjs/xchain-bsc@1.0.12':
     resolution: {integrity: sha512-qNgxB2R//qBGuXStbVVYKfCqACbqt5OH+rIdsREne3deBexiqTc4nnL9qRxec8qarRu3E+pgsffslL/8DZptMA==}
 
+  '@xchainjs/xchain-client@1.0.10':
+    resolution: {integrity: sha512-By3fG1fdcxGxUqfesTNvfBO8c1JPeLknO5qadpRiffRHKKJaMVH94bBbJ4mS/f4sBpZyaDO03nD4p6Iw7iIPJg==}
+
   '@xchainjs/xchain-client@1.0.7':
     resolution: {integrity: sha512-aDtPLV8h2DNXR4kKcuJRZDQBXOVySqNUChnUznVFg1h+VlhKWbyCAf1KwDcXrAEv61qZDe0us/+Fa/bec+ElvA==}
 
@@ -1920,6 +1929,9 @@ packages:
 
   '@xchainjs/xchain-cosmos-sdk@1.0.10':
     resolution: {integrity: sha512-iHOlAXPENAEDrjmYSFbgLkHSM+fajyqXZdSZt3NN3lQc4wmmP7ooQnzPVJN9oe3Snw+xJQrvSzdtsbCINLegQg==}
+
+  '@xchainjs/xchain-cosmos-sdk@1.0.12':
+    resolution: {integrity: sha512-+AaQtdIIc8T+BA44URysrNMfwr2IVLnMxa9xb6uOXAmEqdsu5M/AkFs2iM8I6oC7r/yhUXxDW4VblzH19a6+YQ==}
 
   '@xchainjs/xchain-cosmos-sdk@1.0.9':
     resolution: {integrity: sha512-Fp/h8Umy5yic3mQ5HW12T4/7xA5NntvDa8dDwy326t0WzbSixVzzp3JNUmb2suM/CSZZGAcp/VdkNbBA5av+PQ==}
@@ -1953,6 +1965,9 @@ packages:
 
   '@xchainjs/xchain-util@1.0.6':
     resolution: {integrity: sha512-ua96jN3bCV2Tsnrz3NAU1AI6/3Lu9KSCys5d9mLNo5FuzjDxXIw4IXuffTxAlBAv8duJfL4f8mIKMz2HViQYSA==}
+
+  '@xchainjs/xchain-util@1.0.8':
+    resolution: {integrity: sha512-ZKZZPa1ANkn+CdwQz59RXw929yxKvy+UVVe3GacUrayuz8xDJhcVEVXw9K77D3lPGBrckElqSy9lPVgY5Ll0tA==}
 
   '@xchainjs/xchain-utxo-providers@1.0.7':
     resolution: {integrity: sha512-ubzoYCH0P3l1hKWqWugBfjuZouhsSg7l9oJeafQM+m2nvEKsCTK4u98kXG2tq00jCBb7aAcfPkt1+z8Y7Xo22Q==}
@@ -5885,7 +5900,7 @@ snapshots:
       '@cosmjs/utils': 0.32.4
       '@noble/hashes': 1.5.0
       bn.js: 5.2.1
-      elliptic: 6.5.7
+      elliptic: 6.6.1
       libsodium-wrappers-sumo: 0.7.15
 
   '@cosmjs/encoding@0.32.4':
@@ -8772,6 +8787,14 @@ snapshots:
       - debug
       - utf-8-validate
 
+  '@xchainjs/xchain-client@1.0.10':
+    dependencies:
+      '@xchainjs/xchain-crypto': 0.3.7
+      '@xchainjs/xchain-util': 1.0.8
+      axios: 1.7.4
+    transitivePeerDependencies:
+      - debug
+
   '@xchainjs/xchain-client@1.0.7':
     dependencies:
       '@xchainjs/xchain-crypto': 0.3.6
@@ -8798,6 +8821,24 @@ snapshots:
       '@xchainjs/xchain-client': 1.0.8
       '@xchainjs/xchain-crypto': 0.3.7
       '@xchainjs/xchain-util': 1.0.6
+      bech32: 1.1.4
+      bip32: 2.0.6
+      secp256k1: 5.0.1
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
+  '@xchainjs/xchain-cosmos-sdk@1.0.12(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@cosmjs/crypto': 0.32.4
+      '@cosmjs/encoding': 0.32.4
+      '@cosmjs/proto-signing': 0.32.4
+      '@cosmjs/stargate': 0.32.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@scure/base': 1.1.5
+      '@xchainjs/xchain-client': 1.0.10
+      '@xchainjs/xchain-crypto': 0.3.7
+      '@xchainjs/xchain-util': 1.0.8
       bech32: 1.1.4
       bip32: 2.0.6
       secp256k1: 5.0.1
@@ -8956,6 +8997,10 @@ snapshots:
       - utf-8-validate
 
   '@xchainjs/xchain-util@1.0.6':
+    dependencies:
+      bignumber.js: 9.0.0
+
+  '@xchainjs/xchain-util@1.0.8':
     dependencies:
       bignumber.js: 9.0.0
 
@@ -12500,7 +12545,7 @@ snapshots:
 
   secp256k1@5.0.1:
     dependencies:
-      elliptic: 6.6.0
+      elliptic: 6.6.1
       node-addon-api: 5.1.0
       node-gyp-build: 4.8.2
 

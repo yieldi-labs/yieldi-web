@@ -4,11 +4,13 @@ import { Client as BitcoinClient } from "@xchainjs/xchain-bitcoin";
 import * as Bitcoin from "bitcoinjs-lib";
 import { getLedgerClient, UTXOChain } from "../utxoClients/ledgerClients";
 import { ChainKey, WalletKey } from "../constants";
-import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
+import { coins, defaultRegistryTypes, GasPrice, SigningStargateClient } from "@cosmjs/stargate";
 import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
-import { AssetRuneNative, RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
+import { AssetRuneNative, RUNE_DECIMAL, defaultClientConfig } from "@xchainjs/xchain-thorchain";
 import { switchEvmChain } from "@/utils/chain";
+import { bech32ToBase64 } from '@xchainjs/xchain-cosmos-sdk'
+import { Registry } from '@cosmjs/proto-signing'
 
 export interface TransactionEvmParams extends TransactionParams {
   data: `0x${string}`;
@@ -195,6 +197,52 @@ export const depositThorchain = async (
         console.error("deposit error", e);
       }
       return result;
+    case WalletKey.LEAP: {
+      await wallet.provider.enable('thorchain-stagenet-2')
+      const offlineSigner = wallet.provider.getOfflineSigner('thorchain-stagenet-2');
+
+      let result: any
+      try {
+        const registry = new Registry([...defaultRegistryTypes, ...defaultClientConfig.registryTypes])
+        const cosmJS = await SigningStargateClient.connectWithSigner(
+          'https://stagenet-rpc.ninerealms.com/',
+          offlineSigner,
+          {
+            registry,
+          },
+        );
+
+        const coin = {
+          asset: AssetRuneNative,
+          amount: transferParams.amount.amount().toString(),
+        };
+
+        const fee = {
+          amount: coins(10000, "rune"),
+          gas: "200000",
+        };
+
+        const msgDeposit = {
+          typeUrl: "/types.MsgDeposit",
+          value: {
+            signer: bech32ToBase64(transferParams.from),
+            memo: transferParams.memo,
+            coins: [coin],
+          },
+        };
+
+        result = await cosmJS.signAndBroadcast(transferParams.from, [msgDeposit], fee, transferParams.memo);
+
+        console.log('result', result)
+  
+      } catch (e) {
+        console.error('Error', e)
+        throw e
+      }
+
+
+      return result.transactionHash;
+    }
     default:
       throw Error(`Deposit not implemented for ${wallet.walletId}`);
   }
@@ -207,6 +255,7 @@ export const transferCosmos = async (
   switch (wallet.walletId) {
     case WalletKey.CTRL:
     case WalletKey.OKX:
+    case WalletKey.LEAP:
       const chainId = "cosmoshub-4";
       const rpcUrl = process.env.NEXT_PUBLIC_COSMOS_RPC_URL || "";
       await wallet.provider.enable(chainId);

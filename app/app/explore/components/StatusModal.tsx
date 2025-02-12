@@ -16,6 +16,7 @@ import {
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import LpSubstepDetail from "./LpSubstepDetail";
 import { Warn } from "@shared/components/ui";
+import { showToast, ToastType } from "@/app/errorToast";
 
 export interface StatusStepData {
   pool: PoolDetail;
@@ -141,8 +142,7 @@ export default function StatusModal({
           runeAmount: parsedRuneAmount,
           pairedAddress,
           emitError: (error) => {
-            console.error(error);
-            onClose();
+            showToast({ text: error, type: ToastType.ERROR });
           },
           emitNewHash: (hash, stepToUpdate) => {
             setAssetTxHash(hash);
@@ -182,8 +182,7 @@ export default function StatusModal({
           pairedAddress,
           runeAmount: parsedRuneAmount,
           emitError: (error) => {
-            console.error(error);
-            onClose();
+            showToast({ text: error, type: ToastType.ERROR });
           },
           emitNewHash: (hash, stepToUpdate) => {
             setRuneTxHash(hash);

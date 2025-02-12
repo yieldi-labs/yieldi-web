@@ -14,6 +14,7 @@ import {
 } from "@xchainjs/xchain-util";
 import { useQuery } from "@tanstack/react-query";
 import { getBalancePerChainAndAddress } from "@/ctrl/client";
+import { balances as getBalanceFromThorchainNetwork } from "@/thornode";
 
 const initialWalletTokensData: WalletTokensData = {
   [ChainKey.AVALANCHE]: {},
@@ -133,6 +134,14 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
       };
     };
 
+    // ONLY FOR STAGENET
+    let formattedRuneStagenetBalance = 0
+    if (process.env.NEXT_PUBLIC_IS_STAGENET) {
+      const runeStagenetBalance = await getBalanceFromThorchainNetwork({ path: { address: walletsState[ChainKey.THORCHAIN].address }});
+      const balance = baseAmount(runeStagenetBalance.data?.result?.find((balance) => balance.denom == 'rune')?.amount || 0)
+      formattedRuneStagenetBalance = baseToAsset(balance).amount().toNumber()
+    }
+
     const chainPromises = Object.entries(walletTokensData).map(
       async ([chain, tokens]) => {
         if (!walletsState || !walletsState[chain as ChainKey]) return;
@@ -165,12 +174,16 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
               );
             });
 
-            const formattedAssetBalance = baseToAsset(
+            let formattedAssetBalance = baseToAsset(
               baseAmount(balance?.amount.value || 0, token.decimals),
             )
               .amount()
               .toNumber();
 
+            if (process.env.NEXT_PUBLIC_IS_STAGENET && chain === ChainKey.THORCHAIN) {
+              formattedAssetBalance = formattedRuneStagenetBalance
+            }
+          
             updateTokenData(chain as ChainKey, tokenKey, {
               balance: formattedAssetBalance,
             });
