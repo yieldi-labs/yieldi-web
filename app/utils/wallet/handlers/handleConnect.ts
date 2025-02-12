@@ -326,10 +326,10 @@ export const connectWallet = async (wallet: {
         address: addressCosmos,
       };
     case "leap-thorchain": {
-      await wallet.provider.enable('thorchain-stagenet-2')
+      await wallet.provider.enable(wallet.subchain)
 
       // Get the offline signer
-      const offlineSigner = wallet.provider.getOfflineSigner('thorchain-stagenet-2');
+      const offlineSigner = wallet.provider.getOfflineSigner(wallet.subchain);
       const accounts = await offlineSigner.getAccounts();
 
       if (!accounts || accounts.length === 0) {
@@ -337,7 +337,7 @@ export const connectWallet = async (wallet: {
       }
 
       return {
-        provider: window.keplr,
+        provider: wallet.provider,
         address: accounts[0].address
       };
     }

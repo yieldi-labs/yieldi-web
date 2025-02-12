@@ -57,6 +57,17 @@ const getStatusView = (status: LpSubstepsStatus) => {
       />
     );
   }
+  if (status === LpSubstepsStatus.FAILED) {
+    return (
+      <Image
+        src={"/fail-status-modal.svg"}
+        alt="Fail icon"
+        className="rounded-full"
+        width={40}
+        height={40}
+      />
+    );
+  }
   return <div className="w-[40px] h-[40px] bg-gray-200 rounded-full"></div>;
 };
 

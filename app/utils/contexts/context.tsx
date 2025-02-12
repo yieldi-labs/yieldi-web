@@ -530,6 +530,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   id: "leap-thorchain",
                   provider: leapProvider || window.leap,
                   walletId: WalletKey.LEAP,
+                  subchain: process.env.NEXT_PUBLIC_IS_STAGENET ? "thorchain-stagenet-2" : "thorchain-1",
                 }),
               [ProviderKey.COSMOS]: async () =>
                 await connectWallet({
@@ -627,7 +628,9 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     const processedWallets = new Set<WalletKey>();
 
     const processWallet = (wallet: WalletType) => {
-      if (processedWallets.has(wallet.id)) return;
+      if (processedWallets.has(wallet.id) || (process.env.NEXT_PUBLIC_IS_STAGENET && !wallet.hasSupportStagenet)) {
+        return
+      }
       if (wallet.isAvailable) {
         detected.push(wallet);
       } else {

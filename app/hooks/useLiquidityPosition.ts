@@ -56,7 +56,7 @@ interface UseLiquidityPositionProps {
 
 let affiliate = "yi";
 if (process.env.NEXT_PUBLIC_IS_STAGENET) {
-  affiliate = "";
+  affiliate = ""; // TODO: Register affiliate on stagenet
 }
 const feeBps = 0;
 
@@ -135,6 +135,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       emitNewHash,
       emitError,
     }: AddLiquidityParams) => {
+      console.log('Adding...')
       if (!getAssetWallet(asset)?.address) {
         emitError("Wallet not connected");
         throw new Error("Wallet not connected");
@@ -305,9 +306,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         return txHash;
       } catch (err) {
         console.error("Failed to add liquidity:", err);
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to add liquidity";
-        emitError(errorMessage);
       } finally {
         setLoading(false);
       }

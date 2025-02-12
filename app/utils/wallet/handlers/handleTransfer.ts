@@ -4,13 +4,22 @@ import { Client as BitcoinClient } from "@xchainjs/xchain-bitcoin";
 import * as Bitcoin from "bitcoinjs-lib";
 import { getLedgerClient, UTXOChain } from "../utxoClients/ledgerClients";
 import { ChainKey, WalletKey } from "../constants";
-import { coins, defaultRegistryTypes, GasPrice, SigningStargateClient } from "@cosmjs/stargate";
+import {
+  coins,
+  defaultRegistryTypes,
+  GasPrice,
+  SigningStargateClient,
+} from "@cosmjs/stargate";
 import { getBftLedgerClient } from "../bftClients/ledgerClients";
 import { getEvmLedgerClient } from "../evmClients/ledgerClients";
-import { AssetRuneNative, RUNE_DECIMAL, defaultClientConfig } from "@xchainjs/xchain-thorchain";
+import {
+  AssetRuneNative,
+  RUNE_DECIMAL,
+  defaultClientConfig,
+} from "@xchainjs/xchain-thorchain";
 import { switchEvmChain } from "@/utils/chain";
-import { bech32ToBase64 } from '@xchainjs/xchain-cosmos-sdk'
-import { Registry } from '@cosmjs/proto-signing'
+import { bech32ToBase64 } from "@xchainjs/xchain-cosmos-sdk";
+import { Registry } from "@cosmjs/proto-signing";
 
 export interface TransactionEvmParams extends TransactionParams {
   data: `0x${string}`;
@@ -32,7 +41,7 @@ interface DepositParams {
 export const transferUTXO = async (
   wallet: WalletState,
   transferParams: TransactionParams,
-  clientBuilder?: BitcoinClient,
+  clientBuilder?: BitcoinClient
 ): Promise<string> => {
   try {
     switch (wallet.walletId) {
@@ -74,7 +83,7 @@ export const transferUTXO = async (
               } else {
                 resolve(result);
               }
-            },
+            }
           );
         });
       case WalletKey.PHANTOM:
@@ -90,7 +99,7 @@ export const transferUTXO = async (
         });
         const fromHexString = (hexString: any) =>
           Uint8Array.from(
-            hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16)),
+            hexString.match(/.{1,2}/g).map((byte: any) => parseInt(byte, 16))
           );
         const psbtUnsigned = Bitcoin.Psbt.fromBase64(rawUnsignedTx);
         const signedPSBTBytes: Uint8Array = await wallet.provider.signPSBT(
@@ -102,7 +111,7 @@ export const transferUTXO = async (
                 signingIndexes: inputs.map((input) => input.index),
               },
             ],
-          },
+          }
         );
 
         const psbtSigned = Bitcoin.Psbt.fromBuffer(signedPSBTBytes);
@@ -128,7 +137,7 @@ export const transferUTXO = async (
       case WalletKey.LEDGER:
         const ledgerClient = getLedgerClient(
           wallet.ChainInfo as UTXOChain,
-          wallet.provider,
+          wallet.provider
         );
         const utxoHash = await ledgerClient.transfer({
           amount: transferParams.amount,
@@ -148,7 +157,7 @@ export const transferUTXO = async (
 
 export const depositThorchain = async (
   wallet: WalletState,
-  transferParams: DepositParams,
+  transferParams: DepositParams
 ): Promise<string> => {
   switch (wallet.walletId) {
     case WalletKey.CTRL:
@@ -174,7 +183,7 @@ export const depositThorchain = async (
             } else {
               resolve(result || "");
             }
-          },
+          }
         );
       });
     case WalletKey.VULTISIG:
@@ -198,48 +207,49 @@ export const depositThorchain = async (
       }
       return result;
     case WalletKey.LEAP: {
-      await wallet.provider.enable('thorchain-stagenet-2')
-      const offlineSigner = wallet.provider.getOfflineSigner('thorchain-stagenet-2');
+      const subchain = process.env.NEXT_PUBLIC_IS_STAGENET ? "thorchain-stagenet-2" : "thorchain-1"
+      const offlineSigner = wallet.provider.getOfflineSigner(subchain);
+      const rpc = process.env.NEXT_PUBLIC_IS_STAGENET ? "https://stagenet-rpc.ninerealms.com/" : "https://rpc.ninerealms.com/"
 
-      let result: any
-      try {
-        const registry = new Registry([...defaultRegistryTypes, ...defaultClientConfig.registryTypes])
-        const cosmJS = await SigningStargateClient.connectWithSigner(
-          'https://stagenet-rpc.ninerealms.com/',
-          offlineSigner,
-          {
-            registry,
-          },
-        );
+      let result: any;
 
-        const coin = {
-          asset: AssetRuneNative,
-          amount: transferParams.amount.amount().toString(),
-        };
+      const registry = new Registry([
+        ...defaultRegistryTypes,
+        ...defaultClientConfig.registryTypes,
+      ]);
+      const cosmJS = await SigningStargateClient.connectWithSigner(
+        rpc,
+        offlineSigner,
+        {
+          registry,
+        }
+      );
 
-        const fee = {
-          amount: coins(10000, "rune"),
-          gas: "200000",
-        };
+      const coin = {
+        asset: AssetRuneNative,
+        amount: transferParams.amount.amount().toString(),
+      };
 
-        const msgDeposit = {
-          typeUrl: "/types.MsgDeposit",
-          value: {
-            signer: bech32ToBase64(transferParams.from),
-            memo: transferParams.memo,
-            coins: [coin],
-          },
-        };
+      const fee = {
+        amount: coins(10000, "rune"),
+        gas: "200000",
+      };
 
-        result = await cosmJS.signAndBroadcast(transferParams.from, [msgDeposit], fee, transferParams.memo);
+      const msgDeposit = {
+        typeUrl: "/types.MsgDeposit",
+        value: {
+          signer: bech32ToBase64(transferParams.from),
+          memo: transferParams.memo,
+          coins: [coin],
+        },
+      };
 
-        console.log('result', result)
-  
-      } catch (e) {
-        console.error('Error', e)
-        throw e
-      }
-
+      result = await cosmJS.signAndBroadcast(
+        transferParams.from,
+        [msgDeposit],
+        fee,
+        transferParams.memo
+      );
 
       return result.transactionHash;
     }
@@ -250,7 +260,7 @@ export const depositThorchain = async (
 
 export const transferCosmos = async (
   wallet: WalletState,
-  transferParams: TransactionParams,
+  transferParams: TransactionParams
 ): Promise<string> => {
   switch (wallet.walletId) {
     case WalletKey.CTRL:
@@ -267,7 +277,7 @@ export const transferCosmos = async (
         offlineSigner,
         {
           gasPrice,
-        },
+        }
       );
       const coin = {
         denom: "uatom",
@@ -279,7 +289,7 @@ export const transferCosmos = async (
         transferParams.recipient,
         [coin],
         "auto",
-        transferParams.memo,
+        transferParams.memo
       );
       return result.transactionHash;
     case WalletKey.VULTISIG:
@@ -308,7 +318,7 @@ export const transferCosmos = async (
 
 export const transferEvm = async (
   wallet: WalletState,
-  transferParams: TransactionEvmParams,
+  transferParams: TransactionEvmParams
 ): Promise<any> => {
   switch (wallet.walletId) {
     case WalletKey.CTRL:
