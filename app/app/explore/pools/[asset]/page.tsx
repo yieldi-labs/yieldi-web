@@ -1,6 +1,10 @@
+import Loader from "@/app/components/Loader";
 import PoolDetailClient from "./PoolDetailClient";
 import { getPool, getStats } from "@/midgard";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+
+export const revalidate = 60;
 
 export default async function PoolDetailPage({
   params,
@@ -26,5 +30,11 @@ export default async function PoolDetailPage({
   )
     return notFound();
 
-  return <PoolDetailClient pool={poolData.data} />;
+  return <Suspense fallback={
+    <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
+      <Loader />
+    </div>
+    }>
+    <PoolDetailClient pool={poolData.data} />
+  </Suspense>;
 }

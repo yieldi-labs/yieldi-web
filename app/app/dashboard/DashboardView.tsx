@@ -138,9 +138,9 @@ export default function DashboardView() {
           Manage your active positions and track your earnings.
         </div>
         {isPending && !positions ? (
-          <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl md:mx-16">
-            <Loader />
-          </div>
+          <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
+          <Loader />
+        </div>
         ) : (
           <PositionsList
             positions={allPositionsArray}
