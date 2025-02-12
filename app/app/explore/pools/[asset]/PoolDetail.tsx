@@ -28,13 +28,20 @@ import { assetFromString } from "@xchainjs/xchain-util";
 import AddLiquidityManager, {
   LpSteps,
 } from "../../components/AddLiquidityManager";
+import { Warn } from "@shared/components/ui";
+import { showToast, ToastType } from "@/app/errorToast";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
 }
 
 export default function PoolDetail({ pool }: PoolDetailProps) {
-  const { walletsState, toggleWalletModal, midgardStats } = useAppState();
+  const {
+    walletsState,
+    toggleWalletModal,
+    midgardStats,
+    isLiquidityCapReached,
+  } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
@@ -48,7 +55,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
   const wallet =
     walletsState && walletsState[chainKey] ? walletsState![chainKey] : null;
 
-  const { positions, isPending, error } = useLiquidityPositions();
+  const { positions, isPending, positionsError } = useLiquidityPositions();
   const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0;
 
   useEffect(() => {
@@ -78,6 +85,15 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
     setShowAddLiquidityModal(false);
   };
 
+  useEffect(() => {
+    if (positionsError) {
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to load your liquidity positions. Please try again.",
+      });
+    }
+  }, [positionsError]);
+
   const renderActionButton = () => {
     if (!wallet) {
       return (
@@ -102,14 +118,24 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
     }
 
     return (
-      <button
-        className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
-                 hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-        onClick={() => setShowAddLiquidityModal(true)}
-        disabled={showLoadingState}
-      >
-        {showLoadingState ? "Loading..." : "Add"}
-      </button>
+      <>
+        <button
+          disabled={showLoadingState || isLiquidityCapReached}
+          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
+                  hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={() => setShowAddLiquidityModal(true)}
+        >
+          {showLoadingState ? "Loading..." : "Add"}
+        </button>
+        {isLiquidityCapReached ? (
+          <div className="mt-6 w-full">
+            <Warn
+              text={`Liquidity deposits are temporarily disabled due to network limits.`}
+              link="https://yieldi.gitbook.io/yieldi/basics/integrations#why-cant-i-add-more-liquidity"
+            />
+          </div>
+        ) : null}
+      </>
     );
   };
 
@@ -293,12 +319,6 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
             runePriceUSD: runePriceUSD,
           }}
         />
-      )}
-
-      {error && (
-        <div className="fixed bottom-4 right-4 bg-red text-white p-4 rounded-lg">
-          {error.message}
-        </div>
       )}
     </div>
   );

@@ -16,6 +16,7 @@ import {
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import LpSubstepDetail from "./LpSubstepDetail";
 import { Warn } from "@shared/components/ui";
+import { showToast, ToastType } from "@/app/errorToast";
 
 export interface StatusStepData {
   pool: PoolDetail;
@@ -31,6 +32,7 @@ export enum LpSubstepsStatus {
   PENDING = "PENDING",
   SUCCESS = "SUCCESS",
   INACTIVE = "INACTIVE",
+  FAILED = "FAILED",
 }
 
 export interface ConfirmStepData {
@@ -141,8 +143,18 @@ export default function StatusModal({
           runeAmount: parsedRuneAmount,
           pairedAddress,
           emitError: (error) => {
-            console.error(error);
-            onClose();
+            showToast({ text: error, type: ToastType.ERROR });
+            setStepStatus((prev) => {
+              return prev.map((step) => {
+                if (step.status === LpSubstepsStatus.PENDING) {
+                  return {
+                    ...step,
+                    status: LpSubstepsStatus.FAILED,
+                  };
+                }
+                return step;
+              });
+            });
           },
           emitNewHash: (hash, stepToUpdate) => {
             setAssetTxHash(hash);
@@ -159,7 +171,7 @@ export default function StatusModal({
                   updatedStepIndex = index;
                   return {
                     ...step,
-                    status: LpSubstepsStatus.SUCCESS,
+                    status: LpSubstepsStatus.FAILED,
                   };
                 }
                 return step;
@@ -182,8 +194,18 @@ export default function StatusModal({
           pairedAddress,
           runeAmount: parsedRuneAmount,
           emitError: (error) => {
-            console.error(error);
-            onClose();
+            showToast({ text: error, type: ToastType.ERROR });
+            setStepStatus((prev) => {
+              return prev.map((step) => {
+                if (step.status === LpSubstepsStatus.PENDING) {
+                  return {
+                    ...step,
+                    status: LpSubstepsStatus.INACTIVE,
+                  };
+                }
+                return step;
+              });
+            });
           },
           emitNewHash: (hash, stepToUpdate) => {
             setRuneTxHash(hash);

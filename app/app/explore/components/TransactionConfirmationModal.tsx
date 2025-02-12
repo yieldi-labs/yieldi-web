@@ -6,6 +6,7 @@ import {
   PositionStatus,
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
+import { getAddressUrl } from "@/utils/wallet/utils";
 
 interface TransactionConfirmationModalProps {
   stepData: {
@@ -73,12 +74,8 @@ export default function TransactionConfirmationModal({
     return hash
       ? [
           {
-            url: `https://thorchain.net/tx/${hash}`,
+            url: `${getAddressUrl()}${hash}`,
             text: `View ${chainName} transaction on THORChain.net`,
-          },
-          {
-            url: `https://runescan.io/tx/${hash}`,
-            text: `View ${chainName} transaction on Runescan`,
           },
         ]
       : [];

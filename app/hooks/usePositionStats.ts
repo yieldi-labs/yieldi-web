@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getPools, MemberPool, PoolDetail, PoolDetails } from "@/midgard";
+import { MemberPool, PoolDetail, PoolDetails } from "@/midgard";
 import {
   Positions,
   PositionStats,
@@ -8,19 +8,18 @@ import {
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { useCallback, useEffect, useState } from "react";
-import { useAppState } from "@/utils/contexts/context";
 import { ethers } from "ethers";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
+import { MimirResponse } from "@/thornode";
+import { ConnectedWalletsState } from "@/utils/interfaces";
 
 interface UsePositionStatsProps {
   defaultRefetchInterval?: number;
-}
-
-interface PositionsCache {
-  positions: Positions;
-  pools: PoolDetails;
+  walletsState: ConnectedWalletsState;
+  mimirParameters: MimirResponse | undefined;
+  poolsData: PoolDetails | undefined;
 }
 
 export function emptyPositionStats(
@@ -51,15 +50,17 @@ export function emptyPositionStats(
 
 export function usePositionStats({
   defaultRefetchInterval = 30000,
+  walletsState,
+  mimirParameters,
+  poolsData,
 }: UsePositionStatsProps) {
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
-    PositionsCache | undefined
+    Positions | undefined
   >();
 
   const [currentRefetchInterval, setRefetchInterval] = useState<
     number | undefined
   >(defaultRefetchInterval);
-  const { walletsState, mimirParameters } = useAppState();
 
   const { isFetching: isPending, error } = useQuery({
     queryKey: ["position-stats", Object.keys(walletsState).length],
@@ -83,16 +84,13 @@ export function usePositionStats({
           arrayAddresses.indexOf(address) === index,
       );
 
-      const resultPools = await getPools();
-      const pools = resultPools.data;
-
-      if (!pools) {
+      if (!poolsData) {
         throw Error("No pools available");
       }
 
       const genericPositionsDataStructure = await positionsTransformer(
         uniqueAddresses,
-        pools,
+        poolsData,
         {
           LIQUIDITYLOCKUPBLOCKS: Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS),
         },
@@ -120,24 +118,20 @@ export function usePositionStats({
         return positions;
       }, {});
 
-      setCurrentPositionsStats({
-        positions: filteredPositions,
-        pools: pools || [],
-      });
+      setCurrentPositionsStats(filteredPositions);
 
-      return { positions: genericPositionsDataStructure, pools };
+      return { positions: genericPositionsDataStructure, pools: poolsData };
     },
   });
 
   useEffect(() => {
-    const hasPendingPositions = Object.values(
-      currentPositionsStats?.positions || {},
-    ).some((positions) =>
-      Object.values(positions).some(
-        (position) =>
-          position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
-          position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
-      ),
+    const hasPendingPositions = Object.values(currentPositionsStats || {}).some(
+      (positions) =>
+        Object.values(positions).some(
+          (position) =>
+            position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
+            position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
+        ),
     );
 
     if (hasPendingPositions) {
@@ -155,35 +149,34 @@ export function usePositionStats({
   const markPositionAsPending = useCallback(
     (pooldId: string, positionType: PositionType, status: PositionStatus) => {
       setCurrentPositionsStats((prev) => {
-        const updatedPositions = { ...prev };
-
-        if (!updatedPositions.positions) {
+        if (!prev) {
           throw Error("Pool or positions does not exist");
         }
 
-        if (!updatedPositions.positions[pooldId]) {
-          updatedPositions.positions[pooldId] = { SYM: null, ASYM: null };
+        if (!prev[pooldId]) {
+          prev[pooldId] = { SYM: null, ASYM: null };
         }
 
-        if (!updatedPositions.positions[pooldId][positionType]) {
-          updatedPositions.positions[pooldId][positionType] =
-            emptyPositionStats(pooldId, positionType);
+        if (!prev[pooldId][positionType]) {
+          prev[pooldId][positionType] = emptyPositionStats(
+            pooldId,
+            positionType,
+          );
         } else {
-          updatedPositions.positions[pooldId][positionType] = {
-            ...updatedPositions.positions[pooldId][positionType],
+          prev[pooldId][positionType] = {
+            ...prev[pooldId][positionType],
             status: status,
           };
         }
         setRefetchInterval(defaultRefetchInterval + 1); // Reset refech interval to improve UX
-        return updatedPositions as PositionsCache;
+        return prev;
       });
     },
     [defaultRefetchInterval],
   );
 
   return {
-    positions: currentPositionsStats?.positions,
-    pools: currentPositionsStats?.pools,
+    positions: currentPositionsStats,
     markPositionAsPending,
     cleanPositions,
     isPending,

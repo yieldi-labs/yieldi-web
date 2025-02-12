@@ -37,3 +37,8 @@ next-env.d.ts
 
 # jest
 .swc
+# Sentry Config File
+.env.sentry-build-plugin
+
+/midgard
+/thornode

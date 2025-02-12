@@ -16,6 +16,7 @@ import {
   WalletKey,
 } from "@/utils/wallet/constants";
 import { isWalletValidForAllChains } from "@/utils/wallet/utils";
+import { showToast, ToastType } from "@/app/errorToast";
 
 export default function WalletModal() {
   const [showHardwareWallets, setShowHardwareWallets] = useState(false);
@@ -49,8 +50,18 @@ export default function WalletModal() {
     }
   };
 
-  const handleConnectWallet = () => {
-    if (selectedWallet) handleConnect(selectedWallet);
+  const handleConnectWallet = async () => {
+    if (!selectedWallet) return; // Evita ejecutar si no hay wallet seleccionada
+
+    try {
+      await handleConnect(selectedWallet);
+    } catch (error) {
+      console.error(error);
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to connect the wallet. Please try again.",
+      });
+    }
   };
 
   if (!isWalletModalOpen) return null;
@@ -83,24 +94,26 @@ export default function WalletModal() {
               isWalletValidForChain={isWalletValidForAllChains}
               onWalletSelect={handleWalletSelect}
             />
-            <div
-              onClick={() => {
-                handleWalletSelect(SUPPORTED_WALLETS[WalletKey.LEDGER]);
-                setShowHardwareWallets(true);
-              }}
-              className={twMerge(
-                "flex items-center justify-between",
-                "bg-white rounded-2xl p-4",
-                "border-2 border-transparent",
-                "hover:border-primary cursor-pointer",
-                "transition-all duration-75",
-              )}
-            >
-              <h3 className="text-sm text-neutral-900 font-medium font-gt-america">
-                Hardware Wallets
-              </h3>
-              <IconSvg.Wallet />
-            </div>
+            {!process.env.NEXT_PUBLIC_IS_STAGENET && (
+              <div
+                onClick={() => {
+                  handleWalletSelect(SUPPORTED_WALLETS[WalletKey.LEDGER]);
+                  setShowHardwareWallets(true);
+                }}
+                className={twMerge(
+                  "flex items-center justify-between",
+                  "bg-white rounded-2xl p-4",
+                  "border-2 border-transparent",
+                  "hover:border-primary cursor-pointer",
+                  "transition-all duration-75",
+                )}
+              >
+                <h3 className="text-sm text-neutral-900 font-medium font-gt-america">
+                  Hardware Wallets
+                </h3>
+                <IconSvg.Wallet />
+              </div>
+            )}
           </>
         ) : (
           <HardwareWallets
@@ -113,14 +126,14 @@ export default function WalletModal() {
           />
         )}
         <button
-          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
+          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-4 
                    disabled:opacity-50 transition-opacity"
           disabled={!selectedWallet}
           onClick={handleConnectWallet}
         >
           Connect
         </button>
-        <p className="text-sm text-neutral-600 mt-2 max-w-[390px]">
+        <p className="text-sm text-neutral-600 mt-2 text-center w-full">
           By connecting a wallet, you agree to Yieldi&apos;s Terms of Use and
           Privacy Policy
         </p>

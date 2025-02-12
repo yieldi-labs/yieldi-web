@@ -133,7 +133,7 @@ export default function PositionsList({
                     rel="noopener noreferrer"
                     className="text-blue-500 hover:underline pl-1"
                   >
-                    Learn why
+                    Learn more
                   </a>
                 </p>
               }

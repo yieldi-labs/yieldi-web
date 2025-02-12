@@ -238,8 +238,6 @@ export default function AddLiquidityModal({
   return (
     <>
       <div className="p-2 w-full">
-        {/* {error && <ErrorCard className="mb-4">{error}</ErrorCard>} */}
-
         {/* Toggle between Single-sided and Dual-sided */}
         {isWalletConnected(ChainKey.THORCHAIN) && !stepData.initialType && (
           <ToggleButtonGroup

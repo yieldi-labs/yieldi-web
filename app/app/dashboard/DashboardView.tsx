@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { addDollarSignAndSuffix } from "../utils";
 import DashboardHighlightsCard from "./components/DashboardHighlightsCards";
 import PositionsList from "./components/PositionsList";
@@ -24,6 +24,8 @@ import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
 import { AddLiquidityStepData } from "../explore/components/AddLiquidityModal";
 import { useAppState } from "@/utils/contexts/context";
 import { Tooltip } from "@shared/components/ui";
+import { showToast, ToastType } from "../errorToast";
+import { getAddressUrl } from "@/utils/wallet/utils";
 
 export default function DashboardView() {
   const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{
@@ -40,8 +42,8 @@ export default function DashboardView() {
     useState(false);
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
-  const { positions, pools, isPending } = useLiquidityPositions();
-  const { midgardStats } = useAppState();
+  const { positions, isPending, positionsError } = useLiquidityPositions();
+  const { midgardStats, pools } = useAppState();
 
   const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0; // TODO: Loading state
 
@@ -66,6 +68,15 @@ export default function DashboardView() {
 
   const titleStyle =
     "my-2 md:mb-4 md:mt-0 md:text-2xl font-medium md:mb-6 text-neutral-900 md:text-neutral font-gt-america-ext uppercase";
+
+  useEffect(() => {
+    if (positionsError) {
+      showToast({
+        type: ToastType.ERROR,
+        text: "Failed to load your liquidity positions. Please try again.",
+      });
+    }
+  }, [positionsError]);
 
   return (
     <main className="md:mx-16 space-y-3 md:space-y-5">
@@ -108,7 +119,7 @@ export default function DashboardView() {
                   rel="noopener noreferrer"
                   className="text-blue-500 hover:underline pl-1"
                 >
-                  Learn why
+                  Learn more
                 </a>
               </p>
             }
@@ -127,7 +138,7 @@ export default function DashboardView() {
           Manage your active positions and track your earnings.
         </div>
         {isPending && !positions ? (
-          <div className="absolute inset-0 bg-white/50 flex items-center justify-center rounded-2xl md:mx-16">
+          <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
             <Loader />
           </div>
         ) : (
@@ -144,7 +155,7 @@ export default function DashboardView() {
                 case PositionStatus.LP_POSITION_DEPOSIT_PENDING:
                 case PositionStatus.LP_POSITION_WITHDRAWAL_PENDING:
                   window.open(
-                    `https://thorchain.net/address/${position.memberDetails?.assetAddress}?tab=lps`,
+                    `${getAddressUrl()}${position.memberDetails?.assetAddress}?tab=lps`,
                     "_blank",
                   );
                   break;
@@ -167,7 +178,6 @@ export default function DashboardView() {
                     valueOfPendingRuneInUsd.div(assetPriceUSD);
                   const amountOfRuneToDeposit =
                     valueOfPendingAssetInUsd.div(runePriceUSD);
-
                   const requiredSteps =
                     position.memberDetails?.assetPending === "0"
                       ? [

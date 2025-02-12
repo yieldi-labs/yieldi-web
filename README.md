@@ -33,6 +33,16 @@ For detailed information, see [App README](app/README.md) and [Landing Page READ
    NEXT_PUBLIC_WALLETCONNECT_PROJECTID=your_walletconnect_project_id
    ```
 
+3. Build api clientes
+   For `stagenet`
+   ```
+   pnpm run openapi:gen:stagenet
+   ```
+   For `mainnet`
+      ```
+   pnpm run openapi:gen
+   ```
+
 4. Run development servers:
    ```
    cd app && npm run dev
@@ -45,6 +55,32 @@ For detailed information, see [App README](app/README.md) and [Landing Page READ
 - Tailwind CSS
 - XchainJS
 - Thorchain API and Midgard
+
+## Configure Thorchain stagenet
+
+The stagenet network is only available with the wallet [leap](https://www.leapwallet.io/).
+
+You need to add custom network with this parameters: 
+
+```
+chain id: thorchain-stagenet-2
+chain name: thorchain
+rpc URL: https://stagenet-rpc.ninerealms.com
+Rest URL: https://stagenet-thornode.ninerealms.com
+prefix: sthor
+coin type: 931
+native denom: rune
+decimals: 8
+```
+
+Aditional you need to add env variable: 
+
+`NEXT_PUBLIC_IS_STAGENET=true`
+
+Finally you need to generate the clients based on stagenet specs using: 
+
+`pnpm run openapi:gen:stagenet`
+
 
 ## Contributing
 

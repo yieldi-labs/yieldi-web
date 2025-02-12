@@ -22,6 +22,7 @@ declare global {
     };
     thorchain?: any;
     ctrlEthProviders?: Record<string, any>;
+    ctrlKeplrProviders?: Record<string, any>;
   }
 }
 

@@ -10,6 +10,8 @@ import "./styles/globals.css";
 import { LiquidityPositionsProvider } from "@/utils/contexts/PositionsContext";
 import WalletDrawer from "./components/wallet-drawer";
 
+import { ToastContainer } from "react-toastify";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -33,6 +35,7 @@ export default function RootLayout({
           </AppStateProvider>
         </Providers>
         <CommonComponents.GradientCircles circles={lpGradientCircles} fixed />
+        <ToastContainer />
         <div id="modal-root" />
       </body>
     </html>
