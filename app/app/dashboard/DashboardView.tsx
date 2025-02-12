@@ -139,8 +139,8 @@ export default function DashboardView() {
         </div>
         {isPending && !positions ? (
           <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
-          <Loader />
-        </div>
+            <Loader />
+          </div>
         ) : (
           <PositionsList
             positions={allPositionsArray}

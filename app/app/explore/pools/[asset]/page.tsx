@@ -30,11 +30,15 @@ export default async function PoolDetailPage({
   )
     return notFound();
 
-  return <Suspense fallback={
-    <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
-      <Loader />
-    </div>
-    }>
-    <PoolDetailClient pool={poolData.data} />
-  </Suspense>;
+  return (
+    <Suspense
+      fallback={
+        <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
+          <Loader />
+        </div>
+      }
+    >
+      <PoolDetailClient pool={poolData.data} />
+    </Suspense>
+  );
 }
