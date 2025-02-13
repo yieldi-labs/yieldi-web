@@ -331,6 +331,7 @@ export const transferEvm = async (
     case WalletKey.PHANTOM:
     case WalletKey.VULTISIG:
     case WalletKey.WALLETCONNECT:
+    case WalletKey.LEAP:
       await switchEvmChain(wallet, transferParams.chainId as string);
 
       const currentChainId = await wallet.provider.request({

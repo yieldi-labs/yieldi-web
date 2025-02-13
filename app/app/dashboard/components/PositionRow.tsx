@@ -67,7 +67,8 @@ const isActionDisabled = (
     );
   } else if (
     position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
-    position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
+    position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING ||
+    position.status === PositionStatus.LP_POSITION_INCOMPLETE
   ) {
     return "Action in progress";
   } else if (
