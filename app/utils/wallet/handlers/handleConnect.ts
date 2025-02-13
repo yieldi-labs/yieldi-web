@@ -210,7 +210,8 @@ export const connectWallet = async (wallet: {
     case "vultisig-bsc":
     case "vultisig-eth":
     case "vultisig-base": 
-    case "leap-eth": {
+    case "leap-eth":
+    case "leap-bsc": {
       const [, chainIdentifier] = wallet.id.split("-");
       const chain = getChainInfoFromChainString(chainIdentifier);
 

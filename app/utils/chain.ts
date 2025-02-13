@@ -6,8 +6,8 @@ import {
   WalletKey,
 } from "./wallet/constants";
 import { ChainInfo, ChainType } from "./interfaces";
-import { InboundAddress } from "@/thornode";
-import { AnyAsset, assetFromString } from "@xchainjs/xchain-util";
+import { InboundAddress, InboundAddressesResponse } from "@/thornode";
+import { AnyAsset, assetFromString, baseAmount, baseToAsset } from "@xchainjs/xchain-util";
 
 /**
  * Validate inbound address for liquidity operations
@@ -106,28 +106,15 @@ export const isSupportedChain = (assetChain: string): boolean => {
 
 /**
  * Get minimum amount by chain
- * TODO: Get from inbound endpoint
  */
-export const getMinAmountByChain = (chain: ThorchainIdentifiers): number => {
-  switch (chain) {
-    case ThorchainIdentifiers.BTC:
-    case ThorchainIdentifiers.LTC:
-    case ThorchainIdentifiers.BCH:
-      return 0.00010001;
-    case ThorchainIdentifiers.DOGE:
-      return 1.00000001;
-    case ThorchainIdentifiers.AVAX:
-    case ThorchainIdentifiers.BASE:
-    case ThorchainIdentifiers.ETH:
-    case ThorchainIdentifiers.BSC:
-      return 0.00000001;
-    case ThorchainIdentifiers.THOR:
-      return 0;
-    case ThorchainIdentifiers.GAIA:
-      return 0.000001;
-    default:
-      throw Error("No dust amount defined for chain");
+export const getMinAmountByChain = (chain: ThorchainIdentifiers, inboundAddressesResponse?: InboundAddressesResponse): number => {
+  const inbound = inboundAddressesResponse?.find((inbound) => inbound.chain?.toLowerCase() === chain.toLowerCase());
+  if (!inbound) {
+    return 0 // For RUNE
   }
+  const dustBaseAmount = baseAmount(Number(inbound.dust_threshold)+1);
+  const dustAssetAmount = baseToAsset(dustBaseAmount).amount().toNumber();
+  return dustAssetAmount
 };
 
 /**

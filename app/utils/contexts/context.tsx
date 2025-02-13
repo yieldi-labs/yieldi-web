@@ -578,6 +578,12 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   provider: leapProvider || window.leap.ethereum,
                   walletId: WalletKey.LEAP,
                 }),
+              [ProviderKey.BINANCESMARTCHAIN]: async () =>
+                await connectWallet({
+                  id: "leap-bsc",
+                  provider: leapProvider || window.leap.ethereum,
+                  walletId: WalletKey.LEAP,
+                }),
             };
             break;
           }

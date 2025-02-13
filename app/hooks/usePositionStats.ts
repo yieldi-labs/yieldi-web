@@ -11,7 +11,6 @@ import { useCallback, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { getChainKeyFromChain } from "@/utils/chain";
-import { ChainKey } from "@/utils/wallet/constants";
 import { MimirResponse } from "@/thornode";
 import { ConnectedWalletsState } from "@/utils/interfaces";
 

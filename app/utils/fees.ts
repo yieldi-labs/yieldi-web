@@ -17,9 +17,13 @@ export function getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
   pool: PoolDetail,
   runePriceInDollar: number,
   withdrawalType: WithdrawalType,
+  gasAssetPool?: PoolDetail,
   nativeOutboundFeeRuneInBase?: string,
   inboundAddresses?: InboundAddressesResponse
 ) {
+  if (!gasAssetPool) {
+    throw Error("gasAssetPool is invalid");
+  }
   if (!nativeOutboundFeeRuneInBase) {
     throw Error("nativeOutboundFeeRuneInBase is invalid");
   }
@@ -36,7 +40,7 @@ export function getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
 
   // Asset outbound
   const outboundFeeInGasAsset = baseAmount(inboundInfo?.outbound_fee);
-  const outboundFeeInRune = getValueOfAssetInRune(outboundFeeInGasAsset, pool);
+  const outboundFeeInRune = getValueOfAssetInRune(outboundFeeInGasAsset, gasAssetPool);
   const princeOutboundAssetInDollars =
     baseToAsset(outboundFeeInRune).times(runePriceInDollar);
 

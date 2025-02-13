@@ -60,9 +60,19 @@ export default function RemoveLiquidityModal({
     mimirParameters,
     inboundAddresses,
     thornodeNetworkParameters,
+    pools
   } = useAppState();
 
   const asset = assetFromString(pool.asset);
+
+  const nativePool = pools?.find((p) => {
+    const poolAsset = assetFromString(p.asset);
+    const selectedPoolAsset = assetFromString(pool.asset);
+    if (poolAsset?.chain.toLowerCase() === selectedPoolAsset?.chain.toLowerCase() && poolAsset?.symbol.indexOf("-") === -1) {
+      return true;
+    }
+    return false
+  });
 
   const { positions, markPositionAsPending, positionsError } =
     useLiquidityPositions();
@@ -366,6 +376,15 @@ export default function RemoveLiquidityModal({
     runeUsdValue
   );
 
+  const outboundFee = getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
+    pool,
+    runePriceUSD,
+    withdrawalType,
+    nativePool,
+    thornodeNetworkParameters?.native_outbound_fee_rune,
+    inboundAddresses
+  )
+
   return (
     <Modal onClose={() => onClose(false)} title="Remove">
       <div className="p-2 w-m">
@@ -417,15 +436,7 @@ export default function RemoveLiquidityModal({
         <div className="flex justify-between items-center mb-4">
           <span className="text-gray-500">Withdrawal fee</span>
           <span className="font-medium">
-            {addDollarSignAndSuffix(
-              getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
-                pool,
-                runePriceUSD,
-                withdrawalType,
-                thornodeNetworkParameters?.native_outbound_fee_rune,
-                inboundAddresses
-              )
-            )}
+            {addDollarSignAndSuffix(outboundFee)}
           </span>
         </div>
 
@@ -461,12 +472,12 @@ export default function RemoveLiquidityModal({
 
         <button
           onClick={handleRemoveLiquidity}
-          disabled={!isEnabled() || isDisableDueTooSmallAmount}
+          disabled={!isEnabled() || isDisableDueTooSmallAmount || outboundFee > (assetUsdValue + runeUsdValue)}
           className="w-full bg-red text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting
             ? "Submitting Transaction..."
-            : isDisableDueTooSmallAmount
+            : isDisableDueTooSmallAmount || outboundFee > (assetUsdValue + runeUsdValue)
             ? "Small amount"
             : "Remove"}
         </button>
