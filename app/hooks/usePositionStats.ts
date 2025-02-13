@@ -108,12 +108,6 @@ export function usePositionStats({
         const chainKey = getChainKeyFromChain(chain);
         if (walletsConnected.includes(chainKey)) {
           positions[key] = genericPositionsDataStructure[key];
-        } else if (walletsConnected.includes(ChainKey.THORCHAIN)) {
-          // Symmetrical positions can be managed from THORChain wallet
-          positions[key] = {
-            ASYM: null,
-            SYM: genericPositionsDataStructure[key].SYM,
-          };
         }
         return positions;
       }, {});

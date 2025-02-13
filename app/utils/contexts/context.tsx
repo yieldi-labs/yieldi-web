@@ -37,6 +37,8 @@ import {
   asgard,
   mimir,
   network,
+  inboundAddresses,
+  InboundAddressesResponse,
 } from "@/thornode";
 import { getPools, getStats, PoolDetails, StatsData } from "@/midgard";
 import {
@@ -70,6 +72,8 @@ interface AppStateContextType {
   poolsData: PoolDetails | undefined;
   isLiquidityCapReached: boolean;
   pools: PoolDetails | undefined;
+  inboundAddresses: InboundAddressesResponse | undefined;
+  thornodeNetworkParameters: NetworkResponse | undefined;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -133,6 +137,31 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       const data = await getStats();
       if (!data.data) {
         throw Error("No midgard stats found");
+      }
+      return data.data;
+    },
+  });
+
+  const { data: thornodeNetworkParameters } = useQuery({
+    queryKey: ["thornode-network"],
+    retry: false,
+    queryFn: async () => {
+      const data = await network();
+      if (!data.data) {
+        throw Error("No thornode network params found");
+      }
+      return data.data;
+    },
+  });
+
+  const { data: currentInboundAddresses } = useQuery({
+    queryKey: ["inbound-addresses"],
+    retry: false,
+    refetchInterval: 10000,
+    queryFn: async () => {
+      const data = await inboundAddresses();
+      if (!data.data) {
+        throw Error("No inbound addresses found");
       }
       return data.data;
     },
@@ -543,6 +572,12 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   provider: leapProvider || window.leap,
                   walletId: WalletKey.LEAP,
                 }),
+              [ProviderKey.ETHEREUM]: async () =>
+                await connectWallet({
+                  id: "leap-eth",
+                  provider: leapProvider || window.leap.ethereum,
+                  walletId: WalletKey.LEAP,
+                }),
             };
             break;
           }
@@ -725,6 +760,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         poolsData,
         isLiquidityCapReached,
         pools: poolsData,
+        inboundAddresses: currentInboundAddresses,
+        thornodeNetworkParameters,
       }}
     >
       {children}

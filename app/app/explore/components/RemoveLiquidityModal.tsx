@@ -2,9 +2,10 @@ import { useState, useMemo, useEffect } from "react";
 import { NumberFormatValues } from "react-number-format";
 import BigNumber from "bignumber.js";
 import Modal from "@/app/modal";
-import { PoolDetail as IPoolDetail, MemberPool } from "@/midgard";
+import { PoolDetail, MemberPool } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
+  addDollarSignAndSuffix,
   DECIMALS,
   disableDueTooSmallAmount,
   getAssetShortSymbol,
@@ -24,19 +25,17 @@ import AssetInput from "./AssetInput";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { showToast, ToastType } from "@/app/errorToast";
+import {
+  getOutboundFeeInDollarsByPoolAndWithdrawalStrategy,
+  WithdrawalType,
+} from "@/utils/fees";
 
 interface RemoveLiquidityModalProps {
-  pool: IPoolDetail;
+  pool: PoolDetail;
   position: MemberPool;
   positionType: PositionType;
   runePriceUSD: number;
   onClose: (transactionSubmitted: boolean) => void;
-}
-
-enum WithdrawalType {
-  SPLIT = "SPLIT",
-  ALL_RUNE = "ALL_RUNE",
-  ALL_ASSET = "ALL_ASSET",
 }
 
 const DECIMAL_FORMATS = {
@@ -55,7 +54,13 @@ export default function RemoveLiquidityModal({
   const { error: liquidityError, removeLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState, mimirParameters } = useAppState();
+  const {
+    toggleWalletModal,
+    walletsState,
+    mimirParameters,
+    inboundAddresses,
+    thornodeNetworkParameters,
+  } = useAppState();
 
   const asset = assetFromString(pool.asset);
 
@@ -68,12 +73,12 @@ export default function RemoveLiquidityModal({
   const [runeTxHash, setRuneTxHash] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastModified, setLastModified] = useState<"asset" | "rune" | null>(
-    null,
+    null
   );
   const [withdrawalType, setWithdrawalType] = useState<WithdrawalType>(
     positionType === PositionType.ASYM
       ? WithdrawalType.ALL_ASSET
-      : WithdrawalType.SPLIT,
+      : WithdrawalType.SPLIT
   );
   const chainKey = getChainKeyFromChain(asset?.chain || "");
   const selectedWallet = walletsState![chainKey];
@@ -102,22 +107,22 @@ export default function RemoveLiquidityModal({
 
   const posAssetAmount = useMemo(
     () => new BigNumber(positionAssetAmount),
-    [positionAssetAmount],
+    [positionAssetAmount]
   );
   const posRuneAmount = useMemo(
     () => new BigNumber(positionRuneAmount),
-    [positionRuneAmount],
+    [positionRuneAmount]
   );
   const posAssetUsdValue = posAssetAmount.times(
-    new BigNumber(pool.assetPriceUSD),
+    new BigNumber(pool.assetPriceUSD)
   );
   const posRuneUsdValue = posRuneAmount.times(new BigNumber(runePriceUSD));
 
   const totalAssetAmount = posAssetAmount.plus(
-    posRuneAmount.times(assetRuneRatio),
+    posRuneAmount.times(assetRuneRatio)
   );
   const totalRuneAmount = posRuneAmount.plus(
-    posAssetAmount.div(assetRuneRatio),
+    posAssetAmount.div(assetRuneRatio)
   );
 
   useEffect(() => {
@@ -259,8 +264,8 @@ export default function RemoveLiquidityModal({
           withdrawalType === WithdrawalType.ALL_ASSET
             ? pool.asset
             : withdrawalType === WithdrawalType.ALL_RUNE
-              ? "THOR.RUNE"
-              : undefined,
+            ? "THOR.RUNE"
+            : undefined,
       });
 
       if (hash) {
@@ -272,7 +277,7 @@ export default function RemoveLiquidityModal({
         markPositionAsPending(
           pool.asset,
           positionType,
-          PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
+          PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
         );
       }
     } catch (err) {
@@ -358,7 +363,7 @@ export default function RemoveLiquidityModal({
   const isDisableDueTooSmallAmount = disableDueTooSmallAmount(
     Number(mimirParameters?.MINIMUML1OUTBOUNDFEEUSD || 0),
     assetUsdValue,
-    runeUsdValue,
+    runeUsdValue
   );
 
   return (
@@ -409,6 +414,21 @@ export default function RemoveLiquidityModal({
           />
         )}
 
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-gray-500">Withdrawal fee</span>
+          <span className="font-medium">
+            {addDollarSignAndSuffix(
+              getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
+                pool,
+                runePriceUSD,
+                withdrawalType,
+                thornodeNetworkParameters?.native_outbound_fee_rune,
+                inboundAddresses
+              )
+            )}
+          </span>
+        </div>
+
         {/* Percentage Buttons */}
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
@@ -419,7 +439,7 @@ export default function RemoveLiquidityModal({
                 "px-6 py-2 rounded-full font-medium transition-colors",
                 isPercentageMatch(percent)
                   ? "bg-secondaryBtn text-white"
-                  : "bg-white text-secondaryBtn",
+                  : "bg-white text-secondaryBtn"
               )}
               disabled={isSubmitting}
             >
@@ -447,8 +467,8 @@ export default function RemoveLiquidityModal({
           {isSubmitting
             ? "Submitting Transaction..."
             : isDisableDueTooSmallAmount
-              ? "Small amount"
-              : "Remove"}
+            ? "Small amount"
+            : "Remove"}
         </button>
       </div>
     </Modal>

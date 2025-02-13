@@ -22,7 +22,6 @@ import {
   assetFromString,
   assetToBase,
 } from "@xchainjs/xchain-util";
-import { inboundAddresses } from "@/thornode";
 import { ChainType } from "@/utils/interfaces";
 
 export enum LpSubstepsAddLiquidity {
@@ -61,7 +60,7 @@ if (process.env.NEXT_PUBLIC_IS_STAGENET) {
 const feeBps = 0;
 
 export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
-  const { walletsState } = useAppState();
+  const { walletsState, inboundAddresses } = useAppState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const thorChainClient = useThorchain({
@@ -173,8 +172,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           }
         }
 
-        const inboundAddressesResponse = await inboundAddresses();
-        const inbound = inboundAddressesResponse.data?.find(
+        const inbound = inboundAddresses?.find(
           (i) => i.chain === parsedAsset.chain.toUpperCase(),
         );
         if (!inbound?.address) {
@@ -309,18 +307,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         setLoading(false);
       }
     },
-    [
-      getAssetWallet,
-      pool,
-      thorChainClient,
-      cosmosTransfer,
-      addUTXOLiquidity,
-      isNativeAsset,
-      tokenAddress,
-      getAllowance,
-      depositWithExpiry,
-      approveSpending,
-    ],
+    [getAssetWallet, pool, inboundAddresses, thorChainClient, cosmosTransfer, addUTXOLiquidity, isNativeAsset, tokenAddress, getAllowance, depositWithExpiry, approveSpending],
   );
 
   const removeLiquidity = useCallback(
@@ -342,8 +329,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         setLoading(true);
         setError(null);
-
-        const inboundAddressesData = await inboundAddresses();
 
         const selectedChainToStartAction = getChainInfoFromChainString(
           assetIdToStartActionParsed?.chain || "",
@@ -374,7 +359,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           });
         }
 
-        const inbound = inboundAddressesData.data?.find(
+        const inbound = inboundAddresses?.find(
           (i) => i.chain === assetIdToStartActionParsed.chain.toUpperCase(),
         );
 
@@ -448,14 +433,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         setLoading(false);
       }
     },
-    [
-      getAssetWallet,
-      pool,
-      depositWithExpiry,
-      thorChainClient,
-      cosmosTransfer,
-      removeUTXOLiquidity,
-    ],
+    [getAssetWallet, pool.asset, inboundAddresses, depositWithExpiry, thorChainClient, cosmosTransfer, removeUTXOLiquidity],
   );
 
   return {
