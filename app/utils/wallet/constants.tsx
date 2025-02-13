@@ -348,7 +348,12 @@ export const SUPPORTED_WALLETS: Record<WalletKey, WalletType> = {
   [WalletKey.LEAP]: {
     id: WalletKey.LEAP,
     name: "Leap",
-    chains: [ChainKey.THORCHAIN, ChainKey.GAIACHAIN, ChainKey.ETHEREUM, ChainKey.BSCCHAIN],
+    chains: [
+      ChainKey.THORCHAIN,
+      ChainKey.GAIACHAIN,
+      ChainKey.ETHEREUM,
+      ChainKey.BSCCHAIN,
+    ],
     downloadUrl: "https://www.leapwallet.io/",
     icon: <WalletSvg.Leap />,
     isAvailable: false,

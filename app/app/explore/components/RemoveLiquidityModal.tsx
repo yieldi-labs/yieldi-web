@@ -60,7 +60,7 @@ export default function RemoveLiquidityModal({
     mimirParameters,
     inboundAddresses,
     thornodeNetworkParameters,
-    pools
+    pools,
   } = useAppState();
 
   const asset = assetFromString(pool.asset);
@@ -68,10 +68,14 @@ export default function RemoveLiquidityModal({
   const nativePool = pools?.find((p) => {
     const poolAsset = assetFromString(p.asset);
     const selectedPoolAsset = assetFromString(pool.asset);
-    if (poolAsset?.chain.toLowerCase() === selectedPoolAsset?.chain.toLowerCase() && poolAsset?.symbol.indexOf("-") === -1) {
+    if (
+      poolAsset?.chain.toLowerCase() ===
+        selectedPoolAsset?.chain.toLowerCase() &&
+      poolAsset?.symbol.indexOf("-") === -1
+    ) {
       return true;
     }
-    return false
+    return false;
   });
 
   const { positions, markPositionAsPending, positionsError } =
@@ -83,12 +87,12 @@ export default function RemoveLiquidityModal({
   const [runeTxHash, setRuneTxHash] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastModified, setLastModified] = useState<"asset" | "rune" | null>(
-    null
+    null,
   );
   const [withdrawalType, setWithdrawalType] = useState<WithdrawalType>(
     positionType === PositionType.ASYM
       ? WithdrawalType.ALL_ASSET
-      : WithdrawalType.SPLIT
+      : WithdrawalType.SPLIT,
   );
   const chainKey = getChainKeyFromChain(asset?.chain || "");
   const selectedWallet = walletsState![chainKey];
@@ -117,22 +121,22 @@ export default function RemoveLiquidityModal({
 
   const posAssetAmount = useMemo(
     () => new BigNumber(positionAssetAmount),
-    [positionAssetAmount]
+    [positionAssetAmount],
   );
   const posRuneAmount = useMemo(
     () => new BigNumber(positionRuneAmount),
-    [positionRuneAmount]
+    [positionRuneAmount],
   );
   const posAssetUsdValue = posAssetAmount.times(
-    new BigNumber(pool.assetPriceUSD)
+    new BigNumber(pool.assetPriceUSD),
   );
   const posRuneUsdValue = posRuneAmount.times(new BigNumber(runePriceUSD));
 
   const totalAssetAmount = posAssetAmount.plus(
-    posRuneAmount.times(assetRuneRatio)
+    posRuneAmount.times(assetRuneRatio),
   );
   const totalRuneAmount = posRuneAmount.plus(
-    posAssetAmount.div(assetRuneRatio)
+    posAssetAmount.div(assetRuneRatio),
   );
 
   useEffect(() => {
@@ -274,8 +278,8 @@ export default function RemoveLiquidityModal({
           withdrawalType === WithdrawalType.ALL_ASSET
             ? pool.asset
             : withdrawalType === WithdrawalType.ALL_RUNE
-            ? "THOR.RUNE"
-            : undefined,
+              ? "THOR.RUNE"
+              : undefined,
       });
 
       if (hash) {
@@ -287,7 +291,7 @@ export default function RemoveLiquidityModal({
         markPositionAsPending(
           pool.asset,
           positionType,
-          PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
+          PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
         );
       }
     } catch (err) {
@@ -373,7 +377,7 @@ export default function RemoveLiquidityModal({
   const isDisableDueTooSmallAmount = disableDueTooSmallAmount(
     Number(mimirParameters?.MINIMUML1OUTBOUNDFEEUSD || 0),
     assetUsdValue,
-    runeUsdValue
+    runeUsdValue,
   );
 
   const outboundFee = getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
@@ -382,8 +386,8 @@ export default function RemoveLiquidityModal({
     withdrawalType,
     nativePool,
     thornodeNetworkParameters?.native_outbound_fee_rune,
-    inboundAddresses
-  )
+    inboundAddresses,
+  );
 
   return (
     <Modal onClose={() => onClose(false)} title="Remove">
@@ -450,7 +454,7 @@ export default function RemoveLiquidityModal({
                 "px-6 py-2 rounded-full font-medium transition-colors",
                 isPercentageMatch(percent)
                   ? "bg-secondaryBtn text-white"
-                  : "bg-white text-secondaryBtn"
+                  : "bg-white text-secondaryBtn",
               )}
               disabled={isSubmitting}
             >
@@ -472,14 +476,19 @@ export default function RemoveLiquidityModal({
 
         <button
           onClick={handleRemoveLiquidity}
-          disabled={!isEnabled() || isDisableDueTooSmallAmount || outboundFee > (assetUsdValue + runeUsdValue)}
+          disabled={
+            !isEnabled() ||
+            isDisableDueTooSmallAmount ||
+            outboundFee > assetUsdValue + runeUsdValue
+          }
           className="w-full bg-red text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting
             ? "Submitting Transaction..."
-            : isDisableDueTooSmallAmount || outboundFee > (assetUsdValue + runeUsdValue)
-            ? "Small amount"
-            : "Remove"}
+            : isDisableDueTooSmallAmount ||
+                outboundFee > assetUsdValue + runeUsdValue
+              ? "Small amount"
+              : "Remove"}
         </button>
       </div>
     </Modal>

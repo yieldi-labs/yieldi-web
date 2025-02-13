@@ -7,7 +7,12 @@ import {
 } from "./wallet/constants";
 import { ChainInfo, ChainType } from "./interfaces";
 import { InboundAddress, InboundAddressesResponse } from "@/thornode";
-import { AnyAsset, assetFromString, baseAmount, baseToAsset } from "@xchainjs/xchain-util";
+import {
+  AnyAsset,
+  assetFromString,
+  baseAmount,
+  baseToAsset,
+} from "@xchainjs/xchain-util";
 
 /**
  * Validate inbound address for liquidity operations
@@ -107,14 +112,19 @@ export const isSupportedChain = (assetChain: string): boolean => {
 /**
  * Get minimum amount by chain
  */
-export const getMinAmountByChain = (chain: ThorchainIdentifiers, inboundAddressesResponse?: InboundAddressesResponse): number => {
-  const inbound = inboundAddressesResponse?.find((inbound) => inbound.chain?.toLowerCase() === chain.toLowerCase());
+export const getMinAmountByChain = (
+  chain: ThorchainIdentifiers,
+  inboundAddressesResponse?: InboundAddressesResponse,
+): number => {
+  const inbound = inboundAddressesResponse?.find(
+    (inbound) => inbound.chain?.toLowerCase() === chain.toLowerCase(),
+  );
   if (!inbound) {
-    return 0 // For RUNE
+    return 0; // For RUNE
   }
-  const dustBaseAmount = baseAmount(Number(inbound.dust_threshold)+1);
+  const dustBaseAmount = baseAmount(Number(inbound.dust_threshold) + 1);
   const dustAssetAmount = baseToAsset(dustBaseAmount).amount().toNumber();
-  return dustAssetAmount
+  return dustAssetAmount;
 };
 
 /**

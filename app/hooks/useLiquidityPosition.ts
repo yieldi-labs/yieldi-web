@@ -307,7 +307,19 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         setLoading(false);
       }
     },
-    [getAssetWallet, pool, inboundAddresses, thorChainClient, cosmosTransfer, addUTXOLiquidity, isNativeAsset, tokenAddress, getAllowance, depositWithExpiry, approveSpending],
+    [
+      getAssetWallet,
+      pool,
+      inboundAddresses,
+      thorChainClient,
+      cosmosTransfer,
+      addUTXOLiquidity,
+      isNativeAsset,
+      tokenAddress,
+      getAllowance,
+      depositWithExpiry,
+      approveSpending,
+    ],
   );
 
   const removeLiquidity = useCallback(
@@ -352,7 +364,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         if (wallet.ChainInfo === ChainKey.THORCHAIN) {
           const amount = getMinAmountByChain(
             selectedChainToStartAction.thorchainIdentifier,
-            inboundAddresses
+            inboundAddresses,
           ); // TODO: Handle decimals
           return await thorChainClient.deposit({
             amount: amount,
@@ -378,7 +390,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             assetAmount(
               getMinAmountByChain(
                 selectedChainToStartAction.thorchainIdentifier,
-                inboundAddresses
+                inboundAddresses,
               ),
               selectedChainToStartAction.nativeDecimals,
             ),
@@ -397,7 +409,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             vault: inbound.address,
             amount: getMinAmountByChain(
               selectedChainToStartAction.thorchainIdentifier,
-              inboundAddresses
+              inboundAddresses,
             ), // TODO: Handle decimals
             memo: memo,
           });
@@ -412,8 +424,15 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         // Use base unit amount for withdrawal transaction
         const decimals = selectedChainToStartAction.nativeDecimals;
-        const minAmountByChain = getMinAmountByChain(selectedChainToStartAction.thorchainIdentifier, inboundAddresses)
-        const minAmountInBase = assetToBase(assetAmount(minAmountByChain, decimals)).amount().toNumber();
+        const minAmountByChain = getMinAmountByChain(
+          selectedChainToStartAction.thorchainIdentifier,
+          inboundAddresses,
+        );
+        const minAmountInBase = assetToBase(
+          assetAmount(minAmountByChain, decimals),
+        )
+          .amount()
+          .toNumber();
         const txHash = await depositWithExpiry(
           routerAddress,
           vaultAddress,
@@ -435,7 +454,15 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         setLoading(false);
       }
     },
-    [getAssetWallet, pool.asset, inboundAddresses, depositWithExpiry, thorChainClient, cosmosTransfer, removeUTXOLiquidity],
+    [
+      getAssetWallet,
+      pool.asset,
+      inboundAddresses,
+      depositWithExpiry,
+      thorChainClient,
+      cosmosTransfer,
+      removeUTXOLiquidity,
+    ],
   );
 
   return {

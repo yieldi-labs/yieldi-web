@@ -19,7 +19,7 @@ export function getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
   withdrawalType: WithdrawalType,
   gasAssetPool?: PoolDetail,
   nativeOutboundFeeRuneInBase?: string,
-  inboundAddresses?: InboundAddressesResponse
+  inboundAddresses?: InboundAddressesResponse,
 ) {
   if (!gasAssetPool) {
     throw Error("gasAssetPool is invalid");
@@ -32,7 +32,7 @@ export function getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
     throw Error(`Invalid asset ${pool.asset}`);
   }
   const inboundInfo = inboundAddresses?.find(
-    (inbound) => inbound.chain?.toLowerCase() === asset.chain.toLowerCase()
+    (inbound) => inbound.chain?.toLowerCase() === asset.chain.toLowerCase(),
   );
   if (!inboundInfo) {
     throw Error(`No inbound info for asset ${asset.chain}.${asset.symbol}`);
@@ -40,13 +40,18 @@ export function getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
 
   // Asset outbound
   const outboundFeeInGasAsset = baseAmount(inboundInfo?.outbound_fee);
-  const outboundFeeInRune = getValueOfAssetInRune(outboundFeeInGasAsset, gasAssetPool);
+  const outboundFeeInRune = getValueOfAssetInRune(
+    outboundFeeInGasAsset,
+    gasAssetPool,
+  );
   const princeOutboundAssetInDollars =
     baseToAsset(outboundFeeInRune).times(runePriceInDollar);
 
   // Rune outbound
   const outboundFeeRuneNetwork = baseAmount(nativeOutboundFeeRuneInBase);
-  const princeNativeRuneWithdrawalInDollars = baseToAsset(outboundFeeRuneNetwork).times(runePriceInDollar);
+  const princeNativeRuneWithdrawalInDollars = baseToAsset(
+    outboundFeeRuneNetwork,
+  ).times(runePriceInDollar);
 
   if (withdrawalType === WithdrawalType.ALL_RUNE) {
     return princeNativeRuneWithdrawalInDollars.amount().toNumber();
@@ -56,12 +61,15 @@ export function getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
     return princeOutboundAssetInDollars.amount().toNumber();
   }
 
-  return princeOutboundAssetInDollars.plus(princeNativeRuneWithdrawalInDollars).amount().toNumber();
+  return princeOutboundAssetInDollars
+    .plus(princeNativeRuneWithdrawalInDollars)
+    .amount()
+    .toNumber();
 }
 
 const getValueOfAssetInRune = (
   inputAsset: BaseAmount,
-  pool: PoolDetail
+  pool: PoolDetail,
 ): BaseAmount => {
   // formula: ((a * R) / A) => R per A (Runeper$)
   const t = inputAsset.amount();
