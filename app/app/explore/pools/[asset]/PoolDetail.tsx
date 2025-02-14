@@ -40,7 +40,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
     walletsState,
     toggleWalletModal,
     midgardStats,
-    isLiquidityCapReached,
+    percentageLiquidityCapReached,
   } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
@@ -120,14 +120,14 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
     return (
       <>
         <button
-          disabled={showLoadingState || isLiquidityCapReached}
+          disabled={showLoadingState || percentageLiquidityCapReached > 100}
           className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
                   hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setShowAddLiquidityModal(true)}
         >
           {showLoadingState ? "Loading..." : "Add"}
         </button>
-        {isLiquidityCapReached ? (
+        {percentageLiquidityCapReached > 100 ? (
           <div className="mt-6 w-full">
             <Warn
               text={`Liquidity deposits are temporarily disabled due to network limits.`}

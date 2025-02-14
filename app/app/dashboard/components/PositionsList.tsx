@@ -84,8 +84,7 @@ export default function PositionsList({
 
   if (
     Object.entries(positions).length <= 0 ||
-    !positions ||
-    numberConnectedWallets <= 0
+    !positions
   ) {
     return <PositionsPlaceholder />;
   }
