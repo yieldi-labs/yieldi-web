@@ -8,22 +8,23 @@ import {
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { useCallback, useEffect, useState } from "react";
-import { ethers } from "ethers";
 import { assetFromString } from "@xchainjs/xchain-util";
-import { getChainKeyFromChain } from "@/utils/chain";
 import { MimirResponse } from "@/thornode";
-import { ConnectedWalletsState } from "@/utils/interfaces";
+import { ChainKey } from "@/utils/wallet/constants";
+import { getChainKeyFromChain } from "@/utils/chain";
 
 interface UsePositionStatsProps {
   defaultRefetchInterval?: number;
-  walletsState: ConnectedWalletsState;
   mimirParameters: MimirResponse | undefined;
   poolsData: PoolDetails | undefined;
+  addresses: Set<string>;
+  filterByChains: ChainKey[];
+  autoFetch?: boolean
 }
 
 export function emptyPositionStats(
   asset = "BTC.BTC",
-  positionType = PositionType.SYM,
+  positionType = PositionType.SYM
 ): PositionStats {
   return {
     assetId: asset,
@@ -49,70 +50,58 @@ export function emptyPositionStats(
 
 export function usePositionStats({
   defaultRefetchInterval = 30000,
-  walletsState,
   mimirParameters,
   poolsData,
+  addresses,
+  filterByChains,
+  autoFetch = true,
 }: UsePositionStatsProps) {
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     Positions | undefined
   >();
-
   const [currentRefetchInterval, setRefetchInterval] = useState<
     number | undefined
   >(defaultRefetchInterval);
+  const [fetchPositions, setFetchPositions] = useState(autoFetch);
 
-  const { isFetching: isPending, error } = useQuery({
-    queryKey: ["position-stats", Object.keys(walletsState).length],
+  const {
+    isFetching: isPending,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ["position-stats", addresses],
     retry: false,
-    enabled: Object.keys(walletsState).length > 0 && Boolean(mimirParameters),
+    enabled: fetchPositions && addresses.size > 0 && Boolean(mimirParameters),
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
-      const addresses = [];
-      for (const key in walletsState!) {
-        if (walletsState!.hasOwnProperty(key)) {
-          const address = walletsState![key].address;
-          if (ethers.utils.isAddress(address)) {
-            const checksummeAddress = ethers.utils.getAddress(address); // Address with checksum
-            addresses.push(checksummeAddress);
-          }
-          addresses.push(address);
-        }
-      }
-      const uniqueAddresses = addresses.filter(
-        (address, index, arrayAddresses) =>
-          arrayAddresses.indexOf(address) === index,
-      );
+      const uniqueAddresses = Array.from(addresses);
 
       if (!poolsData) {
         throw Error("No pools available");
       }
 
-      const genericPositionsDataStructure = await positionsTransformer(
+      const genericPositionsDataStructure = await positionsTransformer( // TODO: Remove filter from both addresses for DLP on search
         uniqueAddresses,
         poolsData,
         {
           LIQUIDITYLOCKUPBLOCKS: Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS),
-        },
+        }
       );
 
-      // Filter based on connected wallets
-      const walletsConnected = Object.keys(walletsState);
       const filteredPositions = Object.keys(
-        genericPositionsDataStructure,
+        genericPositionsDataStructure
       ).reduce((positions: Positions, key: string) => {
         const chain = assetFromString(key)?.chain;
-        if (!chain) {
-          throw Error("Invalid chain");
-        }
-        const chainKey = getChainKeyFromChain(chain);
-        if (walletsConnected.includes(chainKey)) {
-          positions[key] = genericPositionsDataStructure[key];
+        if (chain) {
+          const chainKey = getChainKeyFromChain(chain);
+          if (filterByChains.includes(chainKey)) {
+            positions[key] = genericPositionsDataStructure[key];
+          }
         }
         return positions;
       }, {});
 
       setCurrentPositionsStats(filteredPositions);
-
       return { positions: genericPositionsDataStructure, pools: poolsData };
     },
   });
@@ -123,8 +112,8 @@ export function usePositionStats({
         Object.values(positions).some(
           (position) =>
             position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
-            position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
-        ),
+            position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
+        )
     );
 
     if (hasPendingPositions) {
@@ -134,10 +123,15 @@ export function usePositionStats({
     }
   }, [currentPositionsStats, defaultRefetchInterval]);
 
-  const cleanPositions = useCallback(
-    () => setCurrentPositionsStats(undefined),
-    [],
-  );
+  const fetchPositionsManually = useCallback(() => {
+    setFetchPositions(true);
+    refetch();
+  }, [refetch]);
+
+  const resetPositions = useCallback(() => {
+    setCurrentPositionsStats(undefined);
+    setFetchPositions(false);
+  }, []);
 
   const markPositionAsPending = useCallback(
     (pooldId: string, positionType: PositionType, status: PositionStatus) => {
@@ -153,7 +147,7 @@ export function usePositionStats({
         if (!prev[pooldId][positionType]) {
           prev[pooldId][positionType] = emptyPositionStats(
             pooldId,
-            positionType,
+            positionType
           );
         } else {
           prev[pooldId][positionType] = {
@@ -165,13 +159,14 @@ export function usePositionStats({
         return prev;
       });
     },
-    [defaultRefetchInterval],
+    [defaultRefetchInterval]
   );
 
   return {
     positions: currentPositionsStats,
     markPositionAsPending,
-    cleanPositions,
+    fetchPositions: fetchPositionsManually,
+    resetPositions,
     isPending,
     error,
   };

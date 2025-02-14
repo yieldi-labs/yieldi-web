@@ -31,12 +31,12 @@ const isActionDisabled = (
   chainKey: ChainKey,
   action: ActionType,
   walletsState: ConnectedWalletsState,
-  isLiquidityCapReached: boolean,
+  percentageLiquidityCapReached: number,
 ): string | React.ReactNode | null => {
-  if (isLiquidityCapReached && action === ActionType.ADD_LIQUIDITY) {
+  if (percentageLiquidityCapReached > 100 && action === ActionType.ADD_LIQUIDITY) {
     return (
       <p className="w-[300px] whitespace-normal break-words">
-        Liquidity deposits are temporarily disabled due to network limits.
+        Liquidity deposits are temporarily disabled due to network limits. {`(${percentageLiquidityCapReached.toFixed(0)}%)`}
         <a
           href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-cant-i-add-more-liquidity"
           target="_blank"
@@ -89,7 +89,7 @@ export default function PositionRow({
   hideAddButton = false,
   hideStatus = false,
 }: PositionsRow) {
-  const { walletsState, isLiquidityCapReached } = useAppState();
+  const { walletsState, percentageLiquidityCapReached } = useAppState();
   const asset = assetFromString(position.assetId);
   if (!asset) {
     throw new Error("Invalid asset");
@@ -100,14 +100,14 @@ export default function PositionRow({
     chainKey,
     ActionType.REMOVE_LIQUIDITY,
     walletsState,
-    isLiquidityCapReached,
+    percentageLiquidityCapReached,
   );
   const reasonToDisableAdd = isActionDisabled(
     position,
     chainKey,
     ActionType.ADD_LIQUIDITY,
     walletsState,
-    isLiquidityCapReached,
+    percentageLiquidityCapReached,
   );
   return (
     <TranslucentCard className="rounded-xl mb-1.5">

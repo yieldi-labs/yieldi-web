@@ -70,7 +70,7 @@ interface AppStateContextType {
   thornodeNetwork: NetworkResponse | undefined;
   asgardVaults: VaultsResponse | undefined;
   poolsData: PoolDetails | undefined;
-  isLiquidityCapReached: boolean;
+  percentageLiquidityCapReached: number;
   pools: PoolDetails | undefined;
   inboundAddresses: InboundAddressesResponse | undefined;
   thornodeNetworkParameters: NetworkResponse | undefined;
@@ -106,7 +106,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   const [undetected, setUndetected] = useState<WalletType[]>([]);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false);
-  const [isLiquidityCapReached, setIsLiquidityCapReached] = useState(false);
+  const [percentageLiquidityCapReached, setPercentageLiquidityCapReached] = useState(0);
   const [walletsState, setWalletsState] = useState<ConnectedWalletsState>({}); // TODO: We should remove complex objects as wallet providers from provider state. It can not be passed as props
   const toggleWalletModal = () => {
     setIsWalletModalOpen((prevState) => !prevState);
@@ -728,16 +728,16 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           );
         });
       });
-      if (
-        Number(thornodeNetwork?.effective_security_bond) >
-        vaultsLiquidityRune.amount().toNumber()
-      ) {
-        setIsLiquidityCapReached(false);
-      } else {
-        setIsLiquidityCapReached(true);
-      }
+  
+      const effectiveSecurityBond = Number(thornodeNetwork?.effective_security_bond);
+      const liquidityAmount = vaultsLiquidityRune.amount().toNumber();
+  
+      const liquidityCapPercentage = ((liquidityAmount / effectiveSecurityBond) * 100);
+  
+      setPercentageLiquidityCapReached(liquidityCapPercentage)
     }
   }, [asgardVaults, poolsData, thornodeNetwork]);
+  
 
   return (
     <AppStateContext.Provider
@@ -764,7 +764,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         thornodeNetwork,
         asgardVaults,
         poolsData,
-        isLiquidityCapReached,
+        percentageLiquidityCapReached,
         pools: poolsData,
         inboundAddresses: currentInboundAddresses,
         thornodeNetworkParameters,

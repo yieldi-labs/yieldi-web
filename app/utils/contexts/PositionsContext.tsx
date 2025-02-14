@@ -7,13 +7,15 @@ import {
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { useAppState } from "./context";
+import { ethers } from "ethers";
+import { getChainsConnected } from "../chain";
 
 interface LiquidityPositionsContextType {
   positions: Positions | undefined;
   markPositionAsPending: (
     pooldId: string,
     type: PositionType,
-    status: PositionStatus,
+    status: PositionStatus
   ) => void;
   cleanPositions: () => void;
   isPending: boolean;
@@ -31,19 +33,40 @@ export const LiquidityPositionsProvider = ({
 }) => {
   const { walletsState, mimirParameters, poolsData } = useAppState();
 
-  const { positions, markPositionAsPending, isPending, error, cleanPositions } =
-    usePositionStats({
-      walletsState,
-      mimirParameters,
-      poolsData,
-    });
+  const addresses = new Set<string>();
+
+  for (const key in walletsState) {
+    if (walletsState?.hasOwnProperty(key)) {
+      const address = walletsState[key]?.address;
+      if (ethers.utils.isAddress(address)) {
+        const checksummedAddress = ethers.utils.getAddress(address);
+        addresses.add(checksummedAddress);
+      } else {
+        addresses.add(address);
+      }
+    }
+  }
+
+  const {
+    positions,
+    markPositionAsPending,
+    isPending,
+    error,
+    resetPositions,
+  } = usePositionStats({
+    mimirParameters,
+    poolsData,
+    addresses,
+    filterByChains: getChainsConnected(walletsState),
+  });
+
 
   return (
     <LiquidityPositionsContext.Provider
       value={{
         positions,
         markPositionAsPending,
-        cleanPositions,
+        cleanPositions: resetPositions,
         isPending,
         positionsError: error,
       }}
@@ -57,7 +80,7 @@ export const useLiquidityPositions = () => {
   const context = useContext(LiquidityPositionsContext);
   if (!context) {
     throw new Error(
-      "useLiquidityPositions must be used within a LiquidityPositionsProvider",
+      "useLiquidityPositions must be used within a LiquidityPositionsProvider"
     );
   }
   return context;
