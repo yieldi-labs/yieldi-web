@@ -64,7 +64,7 @@ interface AppStateContextType {
   isLoadingTokenList: boolean;
   detected: WalletType[];
   undetected: WalletType[];
-  isWalletConnected: (chainKey: ChainKey) => boolean;
+  isWalletConnected: (chainKey?: ChainKey) => boolean;
   mimirParameters: MimirResponse | undefined;
   midgardStats: StatsData | undefined;
   thornodeNetwork: NetworkResponse | undefined;
@@ -710,7 +710,10 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     setSelectedChains(connectedChains);
   }, [walletsState]);
 
-  const isWalletConnected = (chainKey: ChainKey) => {
+  const isWalletConnected = (chainKey?: ChainKey) => {
+    if (!chainKey) {
+      return Boolean(Object.keys(walletsState).length)
+    }
     return Boolean(walletsState[chainKey]?.address);
   };
 

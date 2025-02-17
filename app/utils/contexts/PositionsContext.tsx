@@ -19,7 +19,9 @@ interface LiquidityPositionsContextType {
   ) => void;
   cleanPositions: () => void;
   isPending: boolean;
+  isRefetching: boolean;
   positionsError: Error | null;
+  refresh: () => void;
 }
 
 const LiquidityPositionsContext = createContext<
@@ -47,17 +49,22 @@ export const LiquidityPositionsProvider = ({
     }
   }
 
+  console.log('addresses', addresses)
+
   const {
     positions,
     markPositionAsPending,
     isPending,
+    isRefetching,
     error,
     resetPositions,
+    fetchPositions: refresh
   } = usePositionStats({
     mimirParameters,
     poolsData,
-    addresses,
+    addresses: Array.from(addresses),
     filterByChains: getChainsConnected(walletsState),
+    ensureBothAddressConnectedOnDlp: true
   });
 
 
@@ -68,7 +75,9 @@ export const LiquidityPositionsProvider = ({
         markPositionAsPending,
         cleanPositions: resetPositions,
         isPending,
+        isRefetching,
         positionsError: error,
+        refresh
       }}
     >
       {children}

@@ -32,10 +32,8 @@ import { ChainKey } from "@/utils/wallet/constants";
 import { usePositionStats } from "@/hooks/usePositionStats";
 
 const allChainKeys = Object.values(ChainKey).filter(
-  (value) => typeof value === 'string'
+  (value) => typeof value === "string"
 ) as ChainKey[];
-
-console.log('allChainKeys', allChainKeys)
 
 export default function DashboardView() {
   const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{
@@ -53,19 +51,29 @@ export default function DashboardView() {
     useState(false);
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
-  const { positions, isPending, positionsError } = useLiquidityPositions();
-  const { midgardStats, pools } = useAppState();
+  const { positions, isPending, isRefetching, positionsError, refresh } = useLiquidityPositions();
+  const { midgardStats, pools, isWalletConnected } = useAppState();
 
-  const { positions: searchedPositions, fetchPositions } = usePositionStats({
+  const {
+    positions: searchedPositions,
+    fetchPositions,
+    resetPositions,
+  } = usePositionStats({
     defaultRefetchInterval: 300000,
     mimirParameters: midgardStats,
     poolsData: pools,
-    addresses: new Set<string>([addressInSearch]),
+    addresses: [addressInSearch],
     filterByChains: allChainKeys,
     autoFetch: false,
-  })
+    ensureBothAddressConnectedOnDlp: false,
+  });
 
-  console.log('searchedPositions', searchedPositions)
+  useEffect(() => {
+    if (isWalletConnected()) {
+      resetPositions();
+      setAddressInSearch("");
+    }
+  }, [isWalletConnected, resetPositions]);
 
   const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0; // TODO: Loading state
 
@@ -73,12 +81,15 @@ export default function DashboardView() {
 
   const allPositionsArray =
     (currentPositions &&
-      Object.entries(currentPositions).reduce((pools: PositionStats[], [, types]) => {
-        const chainPools = Object.entries(types)
-          .filter(([, position]) => position)
-          .map(([, position]) => position as PositionStats);
-        return pools.concat(chainPools);
-      }, [])) ||
+      Object.entries(currentPositions).reduce(
+        (pools: PositionStats[], [, types]) => {
+          const chainPools = Object.entries(types)
+            .filter(([, position]) => position)
+            .map(([, position]) => position as PositionStats);
+          return pools.concat(chainPools);
+        },
+        []
+      )) ||
     [];
 
   // Calculate totals
@@ -158,15 +169,37 @@ export default function DashboardView() {
               />
             </Tooltip>
           </div>
-          <div className="flex">
-            <Input label={"Search"} placeholder={"0x"} value={addressInSearch} onChange={(newAddress) => {setAddressInSearch(newAddress)}} />
-            <Button onClick={() => fetchPositions()} className="ml-2">Search</Button>
-          </div>
+          {isWalletConnected() && (
+            <div onClick={() => refresh()} className="bg-white w-12 h-12 flex justify-center intems-center rounded-xl cursor-pointer hover:bg-white/50">
+              <Image
+                src="/refresh.svg"
+                alt="settings"
+                className=""
+                width={24}
+                height={24}
+              />
+            </div>
+          )}
+          {!isWalletConnected() && (
+            <div className="flex">
+              <Input
+                label={"Search"}
+                placeholder={"0x"}
+                value={addressInSearch}
+                onChange={(newAddress) => {
+                  setAddressInSearch(newAddress);
+                }}
+              />
+              <Button onClick={() => fetchPositions()} className="ml-2">
+                Search
+              </Button>
+            </div>
+          )}
         </div>
         <div className="w-2/3 text-neutral-800 text-sm font-normal leading-tight mb-7">
           Manage your active positions and track your earnings.
         </div>
-        {isPending && !currentPositions ? (
+        {(isPending && !currentPositions) || isRefetching ? (
           <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
             <Loader />
           </div>
@@ -184,18 +217,20 @@ export default function DashboardView() {
                 case PositionStatus.LP_POSITION_DEPOSIT_PENDING:
                 case PositionStatus.LP_POSITION_WITHDRAWAL_PENDING:
                   window.open(
-                    `${getAddressUrl()}${position.memberDetails?.assetAddress}?tab=lps`,
-                    "_blank",
+                    `${getAddressUrl()}${
+                      position.memberDetails?.assetAddress
+                    }?tab=lps`,
+                    "_blank"
                   );
                   break;
                 case PositionStatus.LP_POSITION_INCOMPLETE:
                   const assetPriceUSD = parseFloat(pool.assetPriceUSD);
 
                   const assetAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.assetPending, 8),
+                    baseAmount(position.memberDetails?.assetPending, 8)
                   );
                   const runeAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.runePending, 8),
+                    baseAmount(position.memberDetails?.runePending, 8)
                   );
 
                   const valueOfPendingAssetInUsd =
@@ -243,7 +278,7 @@ export default function DashboardView() {
               }
               setSelectedPool(pool);
               setSelectedPosition(
-                (currentPositions as Positions)[assetId][type] || null,
+                (currentPositions as Positions)[assetId][type] || null
               );
               setAddLiquidityProcessState({
                 initialStep: LpSteps.SELECT_OPTIONS,
@@ -257,9 +292,11 @@ export default function DashboardView() {
             }}
             onRemove={(poolId: string, type: PositionType) => {
               setSelectedPool(
-                pools?.find((pool) => pool.asset === poolId) || null,
+                pools?.find((pool) => pool.asset === poolId) || null
               );
-              setSelectedPosition((currentPositions as Positions)[poolId][type]);
+              setSelectedPosition(
+                (currentPositions as Positions)[poolId][type]
+              );
               setShowRemoveLiquidityModal(true);
             }}
           />

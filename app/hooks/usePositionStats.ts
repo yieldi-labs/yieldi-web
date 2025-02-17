@@ -17,9 +17,10 @@ interface UsePositionStatsProps {
   defaultRefetchInterval?: number;
   mimirParameters: MimirResponse | undefined;
   poolsData: PoolDetails | undefined;
-  addresses: Set<string>;
+  addresses: string[];
   filterByChains: ChainKey[];
   autoFetch?: boolean
+  ensureBothAddressConnectedOnDlp: boolean
 }
 
 export function emptyPositionStats(
@@ -55,6 +56,7 @@ export function usePositionStats({
   addresses,
   filterByChains,
   autoFetch = true,
+  ensureBothAddressConnectedOnDlp = false
 }: UsePositionStatsProps) {
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     Positions | undefined
@@ -66,12 +68,15 @@ export function usePositionStats({
 
   const {
     isFetching: isPending,
+    isRefetching,
+    isStale,
     error,
     refetch,
   } = useQuery({
     queryKey: ["position-stats", addresses],
     retry: false,
-    enabled: fetchPositions && addresses.size > 0 && Boolean(mimirParameters),
+    staleTime: 2000,
+    enabled: fetchPositions && addresses.length > 0 && Boolean(mimirParameters),
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
       const uniqueAddresses = Array.from(addresses);
@@ -80,11 +85,14 @@ export function usePositionStats({
         throw Error("No pools available");
       }
 
+      console.log('uniqueAddresses', uniqueAddresses)
+
       const genericPositionsDataStructure = await positionsTransformer( // TODO: Remove filter from both addresses for DLP on search
         uniqueAddresses,
         poolsData,
         {
           LIQUIDITYLOCKUPBLOCKS: Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS),
+          ensureBothAddressConnectedOnDlp
         }
       );
 
@@ -124,14 +132,17 @@ export function usePositionStats({
   }, [currentPositionsStats, defaultRefetchInterval]);
 
   const fetchPositionsManually = useCallback(() => {
+    console.log('refeching...')
     setFetchPositions(true);
-    refetch();
+    refetch({
+      
+    });
   }, [refetch]);
 
   const resetPositions = useCallback(() => {
     setCurrentPositionsStats(undefined);
-    setFetchPositions(false);
-  }, []);
+    setFetchPositions(autoFetch);
+  }, [autoFetch]);
 
   const markPositionAsPending = useCallback(
     (pooldId: string, positionType: PositionType, status: PositionStatus) => {
@@ -168,6 +179,7 @@ export function usePositionStats({
     fetchPositions: fetchPositionsManually,
     resetPositions,
     isPending,
+    isRefetching: isRefetching,
     error,
   };
 }
