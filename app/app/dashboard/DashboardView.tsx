@@ -23,11 +23,9 @@ import { baseAmount, baseToAsset } from "@xchainjs/xchain-util";
 import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
 import { AddLiquidityStepData } from "../explore/components/AddLiquidityModal";
 import { useAppState } from "@/utils/contexts/context";
-import { Tooltip } from "@shared/components/ui";
+import { Button, Input, Tooltip } from "@shared/components/ui";
 import { showToast, ToastType } from "../errorToast";
 import { getAddressUrl } from "@/utils/wallet/utils";
-import Input from "../input";
-import Button from "../button";
 import { ChainKey } from "@/utils/wallet/constants";
 import { usePositionStats } from "@/hooks/usePositionStats";
 
@@ -51,13 +49,14 @@ export default function DashboardView() {
     useState(false);
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
-  const { positions, isPending, isRefetching, positionsError, refresh } = useLiquidityPositions();
+  const { positions, isPending, isRefetching, positionsError, refetch } = useLiquidityPositions();
   const { midgardStats, pools, isWalletConnected } = useAppState();
 
   const {
     positions: searchedPositions,
     fetchPositions,
     resetPositions,
+    error: positionsErrorSearch,
   } = usePositionStats({
     defaultRefetchInterval: 300000,
     mimirParameters: midgardStats,
@@ -67,6 +66,15 @@ export default function DashboardView() {
     autoFetch: false,
     ensureBothAddressConnectedOnDlp: false,
   });
+
+  useEffect(() => {
+    if (searchedPositions && Object.keys(searchedPositions).length === 0 || positionsErrorSearch) {
+      showToast({
+        type: ToastType.ERROR,
+        text: "No positions found for the entered address. Please verify the address and try again.",
+      })
+    }
+  }, [searchedPositions, positionsErrorSearch])
 
   useEffect(() => {
     if (isWalletConnected()) {
@@ -141,7 +149,7 @@ export default function DashboardView() {
         </div>
       </div>
       <div className="flex flex-col">
-        <div className="flex justify-between items-center">
+        <div className={`flex ${!isWalletConnected() ? 'flex-col' : 'flew-row'} md:flex-row items-start justify-between md:items-center`}>
           <div className="flex align-center">
             <h2 className={titleStyle}>Your positions</h2>
             <Tooltip
@@ -170,7 +178,7 @@ export default function DashboardView() {
             </Tooltip>
           </div>
           {isWalletConnected() && (
-            <div onClick={() => refresh()} className="bg-white w-12 h-12 flex justify-center intems-center rounded-xl cursor-pointer hover:bg-white/50">
+            <div onClick={() => refetch()} className="bg-white w-12 h-12 flex justify-center intems-center rounded-xl cursor-pointer hover:bg-white/50">
               <Image
                 src="/refresh.svg"
                 alt="settings"
@@ -181,16 +189,23 @@ export default function DashboardView() {
             </div>
           )}
           {!isWalletConnected() && (
-            <div className="flex">
+            <div className="flex mb-4 md:mb-0">
               <Input
-                label={"Search"}
+                className="md:w-96"
                 placeholder={"0x"}
                 value={addressInSearch}
                 onChange={(newAddress) => {
                   setAddressInSearch(newAddress);
                 }}
               />
-              <Button onClick={() => fetchPositions()} className="ml-2">
+              <Button 
+                type='secondary'
+                disabled={!addressInSearch}
+                onClick={() => {
+                  fetchPositions()
+                }} 
+                className="ml-2"
+              >
                 Search
               </Button>
             </div>

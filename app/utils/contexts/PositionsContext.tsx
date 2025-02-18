@@ -21,7 +21,8 @@ interface LiquidityPositionsContextType {
   isPending: boolean;
   isRefetching: boolean;
   positionsError: Error | null;
-  refresh: () => void;
+  fetchPositions: () => void;
+  refetch: () => void;
 }
 
 const LiquidityPositionsContext = createContext<
@@ -49,8 +50,6 @@ export const LiquidityPositionsProvider = ({
     }
   }
 
-  console.log('addresses', addresses)
-
   const {
     positions,
     markPositionAsPending,
@@ -58,7 +57,8 @@ export const LiquidityPositionsProvider = ({
     isRefetching,
     error,
     resetPositions,
-    fetchPositions: refresh
+    fetchPositions,
+    refetch
   } = usePositionStats({
     mimirParameters,
     poolsData,
@@ -77,7 +77,8 @@ export const LiquidityPositionsProvider = ({
         isPending,
         isRefetching,
         positionsError: error,
-        refresh
+        fetchPositions,
+        refetch
       }}
     >
       {children}

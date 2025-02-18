@@ -6,7 +6,7 @@ export default function Input({
   className,
   right,
 }: {
-  label: string;
+  label?: string;
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
@@ -14,7 +14,7 @@ export default function Input({
   right?: React.ReactNode;
 }) {
   return (
-    <div className={`border py-2 px-4 bg-white ${className || ""}`}>
+    <div className={`py-2 px-4 bg-white rounded-xl rounded-sm ${className || ""}`}>
       <div className="flex">
         <label className="uppercase text-xs opacity-75 leading-none flex-1">
           {label}
@@ -22,7 +22,7 @@ export default function Input({
         {right}
       </div>
       <input
-        className="border-none bg-transparent px-0 leading-relaxed text-xl outline-none w-full"
+        className="bg-transparent px-0 leading-relaxed text-xl outline-none w-full rounded-xl"
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}

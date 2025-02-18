@@ -4,18 +4,20 @@ import React from "react";
 import { twMerge } from "tailwind-merge";
 
 interface ButtonProps {
-  label?: string;
   className?: string;
   onClick?: () => void;
   link?: string;
   disabled?: boolean
+  children: React.ReactNode;
+  type?: 'primary' | 'secondary';
 }
 
-const Button = ({ label, className = "", onClick, link, disabled = false }: ButtonProps) => {
+const Button = ({ children, className = "", onClick, link, disabled = false, type = 'primary' }: ButtonProps) => {
   const baseClass = twMerge(
-    `bg-primary hover:bg-primary/50 rounded-full px-9 py-3 font-semibold text-gray-900 transition duration-300 ease-in-out whitespace-nowrap`,
+    `rounded-full px-9 py-3 font-semibold text-gray-900 transition duration-300 ease-in-out whitespace-nowrap disabled:cursor-not-allowed`,
     className,
-    disabled && 'cursor-disabled bg-primary/50'
+    type === 'primary' && `bg-primary hover:bg-primary/50 disabled:bg-primary/50`,
+    type === 'secondary' && `shadow-md bg-neutral-100 hover:bg-neutral-200 disabled:bg-neutral-300 disabled:opacity-60`
   );
 
   return link ? (
@@ -25,11 +27,11 @@ const Button = ({ label, className = "", onClick, link, disabled = false }: Butt
       rel="noopener noreferrer"
       target="_blank"
     >
-      {label}
+      {children}
     </Link>
   ) : (
-    <button onClick={onClick} className={baseClass}>
-      {label}
+    <button disabled={disabled} onClick={onClick} className={baseClass}>
+      {children}
     </button>
   );
 };

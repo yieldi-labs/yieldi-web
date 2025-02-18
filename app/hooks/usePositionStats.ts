@@ -69,13 +69,11 @@ export function usePositionStats({
   const {
     isFetching: isPending,
     isRefetching,
-    isStale,
     error,
     refetch,
   } = useQuery({
-    queryKey: ["position-stats", addresses],
+    queryKey: ["position-stats"],
     retry: false,
-    staleTime: 2000,
     enabled: fetchPositions && addresses.length > 0 && Boolean(mimirParameters),
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
@@ -84,8 +82,6 @@ export function usePositionStats({
       if (!poolsData) {
         throw Error("No pools available");
       }
-
-      console.log('uniqueAddresses', uniqueAddresses)
 
       const genericPositionsDataStructure = await positionsTransformer( // TODO: Remove filter from both addresses for DLP on search
         uniqueAddresses,
@@ -132,11 +128,8 @@ export function usePositionStats({
   }, [currentPositionsStats, defaultRefetchInterval]);
 
   const fetchPositionsManually = useCallback(() => {
-    console.log('refeching...')
     setFetchPositions(true);
-    refetch({
-      
-    });
+    refetch();
   }, [refetch]);
 
   const resetPositions = useCallback(() => {
@@ -177,9 +170,10 @@ export function usePositionStats({
     positions: currentPositionsStats,
     markPositionAsPending,
     fetchPositions: fetchPositionsManually,
+    refetch: () => refetch(),
     resetPositions,
     isPending,
-    isRefetching: isRefetching,
+    isRefetching,
     error,
   };
 }
