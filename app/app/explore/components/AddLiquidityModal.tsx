@@ -9,7 +9,6 @@ import {
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { useAppState } from "@/utils/contexts/context";
 import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
-import { twMerge } from "tailwind-merge";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { PositionType } from "@/utils/lp-monitor/parsePositions";
 import { ChainKey } from "@/utils/wallet/constants";
@@ -261,7 +260,11 @@ export default function AddLiquidityModal({
             <Button
               key={percent}
               onClick={() => handleAssetPercentageClick(percent / 100)}
-              type={isCloseToPercentage(currentAssetPercentage, percent) ? "primary-action" : "neutral-action"}
+              type={
+                isCloseToPercentage(currentAssetPercentage, percent)
+                  ? "primary-action"
+                  : "neutral-action"
+              }
               size="md"
             >
               {percent === 100 ? "MAX" : `${percent}%`}
@@ -289,7 +292,11 @@ export default function AddLiquidityModal({
                 <Button
                   key={percent}
                   onClick={() => handleRunePercentageClick(percent / 100)}
-                  type={isCloseToPercentage(currentRunePercentage, percent) ? "primary-action" : "neutral-action"}
+                  type={
+                    isCloseToPercentage(currentRunePercentage, percent)
+                      ? "primary-action"
+                      : "neutral-action"
+                  }
                   size="md"
                 >
                   {percent === 100 ? "MAX" : `${percent}%`}

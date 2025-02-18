@@ -15,7 +15,7 @@ interface LiquidityPositionsContextType {
   markPositionAsPending: (
     pooldId: string,
     type: PositionType,
-    status: PositionStatus
+    status: PositionStatus,
   ) => void;
   cleanPositions: () => void;
   isPending: boolean;
@@ -58,15 +58,14 @@ export const LiquidityPositionsProvider = ({
     error,
     resetPositions,
     fetchPositions,
-    refetch
+    refetch,
   } = usePositionStats({
     mimirParameters,
     poolsData,
     addresses: Array.from(addresses),
     filterByChains: getChainsConnected(walletsState),
-    ensureBothAddressConnectedOnDlp: true
+    ensureBothAddressConnectedOnDlp: true,
   });
-
 
   return (
     <LiquidityPositionsContext.Provider
@@ -78,7 +77,7 @@ export const LiquidityPositionsProvider = ({
         isRefetching,
         positionsError: error,
         fetchPositions,
-        refetch
+        refetch,
       }}
     >
       {children}
@@ -90,7 +89,7 @@ export const useLiquidityPositions = () => {
   const context = useContext(LiquidityPositionsContext);
   if (!context) {
     throw new Error(
-      "useLiquidityPositions must be used within a LiquidityPositionsProvider"
+      "useLiquidityPositions must be used within a LiquidityPositionsProvider",
     );
   }
   return context;

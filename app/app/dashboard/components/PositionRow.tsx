@@ -33,10 +33,14 @@ const isActionDisabled = (
   walletsState: ConnectedWalletsState,
   percentageLiquidityCapReached: number,
 ): string | React.ReactNode | null => {
-  if (percentageLiquidityCapReached > 100 && action === ActionType.ADD_LIQUIDITY) {
+  if (
+    percentageLiquidityCapReached > 100 &&
+    action === ActionType.ADD_LIQUIDITY
+  ) {
     return (
       <p className="w-[300px] whitespace-normal break-words">
-        Liquidity deposits are temporarily disabled due to network limits. {`(${percentageLiquidityCapReached.toFixed(0)}%)`}
+        Liquidity deposits are temporarily disabled due to network limits.{" "}
+        {`(${percentageLiquidityCapReached.toFixed(0)}%)`}
         <a
           href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-cant-i-add-more-liquidity"
           target="_blank"
@@ -153,7 +157,7 @@ export default function PositionRow({
                     onClick={() => onAdd(position.assetId, position.type)}
                     type="primary-action"
                     size="sm"
-                    className='h-full'
+                    className="h-full"
                   >
                     Add
                   </Button>
@@ -173,7 +177,7 @@ export default function PositionRow({
                 <Button
                   disabled={Boolean(reasonToDisableRemove)}
                   onClick={() => onRemove(position.assetId, position.type)}
-                  type='secondary-action'
+                  type="secondary-action"
                   size="sm"
                   className="ml-2"
                 >
@@ -183,7 +187,7 @@ export default function PositionRow({
             ) : (
               <Button
                 onClick={() => onRemove(position.assetId, position.type)}
-                type='secondary-action'
+                type="secondary-action"
                 size="sm"
                 className="ml-2"
               >

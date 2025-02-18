@@ -30,7 +30,7 @@ import { ChainKey } from "@/utils/wallet/constants";
 import { usePositionStats } from "@/hooks/usePositionStats";
 
 const allChainKeys = Object.values(ChainKey).filter(
-  (value) => typeof value === "string"
+  (value) => typeof value === "string",
 ) as ChainKey[];
 
 export default function DashboardView() {
@@ -49,7 +49,8 @@ export default function DashboardView() {
     useState(false);
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
-  const { positions, isPending, isRefetching, positionsError, refetch } = useLiquidityPositions();
+  const { positions, isPending, isRefetching, positionsError, refetch } =
+    useLiquidityPositions();
   const { midgardStats, pools, isWalletConnected } = useAppState();
 
   const {
@@ -68,13 +69,16 @@ export default function DashboardView() {
   });
 
   useEffect(() => {
-    if (searchedPositions && Object.keys(searchedPositions).length === 0 || positionsErrorSearch) {
+    if (
+      (searchedPositions && Object.keys(searchedPositions).length === 0) ||
+      positionsErrorSearch
+    ) {
       showToast({
         type: ToastType.ERROR,
         text: "No positions found for the entered address. Please verify the address and try again.",
-      })
+      });
     }
-  }, [searchedPositions, positionsErrorSearch])
+  }, [searchedPositions, positionsErrorSearch]);
 
   useEffect(() => {
     if (isWalletConnected()) {
@@ -96,7 +100,7 @@ export default function DashboardView() {
             .map(([, position]) => position as PositionStats);
           return pools.concat(chainPools);
         },
-        []
+        [],
       )) ||
     [];
 
@@ -149,7 +153,9 @@ export default function DashboardView() {
         </div>
       </div>
       <div className="flex flex-col">
-        <div className={`flex ${!isWalletConnected() ? 'flex-col' : 'flew-row'} md:flex-row items-start justify-between md:items-center`}>
+        <div
+          className={`flex ${!isWalletConnected() ? "flex-col" : "flew-row"} md:flex-row items-start justify-between md:items-center`}
+        >
           <div className="flex align-center">
             <h2 className={titleStyle}>Your positions</h2>
             <Tooltip
@@ -178,7 +184,10 @@ export default function DashboardView() {
             </Tooltip>
           </div>
           {isWalletConnected() && (
-            <div onClick={() => refetch()} className="bg-white w-12 h-12 flex justify-center intems-center rounded-xl cursor-pointer hover:bg-white/50">
+            <div
+              onClick={() => refetch()}
+              className="bg-white w-12 h-12 flex justify-center intems-center rounded-xl cursor-pointer hover:bg-white/50"
+            >
               <Image
                 src="/refresh.svg"
                 alt="settings"
@@ -198,12 +207,12 @@ export default function DashboardView() {
                   setAddressInSearch(newAddress);
                 }}
               />
-              <Button 
-                type='secondary'
+              <Button
+                type="secondary"
                 disabled={!addressInSearch}
                 onClick={() => {
-                  fetchPositions()
-                }} 
+                  fetchPositions();
+                }}
                 className="ml-2"
               >
                 Search
@@ -235,17 +244,17 @@ export default function DashboardView() {
                     `${getAddressUrl()}${
                       position.memberDetails?.assetAddress
                     }?tab=lps`,
-                    "_blank"
+                    "_blank",
                   );
                   break;
                 case PositionStatus.LP_POSITION_INCOMPLETE:
                   const assetPriceUSD = parseFloat(pool.assetPriceUSD);
 
                   const assetAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.assetPending, 8)
+                    baseAmount(position.memberDetails?.assetPending, 8),
                   );
                   const runeAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.runePending, 8)
+                    baseAmount(position.memberDetails?.runePending, 8),
                   );
 
                   const valueOfPendingAssetInUsd =
@@ -293,7 +302,7 @@ export default function DashboardView() {
               }
               setSelectedPool(pool);
               setSelectedPosition(
-                (currentPositions as Positions)[assetId][type] || null
+                (currentPositions as Positions)[assetId][type] || null,
               );
               setAddLiquidityProcessState({
                 initialStep: LpSteps.SELECT_OPTIONS,
@@ -307,10 +316,10 @@ export default function DashboardView() {
             }}
             onRemove={(poolId: string, type: PositionType) => {
               setSelectedPool(
-                pools?.find((pool) => pool.asset === poolId) || null
+                pools?.find((pool) => pool.asset === poolId) || null,
               );
               setSelectedPosition(
-                (currentPositions as Positions)[poolId][type]
+                (currentPositions as Positions)[poolId][type],
               );
               setShowRemoveLiquidityModal(true);
             }}

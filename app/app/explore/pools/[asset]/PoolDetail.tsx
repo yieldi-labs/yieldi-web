@@ -97,10 +97,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
   const renderActionButton = () => {
     if (!wallet) {
       return (
-        <Button
-          className="w-full mt-8"
-          onClick={toggleWalletModal}
-        >
+        <Button className="w-full mt-8" onClick={toggleWalletModal}>
           Connect Wallet
         </Button>
       );
@@ -108,10 +105,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
 
     if (!isChainSupported) {
       return (
-        <Button
-          disabled
-          className="w-full mt-8"
-        >
+        <Button disabled className="w-full mt-8">
           Coming Soon...
         </Button>
       );

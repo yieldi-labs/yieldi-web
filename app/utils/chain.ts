@@ -279,5 +279,4 @@ export function getChainsConnected(walletsState: ConnectedWalletsState) {
     }
   }
   return chains;
-
 }

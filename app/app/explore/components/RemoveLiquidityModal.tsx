@@ -13,7 +13,6 @@ import {
 } from "@/app/utils";
 import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
-import { twMerge } from "tailwind-merge";
 import { getChainKeyFromChain } from "@/utils/chain";
 import {
   PositionStatus,
@@ -450,7 +449,9 @@ export default function RemoveLiquidityModal({
             <Button
               key={percent}
               onClick={() => handlePercentageClick(percent)}
-              type={isPercentageMatch(percent) ? "primary-action" : "neutral-action"}
+              type={
+                isPercentageMatch(percent) ? "primary-action" : "neutral-action"
+              }
               size="md"
               disabled={isSubmitting}
             >

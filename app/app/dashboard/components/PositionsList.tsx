@@ -31,8 +31,6 @@ export default function PositionsList({
   onRemove,
   onClickStatus,
 }: PositionsList) {
-  const { walletsState } = useAppState();
-  const numberConnectedWallets = Object.keys(walletsState || {}).length;
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: PoolSortKey.PRINCIPAL,
@@ -82,10 +80,7 @@ export default function PositionsList({
     }
   };
 
-  if (
-    Object.entries(positions).length <= 0 ||
-    !positions
-  ) {
+  if (Object.entries(positions).length <= 0 || !positions) {
     return <PositionsPlaceholder />;
   }
 

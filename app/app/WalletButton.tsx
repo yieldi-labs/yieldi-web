@@ -30,13 +30,11 @@ export default function WalletButton() {
           connectedWallets === 0 ? toggleWalletModal() : toggleWalletDrawer()
         }
       >
-        {
-          connectedWallets === 0
+        {connectedWallets === 0
           ? isMobile
             ? "Connect"
             : "Connect Wallet"
-          : "Wallet"
-        }
+          : "Wallet"}
       </Button>
     </div>
   );

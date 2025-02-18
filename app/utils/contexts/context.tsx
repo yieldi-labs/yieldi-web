@@ -106,7 +106,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   const [undetected, setUndetected] = useState<WalletType[]>([]);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false);
-  const [percentageLiquidityCapReached, setPercentageLiquidityCapReached] = useState(0);
+  const [percentageLiquidityCapReached, setPercentageLiquidityCapReached] =
+    useState(0);
   const [walletsState, setWalletsState] = useState<ConnectedWalletsState>({}); // TODO: We should remove complex objects as wallet providers from provider state. It can not be passed as props
   const toggleWalletModal = () => {
     setIsWalletModalOpen((prevState) => !prevState);
@@ -712,7 +713,7 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
 
   const isWalletConnected = (chainKey?: ChainKey) => {
     if (!chainKey) {
-      return Boolean(Object.keys(walletsState).length)
+      return Boolean(Object.keys(walletsState).length);
     }
     return Boolean(walletsState[chainKey]?.address);
   };
@@ -731,16 +732,18 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           );
         });
       });
-  
-      const effectiveSecurityBond = Number(thornodeNetwork?.effective_security_bond);
+
+      const effectiveSecurityBond = Number(
+        thornodeNetwork?.effective_security_bond,
+      );
       const liquidityAmount = vaultsLiquidityRune.amount().toNumber();
-  
-      const liquidityCapPercentage = ((liquidityAmount / effectiveSecurityBond) * 100);
-  
-      setPercentageLiquidityCapReached(liquidityCapPercentage)
+
+      const liquidityCapPercentage =
+        (liquidityAmount / effectiveSecurityBond) * 100;
+
+      setPercentageLiquidityCapReached(liquidityCapPercentage);
     }
   }, [asgardVaults, poolsData, thornodeNetwork]);
-  
 
   return (
     <AppStateContext.Provider

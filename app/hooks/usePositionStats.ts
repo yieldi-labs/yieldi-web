@@ -19,13 +19,13 @@ interface UsePositionStatsProps {
   poolsData: PoolDetails | undefined;
   addresses: string[];
   filterByChains: ChainKey[];
-  autoFetch?: boolean
-  ensureBothAddressConnectedOnDlp: boolean
+  autoFetch?: boolean;
+  ensureBothAddressConnectedOnDlp: boolean;
 }
 
 export function emptyPositionStats(
   asset = "BTC.BTC",
-  positionType = PositionType.SYM
+  positionType = PositionType.SYM,
 ): PositionStats {
   return {
     assetId: asset,
@@ -56,7 +56,7 @@ export function usePositionStats({
   addresses,
   filterByChains,
   autoFetch = true,
-  ensureBothAddressConnectedOnDlp = false
+  ensureBothAddressConnectedOnDlp = false,
 }: UsePositionStatsProps) {
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     Positions | undefined
@@ -83,17 +83,18 @@ export function usePositionStats({
         throw Error("No pools available");
       }
 
-      const genericPositionsDataStructure = await positionsTransformer( // TODO: Remove filter from both addresses for DLP on search
+      const genericPositionsDataStructure = await positionsTransformer(
+        // TODO: Remove filter from both addresses for DLP on search
         uniqueAddresses,
         poolsData,
         {
           LIQUIDITYLOCKUPBLOCKS: Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS),
-          ensureBothAddressConnectedOnDlp
-        }
+          ensureBothAddressConnectedOnDlp,
+        },
       );
 
       const filteredPositions = Object.keys(
-        genericPositionsDataStructure
+        genericPositionsDataStructure,
       ).reduce((positions: Positions, key: string) => {
         const chain = assetFromString(key)?.chain;
         if (chain) {
@@ -116,8 +117,8 @@ export function usePositionStats({
         Object.values(positions).some(
           (position) =>
             position?.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
-            position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
-        )
+            position?.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
+        ),
     );
 
     if (hasPendingPositions) {
@@ -151,7 +152,7 @@ export function usePositionStats({
         if (!prev[pooldId][positionType]) {
           prev[pooldId][positionType] = emptyPositionStats(
             pooldId,
-            positionType
+            positionType,
           );
         } else {
           prev[pooldId][positionType] = {
@@ -163,7 +164,7 @@ export function usePositionStats({
         return prev;
       });
     },
-    [defaultRefetchInterval]
+    [defaultRefetchInterval],
   );
 
   return {

@@ -61,7 +61,10 @@ export interface Positions {
 export const positionsTransformer = async (
   addresses: string[],
   pools: PoolDetails,
-  options: { LIQUIDITYLOCKUPBLOCKS: number, ensureBothAddressConnectedOnDlp?: boolean },
+  options: {
+    LIQUIDITYLOCKUPBLOCKS: number;
+    ensureBothAddressConnectedOnDlp?: boolean;
+  },
 ) => {
   const defaultLockupPeriodInSecond = options.LIQUIDITYLOCKUPBLOCKS * 6; // six second per block
   const result: Positions = {};
@@ -76,7 +79,7 @@ export const positionsTransformer = async (
 
   const memberPools = memberPoolsResult.data?.pools;
 
-  let filteredMemberPools = memberPools
+  let filteredMemberPools = memberPools;
   // Filter out positions that does not match with both addresses
   if (options.ensureBothAddressConnectedOnDlp) {
     filteredMemberPools = memberPools?.filter((memberPool) => {
