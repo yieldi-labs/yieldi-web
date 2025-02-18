@@ -32,7 +32,6 @@ module.exports = {
         accent: { DEFAULT: "#72BACA", dark: "#71bac9" },
         dark: "#003944",
         highlight: "#A1FD59",
-        secondaryBtn: "#627EEA",
         red: {
           dark: "#BF2212",
           DEFAULT: "#FF6656",

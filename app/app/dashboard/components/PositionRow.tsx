@@ -10,7 +10,7 @@ import {
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { ChainKey } from "@/utils/wallet/constants";
-import { Timer } from "@shared/components/ui";
+import { Button, Timer } from "@shared/components/ui";
 import { ConnectedWalletsState } from "@/utils/interfaces";
 import { ActionType } from "@/utils/lp-monitor/parseActions";
 import { assetFromString } from "@xchainjs/xchain-util";
@@ -148,43 +148,47 @@ export default function PositionRow({
             {!hideAddButton &&
               (reasonToDisableAdd ? (
                 <UIComponents.Tooltip content={<>{reasonToDisableAdd}</>}>
-                  <button
+                  <Button
                     disabled={Boolean(reasonToDisableAdd)}
                     onClick={() => onAdd(position.assetId, position.type)}
-                    className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed "
+                    type="primary-action"
+                    size="sm"
+                    className='h-full'
                   >
                     Add
-                  </button>
+                  </Button>
                 </UIComponents.Tooltip>
               ) : (
-                <button
+                <Button
                   disabled={Boolean(reasonToDisableAdd)}
                   onClick={() => onAdd(position.assetId, position.type)}
-                  className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
+                  type="primary-action"
+                  size="sm"
                 >
                   Add
-                </button>
+                </Button>
               ))}
             {reasonToDisableRemove ? (
               <UIComponents.Tooltip content={<>{reasonToDisableRemove}</>}>
-                <button
+                <Button
                   disabled={Boolean(reasonToDisableRemove)}
-                  className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
-                              transition-all disabled:border-neutral-900 disabled:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed ml-2"
                   onClick={() => onRemove(position.assetId, position.type)}
+                  type='secondary-action'
+                  size="sm"
+                  className="ml-2"
                 >
                   Remove
-                </button>
+                </Button>
               </UIComponents.Tooltip>
             ) : (
-              <button
-                className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
-                            hover:text-opacity-50 hover:border-opacity-50 transition-all 
-                            disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+              <Button
                 onClick={() => onRemove(position.assetId, position.type)}
+                type='secondary-action'
+                size="sm"
+                className="ml-2"
               >
                 Remove
-              </button>
+              </Button>
             )}
           </div>
         </div>
