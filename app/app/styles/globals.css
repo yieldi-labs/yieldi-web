@@ -156,14 +156,14 @@ a:hover {
   appearance: none;
   width: 20px;
   height: 20px;
-  background: var(--secondaryBtn);
+  background: var(--blue);
   cursor: pointer;
 }
 
 .custom-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
-  background: var(--secondaryBtn);
+  background: var(--blue);
   cursor: pointer;
 }
 

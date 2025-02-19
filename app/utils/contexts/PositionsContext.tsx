@@ -7,6 +7,8 @@ import {
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { useAppState } from "./context";
+import { ethers } from "ethers";
+import { getChainsConnected } from "../chain";
 
 interface LiquidityPositionsContextType {
   positions: Positions | undefined;
@@ -17,7 +19,10 @@ interface LiquidityPositionsContextType {
   ) => void;
   cleanPositions: () => void;
   isPending: boolean;
+  isRefetching: boolean;
   positionsError: Error | null;
+  fetchPositions: () => void;
+  refetch: () => void;
 }
 
 const LiquidityPositionsContext = createContext<
@@ -31,21 +36,48 @@ export const LiquidityPositionsProvider = ({
 }) => {
   const { walletsState, mimirParameters, poolsData } = useAppState();
 
-  const { positions, markPositionAsPending, isPending, error, cleanPositions } =
-    usePositionStats({
-      walletsState,
-      mimirParameters,
-      poolsData,
-    });
+  const addresses = new Set<string>();
+
+  for (const key in walletsState) {
+    if (walletsState?.hasOwnProperty(key)) {
+      const address = walletsState[key]?.address;
+      if (ethers.utils.isAddress(address)) {
+        const checksummedAddress = ethers.utils.getAddress(address);
+        addresses.add(checksummedAddress);
+      } else {
+        addresses.add(address);
+      }
+    }
+  }
+
+  const {
+    positions,
+    markPositionAsPending,
+    isPending,
+    isRefetching,
+    error,
+    resetPositions,
+    fetchPositions,
+    refetch,
+  } = usePositionStats({
+    mimirParameters,
+    poolsData,
+    addresses: Array.from(addresses),
+    filterByChains: getChainsConnected(walletsState),
+    ensureBothAddressConnectedOnDlp: true,
+  });
 
   return (
     <LiquidityPositionsContext.Provider
       value={{
         positions,
         markPositionAsPending,
-        cleanPositions,
+        cleanPositions: resetPositions,
         isPending,
+        isRefetching,
         positionsError: error,
+        fetchPositions,
+        refetch,
       }}
     >
       {children}

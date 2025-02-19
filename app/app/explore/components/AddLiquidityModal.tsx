@@ -9,7 +9,6 @@ import {
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { useAppState } from "@/utils/contexts/context";
 import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
-import { twMerge } from "tailwind-merge";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { PositionType } from "@/utils/lp-monitor/parsePositions";
 import { ChainKey } from "@/utils/wallet/constants";
@@ -22,7 +21,7 @@ import {
 } from "@xchainjs/xchain-util";
 import { StatusStepData } from "./StatusModal";
 import { RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
-import { Warn } from "@shared/components/ui";
+import { Button, Warn } from "@shared/components/ui";
 
 export interface AddLiquidityStepData {
   pool: IPoolDetail;
@@ -198,12 +197,6 @@ export default function AddLiquidityModal({
     : 0;
   const runeUsdBalance = runeBalance * stepData.runePriceUSD;
 
-  const percentageButtonClasses = (isActive: boolean) =>
-    twMerge(
-      "px-6 py-2 rounded-full font-medium transition-colors",
-      isActive ? "bg-secondaryBtn text-white" : "bg-white text-secondaryBtn",
-    );
-
   const currentAssetPercentage = useMemo(() => {
     if (!assetAmount || !assetBalance) return 0;
     return (parseFloat(assetAmount) / assetBalance) * 100;
@@ -264,15 +257,18 @@ export default function AddLiquidityModal({
         />
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
-            <button
+            <Button
               key={percent}
               onClick={() => handleAssetPercentageClick(percent / 100)}
-              className={percentageButtonClasses(
-                isCloseToPercentage(currentAssetPercentage, percent),
-              )}
+              type={
+                isCloseToPercentage(currentAssetPercentage, percent)
+                  ? "primary-action"
+                  : "neutral-action"
+              }
+              size="md"
             >
               {percent === 100 ? "MAX" : `${percent}%`}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -293,21 +289,24 @@ export default function AddLiquidityModal({
             />
             <div className="flex justify-end gap-2 mb-6">
               {[25, 50, 100].map((percent) => (
-                <button
+                <Button
                   key={percent}
                   onClick={() => handleRunePercentageClick(percent / 100)}
-                  className={percentageButtonClasses(
-                    isCloseToPercentage(currentRunePercentage, percent),
-                  )}
+                  type={
+                    isCloseToPercentage(currentRunePercentage, percent)
+                      ? "primary-action"
+                      : "neutral-action"
+                  }
+                  size="md"
                 >
                   {percent === 100 ? "MAX" : `${percent}%`}
-                </button>
+                </Button>
               ))}
             </div>
           </>
         )}
 
-        <button
+        <Button
           onClick={() =>
             nextStep({
               pool: stepData.pool,
@@ -323,7 +322,7 @@ export default function AddLiquidityModal({
             })
           }
           disabled={!isValidAmount || isDisableDueTooSmallAmount}
-          className="w-full bg-primary text-black font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full"
         >
           {!selectedWallet?.address
             ? "Connect Wallet"
@@ -332,7 +331,7 @@ export default function AddLiquidityModal({
               : isDisableDueTooSmallAmount
                 ? "Small amount"
                 : "Add"}
-        </button>
+        </Button>
         <div className="mt-6">
           <Warn
             text={`You are about to link your currently connected ${asset.ticker} and RUNE addresses to this liquidity position. Ensure that these are the addresses you want to own the position, as this cannot be changed later.`}

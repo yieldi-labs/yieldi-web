@@ -18,6 +18,8 @@ module.exports = {
         neutral: {
           DEFAULT: "#242628",
           100: "#F5F6F6",
+          200: "#E5E7E8",
+          300: "#CED2D3",
           700: "#585E62",
           800: "#424648",
           900: "#4E4846",
@@ -30,7 +32,6 @@ module.exports = {
         accent: { DEFAULT: "#72BACA", dark: "#71bac9" },
         dark: "#003944",
         highlight: "#A1FD59",
-        secondaryBtn: "#627EEA",
         red: {
           dark: "#BF2212",
           DEFAULT: "#FF6656",

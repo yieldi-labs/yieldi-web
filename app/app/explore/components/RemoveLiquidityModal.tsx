@@ -13,14 +13,13 @@ import {
 } from "@/app/utils";
 import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
-import { twMerge } from "tailwind-merge";
 import { getChainKeyFromChain } from "@/utils/chain";
 import {
   PositionStatus,
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
-import { Slider } from "@shared/components/ui";
+import { Button, Slider } from "@shared/components/ui";
 import AssetInput from "./AssetInput";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import { assetFromString } from "@xchainjs/xchain-util";
@@ -447,19 +446,17 @@ export default function RemoveLiquidityModal({
         {/* Percentage Buttons */}
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
-            <button
+            <Button
               key={percent}
               onClick={() => handlePercentageClick(percent)}
-              className={twMerge(
-                "px-6 py-2 rounded-full font-medium transition-colors",
-                isPercentageMatch(percent)
-                  ? "bg-secondaryBtn text-white"
-                  : "bg-white text-secondaryBtn",
-              )}
+              type={
+                isPercentageMatch(percent) ? "primary-action" : "neutral-action"
+              }
+              size="md"
               disabled={isSubmitting}
             >
               {percent === 100 ? "MAX" : `${percent}%`}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -474,14 +471,14 @@ export default function RemoveLiquidityModal({
           </div>
         </div>
 
-        <button
+        <Button
           onClick={handleRemoveLiquidity}
           disabled={
             !isEnabled() ||
             isDisableDueTooSmallAmount ||
             outboundFee > assetUsdValue + runeUsdValue
           }
-          className="w-full bg-red text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full"
         >
           {isSubmitting
             ? "Submitting Transaction..."
@@ -489,7 +486,7 @@ export default function RemoveLiquidityModal({
                 outboundFee > assetUsdValue + runeUsdValue
               ? "Small amount"
               : "Remove"}
-        </button>
+        </Button>
       </div>
     </Modal>
   );

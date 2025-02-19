@@ -5,7 +5,7 @@ import {
   ThorchainIdentifiers,
   WalletKey,
 } from "./wallet/constants";
-import { ChainInfo, ChainType } from "./interfaces";
+import { ChainInfo, ChainType, ConnectedWalletsState } from "./interfaces";
 import { InboundAddress, InboundAddressesResponse } from "@/thornode";
 import {
   AnyAsset,
@@ -266,3 +266,17 @@ export const getWalletId = (
   }
   return defaultWalletKey;
 };
+
+export function getChainsConnected(walletsState: ConnectedWalletsState) {
+  const chains: ChainKey[] = [];
+  for (const key in walletsState) {
+    if (walletsState?.hasOwnProperty(key)) {
+      const wallet = walletsState[key];
+      const chain = wallet?.ChainInfo;
+      if (chain) {
+        chains.push(chain);
+      }
+    }
+  }
+  return chains;
+}

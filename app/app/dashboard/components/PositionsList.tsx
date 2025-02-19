@@ -4,7 +4,6 @@ import { SortDirection } from "@shared/components/ui/types";
 import PositionRow from "./PositionRow";
 import { PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
 import PositionsPlaceholder from "./PositionsPlaceholder";
-import { useAppState } from "@/utils/contexts/context";
 import Image from "next/image";
 
 interface PositionsList {
@@ -31,9 +30,6 @@ export default function PositionsList({
   onRemove,
   onClickStatus,
 }: PositionsList) {
-  const { walletsState } = useAppState();
-  const numberConnectedWallets = Object.keys(walletsState || {}).length;
-
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     key: PoolSortKey.PRINCIPAL,
     direction: SortDirection.DESC,
@@ -82,11 +78,7 @@ export default function PositionsList({
     }
   };
 
-  if (
-    Object.entries(positions).length <= 0 ||
-    !positions ||
-    numberConnectedWallets <= 0
-  ) {
+  if (Object.entries(positions).length <= 0 || !positions) {
     return <PositionsPlaceholder />;
   }
 

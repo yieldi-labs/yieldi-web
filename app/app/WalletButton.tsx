@@ -29,14 +29,13 @@ export default function WalletButton() {
         onClick={() =>
           connectedWallets === 0 ? toggleWalletModal() : toggleWalletDrawer()
         }
-        label={
-          connectedWallets === 0
-            ? isMobile
-              ? "Connect"
-              : "Connect Wallet"
-            : "Wallet"
-        }
-      />
+      >
+        {connectedWallets === 0
+          ? isMobile
+            ? "Connect"
+            : "Connect Wallet"
+          : "Wallet"}
+      </Button>
     </div>
   );
 }
