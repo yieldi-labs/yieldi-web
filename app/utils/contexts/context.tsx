@@ -37,6 +37,8 @@ import {
   asgard,
   mimir,
   network,
+  inboundAddresses,
+  InboundAddressesResponse,
 } from "@/thornode";
 import { getPools, getStats, PoolDetails, StatsData } from "@/midgard";
 import {
@@ -62,14 +64,16 @@ interface AppStateContextType {
   isLoadingTokenList: boolean;
   detected: WalletType[];
   undetected: WalletType[];
-  isWalletConnected: (chainKey: ChainKey) => boolean;
+  isWalletConnected: (chainKey?: ChainKey) => boolean;
   mimirParameters: MimirResponse | undefined;
   midgardStats: StatsData | undefined;
   thornodeNetwork: NetworkResponse | undefined;
   asgardVaults: VaultsResponse | undefined;
   poolsData: PoolDetails | undefined;
-  isLiquidityCapReached: boolean;
+  percentageLiquidityCapReached: number;
   pools: PoolDetails | undefined;
+  inboundAddresses: InboundAddressesResponse | undefined;
+  thornodeNetworkParameters: NetworkResponse | undefined;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(
@@ -102,7 +106,8 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
   const [undetected, setUndetected] = useState<WalletType[]>([]);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(false);
-  const [isLiquidityCapReached, setIsLiquidityCapReached] = useState(false);
+  const [percentageLiquidityCapReached, setPercentageLiquidityCapReached] =
+    useState(0);
   const [walletsState, setWalletsState] = useState<ConnectedWalletsState>({}); // TODO: We should remove complex objects as wallet providers from provider state. It can not be passed as props
   const toggleWalletModal = () => {
     setIsWalletModalOpen((prevState) => !prevState);
@@ -133,6 +138,31 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
       const data = await getStats();
       if (!data.data) {
         throw Error("No midgard stats found");
+      }
+      return data.data;
+    },
+  });
+
+  const { data: thornodeNetworkParameters } = useQuery({
+    queryKey: ["thornode-network"],
+    retry: false,
+    queryFn: async () => {
+      const data = await network();
+      if (!data.data) {
+        throw Error("No thornode network params found");
+      }
+      return data.data;
+    },
+  });
+
+  const { data: currentInboundAddresses } = useQuery({
+    queryKey: ["inbound-addresses"],
+    retry: false,
+    refetchInterval: 10000,
+    queryFn: async () => {
+      const data = await inboundAddresses();
+      if (!data.data) {
+        throw Error("No inbound addresses found");
       }
       return data.data;
     },
@@ -543,6 +573,18 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
                   provider: leapProvider || window.leap,
                   walletId: WalletKey.LEAP,
                 }),
+              [ProviderKey.ETHEREUM]: async () =>
+                await connectWallet({
+                  id: "leap-eth",
+                  provider: leapProvider || window.leap.ethereum,
+                  walletId: WalletKey.LEAP,
+                }),
+              [ProviderKey.BINANCESMARTCHAIN]: async () =>
+                await connectWallet({
+                  id: "leap-bsc",
+                  provider: leapProvider || window.leap.ethereum,
+                  walletId: WalletKey.LEAP,
+                }),
             };
             break;
           }
@@ -669,7 +711,10 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
     setSelectedChains(connectedChains);
   }, [walletsState]);
 
-  const isWalletConnected = (chainKey: ChainKey) => {
+  const isWalletConnected = (chainKey?: ChainKey) => {
+    if (!chainKey) {
+      return Boolean(Object.keys(walletsState).length);
+    }
     return Boolean(walletsState[chainKey]?.address);
   };
 
@@ -687,14 +732,16 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
           );
         });
       });
-      if (
-        Number(thornodeNetwork?.effective_security_bond) >
-        vaultsLiquidityRune.amount().toNumber()
-      ) {
-        setIsLiquidityCapReached(false);
-      } else {
-        setIsLiquidityCapReached(true);
-      }
+
+      const effectiveSecurityBond = Number(
+        thornodeNetwork?.effective_security_bond,
+      );
+      const liquidityAmount = vaultsLiquidityRune.amount().toNumber();
+
+      const liquidityCapPercentage =
+        (liquidityAmount / effectiveSecurityBond) * 100;
+
+      setPercentageLiquidityCapReached(liquidityCapPercentage);
     }
   }, [asgardVaults, poolsData, thornodeNetwork]);
 
@@ -723,8 +770,10 @@ export const AppStateProvider = ({ children }: { children: ReactNode }) => {
         thornodeNetwork,
         asgardVaults,
         poolsData,
-        isLiquidityCapReached,
+        percentageLiquidityCapReached,
         pools: poolsData,
+        inboundAddresses: currentInboundAddresses,
+        thornodeNetworkParameters,
       }}
     >
       {children}

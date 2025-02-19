@@ -22,9 +22,9 @@ export const addDollarSignAndSuffix = (value: number) => {
   if (value === 0) {
     return "-";
   }
-  if (value >= 1e6) {
+  if (Math.abs(value) >= 1e6) {
     return `$${formatNumber(value / 1e6, 2, 2)}M`;
-  } else if (value >= 1e3) {
+  } else if (Math.abs(value) >= 1e3) {
     return `$${formatNumber(value / 1e3, 2, 2)}K`;
   } else {
     return `$${formatNumber(value, 2, 2)}`;

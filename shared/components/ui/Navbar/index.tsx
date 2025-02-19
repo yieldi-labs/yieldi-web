@@ -87,7 +87,7 @@ const Navbar = ({ links, buttons }: NavbarProps) => {
                     key: index,
                   })
                 ) : (
-                  <Button key={index} {...button} />
+                  <Button key={index} {...button} >{button.label}</Button>
                 ),
               )}
             </div>

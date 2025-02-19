@@ -22,7 +22,6 @@ import {
   assetFromString,
   assetToBase,
 } from "@xchainjs/xchain-util";
-import { inboundAddresses } from "@/thornode";
 import { ChainType } from "@/utils/interfaces";
 
 export enum LpSubstepsAddLiquidity {
@@ -61,7 +60,7 @@ if (process.env.NEXT_PUBLIC_IS_STAGENET) {
 const feeBps = 0;
 
 export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
-  const { walletsState } = useAppState();
+  const { walletsState, inboundAddresses } = useAppState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const thorChainClient = useThorchain({
@@ -173,8 +172,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           }
         }
 
-        const inboundAddressesResponse = await inboundAddresses();
-        const inbound = inboundAddressesResponse.data?.find(
+        const inbound = inboundAddresses?.find(
           (i) => i.chain === parsedAsset.chain.toUpperCase(),
         );
         if (!inbound?.address) {
@@ -312,6 +310,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     [
       getAssetWallet,
       pool,
+      inboundAddresses,
       thorChainClient,
       cosmosTransfer,
       addUTXOLiquidity,
@@ -343,8 +342,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         setLoading(true);
         setError(null);
 
-        const inboundAddressesData = await inboundAddresses();
-
         const selectedChainToStartAction = getChainInfoFromChainString(
           assetIdToStartActionParsed?.chain || "",
         );
@@ -367,6 +364,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         if (wallet.ChainInfo === ChainKey.THORCHAIN) {
           const amount = getMinAmountByChain(
             selectedChainToStartAction.thorchainIdentifier,
+            inboundAddresses,
           ); // TODO: Handle decimals
           return await thorChainClient.deposit({
             amount: amount,
@@ -374,7 +372,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           });
         }
 
-        const inbound = inboundAddressesData.data?.find(
+        const inbound = inboundAddresses?.find(
           (i) => i.chain === assetIdToStartActionParsed.chain.toUpperCase(),
         );
 
@@ -392,6 +390,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             assetAmount(
               getMinAmountByChain(
                 selectedChainToStartAction.thorchainIdentifier,
+                inboundAddresses,
               ),
               selectedChainToStartAction.nativeDecimals,
             ),
@@ -410,6 +409,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             vault: inbound.address,
             amount: getMinAmountByChain(
               selectedChainToStartAction.thorchainIdentifier,
+              inboundAddresses,
             ), // TODO: Handle decimals
             memo: memo,
           });
@@ -424,15 +424,21 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         // Use base unit amount for withdrawal transaction
         const decimals = selectedChainToStartAction.nativeDecimals;
-        const minAmountByChain =
-          getMinAmountByChain(selectedChainToStartAction.thorchainIdentifier) *
-          10 ** decimals;
+        const minAmountByChain = getMinAmountByChain(
+          selectedChainToStartAction.thorchainIdentifier,
+          inboundAddresses,
+        );
+        const minAmountInBase = assetToBase(
+          assetAmount(minAmountByChain, decimals),
+        )
+          .amount()
+          .toNumber();
         const txHash = await depositWithExpiry(
           routerAddress,
           vaultAddress,
           "0x0000000000000000000000000000000000000000",
           decimals,
-          BigInt(minAmountByChain),
+          BigInt(minAmountInBase),
           memo,
           expiry,
           selectedChainToStartAction.chainId as string,
@@ -450,7 +456,8 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
     },
     [
       getAssetWallet,
-      pool,
+      pool.asset,
+      inboundAddresses,
       depositWithExpiry,
       thorChainClient,
       cosmosTransfer,

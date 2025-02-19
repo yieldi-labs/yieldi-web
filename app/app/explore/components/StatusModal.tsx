@@ -171,7 +171,7 @@ export default function StatusModal({
                   updatedStepIndex = index;
                   return {
                     ...step,
-                    status: LpSubstepsStatus.FAILED,
+                    status: LpSubstepsStatus.SUCCESS,
                   };
                 }
                 return step;

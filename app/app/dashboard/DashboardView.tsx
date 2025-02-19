@@ -23,9 +23,15 @@ import { baseAmount, baseToAsset } from "@xchainjs/xchain-util";
 import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
 import { AddLiquidityStepData } from "../explore/components/AddLiquidityModal";
 import { useAppState } from "@/utils/contexts/context";
-import { Tooltip } from "@shared/components/ui";
+import { Button, Input, Tooltip } from "@shared/components/ui";
 import { showToast, ToastType } from "../errorToast";
 import { getAddressUrl } from "@/utils/wallet/utils";
+import { ChainKey } from "@/utils/wallet/constants";
+import { usePositionStats } from "@/hooks/usePositionStats";
+
+const allChainKeys = Object.values(ChainKey).filter(
+  (value) => typeof value === "string",
+) as ChainKey[];
 
 export default function DashboardView() {
   const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{
@@ -35,6 +41,7 @@ export default function DashboardView() {
     initialStep: LpSteps.SELECT_OPTIONS,
     stepData: null,
   });
+  const [addressInSearch, setAddressInSearch] = useState("");
   const [selectedPool, setSelectedPool] = useState<PoolDetail | null>(null);
   const [selectedPosition, setSelectedPosition] =
     useState<PositionStats | null>(null);
@@ -42,19 +49,59 @@ export default function DashboardView() {
     useState(false);
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
 
-  const { positions, isPending, positionsError } = useLiquidityPositions();
-  const { midgardStats, pools } = useAppState();
+  const { positions, isPending, isRefetching, positionsError, refetch } =
+    useLiquidityPositions();
+  const { midgardStats, pools, isWalletConnected } = useAppState();
+
+  const {
+    positions: searchedPositions,
+    fetchPositions,
+    resetPositions,
+    error: positionsErrorSearch,
+  } = usePositionStats({
+    defaultRefetchInterval: 300000,
+    mimirParameters: midgardStats,
+    poolsData: pools,
+    addresses: [addressInSearch],
+    filterByChains: allChainKeys,
+    autoFetch: false,
+    ensureBothAddressConnectedOnDlp: false,
+  });
+
+  useEffect(() => {
+    if (
+      (searchedPositions && Object.keys(searchedPositions).length === 0) ||
+      positionsErrorSearch
+    ) {
+      showToast({
+        type: ToastType.ERROR,
+        text: "No positions found for the entered address. Please verify the address and try again.",
+      });
+    }
+  }, [searchedPositions, positionsErrorSearch]);
+
+  useEffect(() => {
+    if (isWalletConnected()) {
+      resetPositions();
+      setAddressInSearch("");
+    }
+  }, [isWalletConnected, resetPositions]);
 
   const runePriceUSD = Number(midgardStats?.runePriceUSD) || 0; // TODO: Loading state
 
+  const currentPositions = positions || searchedPositions;
+
   const allPositionsArray =
-    (positions &&
-      Object.entries(positions).reduce((pools: PositionStats[], [, types]) => {
-        const chainPools = Object.entries(types)
-          .filter(([, position]) => position)
-          .map(([, position]) => position as PositionStats);
-        return pools.concat(chainPools);
-      }, [])) ||
+    (currentPositions &&
+      Object.entries(currentPositions).reduce(
+        (pools: PositionStats[], [, types]) => {
+          const chainPools = Object.entries(types)
+            .filter(([, position]) => position)
+            .map(([, position]) => position as PositionStats);
+          return pools.concat(chainPools);
+        },
+        [],
+      )) ||
     [];
 
   // Calculate totals
@@ -106,38 +153,77 @@ export default function DashboardView() {
         </div>
       </div>
       <div className="flex flex-col">
-        <div className="flex align-center">
-          <h2 className={titleStyle}>Your positions</h2>
-          <Tooltip
-            content={
-              <p className="w-[300px]">
-                If you can’t find your liquidity position, make sure you are
-                connected with both addresses used during the initial deposit.
-                <a
-                  href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-cant-i-find-my-dual-chain-liquidity-position-in-yieldi"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline pl-1"
-                >
-                  Learn more
-                </a>
-              </p>
-            }
-          >
-            <Image
-              src="/help.svg"
-              alt="settings"
-              className="rounded-full ml-2 mt-1 cursor-pointer"
-              width={24}
-              height={24}
-              onClick={() => {}}
-            />
-          </Tooltip>
+        <div
+          className={`flex ${!isWalletConnected() ? "flex-col" : "flew-row"} md:flex-row items-start justify-between md:items-center`}
+        >
+          <div className="flex align-center">
+            <h2 className={titleStyle}>Your positions</h2>
+            <Tooltip
+              content={
+                <p className="w-[300px]">
+                  If you can’t find your liquidity position, make sure you are
+                  connected with both addresses used during the initial deposit.
+                  <a
+                    href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-cant-i-find-my-dual-chain-liquidity-position-in-yieldi"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline pl-1"
+                  >
+                    Learn more
+                  </a>
+                </p>
+              }
+            >
+              <Image
+                src="/help.svg"
+                alt="settings"
+                className="rounded-full ml-2 mt-1 cursor-pointer"
+                width={24}
+                height={24}
+              />
+            </Tooltip>
+          </div>
+          {isWalletConnected() && (
+            <div
+              onClick={() => refetch()}
+              className="bg-white w-12 h-12 flex justify-center intems-center rounded-xl cursor-pointer hover:bg-white/50"
+            >
+              <Image
+                src="/refresh.svg"
+                alt="settings"
+                className=""
+                width={24}
+                height={24}
+              />
+            </div>
+          )}
+          {!isWalletConnected() && (
+            <div className="flex mb-4 md:mb-0">
+              <Input
+                className="md:w-96"
+                placeholder={"0x"}
+                value={addressInSearch}
+                onChange={(newAddress) => {
+                  setAddressInSearch(newAddress);
+                }}
+              />
+              <Button
+                type="secondary"
+                disabled={!addressInSearch}
+                onClick={() => {
+                  fetchPositions();
+                }}
+                className="ml-2"
+              >
+                Search
+              </Button>
+            </div>
+          )}
         </div>
         <div className="w-2/3 text-neutral-800 text-sm font-normal leading-tight mb-7">
           Manage your active positions and track your earnings.
         </div>
-        {isPending && !positions ? (
+        {(isPending && !currentPositions) || isRefetching ? (
           <div className="fixed inset-0 bg-white/50 flex items-center justify-center z-50">
             <Loader />
           </div>
@@ -146,7 +232,7 @@ export default function DashboardView() {
             positions={allPositionsArray}
             onClickStatus={(assetId: string, type: PositionType) => {
               const pool = pools?.find((pool) => pool.asset === assetId);
-              const position = (positions as Positions)[assetId][type];
+              const position = (currentPositions as Positions)[assetId][type];
               if (!position || !pool) {
                 throw Error("Position or pool not found");
               }
@@ -155,7 +241,9 @@ export default function DashboardView() {
                 case PositionStatus.LP_POSITION_DEPOSIT_PENDING:
                 case PositionStatus.LP_POSITION_WITHDRAWAL_PENDING:
                   window.open(
-                    `${getAddressUrl()}${position.memberDetails?.assetAddress}?tab=lps`,
+                    `${getAddressUrl()}${
+                      position.memberDetails?.assetAddress
+                    }?tab=lps`,
                     "_blank",
                   );
                   break;
@@ -214,7 +302,7 @@ export default function DashboardView() {
               }
               setSelectedPool(pool);
               setSelectedPosition(
-                (positions as Positions)[assetId][type] || null,
+                (currentPositions as Positions)[assetId][type] || null,
               );
               setAddLiquidityProcessState({
                 initialStep: LpSteps.SELECT_OPTIONS,
@@ -230,7 +318,9 @@ export default function DashboardView() {
               setSelectedPool(
                 pools?.find((pool) => pool.asset === poolId) || null,
               );
-              setSelectedPosition((positions as Positions)[poolId][type]);
+              setSelectedPosition(
+                (currentPositions as Positions)[poolId][type],
+              );
               setShowRemoveLiquidityModal(true);
             }}
           />

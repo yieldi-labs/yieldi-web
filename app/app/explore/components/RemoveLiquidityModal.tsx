@@ -2,9 +2,10 @@ import { useState, useMemo, useEffect } from "react";
 import { NumberFormatValues } from "react-number-format";
 import BigNumber from "bignumber.js";
 import Modal from "@/app/modal";
-import { PoolDetail as IPoolDetail, MemberPool } from "@/midgard";
+import { PoolDetail, MemberPool } from "@/midgard";
 import TransactionConfirmationModal from "./TransactionConfirmationModal";
 import {
+  addDollarSignAndSuffix,
   DECIMALS,
   disableDueTooSmallAmount,
   getAssetShortSymbol,
@@ -12,31 +13,28 @@ import {
 } from "@/app/utils";
 import { useAppState } from "@/utils/contexts/context";
 import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
-import { twMerge } from "tailwind-merge";
 import { getChainKeyFromChain } from "@/utils/chain";
 import {
   PositionStatus,
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
-import { Slider } from "@shared/components/ui";
+import { Button, Slider } from "@shared/components/ui";
 import AssetInput from "./AssetInput";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { showToast, ToastType } from "@/app/errorToast";
+import {
+  getOutboundFeeInDollarsByPoolAndWithdrawalStrategy,
+  WithdrawalType,
+} from "@/utils/fees";
 
 interface RemoveLiquidityModalProps {
-  pool: IPoolDetail;
+  pool: PoolDetail;
   position: MemberPool;
   positionType: PositionType;
   runePriceUSD: number;
   onClose: (transactionSubmitted: boolean) => void;
-}
-
-enum WithdrawalType {
-  SPLIT = "SPLIT",
-  ALL_RUNE = "ALL_RUNE",
-  ALL_ASSET = "ALL_ASSET",
 }
 
 const DECIMAL_FORMATS = {
@@ -55,9 +53,29 @@ export default function RemoveLiquidityModal({
   const { error: liquidityError, removeLiquidity } = useLiquidityPosition({
     pool,
   });
-  const { toggleWalletModal, walletsState, mimirParameters } = useAppState();
+  const {
+    toggleWalletModal,
+    walletsState,
+    mimirParameters,
+    inboundAddresses,
+    thornodeNetworkParameters,
+    pools,
+  } = useAppState();
 
   const asset = assetFromString(pool.asset);
+
+  const nativePool = pools?.find((p) => {
+    const poolAsset = assetFromString(p.asset);
+    const selectedPoolAsset = assetFromString(pool.asset);
+    if (
+      poolAsset?.chain.toLowerCase() ===
+        selectedPoolAsset?.chain.toLowerCase() &&
+      poolAsset?.symbol.indexOf("-") === -1
+    ) {
+      return true;
+    }
+    return false;
+  });
 
   const { positions, markPositionAsPending, positionsError } =
     useLiquidityPositions();
@@ -361,6 +379,15 @@ export default function RemoveLiquidityModal({
     runeUsdValue,
   );
 
+  const outboundFee = getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
+    pool,
+    runePriceUSD,
+    withdrawalType,
+    nativePool,
+    thornodeNetworkParameters?.native_outbound_fee_rune,
+    inboundAddresses,
+  );
+
   return (
     <Modal onClose={() => onClose(false)} title="Remove">
       <div className="p-2 w-m">
@@ -409,22 +436,27 @@ export default function RemoveLiquidityModal({
           />
         )}
 
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-gray-500">Withdrawal fee</span>
+          <span className="font-medium">
+            {addDollarSignAndSuffix(outboundFee)}
+          </span>
+        </div>
+
         {/* Percentage Buttons */}
         <div className="flex justify-end gap-2 mb-6">
           {[25, 50, 100].map((percent) => (
-            <button
+            <Button
               key={percent}
               onClick={() => handlePercentageClick(percent)}
-              className={twMerge(
-                "px-6 py-2 rounded-full font-medium transition-colors",
-                isPercentageMatch(percent)
-                  ? "bg-secondaryBtn text-white"
-                  : "bg-white text-secondaryBtn",
-              )}
+              type={
+                isPercentageMatch(percent) ? "primary-action" : "neutral-action"
+              }
+              size="md"
               disabled={isSubmitting}
             >
               {percent === 100 ? "MAX" : `${percent}%`}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -439,17 +471,22 @@ export default function RemoveLiquidityModal({
           </div>
         </div>
 
-        <button
+        <Button
           onClick={handleRemoveLiquidity}
-          disabled={!isEnabled() || isDisableDueTooSmallAmount}
-          className="w-full bg-red text-white font-semibold py-3 rounded-full hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={
+            !isEnabled() ||
+            isDisableDueTooSmallAmount ||
+            outboundFee > assetUsdValue + runeUsdValue
+          }
+          className="w-full"
         >
           {isSubmitting
             ? "Submitting Transaction..."
-            : isDisableDueTooSmallAmount
+            : isDisableDueTooSmallAmount ||
+                outboundFee > assetUsdValue + runeUsdValue
               ? "Small amount"
               : "Remove"}
-        </button>
+        </Button>
       </div>
     </Modal>
   );

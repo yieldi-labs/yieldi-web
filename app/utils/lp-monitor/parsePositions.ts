@@ -61,7 +61,10 @@ export interface Positions {
 export const positionsTransformer = async (
   addresses: string[],
   pools: PoolDetails,
-  options: { LIQUIDITYLOCKUPBLOCKS: number },
+  options: {
+    LIQUIDITYLOCKUPBLOCKS: number;
+    ensureBothAddressConnectedOnDlp?: boolean;
+  },
 ) => {
   const defaultLockupPeriodInSecond = options.LIQUIDITYLOCKUPBLOCKS * 6; // six second per block
   const result: Positions = {};
@@ -76,19 +79,22 @@ export const positionsTransformer = async (
 
   const memberPools = memberPoolsResult.data?.pools;
 
+  let filteredMemberPools = memberPools;
   // Filter out positions that does not match with both addresses
-  const filteredMemberPools = memberPools?.filter((memberPool) => {
-    if (memberPool.assetAddress !== "" && memberPool.runeAddress !== "") {
-      const lowerCaseAddresses = addresses.map((address) =>
-        address.toLowerCase(),
-      );
-      return (
-        lowerCaseAddresses.includes(memberPool.assetAddress.toLowerCase()) &&
-        addresses.includes(memberPool.runeAddress.toLowerCase())
-      );
-    }
-    return true;
-  });
+  if (options.ensureBothAddressConnectedOnDlp) {
+    filteredMemberPools = memberPools?.filter((memberPool) => {
+      if (memberPool.assetAddress !== "" && memberPool.runeAddress !== "") {
+        const lowerCaseAddresses = addresses.map((address) =>
+          address.toLowerCase(),
+        );
+        return (
+          lowerCaseAddresses.includes(memberPool.assetAddress.toLowerCase()) &&
+          addresses.includes(memberPool.runeAddress.toLowerCase())
+        );
+      }
+      return true;
+    });
+  }
 
   filteredMemberPools?.forEach((memberPool) => {
     const type = determinePositionType(memberPool);

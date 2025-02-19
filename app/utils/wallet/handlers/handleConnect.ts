@@ -209,7 +209,9 @@ export const connectWallet = async (wallet: {
     case "vultisig-avax":
     case "vultisig-bsc":
     case "vultisig-eth":
-    case "vultisig-base": {
+    case "vultisig-base":
+    case "leap-eth":
+    case "leap-bsc": {
       const [, chainIdentifier] = wallet.id.split("-");
       const chain = getChainInfoFromChainString(chainIdentifier);
 
@@ -228,9 +230,10 @@ export const connectWallet = async (wallet: {
         throw new Error("Incorrect chain conection attempt");
       }
       if (!wallet.provider.connect || wallet.provider.isConnected()) {
-        let accounts = [];
+        let accounts: string[] = [];
         accounts = await wallet.provider.request({ method: "eth_accounts" });
-        if (accounts.length <= 0) {
+        const filteredAccounts = accounts.filter((account) => account !== null);
+        if (filteredAccounts.length <= 0) {
           accounts = await wallet.provider.request({
             method: "eth_requestAccounts",
           });

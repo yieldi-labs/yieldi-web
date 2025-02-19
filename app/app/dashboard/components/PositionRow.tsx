@@ -10,7 +10,7 @@ import {
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { ChainKey } from "@/utils/wallet/constants";
-import { Timer } from "@shared/components/ui";
+import { Button, Timer } from "@shared/components/ui";
 import { ConnectedWalletsState } from "@/utils/interfaces";
 import { ActionType } from "@/utils/lp-monitor/parseActions";
 import { assetFromString } from "@xchainjs/xchain-util";
@@ -31,12 +31,16 @@ const isActionDisabled = (
   chainKey: ChainKey,
   action: ActionType,
   walletsState: ConnectedWalletsState,
-  isLiquidityCapReached: boolean,
+  percentageLiquidityCapReached: number,
 ): string | React.ReactNode | null => {
-  if (isLiquidityCapReached && action === ActionType.ADD_LIQUIDITY) {
+  if (
+    percentageLiquidityCapReached > 100 &&
+    action === ActionType.ADD_LIQUIDITY
+  ) {
     return (
       <p className="w-[300px] whitespace-normal break-words">
-        Liquidity deposits are temporarily disabled due to network limits.
+        Liquidity deposits are temporarily disabled due to network limits.{" "}
+        {`(${percentageLiquidityCapReached.toFixed(0)}%)`}
         <a
           href="https://yieldi.gitbook.io/yieldi/basics/integrations#why-cant-i-add-more-liquidity"
           target="_blank"
@@ -67,7 +71,8 @@ const isActionDisabled = (
     );
   } else if (
     position.status === PositionStatus.LP_POSITION_DEPOSIT_PENDING ||
-    position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
+    position.status === PositionStatus.LP_POSITION_WITHDRAWAL_PENDING ||
+    position.status === PositionStatus.LP_POSITION_INCOMPLETE
   ) {
     return "Action in progress";
   } else if (
@@ -88,7 +93,7 @@ export default function PositionRow({
   hideAddButton = false,
   hideStatus = false,
 }: PositionsRow) {
-  const { walletsState, isLiquidityCapReached } = useAppState();
+  const { walletsState, percentageLiquidityCapReached } = useAppState();
   const asset = assetFromString(position.assetId);
   if (!asset) {
     throw new Error("Invalid asset");
@@ -99,14 +104,14 @@ export default function PositionRow({
     chainKey,
     ActionType.REMOVE_LIQUIDITY,
     walletsState,
-    isLiquidityCapReached,
+    percentageLiquidityCapReached,
   );
   const reasonToDisableAdd = isActionDisabled(
     position,
     chainKey,
     ActionType.ADD_LIQUIDITY,
     walletsState,
-    isLiquidityCapReached,
+    percentageLiquidityCapReached,
   );
   return (
     <TranslucentCard className="rounded-xl mb-1.5">
@@ -147,43 +152,47 @@ export default function PositionRow({
             {!hideAddButton &&
               (reasonToDisableAdd ? (
                 <UIComponents.Tooltip content={<>{reasonToDisableAdd}</>}>
-                  <button
+                  <Button
                     disabled={Boolean(reasonToDisableAdd)}
                     onClick={() => onAdd(position.assetId, position.type)}
-                    className="h-full px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn text-white disabled:bg-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed "
+                    type="primary-action"
+                    size="sm"
+                    className="h-full"
                   >
                     Add
-                  </button>
+                  </Button>
                 </UIComponents.Tooltip>
               ) : (
-                <button
+                <Button
                   disabled={Boolean(reasonToDisableAdd)}
                   onClick={() => onAdd(position.assetId, position.type)}
-                  className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
+                  type="primary-action"
+                  size="sm"
                 >
                   Add
-                </button>
+                </Button>
               ))}
             {reasonToDisableRemove ? (
               <UIComponents.Tooltip content={<>{reasonToDisableRemove}</>}>
-                <button
+                <Button
                   disabled={Boolean(reasonToDisableRemove)}
-                  className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
-                              transition-all disabled:border-neutral-900 disabled:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed ml-2"
                   onClick={() => onRemove(position.assetId, position.type)}
+                  type="secondary-action"
+                  size="sm"
+                  className="ml-2"
                 >
                   Remove
-                </button>
+                </Button>
               </UIComponents.Tooltip>
             ) : (
-              <button
-                className="border-red border-2 text-red font-bold px-6 py-1 rounded-full
-                            hover:text-opacity-50 hover:border-opacity-50 transition-all 
-                            disabled:opacity-50 disabled:cursor-not-allowed ml-2"
+              <Button
                 onClick={() => onRemove(position.assetId, position.type)}
+                type="secondary-action"
+                size="sm"
+                className="ml-2"
               >
                 Remove
-              </button>
+              </Button>
             )}
           </div>
         </div>

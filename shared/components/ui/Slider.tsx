@@ -62,7 +62,7 @@ const Slider = ({ value, max, onChange }: { value: number; max: number; onChange
       />
       <div 
         className={twMerge(
-          "absolute w-5 h-5 rounded-full top-1/2 -mt-2.5 -ml-2.5 bg-secondaryBtn",
+          "absolute w-5 h-5 rounded-full top-1/2 -mt-2.5 -ml-2.5 bg-blue",
           isDragging ? "cursor-grabbing" : "cursor-grab"
         )}
         style={{ left: `${percentage}%` }}

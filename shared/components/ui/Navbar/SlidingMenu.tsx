@@ -43,7 +43,7 @@ const SlidingMenu = ({
       {buttons && (
         <div className="flex flex-col items-center gap-5">
           {buttons.map((button, index) =>
-            !button.component && <Button key={index} {...button} />
+            !button.component && <Button key={index} {...button} >{button.label}</Button>
           )}
         </div>
       )}

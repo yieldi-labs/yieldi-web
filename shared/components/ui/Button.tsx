@@ -4,18 +4,31 @@ import React from "react";
 import { twMerge } from "tailwind-merge";
 
 interface ButtonProps {
-  label?: string;
   className?: string;
   onClick?: () => void;
   link?: string;
   disabled?: boolean
+  children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg';
+  type?: 'primary' | 'secondary' | 'primary-action' | 'secondary-action' | 'neutral-action';
 }
 
-const Button = ({ label, className = "", onClick, link, disabled = false }: ButtonProps) => {
+// className="px-6 py-1 text-sm rounded-full font-bold bg-secondaryBtn hover:bg-secondaryBtn/50 text-white disabled:opacity-50 disabled:cursor-not-allowed "
+
+// border-red border-2 text-red font-bold px-6 py-1 rounded-full transition-all disabled:border-neutral-900 disabled:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed ml-2
+
+const Button = ({ children, className = "", onClick, link, disabled = false, type = 'primary', size = 'lg' }: ButtonProps) => {
   const baseClass = twMerge(
-    `bg-primary hover:bg-primary/50 rounded-full px-9 py-3 font-semibold text-gray-900 transition duration-300 ease-in-out whitespace-nowrap`,
+    `rounded-full px-9 py-3 font-semibold text-gray-900 transition duration-300 ease-in-out whitespace-nowrap disabled:cursor-not-allowed`,
     className,
-    disabled && 'cursor-disabled bg-primary/50'
+    size === 'sm' && 'px-6 py-1 text-sm',
+    size === 'md' && 'px-6 py-2',
+    size === 'lg' && 'px-9 py-3',
+    type === 'primary' && `bg-primary hover:bg-primary/50 disabled:bg-primary/50`,
+    type === 'secondary' && `shadow-md bg-neutral-100 hover:bg-neutral-200 disabled:bg-neutral-300 disabled:opacity-60`,
+    type === 'primary-action' && 'text-white bg-blue hover:bg-blue/50 disabled:bg-neutral-900 disabled:opacity-50',
+    type === 'secondary-action' && 'border-red border-2 text-red hover:text-opacity-50 hover:border-opacity-50 transition-all disabled:border-neutral-900 disabled:text-neutral-900 disabled:opacity-50',
+    type === 'neutral-action' && 'font-medium transition-colors bg-white text-blue'  
   );
 
   return link ? (
@@ -25,11 +38,11 @@ const Button = ({ label, className = "", onClick, link, disabled = false }: Butt
       rel="noopener noreferrer"
       target="_blank"
     >
-      {label}
+      {children}
     </Link>
   ) : (
-    <button onClick={onClick} className={baseClass}>
-      {label}
+    <button disabled={disabled} onClick={onClick} className={baseClass}>
+      {children}
     </button>
   );
 };

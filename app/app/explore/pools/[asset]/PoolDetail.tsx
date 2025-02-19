@@ -28,7 +28,7 @@ import { assetFromString } from "@xchainjs/xchain-util";
 import AddLiquidityManager, {
   LpSteps,
 } from "../../components/AddLiquidityManager";
-import { Warn } from "@shared/components/ui";
+import { Button, Warn } from "@shared/components/ui";
 import { showToast, ToastType } from "@/app/errorToast";
 
 interface PoolDetailProps {
@@ -40,7 +40,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
     walletsState,
     toggleWalletModal,
     midgardStats,
-    isLiquidityCapReached,
+    percentageLiquidityCapReached,
   } = useAppState();
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
@@ -97,37 +97,30 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
   const renderActionButton = () => {
     if (!wallet) {
       return (
-        <button
-          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 hover:opacity-50 transition-opacity"
-          onClick={toggleWalletModal}
-        >
+        <Button className="w-full mt-8" onClick={toggleWalletModal}>
           Connect Wallet
-        </button>
+        </Button>
       );
     }
 
     if (!isChainSupported) {
       return (
-        <button
-          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 opacity-50 cursor-not-allowed"
-          disabled
-        >
+        <Button disabled className="w-full mt-8">
           Coming Soon...
-        </button>
+        </Button>
       );
     }
 
     return (
       <>
-        <button
-          disabled={showLoadingState || isLiquidityCapReached}
-          className="w-full bg-primary text-black font-semibold py-3 rounded-full mt-8 
-                  hover:opacity-50 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        <Button
+          disabled={showLoadingState || percentageLiquidityCapReached > 100}
+          className="w-full mt-8"
           onClick={() => setShowAddLiquidityModal(true)}
         >
           {showLoadingState ? "Loading..." : "Add"}
-        </button>
-        {isLiquidityCapReached ? (
+        </Button>
+        {percentageLiquidityCapReached > 100 ? (
           <div className="mt-6 w-full">
             <Warn
               text={`Liquidity deposits are temporarily disabled due to network limits.`}

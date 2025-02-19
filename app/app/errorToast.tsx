@@ -70,7 +70,7 @@ export const showToast = ({
         shadowbyType[type],
       ),
       closeButton: true,
-      autoClose: 5000,
+      autoClose: 3000,
       hideProgressBar: true,
     },
   );
