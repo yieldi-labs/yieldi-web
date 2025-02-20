@@ -1,24 +1,24 @@
 import React, { useState } from "react";
 import AddLiquidityModal, { AddLiquidityStepData } from "./AddLiquidityModal";
-import StatusModal, { ConfirmStepData, StatusStepData } from "./StatusModal";
+import StatusModal, { ConfirmStepData, StatusStepData } from "./StatusModalAddLiquidity";
 import Modal from "@/app/modal";
-import TransactionConfirmationModal from "./TransactionConfirmationModal";
+import TransactionConfirmationModal from "../TransactionConfirmationModal";
 
-export enum LpSteps {
+export enum LpAddSteps {
   SELECT_OPTIONS = 1,
   HANDLE_STATE = 2,
   SUCCESS_SCREEN = 3,
 }
 
 const modalTitles = {
-  [LpSteps.SELECT_OPTIONS]: undefined,
-  [LpSteps.HANDLE_STATE]: "Deposit tokens",
-  [LpSteps.SUCCESS_SCREEN]: undefined,
+  [LpAddSteps.SELECT_OPTIONS]: undefined,
+  [LpAddSteps.HANDLE_STATE]: "Deposit tokens",
+  [LpAddSteps.SUCCESS_SCREEN]: undefined,
 };
 
 interface AddLiquidityManagerProps {
   onClose: () => void;
-  initialStep?: LpSteps;
+  initialStep?: LpAddSteps;
   stepData?: StatusStepData | ConfirmStepData | AddLiquidityStepData;
 }
 
@@ -27,7 +27,7 @@ const AddLiquidityManager = ({
   initialStep,
   stepData,
 }: AddLiquidityManagerProps) => {
-  const [step, setStep] = useState(initialStep || LpSteps.SELECT_OPTIONS);
+  const [step, setStep] = useState(initialStep || LpAddSteps.SELECT_OPTIONS);
   const [data, setData] = useState(stepData);
 
   const nextStep = (data?: StatusStepData | ConfirmStepData) => {
@@ -35,27 +35,27 @@ const AddLiquidityManager = ({
     setData(data);
   };
 
-  if (step > LpSteps.SUCCESS_SCREEN) {
+  if (step > LpAddSteps.SUCCESS_SCREEN) {
     onClose();
   }
 
   return (
     <Modal onClose={onClose} title={modalTitles[step]}>
       <>
-        {step === LpSteps.SELECT_OPTIONS && (
+        {step === LpAddSteps.SELECT_OPTIONS && (
           <AddLiquidityModal
             nextStep={nextStep}
             stepData={data as AddLiquidityStepData}
           />
         )}
-        {step === LpSteps.HANDLE_STATE && (
+        {step === LpAddSteps.HANDLE_STATE && (
           <StatusModal
             onClose={onClose}
             nextStep={nextStep}
             stepData={data as StatusStepData}
           />
         )}
-        {step === LpSteps.SUCCESS_SCREEN && (
+        {step === LpAddSteps.SUCCESS_SCREEN && (
           <TransactionConfirmationModal
             onClose={onClose}
             stepData={data as ConfirmStepData}

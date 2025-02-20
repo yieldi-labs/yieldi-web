@@ -12,14 +12,14 @@ import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { PositionType } from "@/utils/lp-monitor/parsePositions";
 import { ChainKey } from "@/utils/wallet/constants";
-import AssetInput from "./AssetInput";
-import ToggleButtonGroup from "./ToggleButtonGroup";
+import AssetInput from "../AssetInput";
+import ToggleButtonGroup from "../ToggleButtonGroup";
 import {
   Asset,
   assetFromString,
   assetAmount as assetAmountConstructor,
 } from "@xchainjs/xchain-util";
-import { StatusStepData } from "./StatusModal";
+import { StatusStepData } from "./StatusModalAddLiquidity";
 import { RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 import { Button, Warn } from "@shared/components/ui";
 

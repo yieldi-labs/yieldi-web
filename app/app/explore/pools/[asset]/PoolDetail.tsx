@@ -12,7 +12,6 @@ import {
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { BackArrow } from "@shared/components/svg";
-import RemoveLiquidityModal from "@/app/explore/components/RemoveLiquidityModal";
 import { TopCard } from "@/app/components/TopCard";
 import { useAppState } from "@/utils/contexts/context";
 import { getChainKeyFromChain, isSupportedChain } from "@/utils/chain";
@@ -25,11 +24,10 @@ import {
 } from "@/utils/lp-monitor/parsePositions";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { assetFromString } from "@xchainjs/xchain-util";
-import AddLiquidityManager, {
-  LpSteps,
-} from "../../components/AddLiquidityManager";
 import { Button, Warn } from "@shared/components/ui";
 import { showToast, ToastType } from "@/app/errorToast";
+import RemoveLiquidityManager, { LpRemoveSteps } from "@/app/components/RemoveLiquidity/RemoveLiquidityManager";
+import AddLiquidityManager, { LpAddSteps } from "@/app/components/AddLiquidity/AddLiquidityManager";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -294,18 +292,20 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
       {showRemoveLiquidityModal &&
         selectedPosition &&
         selectedPosition.memberDetails && (
-          <RemoveLiquidityModal
-            pool={pool}
-            position={selectedPosition.memberDetails}
-            positionType={selectedPosition.type}
-            runePriceUSD={runePriceUSD}
+          <RemoveLiquidityManager
+            initialStep={LpRemoveSteps.SELECT_OPTIONS}
             onClose={handleRemoveLiquidityClose}
+            stepData={{
+              pool: pool,
+              position: selectedPosition,
+              runePriceUSD: runePriceUSD
+            }}
           />
         )}
 
       {showAddLiquidityModal && (
         <AddLiquidityManager
-          initialStep={LpSteps.SELECT_OPTIONS}
+          initialStep={LpAddSteps.SELECT_OPTIONS}
           onClose={handleAddLiquidityClose}
           stepData={{
             pool: pool,
