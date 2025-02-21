@@ -39,7 +39,7 @@ export const showToast = ({
 }) => {
   toast(
     <div>
-      <div className="grid grid-cols-[1fr_6fr] grid-rows-2 gap-x-4 items-center">
+      <div className="grid grid-cols-[1fr_6fr] grid-rows-auto gap-x-4 items-center">
         <div className="relative flex items-center justify-center h-[32px]">
           <div
             className={clsx(

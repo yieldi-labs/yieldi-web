@@ -167,7 +167,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               memo: memo,
             });
             if (!result) {
-              emitError("Failed to add liquidity to Thorchain");
               throw new Error("Failed to add liquidity to Thorchain");
             }
             emitNewHash(result, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE);
@@ -179,7 +178,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           (i) => i.chain === parsedAsset.chain.toUpperCase(),
         );
         if (!inbound?.address) {
-          emitError(`No inbound address found for ${parsedAsset.chain}`);
           throw new Error(`No inbound address found for ${parsedAsset.chain}`);
         } else if (inbound) {
           validateInboundAddress(inbound);
@@ -202,7 +200,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           const bftHash = await transferCosmos(wallet, transferParams);
 
           if (!bftHash) {
-            emitError("Failed to add liquidity to Cosmos chain");
             throw new Error("Failed to add liquidity to Cosmos chain");
           }
           emitNewHash(bftHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
@@ -219,7 +216,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             memo: memo,
           });
           if (!utxoHash) {
-            emitError("Failed to add liquidity to UTXO chain");
             throw new Error("Failed to add liquidity to UTXO chain");
           }
           emitNewHash(utxoHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
@@ -263,7 +259,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
                 parsedAmount,
               );
               if (!resultApproveHash) {
-                emitError("Failed to approve");
                 throw new Error("Failed to approve");
               }
               emitNewHash(
@@ -283,7 +278,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               chainId,
             );
             if (!txHash) {
-              emitError("Failed to add liquidity to EVM chain");
               throw new Error("Failed to add liquidity to EVM chain");
             }
             emitNewHash(txHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
@@ -300,7 +294,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               chainId,
             );
             if (!txHash) {
-              emitError("Failed to add liquidity to EVM chain");
               throw new Error("Failed to add liquidity to EVM chain");
             }
             emitNewHash(txHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
@@ -309,6 +302,8 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         return txHash;
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to remove liquidity";
+        emitError(errorMessage);
         console.error("Failed to add liquidity:", err);
       } finally {
         setLoading(false);
@@ -369,6 +364,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             memo: memo,
           });
           emitNewHash(thorchainHash, LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
+          return thorchainHash
         }
 
         const inbound = inboundAddresses?.find(
@@ -405,6 +401,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
           const bftHash = await transferCosmos(wallet, transferParams);
           emitNewHash(bftHash, LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
+          return bftHash
         }
 
         // Handle UTXO chain withdrawals
@@ -421,6 +418,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             memo: memo,
           });
           emitNewHash(utxoHash, LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
+          return utxoHash
         }
 
         const routerAddress = inbound.router

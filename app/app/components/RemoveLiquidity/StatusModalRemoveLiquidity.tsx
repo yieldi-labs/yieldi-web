@@ -134,7 +134,7 @@ export default function StatusModal({
                 if (step.status === LpSubstepsStatus.PENDING) {
                   return {
                     ...step,
-                    status: LpSubstepsStatus.INACTIVE,
+                    status: LpSubstepsStatus.FAILED,
                   };
                 }
                 return step;

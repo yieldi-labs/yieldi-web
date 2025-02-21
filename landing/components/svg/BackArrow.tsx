@@ -13,14 +13,14 @@ const BackArrow = (props: SVGProps<SVGSVGElement>) => (
       d="M14 7L9 12"
       stroke="#242628"
       stroke-width="2"
-      stroke-linecap="round"
+      strokeLinecap="round"
       stroke-linejoin="round"
     />
     <path
       d="M9 12L14 17"
       stroke="#242628"
       stroke-width="2"
-      stroke-linecap="round"
+      strokeLinecap="round"
       stroke-linejoin="round"
     />
   </svg>

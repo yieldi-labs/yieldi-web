@@ -10,3 +10,4 @@ export { default as DoubleArrow } from "./DoubleArrow";
 export { default as SolutionSVG } from "./Solution";
 export { default as Staking } from "./Staking";
 export { default as Yieldi } from "./Yieldi";
+export { default as CircleInfo } from "./CircleInfo";

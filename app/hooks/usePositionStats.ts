@@ -10,14 +10,14 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { MimirResponse } from "@/thornode";
-import { ChainKey } from "@/utils/wallet/constants";
+import { ChainKey, ThorchainIdentifiers } from "@/utils/wallet/constants";
 import { getChainKeyFromChain } from "@/utils/chain";
 
 interface UsePositionStatsProps {
   defaultRefetchInterval?: number;
   mimirParameters: MimirResponse | undefined;
   poolsData: PoolDetails | undefined;
-  addresses: string[];
+  addressesByChain: Record<ThorchainIdentifiers, string>;
   filterByChains: ChainKey[];
   autoFetch?: boolean;
   ensureBothAddressConnectedOnDlp: boolean;
@@ -53,7 +53,7 @@ export function usePositionStats({
   defaultRefetchInterval = 30000,
   mimirParameters,
   poolsData,
-  addresses,
+  addressesByChain,
   filterByChains,
   autoFetch = true,
   ensureBothAddressConnectedOnDlp = false,
@@ -74,10 +74,9 @@ export function usePositionStats({
   } = useQuery({
     queryKey: ["position-stats"],
     retry: false,
-    enabled: fetchPositions && addresses.length > 0 && Boolean(mimirParameters),
+    enabled: fetchPositions && Object.keys(addressesByChain).length > 0 && Boolean(mimirParameters),
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
-      const uniqueAddresses = Array.from(addresses);
 
       if (!poolsData) {
         throw Error("No pools available");
@@ -85,7 +84,7 @@ export function usePositionStats({
 
       const genericPositionsDataStructure = await positionsTransformer(
         // TODO: Remove filter from both addresses for DLP on search
-        uniqueAddresses,
+        addressesByChain,
         poolsData,
         {
           LIQUIDITYLOCKUPBLOCKS: Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS),

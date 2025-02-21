@@ -8,3 +8,5 @@ export { default as SortableHeader } from "./SortableHeader";
 export { default as Timer } from "./Timer";
 export { default as Warn } from "./Warn";
 export { default as Input } from "./Input";
+
+export type { WarnProps } from "./Warn";

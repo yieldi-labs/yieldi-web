@@ -20,6 +20,8 @@ export interface ActionData {
   pool: string;
   chain: string;
   memo: string;
+  assetAddress: string | null;
+  runeAddress: string | null;
 }
 
 export const actionsTransformer = async (
@@ -52,22 +54,27 @@ export const actionsTransformer = async (
         },
       });
     }
+
+    const tx = status?.data?.tx
+
     return {
       date: new Date(Number(action.date) / 1000).toDateString(),
       type:
         action.type === "addLiquidity"
-          ? ActionType.ADD_LIQUIDITY
+          ? ActionType.ADD_LIQUIDITY  
           : ActionType.REMOVE_LIQUIDITY,
       status:
         action.status === "pending"
           ? ActionStatus.PENDING
           : ActionStatus.COMPLETE,
       thorchainTxId: action.in[0].txID,
-      chain: status?.data?.tx?.chain || "-",
+      chain: tx?.chain || "-",
       pendingDelayInSeconds:
         status?.data?.stages.outbound_delay?.remaining_delay_seconds || 0,
       pool: action.pools[0],
-      memo: status?.data?.tx?.memo || "-",
+      memo: tx?.memo || "-",
+      assetAddress: tx?.chain !== 'THOR' ? tx?.from_address || null : null,
+      runeAddress: tx?.chain === 'THOR' ? tx?.from_address || null : null,
     };
   });
 

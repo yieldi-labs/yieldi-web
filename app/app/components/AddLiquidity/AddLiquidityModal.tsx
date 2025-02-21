@@ -8,7 +8,6 @@ import {
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { useAppState } from "@/utils/contexts/context";
-import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { PositionType } from "@/utils/lp-monitor/parsePositions";
 import { ChainKey } from "@/utils/wallet/constants";
@@ -22,6 +21,8 @@ import {
 import { StatusStepData } from "./StatusModalAddLiquidity";
 import { RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 import { Button, Warn } from "@shared/components/ui";
+import { getButtonText, getSubsteps } from "./utils";
+import { WarnType } from "@shared/components/ui/Warn";
 
 export interface AddLiquidityStepData {
   pool: IPoolDetail;
@@ -36,23 +37,6 @@ interface AddLiquidityModalProps {
 const MAX_BALANCE_PERCENTAGE = 0.99;
 type InputChanging = "asset" | "rune";
 
-const getSubsteps = (isDualSided: boolean, asset: Asset) => {
-  const steps = [];
-
-  if (asset.symbol.indexOf("-") !== -1) {
-    // Not native
-    steps.push(LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET);
-  }
-
-  steps.push(LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
-
-  if (isDualSided) {
-    steps.push(LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE);
-  }
-
-  return steps;
-};
-
 export default function AddLiquidityModal({
   stepData,
   nextStep,
@@ -66,7 +50,7 @@ export default function AddLiquidityModal({
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [isDualSided, setIsDualSided] = useState(
-    stepData.initialType === PositionType.SYM,
+    stepData.initialType === PositionType.SYM
   );
   const [inputChanging, setInputChanging] = useState<InputChanging>("asset");
   const inputChangeConstraint = 0.01; // 1%
@@ -91,7 +75,7 @@ export default function AddLiquidityModal({
       const newRuneAmount = newUsdValue / stepData.runePriceUSD;
       // Prevents changing input value when focusing on the other input without changing the value
       const runeAmountChanged = Math.abs(
-        (newRuneAmount - parseFloat(runeAmount)) / newRuneAmount,
+        (newRuneAmount - parseFloat(runeAmount)) / newRuneAmount
       );
       if (
         Number.isNaN(runeAmountChanged) ||
@@ -109,7 +93,7 @@ export default function AddLiquidityModal({
         newUsdValue / parseFloat(stepData.pool.assetPriceUSD);
 
       const assetAmountChanged = Math.abs(
-        (newAssetAmount - parseFloat(assetAmount)) / newAssetAmount,
+        (newAssetAmount - parseFloat(assetAmount)) / newAssetAmount
       );
       if (
         Number.isNaN(assetAmountChanged) ||
@@ -154,7 +138,6 @@ export default function AddLiquidityModal({
     setRuneAmount(formattedAmount);
   };
 
-  //The quick brown fox jumps over the lazy dog
   const isValidAmount = useMemo(() => {
     const amount = parseFloat(assetAmount);
     const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE - assetMinimalUnit;
@@ -209,7 +192,7 @@ export default function AddLiquidityModal({
 
   const isCloseToPercentage = (
     currentPercentage: number,
-    targetPercentage: number,
+    targetPercentage: number
   ) => {
     const tolerance = 0.01;
     if (targetPercentage === 100) {
@@ -225,8 +208,18 @@ export default function AddLiquidityModal({
   const isDisableDueTooSmallAmount = disableDueTooSmallAmount(
     Number(mimirParameters?.MINIMUML1OUTBOUNDFEEUSD || 0),
     usdValue,
-    runeUsdValue,
+    runeUsdValue
   );
+
+  const buttonText = getButtonText(
+    selectedWallet,
+    isValidAmount,
+    isDisableDueTooSmallAmount,
+    runeBalance,
+    assetBalance,
+    runeAmount,
+    assetAmount
+  )
 
   return (
     <>
@@ -312,35 +305,33 @@ export default function AddLiquidityModal({
               pool: stepData.pool,
               assetAmount: assetAmountConstructor(
                 assetAmount,
-                poolNativeDecimal,
+                poolNativeDecimal
               ),
               assetUsdAmount: usdValue,
               runeAmount: assetAmountConstructor(runeAmount, RUNE_DECIMAL),
               runeUsdAmount: runeUsdValue,
               positionType: type,
               requiredSteps: getSubsteps(isDualSided, asset),
+              position: null
             })
           }
-          disabled={!isValidAmount || isDisableDueTooSmallAmount}
+          disabled={buttonText !== 'Add'}
           className="w-full"
         >
-          {!selectedWallet?.address
-            ? "Connect Wallet"
-            : !isValidAmount && assetAmount
-              ? "Invalid Amount"
-              : isDisableDueTooSmallAmount
-                ? "Small amount"
-                : "Add"}
+          {buttonText}
         </Button>
         <div className="mt-6">
           <Warn
-            text={`You are about to link your currently connected ${asset.ticker} and RUNE addresses to this liquidity position. Ensure that these are the addresses you want to own the position, as this cannot be changed later.`}
-            link="https://yieldi.gitbook.io/yieldi/basics/integrations#why-do-i-need-to-link-two-addresses-when-providing-liquidity-on-thorchain"
+            text={`Liquidity added will be subject to a mandatory lockup period of ${
+              (Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS) * 6) / 3600
+            } hour. During this time, remove liquidity will be unavailable. Unlock time will be displayed in your position summary.`}
           />
         </div>
-        <div className="mt-6">
+        <div className="mt-2">
           <Warn
-            text={`Liquidity added will be subject to a mandatory lockup period of ${(Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS) * 6) / 3600} hour. During this time, remove liquidity will be unavailable. Unlock time will be displayed in your position summary.`}
+            type={WarnType.INFO}
+            text={`You are about to link your currently connected ${asset.ticker} and RUNE addresses to this liquidity position. Ensure that these are the addresses you want to own the position, as this cannot be changed later.`}
+            link="https://yieldi.gitbook.io/yieldi/basics/integrations#why-do-i-need-to-link-two-addresses-when-providing-liquidity-on-thorchain"
           />
         </div>
       </div>

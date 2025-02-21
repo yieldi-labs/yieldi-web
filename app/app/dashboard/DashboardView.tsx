@@ -18,17 +18,21 @@ import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
 import { useAppState } from "@/utils/contexts/context";
 import { Button, Input, Tooltip } from "@shared/components/ui";
 import { showToast, ToastType } from "../errorToast";
-import { getAddressUrl } from "@/utils/wallet/utils";
-import { ChainKey } from "@/utils/wallet/constants";
+import { generateEmptyAddressObject, getAddressUrl, identifyNetworks } from "@/utils/wallet/utils";
+import { ChainKey, ThorchainIdentifiers } from "@/utils/wallet/constants";
 import { usePositionStats } from "@/hooks/usePositionStats";
-import RemoveLiquidityManager, { LpRemoveSteps } from "../components/RemoveLiquidity/RemoveLiquidityManager";
-import AddLiquidityManager, { LpAddSteps } from "../components/AddLiquidity/AddLiquidityManager";
+import RemoveLiquidityManager, {
+  LpRemoveSteps,
+} from "../components/RemoveLiquidity/RemoveLiquidityManager";
+import AddLiquidityManager, {
+  LpAddSteps,
+} from "../components/AddLiquidity/AddLiquidityManager";
 import { StatusStepData } from "../components/AddLiquidity/StatusModalAddLiquidity";
 import { AddLiquidityStepData } from "../components/AddLiquidity/AddLiquidityModal";
 import { RemoveLiquidityStepData } from "../components/RemoveLiquidity/RemoveLiquidityModal";
 
 const allChainKeys = Object.values(ChainKey).filter(
-  (value) => typeof value === "string",
+  (value) => typeof value === "string"
 ) as ChainKey[];
 
 export default function DashboardView() {
@@ -39,13 +43,14 @@ export default function DashboardView() {
     initialStep: LpAddSteps.SELECT_OPTIONS,
     stepData: null,
   });
-  const [removeLiquidityProcessState, setRemoveLiquidityProcessState] = useState<{
-    initialStep: LpRemoveSteps;
-    stepData: RemoveLiquidityStepData | null;
-  }>({
-    initialStep: LpRemoveSteps.SELECT_OPTIONS,
-    stepData: null,
-  });
+  const [removeLiquidityProcessState, setRemoveLiquidityProcessState] =
+    useState<{
+      initialStep: LpRemoveSteps;
+      stepData: RemoveLiquidityStepData | null;
+    }>({
+      initialStep: LpRemoveSteps.SELECT_OPTIONS,
+      stepData: null,
+    });
   const [addressInSearch, setAddressInSearch] = useState("");
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
@@ -54,6 +59,8 @@ export default function DashboardView() {
   const { positions, isPending, isRefetching, positionsError, refetch } =
     useLiquidityPositions();
   const { midgardStats, pools, isWalletConnected } = useAppState();
+
+  const networkIdentifiers = identifyNetworks(addressInSearch);
 
   const {
     positions: searchedPositions,
@@ -64,7 +71,13 @@ export default function DashboardView() {
     defaultRefetchInterval: 300000,
     mimirParameters: midgardStats,
     poolsData: pools,
-    addresses: [addressInSearch],
+    addressesByChain: networkIdentifiers.reduce<Record<ThorchainIdentifiers, string>>(
+      (addresseses, network) => {
+        addresseses[network] = addressInSearch;
+        return addresseses;
+      },
+      generateEmptyAddressObject()
+    ),
     filterByChains: allChainKeys,
     autoFetch: false,
     ensureBothAddressConnectedOnDlp: false,
@@ -102,7 +115,7 @@ export default function DashboardView() {
             .map(([, position]) => position as PositionStats);
           return pools.concat(chainPools);
         },
-        [],
+        []
       )) ||
     [];
 
@@ -156,7 +169,9 @@ export default function DashboardView() {
       </div>
       <div className="flex flex-col">
         <div
-          className={`flex ${!isWalletConnected() ? "flex-col" : "flew-row"} md:flex-row items-start justify-between md:items-center`}
+          className={`flex ${
+            !isWalletConnected() ? "flex-col" : "flew-row"
+          } md:flex-row items-start justify-between md:items-center`}
         >
           <div className="flex align-center">
             <h2 className={titleStyle}>Your positions</h2>
@@ -246,17 +261,17 @@ export default function DashboardView() {
                     `${getAddressUrl()}${
                       position.memberDetails?.assetAddress
                     }?tab=lps`,
-                    "_blank",
+                    "_blank"
                   );
                   break;
                 case PositionStatus.LP_POSITION_INCOMPLETE:
                   const assetPriceUSD = parseFloat(pool.assetPriceUSD);
 
                   const assetAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.assetPending, 8),
+                    baseAmount(position.memberDetails?.assetPending, 8)
                   );
                   const runeAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.runePending, 8),
+                    baseAmount(position.memberDetails?.runePending, 8)
                   );
 
                   const valueOfPendingAssetInUsd =
@@ -289,6 +304,7 @@ export default function DashboardView() {
                         .toNumber(),
                       positionType: type,
                       requiredSteps: requiredSteps,
+                      position,
                     },
                   });
                   setShowAddLiquidityModal(true);
@@ -317,7 +333,7 @@ export default function DashboardView() {
               if (!pool) {
                 throw Error("Pool not found");
               }
-              const position = (currentPositions as Positions)[assetId][type]
+              const position = (currentPositions as Positions)[assetId][type];
               if (!position) {
                 throw Error("Position not found");
               }
@@ -329,7 +345,6 @@ export default function DashboardView() {
                   runePriceUSD,
                 },
               });
-              setShowAddLiquidityModal(true);
               setShowRemoveLiquidityModal(true);
             }}
           />
@@ -349,14 +364,14 @@ export default function DashboardView() {
         />
       )}
       {showRemoveLiquidityModal && removeLiquidityProcessState.stepData && (
-          <RemoveLiquidityManager
-            initialStep={removeLiquidityProcessState.initialStep}
-            stepData={removeLiquidityProcessState.stepData}
-            onClose={() => {
-              setShowRemoveLiquidityModal(false);
-            }}
-          />
-        )}
+        <RemoveLiquidityManager
+          initialStep={removeLiquidityProcessState.initialStep}
+          stepData={removeLiquidityProcessState.stepData}
+          onClose={() => {
+            setShowRemoveLiquidityModal(false);
+          }}
+        />
+      )}
     </main>
   );
 }

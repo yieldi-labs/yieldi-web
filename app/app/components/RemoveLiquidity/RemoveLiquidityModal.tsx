@@ -11,10 +11,13 @@ import {
 } from "@/app/utils";
 import { useAppState } from "@/utils/contexts/context";
 import { PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
-import { Button, Slider } from "@shared/components/ui";
+import { Button, Slider, Tooltip } from "@shared/components/ui";
 import AssetInput from "../AssetInput";
 import ToggleButtonGroup from "../ToggleButtonGroup";
-import { assetFromString, assetAmount as assetAmountConstructor } from "@xchainjs/xchain-util";
+import {
+  assetFromString,
+  assetAmount as assetAmountConstructor,
+} from "@xchainjs/xchain-util";
 import {
   getOutboundFeeInDollarsByPoolAndWithdrawalStrategy,
   WithdrawalType,
@@ -43,9 +46,9 @@ const getSubsteps = (isDualSided: boolean) => {
   const steps = [];
 
   if (isDualSided) {
-    steps.push(LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
-  } else {
     steps.push(LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_RUNE);
+  } else {
+    steps.push(LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
   }
 
   return steps;
@@ -88,8 +91,10 @@ export default function RemoveLiquidityModal({
       ? WithdrawalType.ALL_ASSET
       : WithdrawalType.SPLIT
   );
-  
-  const userShare = new BigNumber(position.memberDetails?.liquidityUnits || 0).div(pool.units);
+
+  const userShare = new BigNumber(
+    position.memberDetails?.liquidityUnits || 0
+  ).div(pool.units);
   const positionAssetAmount = new BigNumber(pool.assetDepth)
     .div(DECIMALS)
     .times(userShare);
@@ -346,7 +351,23 @@ export default function RemoveLiquidityModal({
       )}
 
       <div className="flex justify-between items-center mb-4">
-        <span className="text-gray-500">Withdrawal fee</span>
+        <Tooltip
+          content={
+            <p className="w-[300px]">
+              This fee covers the cost of sending transactions across networks, paid by nodes on your behalf.
+              <a
+                href="https://yieldi.gitbook.io/yieldi/basics/integrations#how-are-outbound-transaction-fees-calculated"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline pl-1"
+              >
+                Learn more
+              </a>
+            </p>
+          }
+        >
+          <span className="text-gray-500 cursor-pointer">Withdrawal fee</span>
+        </Tooltip>
         <span className="font-medium">
           {addDollarSignAndSuffix(outboundFee)}
         </span>
@@ -377,14 +398,17 @@ export default function RemoveLiquidityModal({
         onClick={() =>
           nextStep({
             pool: stepData.pool,
-            assetAmount: assetAmountConstructor(assetAmount, Number(nativePool?.nativeDecimal) || 8),
+            assetAmount: assetAmountConstructor(
+              assetAmount,
+              Number(nativePool?.nativeDecimal) || 8
+            ),
             assetUsdAmount: assetUsdValue,
             runeAmount: assetAmountConstructor(runeAmount, RUNE_DECIMAL),
             runeUsdAmount: runeUsdValue,
             positionType: position.type,
             requiredSteps: getSubsteps(position.type === PositionType.SYM),
             percentage,
-            withdrawalType
+            withdrawalType,
           })
         }
         disabled={
@@ -393,6 +417,7 @@ export default function RemoveLiquidityModal({
           outboundFee > assetUsdValue + runeUsdValue
         }
         className="w-full"
+        type="danger"
       >
         {isDisableDueTooSmallAmount ||
         outboundFee > assetUsdValue + runeUsdValue
