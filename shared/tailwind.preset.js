@@ -35,7 +35,7 @@ module.exports = {
         red: {
           dark: "#BF2212",
           DEFAULT: "#FF6656",
-          light: "#FFADA4"
+          light: "#FF665636"
         },
         warn: {
           DEFAULT: "#FFD737", 
@@ -43,6 +43,7 @@ module.exports = {
           light: "#FFD73733"
         },
         blue: {
+          dark: "#1E44CF",
           DEFAULT: "#627EEA",
           light: "#627EEA26"
         },

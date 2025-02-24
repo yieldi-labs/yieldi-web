@@ -8,20 +8,21 @@ import {
 } from "@/app/utils";
 import { PoolDetail as IPoolDetail } from "@/midgard";
 import { useAppState } from "@/utils/contexts/context";
-import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { PositionType } from "@/utils/lp-monitor/parsePositions";
 import { ChainKey } from "@/utils/wallet/constants";
-import AssetInput from "./AssetInput";
-import ToggleButtonGroup from "./ToggleButtonGroup";
+import AssetInput from "../AssetInput";
+import ToggleButtonGroup from "../ToggleButtonGroup";
 import {
   Asset,
   assetFromString,
   assetAmount as assetAmountConstructor,
 } from "@xchainjs/xchain-util";
-import { StatusStepData } from "./StatusModal";
+import { StatusStepData } from "./StatusModalAddLiquidity";
 import { RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
 import { Button, Warn } from "@shared/components/ui";
+import { getButtonText, getSubsteps } from "./utils";
+import { WarnType } from "@shared/components/ui/Warn";
 
 export interface AddLiquidityStepData {
   pool: IPoolDetail;
@@ -35,23 +36,6 @@ interface AddLiquidityModalProps {
 
 const MAX_BALANCE_PERCENTAGE = 0.99;
 type InputChanging = "asset" | "rune";
-
-const getSubsteps = (isDualSided: boolean, asset: Asset) => {
-  const steps = [];
-
-  if (asset.symbol.indexOf("-") !== -1) {
-    // Not native
-    steps.push(LpSubstepsAddLiquidity.APRROVE_DEPOSIT_ASSET);
-  }
-
-  steps.push(LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
-
-  if (isDualSided) {
-    steps.push(LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE);
-  }
-
-  return steps;
-};
 
 export default function AddLiquidityModal({
   stepData,
@@ -154,7 +138,6 @@ export default function AddLiquidityModal({
     setRuneAmount(formattedAmount);
   };
 
-  //The quick brown fox jumps over the lazy dog
   const isValidAmount = useMemo(() => {
     const amount = parseFloat(assetAmount);
     const maxAllowed = assetBalance * MAX_BALANCE_PERCENTAGE - assetMinimalUnit;
@@ -226,6 +209,16 @@ export default function AddLiquidityModal({
     Number(mimirParameters?.MINIMUML1OUTBOUNDFEEUSD || 0),
     usdValue,
     runeUsdValue,
+  );
+
+  const buttonText = getButtonText(
+    selectedWallet,
+    isValidAmount,
+    isDisableDueTooSmallAmount,
+    runeBalance,
+    assetBalance,
+    runeAmount,
+    assetAmount,
   );
 
   return (
@@ -319,28 +312,26 @@ export default function AddLiquidityModal({
               runeUsdAmount: runeUsdValue,
               positionType: type,
               requiredSteps: getSubsteps(isDualSided, asset),
+              position: null,
             })
           }
-          disabled={!isValidAmount || isDisableDueTooSmallAmount}
+          disabled={buttonText !== "Add"}
           className="w-full"
         >
-          {!selectedWallet?.address
-            ? "Connect Wallet"
-            : !isValidAmount && assetAmount
-              ? "Invalid Amount"
-              : isDisableDueTooSmallAmount
-                ? "Small amount"
-                : "Add"}
+          {buttonText}
         </Button>
         <div className="mt-6">
           <Warn
-            text={`You are about to link your currently connected ${asset.ticker} and RUNE addresses to this liquidity position. Ensure that these are the addresses you want to own the position, as this cannot be changed later.`}
-            link="https://yieldi.gitbook.io/yieldi/basics/integrations#why-do-i-need-to-link-two-addresses-when-providing-liquidity-on-thorchain"
+            text={`Liquidity added will be subject to a mandatory lockup period of ${
+              (Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS) * 6) / 3600
+            } hour. During this time, remove liquidity will be unavailable. Unlock time will be displayed in your position summary.`}
           />
         </div>
-        <div className="mt-6">
+        <div className="mt-2">
           <Warn
-            text={`Liquidity added will be subject to a mandatory lockup period of ${(Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS) * 6) / 3600} hour. During this time, remove liquidity will be unavailable. Unlock time will be displayed in your position summary.`}
+            type={WarnType.INFO}
+            text={`You are about to link your currently connected ${asset.ticker} and RUNE addresses to this liquidity position. Ensure that these are the addresses you want to own the position, as this cannot be changed later.`}
+            link="https://yieldi.gitbook.io/yieldi/basics/integrations#why-do-i-need-to-link-two-addresses-when-providing-liquidity-on-thorchain"
           />
         </div>
       </div>

@@ -10,14 +10,14 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { MimirResponse } from "@/thornode";
-import { ChainKey } from "@/utils/wallet/constants";
+import { ChainKey, ThorchainIdentifiers } from "@/utils/wallet/constants";
 import { getChainKeyFromChain } from "@/utils/chain";
 
 interface UsePositionStatsProps {
   defaultRefetchInterval?: number;
   mimirParameters: MimirResponse | undefined;
   poolsData: PoolDetails | undefined;
-  addresses: string[];
+  addressesByChain: Record<ThorchainIdentifiers, string>;
   filterByChains: ChainKey[];
   autoFetch?: boolean;
   ensureBothAddressConnectedOnDlp: boolean;
@@ -53,7 +53,7 @@ export function usePositionStats({
   defaultRefetchInterval = 30000,
   mimirParameters,
   poolsData,
-  addresses,
+  addressesByChain,
   filterByChains,
   autoFetch = true,
   ensureBothAddressConnectedOnDlp = false,
@@ -66,26 +66,28 @@ export function usePositionStats({
   >(defaultRefetchInterval);
   const [fetchPositions, setFetchPositions] = useState(autoFetch);
 
+  const hasNonEmptyValue = Object.values(addressesByChain).some(
+    (value) => value !== "",
+  );
+
   const {
     isFetching: isPending,
     isRefetching,
     error,
     refetch,
   } = useQuery({
-    queryKey: ["position-stats"],
+    queryKey: ["position-stats", addressesByChain],
     retry: false,
-    enabled: fetchPositions && addresses.length > 0 && Boolean(mimirParameters),
+    enabled: fetchPositions && hasNonEmptyValue && Boolean(mimirParameters),
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
-      const uniqueAddresses = Array.from(addresses);
-
       if (!poolsData) {
         throw Error("No pools available");
       }
 
       const genericPositionsDataStructure = await positionsTransformer(
         // TODO: Remove filter from both addresses for DLP on search
-        uniqueAddresses,
+        addressesByChain,
         poolsData,
         {
           LIQUIDITYLOCKUPBLOCKS: Number(mimirParameters?.LIQUIDITYLOCKUPBLOCKS),

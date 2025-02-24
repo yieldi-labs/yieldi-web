@@ -7,8 +7,9 @@ import {
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
 import { useAppState } from "./context";
-import { ethers } from "ethers";
 import { getChainsConnected } from "../chain";
+import { generateEmptyAddressObject } from "../wallet/utils";
+import { CHAINS } from "../wallet/constants";
 
 interface LiquidityPositionsContextType {
   positions: Positions | undefined;
@@ -36,18 +37,26 @@ export const LiquidityPositionsProvider = ({
 }) => {
   const { walletsState, mimirParameters, poolsData } = useAppState();
 
-  const addresses = new Set<string>();
-
+  const addressesByChain = generateEmptyAddressObject();
   for (const key in walletsState) {
+    const chainInfo = CHAINS.find((chain) => chain.name === key);
+    if (!chainInfo) {
+      throw Error(`Chain not found for chain: ${key}`);
+    }
     if (walletsState?.hasOwnProperty(key)) {
       const address = walletsState[key]?.address;
-      if (ethers.utils.isAddress(address)) {
-        const checksummedAddress = ethers.utils.getAddress(address);
-        addresses.add(checksummedAddress);
-      } else {
-        addresses.add(address);
-      }
+      addressesByChain[chainInfo.thorchainIdentifier] = address;
     }
+    // TODO: Restore checksum logic
+    // if (walletsState?.hasOwnProperty(key)) {
+    //   const address = wchainInfoalletsState[key]?.address;
+    //   if (ethers.utils.isAddress(address)) {
+    //     const checksummedAddress = ethers.utils.getAddress(address);
+    //     addresses.add(checksummedAddress);
+    //   } else {
+    //     addresses.add(address);
+    //   }
+    // }
   }
 
   const {
@@ -62,7 +71,7 @@ export const LiquidityPositionsProvider = ({
   } = usePositionStats({
     mimirParameters,
     poolsData,
-    addresses: Array.from(addresses),
+    addressesByChain,
     filterByChains: getChainsConnected(walletsState),
     ensureBothAddressConnectedOnDlp: true,
   });

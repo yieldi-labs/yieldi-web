@@ -114,6 +114,7 @@ export const isSupportedChain = (assetChain: string): boolean => {
  */
 export const getMinAmountByChain = (
   chain: ThorchainIdentifiers,
+  decimals: number,
   inboundAddressesResponse?: InboundAddressesResponse,
 ): number => {
   const inbound = inboundAddressesResponse?.find(
@@ -122,7 +123,10 @@ export const getMinAmountByChain = (
   if (!inbound) {
     return 0; // For RUNE
   }
-  const dustBaseAmount = baseAmount(Number(inbound.dust_threshold) + 1);
+  const dustBaseAmount = baseAmount(
+    Number(inbound.dust_threshold) + 1,
+    decimals,
+  );
   const dustAssetAmount = baseToAsset(dustBaseAmount).amount().toNumber();
   return dustAssetAmount;
 };

@@ -1,10 +1,19 @@
-import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
+import {
+  LpSubstepsAddLiquidity,
+  LpSubstepsRemoveLiquidity,
+} from "@/hooks/useLiquidityPosition";
 import React from "react";
-import { LpSubstepsStatus } from "./StatusModal";
 import Image from "next/image";
 
+export enum LpSubstepsStatus {
+  PENDING = "PENDING",
+  SUCCESS = "SUCCESS",
+  INACTIVE = "INACTIVE",
+  FAILED = "FAILED",
+}
+
 const getStepText = (
-  step: LpSubstepsAddLiquidity,
+  step: LpSubstepsAddLiquidity | LpSubstepsRemoveLiquidity,
   status: LpSubstepsStatus,
   symbol: string,
 ) => {
@@ -76,7 +85,7 @@ export default function LpSubstepDetail({
   status,
   symbol,
 }: {
-  step: LpSubstepsAddLiquidity;
+  step: LpSubstepsAddLiquidity | LpSubstepsRemoveLiquidity;
   status: LpSubstepsStatus;
   symbol: string;
 }) {

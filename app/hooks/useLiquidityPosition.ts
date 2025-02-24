@@ -15,7 +15,6 @@ import {
   isChainType,
 } from "@/utils/chain";
 import { ChainKey } from "@/utils/wallet/constants";
-import { useCosmos } from "./useCosmos";
 import {
   Asset,
   assetAmount,
@@ -23,9 +22,15 @@ import {
   assetToBase,
 } from "@xchainjs/xchain-util";
 import { ChainType } from "@/utils/interfaces";
+import { transferCosmos } from "@/utils/wallet/handlers/handleTransfer";
 
 export enum LpSubstepsAddLiquidity {
   APRROVE_DEPOSIT_ASSET = "APRROVE_DEPOSIT_ASSET",
+  BROADCAST_DEPOSIT_ASSET = "BROADCAST_DEPOSIT_ASSET",
+  BROADCAST_DEPOSIT_RUNE = "BROADCAST_DEPOSIT_RUNE",
+}
+
+export enum LpSubstepsRemoveLiquidity {
   BROADCAST_DEPOSIT_ASSET = "BROADCAST_DEPOSIT_ASSET",
   BROADCAST_DEPOSIT_RUNE = "BROADCAST_DEPOSIT_RUNE",
 }
@@ -45,8 +50,9 @@ interface AddLiquidityParams {
 interface RemoveLiquidityParams {
   assetIdToStartAction: string;
   percentage: number;
-  address: string;
   withdrawAsset?: string;
+  emitNewHash: (txHash: string, step: LpSubstepsRemoveLiquidity) => void;
+  emitError: (error: string) => void;
 }
 
 interface UseLiquidityPositionProps {
@@ -65,9 +71,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
   const [error, setError] = useState<string | null>(null);
   const thorChainClient = useThorchain({
     wallet: walletsState![ChainKey.THORCHAIN],
-  });
-  const { transfer: cosmosTransfer } = useCosmos({
-    wallet: walletsState![ChainKey.GAIACHAIN],
   });
 
   const parsedAsset = assetFromString(pool.asset); // TODO: Remove duplicity between parameters in removeliquidity addliquidity functions and hook parameters
@@ -164,7 +167,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               memo: memo,
             });
             if (!result) {
-              emitError("Failed to add liquidity to Thorchain");
               throw new Error("Failed to add liquidity to Thorchain");
             }
             emitNewHash(result, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE);
@@ -176,7 +178,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           (i) => i.chain === parsedAsset.chain.toUpperCase(),
         );
         if (!inbound?.address) {
-          emitError(`No inbound address found for ${parsedAsset.chain}`);
           throw new Error(`No inbound address found for ${parsedAsset.chain}`);
         } else if (inbound) {
           validateInboundAddress(inbound);
@@ -186,16 +187,18 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         if (wallet.ChainInfo === ChainKey.GAIACHAIN) {
           const cosmosAmount = assetToBase(
             assetAmount(amount, parseInt(pool.nativeDecimal)),
-          )
-            .amount()
-            .toNumber();
-          const bftHash = await cosmosTransfer(
-            inbound.address,
-            cosmosAmount,
-            memo,
           );
+
+          const transferParams = {
+            from: wallet!.address,
+            recipient: inbound.address,
+            amount: cosmosAmount,
+            memo: memo,
+          };
+
+          const bftHash = await transferCosmos(wallet, transferParams);
+
           if (!bftHash) {
-            emitError("Failed to add liquidity to Cosmos chain");
             throw new Error("Failed to add liquidity to Cosmos chain");
           }
           emitNewHash(bftHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
@@ -212,7 +215,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             memo: memo,
           });
           if (!utxoHash) {
-            emitError("Failed to add liquidity to UTXO chain");
             throw new Error("Failed to add liquidity to UTXO chain");
           }
           emitNewHash(utxoHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
@@ -256,7 +258,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
                 parsedAmount,
               );
               if (!resultApproveHash) {
-                emitError("Failed to approve");
                 throw new Error("Failed to approve");
               }
               emitNewHash(
@@ -276,7 +277,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               chainId,
             );
             if (!txHash) {
-              emitError("Failed to add liquidity to EVM chain");
               throw new Error("Failed to add liquidity to EVM chain");
             }
             emitNewHash(txHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
@@ -293,7 +293,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               chainId,
             );
             if (!txHash) {
-              emitError("Failed to add liquidity to EVM chain");
               throw new Error("Failed to add liquidity to EVM chain");
             }
             emitNewHash(txHash, LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_ASSET);
@@ -302,6 +301,9 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         return txHash;
       } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to remove liquidity";
+        emitError(errorMessage);
         console.error("Failed to add liquidity:", err);
       } finally {
         setLoading(false);
@@ -312,7 +314,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       pool,
       inboundAddresses,
       thorChainClient,
-      cosmosTransfer,
       addUTXOLiquidity,
       isNativeAsset,
       tokenAddress,
@@ -327,6 +328,8 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       assetIdToStartAction, // Rune or assets depends on position type
       percentage,
       withdrawAsset,
+      emitNewHash,
+      emitError,
     }: RemoveLiquidityParams) => {
       try {
         const wallet = getAssetWallet(assetIdToStartAction);
@@ -364,12 +367,18 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         if (wallet.ChainInfo === ChainKey.THORCHAIN) {
           const amount = getMinAmountByChain(
             selectedChainToStartAction.thorchainIdentifier,
+            selectedChainToStartAction.nativeDecimals,
             inboundAddresses,
           ); // TODO: Handle decimals
-          return await thorChainClient.deposit({
+          const thorchainHash = await thorChainClient.deposit({
             amount: amount,
             memo: memo,
           });
+          emitNewHash(
+            thorchainHash,
+            LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET,
+          );
+          return thorchainHash;
         }
 
         const inbound = inboundAddresses?.find(
@@ -390,29 +399,46 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             assetAmount(
               getMinAmountByChain(
                 selectedChainToStartAction.thorchainIdentifier,
+                selectedChainToStartAction.nativeDecimals,
                 inboundAddresses,
               ),
               selectedChainToStartAction.nativeDecimals,
             ),
-          )
-            .amount()
-            .toNumber();
+          );
 
-          return await cosmosTransfer(inbound.address, cosmosAmount, memo);
+          const transferParams = {
+            from: wallet!.address,
+            recipient: inbound.address,
+            amount: cosmosAmount,
+            memo: memo,
+          };
+
+          const bftHash = await transferCosmos(wallet, transferParams);
+          emitNewHash(
+            bftHash,
+            LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET,
+          );
+          return bftHash;
         }
 
         // Handle UTXO chain withdrawals
         if (isChainType(ChainType.UTXO, assetIdToStartActionParsed)) {
-          return await removeUTXOLiquidity({
+          const utxoHash = await removeUTXOLiquidity({
             asset: assetIdToStartActionParsed as Asset,
             assetDecimals: selectedChainToStartAction.nativeDecimals,
             vault: inbound.address,
             amount: getMinAmountByChain(
               selectedChainToStartAction.thorchainIdentifier,
+              selectedChainToStartAction.nativeDecimals,
               inboundAddresses,
             ), // TODO: Handle decimals
             memo: memo,
           });
+          emitNewHash(
+            utxoHash,
+            LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET,
+          );
+          return utxoHash;
         }
 
         const routerAddress = inbound.router
@@ -426,6 +452,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
         const decimals = selectedChainToStartAction.nativeDecimals;
         const minAmountByChain = getMinAmountByChain(
           selectedChainToStartAction.thorchainIdentifier,
+          selectedChainToStartAction.nativeDecimals,
           inboundAddresses,
         );
         const minAmountInBase = assetToBase(
@@ -443,11 +470,12 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           expiry,
           selectedChainToStartAction.chainId as string,
         );
-
+        emitNewHash(txHash, LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
         return txHash;
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to remove liquidity";
+        emitError(errorMessage);
         setError(errorMessage);
         throw new Error(errorMessage);
       } finally {
@@ -460,7 +488,6 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       inboundAddresses,
       depositWithExpiry,
       thorChainClient,
-      cosmosTransfer,
       removeUTXOLiquidity,
     ],
   );

@@ -1,9 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { NumberFormatValues } from "react-number-format";
 import BigNumber from "bignumber.js";
-import Modal from "@/app/modal";
-import { PoolDetail, MemberPool } from "@/midgard";
-import TransactionConfirmationModal from "./TransactionConfirmationModal";
+import { PoolDetail } from "@/midgard";
 import {
   addDollarSignAndSuffix,
   DECIMALS,
@@ -12,29 +10,30 @@ import {
   getLogoPath,
 } from "@/app/utils";
 import { useAppState } from "@/utils/contexts/context";
-import { useLiquidityPosition } from "@/hooks/useLiquidityPosition";
-import { getChainKeyFromChain } from "@/utils/chain";
+import { PositionStats, PositionType } from "@/utils/lp-monitor/parsePositions";
+import { Button, Slider, Tooltip } from "@shared/components/ui";
+import AssetInput from "../AssetInput";
+import ToggleButtonGroup from "../ToggleButtonGroup";
 import {
-  PositionStatus,
-  PositionType,
-} from "@/utils/lp-monitor/parsePositions";
-import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
-import { Button, Slider } from "@shared/components/ui";
-import AssetInput from "./AssetInput";
-import ToggleButtonGroup from "./ToggleButtonGroup";
-import { assetFromString } from "@xchainjs/xchain-util";
-import { showToast, ToastType } from "@/app/errorToast";
+  assetFromString,
+  assetAmount as assetAmountConstructor,
+} from "@xchainjs/xchain-util";
 import {
   getOutboundFeeInDollarsByPoolAndWithdrawalStrategy,
   WithdrawalType,
 } from "@/utils/fees";
+import { StatusModalRemoveLiquidityStepData } from "./StatusModalRemoveLiquidity";
+import { RUNE_DECIMAL } from "@xchainjs/xchain-thorchain";
+import { LpSubstepsRemoveLiquidity } from "@/hooks/useLiquidityPosition";
+export interface RemoveLiquidityStepData {
+  pool: PoolDetail;
+  position: PositionStats;
+  runePriceUSD: number;
+}
 
 interface RemoveLiquidityModalProps {
-  pool: PoolDetail;
-  position: MemberPool;
-  positionType: PositionType;
-  runePriceUSD: number;
-  onClose: (transactionSubmitted: boolean) => void;
+  stepData: RemoveLiquidityStepData;
+  nextStep: (data: StatusModalRemoveLiquidityStepData) => void;
 }
 
 const DECIMAL_FORMATS = {
@@ -43,26 +42,30 @@ const DECIMAL_FORMATS = {
   ASSET: 6,
 };
 
+const getSubsteps = (isDualSided: boolean) => {
+  const steps = [];
+
+  if (isDualSided) {
+    steps.push(LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_RUNE);
+  } else {
+    steps.push(LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
+  }
+
+  return steps;
+};
+
 export default function RemoveLiquidityModal({
-  pool,
-  position,
-  positionType,
-  runePriceUSD,
-  onClose,
+  stepData,
+  nextStep,
 }: RemoveLiquidityModalProps) {
-  const { error: liquidityError, removeLiquidity } = useLiquidityPosition({
-    pool,
-  });
+  const { pool, position, runePriceUSD } = stepData;
+
   const {
-    toggleWalletModal,
-    walletsState,
     mimirParameters,
     inboundAddresses,
     thornodeNetworkParameters,
     pools,
   } = useAppState();
-
-  const asset = assetFromString(pool.asset);
 
   const nativePool = pools?.find((p) => {
     const poolAsset = assetFromString(p.asset);
@@ -77,26 +80,21 @@ export default function RemoveLiquidityModal({
     return false;
   });
 
-  const { positions, markPositionAsPending, positionsError } =
-    useLiquidityPositions();
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [percentage, setPercentage] = useState(0);
-  const [assetTxHash, setAssetTxHash] = useState<string | null>(null);
-  const [runeTxHash, setRuneTxHash] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastModified, setLastModified] = useState<"asset" | "rune" | null>(
     null,
   );
   const [withdrawalType, setWithdrawalType] = useState<WithdrawalType>(
-    positionType === PositionType.ASYM
+    position.type === PositionType.ASYM
       ? WithdrawalType.ALL_ASSET
       : WithdrawalType.SPLIT,
   );
-  const chainKey = getChainKeyFromChain(asset?.chain || "");
-  const selectedWallet = walletsState![chainKey];
 
-  const userShare = new BigNumber(position.liquidityUnits).div(pool.units);
+  const userShare = new BigNumber(
+    position.memberDetails?.liquidityUnits || 0,
+  ).div(pool.units);
   const positionAssetAmount = new BigNumber(pool.assetDepth)
     .div(DECIMALS)
     .times(userShare);
@@ -137,21 +135,6 @@ export default function RemoveLiquidityModal({
   const totalRuneAmount = posRuneAmount.plus(
     posAssetAmount.div(assetRuneRatio),
   );
-
-  useEffect(() => {
-    if (liquidityError) {
-      showToast({ type: ToastType.ERROR, text: liquidityError });
-    }
-  }, [liquidityError]);
-
-  useEffect(() => {
-    if (positionsError) {
-      showToast({
-        type: ToastType.ERROR,
-        text: "Failed to load your liquidity positions. Please try again.",
-      });
-    }
-  }, [positionsError]);
 
   const handlePercentageClick = (percent: number) => {
     if (withdrawalType === WithdrawalType.ALL_ASSET) {
@@ -258,48 +241,6 @@ export default function RemoveLiquidityModal({
     setLastModified("rune");
   };
 
-  const handleRemoveLiquidity = async () => {
-    if (!selectedWallet?.address) {
-      toggleWalletModal();
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      const assetId =
-        positionType === PositionType.ASYM ? pool.asset : "THOR.RUNE";
-      const hash = await removeLiquidity({
-        assetIdToStartAction: assetId,
-        percentage,
-        address: selectedWallet.address,
-        withdrawAsset:
-          withdrawalType === WithdrawalType.ALL_ASSET
-            ? pool.asset
-            : withdrawalType === WithdrawalType.ALL_RUNE
-              ? "THOR.RUNE"
-              : undefined,
-      });
-
-      if (hash) {
-        if (positionType === PositionType.ASYM) {
-          setAssetTxHash(hash);
-        } else {
-          setRuneTxHash(hash);
-        }
-        markPositionAsPending(
-          pool.asset,
-          positionType,
-          PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
-        );
-      }
-    } catch (err) {
-      console.error("Failed to remove liquidity:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const EPSILON = 0.0001;
   const isPercentageMatch = (percent: number) => {
     const diff = new BigNumber(percentage).minus(percent).abs();
@@ -309,7 +250,6 @@ export default function RemoveLiquidityModal({
   const assetSymbol = getAssetShortSymbol(pool.asset);
 
   const isEnabled = () => {
-    if (isSubmitting) return false;
     if (withdrawalType === WithdrawalType.SPLIT) {
       return (
         new BigNumber(assetAmount).gt(0) && new BigNumber(runeAmount).gt(0)
@@ -320,31 +260,6 @@ export default function RemoveLiquidityModal({
       return new BigNumber(runeAmount).gt(0);
     }
   };
-
-  if (
-    (assetTxHash || runeTxHash) &&
-    positions &&
-    positions[pool.asset][positionType]
-  ) {
-    const position = positions[pool.asset][positionType];
-    if (!position) return null;
-
-    return (
-      <TransactionConfirmationModal
-        stepData={{
-          pool,
-          positionType,
-          assetHash: assetTxHash,
-          runeHash: runeTxHash,
-        }}
-        onClose={() => {
-          setAssetTxHash(null);
-          setRuneTxHash(null);
-          onClose(true);
-        }}
-      />
-    );
-  }
 
   const handleWithdrawalTypeChange = (type: WithdrawalType) => {
     setWithdrawalType(type);
@@ -389,105 +304,127 @@ export default function RemoveLiquidityModal({
   );
 
   return (
-    <Modal onClose={() => onClose(false)} title="Remove">
-      <div className="p-2 w-m">
-        {/* Withdrawal Options */}
-        {positionType === PositionType.SYM && (
-          <ToggleButtonGroup
-            options={[
-              { label: `${assetSymbol} + RUNE`, value: WithdrawalType.SPLIT },
-              { label: "RUNE", value: WithdrawalType.ALL_RUNE },
-              { label: `${assetSymbol}`, value: WithdrawalType.ALL_ASSET },
-            ]}
-            selectedValue={withdrawalType}
-            onChange={handleWithdrawalTypeChange}
-          />
-        )}
+    <div className="p-2 w-m">
+      {/* Withdrawal Options */}
+      {position.type === PositionType.SYM && (
+        <ToggleButtonGroup
+          options={[
+            { label: `${assetSymbol} + RUNE`, value: WithdrawalType.SPLIT },
+            { label: "RUNE", value: WithdrawalType.ALL_RUNE },
+            { label: `${assetSymbol}`, value: WithdrawalType.ALL_ASSET },
+          ]}
+          selectedValue={withdrawalType}
+          onChange={handleWithdrawalTypeChange}
+        />
+      )}
 
-        {/* Asset Input */}
-        {(withdrawalType === WithdrawalType.SPLIT ||
-          withdrawalType === WithdrawalType.ALL_ASSET) && (
-          <AssetInput
-            value={assetAmount}
-            onValueChange={handleAssetValueChange}
-            assetSymbol={assetSymbol}
-            assetUsdValue={assetUsdValue}
-            logoPath={getLogoPath(pool.asset)}
-            assetDecimalScale={DECIMAL_FORMATS.ASSET}
-            usdDecimalScale={DECIMAL_FORMATS.USD}
-            assetBalance={assetBalance}
-            usdBalance={assetUsdBalance}
-          />
-        )}
+      {/* Asset Input */}
+      {(withdrawalType === WithdrawalType.SPLIT ||
+        withdrawalType === WithdrawalType.ALL_ASSET) && (
+        <AssetInput
+          value={assetAmount}
+          onValueChange={handleAssetValueChange}
+          assetSymbol={assetSymbol}
+          assetUsdValue={assetUsdValue}
+          logoPath={getLogoPath(pool.asset)}
+          assetDecimalScale={DECIMAL_FORMATS.ASSET}
+          usdDecimalScale={DECIMAL_FORMATS.USD}
+          assetBalance={assetBalance}
+          usdBalance={assetUsdBalance}
+        />
+      )}
 
-        {/* Rune Input */}
-        {(withdrawalType === WithdrawalType.SPLIT ||
-          withdrawalType === WithdrawalType.ALL_RUNE) && (
-          <AssetInput
-            value={runeAmount}
-            onValueChange={handleRuneValueChange}
-            assetSymbol="RUNE"
-            assetUsdValue={runeUsdValue}
-            logoPath={getLogoPath("THOR.RUNE")}
-            assetDecimalScale={DECIMAL_FORMATS.ASSET}
-            usdDecimalScale={DECIMAL_FORMATS.USD}
-            assetBalance={runeBalance}
-            usdBalance={runeUsdBalance}
-          />
-        )}
+      {/* Rune Input */}
+      {(withdrawalType === WithdrawalType.SPLIT ||
+        withdrawalType === WithdrawalType.ALL_RUNE) && (
+        <AssetInput
+          value={runeAmount}
+          onValueChange={handleRuneValueChange}
+          assetSymbol="RUNE"
+          assetUsdValue={runeUsdValue}
+          logoPath={getLogoPath("THOR.RUNE")}
+          assetDecimalScale={DECIMAL_FORMATS.ASSET}
+          usdDecimalScale={DECIMAL_FORMATS.USD}
+          assetBalance={runeBalance}
+          usdBalance={runeUsdBalance}
+        />
+      )}
 
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-gray-500">Withdrawal fee</span>
-          <span className="font-medium">
-            {addDollarSignAndSuffix(outboundFee)}
-          </span>
-        </div>
-
-        {/* Percentage Buttons */}
-        <div className="flex justify-end gap-2 mb-6">
-          {[25, 50, 100].map((percent) => (
-            <Button
-              key={percent}
-              onClick={() => handlePercentageClick(percent)}
-              type={
-                isPercentageMatch(percent) ? "primary-action" : "neutral-action"
-              }
-              size="md"
-              disabled={isSubmitting}
-            >
-              {percent === 100 ? "MAX" : `${percent}%`}
-            </Button>
-          ))}
-        </div>
-
-        <div className="flex justify-between items-center mb-6 flex-col gap-2">
-          <Slider
-            value={percentage}
-            onChange={handlePercentageClick}
-            max={100}
-          />
-          <div className="text-neutral-800 text-sm">
-            {percentage.toFixed(2)}%
-          </div>
-        </div>
-
-        <Button
-          onClick={handleRemoveLiquidity}
-          disabled={
-            !isEnabled() ||
-            isDisableDueTooSmallAmount ||
-            outboundFee > assetUsdValue + runeUsdValue
+      <div className="flex justify-between items-center mb-4">
+        <Tooltip
+          content={
+            <p className="w-[300px]">
+              This fee covers the cost of sending transactions across networks,
+              paid by nodes on your behalf.
+              <a
+                href="https://yieldi.gitbook.io/yieldi/basics/integrations#how-are-outbound-transaction-fees-calculated"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline pl-1"
+              >
+                Learn more
+              </a>
+            </p>
           }
-          className="w-full"
         >
-          {isSubmitting
-            ? "Submitting Transaction..."
-            : isDisableDueTooSmallAmount ||
-                outboundFee > assetUsdValue + runeUsdValue
-              ? "Small amount"
-              : "Remove"}
-        </Button>
+          <span className="text-gray-500 cursor-pointer">Withdrawal fee</span>
+        </Tooltip>
+        <span className="font-medium">
+          {addDollarSignAndSuffix(outboundFee)}
+        </span>
       </div>
-    </Modal>
+
+      {/* Percentage Buttons */}
+      <div className="flex justify-end gap-2 mb-6">
+        {[25, 50, 100].map((percent) => (
+          <Button
+            key={percent}
+            onClick={() => handlePercentageClick(percent)}
+            type={
+              isPercentageMatch(percent) ? "primary-action" : "neutral-action"
+            }
+            size="md"
+          >
+            {percent === 100 ? "MAX" : `${percent}%`}
+          </Button>
+        ))}
+      </div>
+
+      <div className="flex justify-between items-center mb-6 flex-col gap-2">
+        <Slider value={percentage} onChange={handlePercentageClick} max={100} />
+        <div className="text-neutral-800 text-sm">{percentage.toFixed(2)}%</div>
+      </div>
+
+      <Button
+        onClick={() =>
+          nextStep({
+            pool: stepData.pool,
+            assetAmount: assetAmountConstructor(
+              assetAmount,
+              Number(nativePool?.nativeDecimal) || 8,
+            ),
+            assetUsdAmount: assetUsdValue,
+            runeAmount: assetAmountConstructor(runeAmount, RUNE_DECIMAL),
+            runeUsdAmount: runeUsdValue,
+            positionType: position.type,
+            requiredSteps: getSubsteps(position.type === PositionType.SYM),
+            percentage,
+            withdrawalType,
+          })
+        }
+        disabled={
+          !isEnabled() ||
+          isDisableDueTooSmallAmount ||
+          outboundFee > assetUsdValue + runeUsdValue
+        }
+        className="w-full"
+        type="danger"
+      >
+        {isDisableDueTooSmallAmount ||
+        outboundFee > assetUsdValue + runeUsdValue
+          ? "Small amount"
+          : "Remove"}
+      </Button>
+    </div>
   );
 }

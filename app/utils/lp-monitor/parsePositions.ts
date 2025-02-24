@@ -7,6 +7,7 @@ import {
 import {
   assetAmount,
   AssetAmount,
+  assetFromString,
   baseAmount,
   baseToAsset,
 } from "@xchainjs/xchain-util";
@@ -17,6 +18,7 @@ import {
   actionsTransformer,
   ActionType,
 } from "./parseActions";
+import { ThorchainIdentifiers } from "../wallet/constants";
 
 export enum PositionStatus {
   LP_POSITION_DEPOSIT_PENDING = "LP_POSITION_DEPOSIT_PENDING",
@@ -59,7 +61,7 @@ export interface Positions {
 }
 
 export const positionsTransformer = async (
-  addresses: string[],
+  addressesByChain: Record<ThorchainIdentifiers, string>,
   pools: PoolDetails,
   options: {
     LIQUIDITYLOCKUPBLOCKS: number;
@@ -68,6 +70,14 @@ export const positionsTransformer = async (
 ) => {
   const defaultLockupPeriodInSecond = options.LIQUIDITYLOCKUPBLOCKS * 6; // six second per block
   const result: Positions = {};
+
+  const addresses: string[] = [];
+
+  Object.entries(addressesByChain).forEach(([, value]) => {
+    if (value !== "" && !addresses.includes(value)) {
+      addresses.push(value);
+    }
+  });
 
   const memberPoolsResult = await getMemberDetail({
     path: {
@@ -84,12 +94,20 @@ export const positionsTransformer = async (
   if (options.ensureBothAddressConnectedOnDlp) {
     filteredMemberPools = memberPools?.filter((memberPool) => {
       if (memberPool.assetAddress !== "" && memberPool.runeAddress !== "") {
-        const lowerCaseAddresses = addresses.map((address) =>
-          address.toLowerCase(),
-        );
+        const asset = assetFromString(memberPool.pool);
+        if (!asset) {
+          throw Error(`Invalid asset ${memberPool.pool}`);
+        }
+        // TODO: Enable multi position support before uncomment this
+        // if (addressesByChain[asset.chain as ThorchainIdentifiers] === "" || addressesByChain[ThorchainIdentifiers.THOR] === "") { // If no different wallets connected display all
+        //   return true
+        // }
         return (
-          lowerCaseAddresses.includes(memberPool.assetAddress.toLowerCase()) &&
-          addresses.includes(memberPool.runeAddress.toLowerCase())
+          addressesByChain[
+            asset.chain as ThorchainIdentifiers
+          ].toLowerCase() === memberPool.assetAddress.toLowerCase() &&
+          addressesByChain[ThorchainIdentifiers.THOR].toLowerCase() ===
+            memberPool.runeAddress.toLowerCase()
         );
       }
       return true;
@@ -162,13 +180,13 @@ export const positionsTransformer = async (
       const isPending =
         action.pool === memberPool.pool &&
         action.status === ActionStatus.PENDING;
-      const isThorchainTx = Boolean(action.chain === "THOR");
+      // const isThorchainTx = Boolean(action.chain === "THOR");
       const splitMemo = action.memo.split(":");
       const isDualLpAction = splitMemo[2] !== "";
       if (type === PositionType.SYM) {
-        return isThorchainTx && isPending;
+        return isPending;
       } else {
-        return !isThorchainTx && !isDualLpAction && isPending;
+        return !isDualLpAction && isPending;
       }
     });
 

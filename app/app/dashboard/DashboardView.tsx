@@ -4,10 +4,8 @@ import { useEffect, useState } from "react";
 import { addDollarSignAndSuffix } from "../utils";
 import DashboardHighlightsCard from "./components/DashboardHighlightsCards";
 import PositionsList from "./components/PositionsList";
-import { PoolDetail } from "@/midgard";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import Loader from "../components/Loader";
-import RemoveLiquidityModal from "../explore/components/RemoveLiquidityModal";
 import Image from "next/image";
 import {
   Positions,
@@ -15,19 +13,27 @@ import {
   PositionStatus,
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
-import AddLiquidityManager, {
-  LpSteps,
-} from "../explore/components/AddLiquidityManager";
-import { StatusStepData } from "../explore/components/StatusModal";
 import { baseAmount, baseToAsset } from "@xchainjs/xchain-util";
 import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
-import { AddLiquidityStepData } from "../explore/components/AddLiquidityModal";
 import { useAppState } from "@/utils/contexts/context";
 import { Button, Input, Tooltip } from "@shared/components/ui";
 import { showToast, ToastType } from "../errorToast";
-import { getAddressUrl } from "@/utils/wallet/utils";
-import { ChainKey } from "@/utils/wallet/constants";
+import {
+  generateEmptyAddressObject,
+  getAddressUrl,
+  identifyNetworks,
+} from "@/utils/wallet/utils";
+import { ChainKey, ThorchainIdentifiers } from "@/utils/wallet/constants";
 import { usePositionStats } from "@/hooks/usePositionStats";
+import RemoveLiquidityManager, {
+  LpRemoveSteps,
+} from "../components/RemoveLiquidity/RemoveLiquidityManager";
+import AddLiquidityManager, {
+  LpAddSteps,
+} from "../components/AddLiquidity/AddLiquidityManager";
+import { StatusStepData } from "../components/AddLiquidity/StatusModalAddLiquidity";
+import { AddLiquidityStepData } from "../components/AddLiquidity/AddLiquidityModal";
+import { RemoveLiquidityStepData } from "../components/RemoveLiquidity/RemoveLiquidityModal";
 
 const allChainKeys = Object.values(ChainKey).filter(
   (value) => typeof value === "string",
@@ -35,16 +41,21 @@ const allChainKeys = Object.values(ChainKey).filter(
 
 export default function DashboardView() {
   const [addLiquidityProcessState, setAddLiquidityProcessState] = useState<{
-    initialStep: LpSteps;
+    initialStep: LpAddSteps;
     stepData: StatusStepData | AddLiquidityStepData | null;
   }>({
-    initialStep: LpSteps.SELECT_OPTIONS,
+    initialStep: LpAddSteps.SELECT_OPTIONS,
     stepData: null,
   });
+  const [removeLiquidityProcessState, setRemoveLiquidityProcessState] =
+    useState<{
+      initialStep: LpRemoveSteps;
+      stepData: RemoveLiquidityStepData | null;
+    }>({
+      initialStep: LpRemoveSteps.SELECT_OPTIONS,
+      stepData: null,
+    });
   const [addressInSearch, setAddressInSearch] = useState("");
-  const [selectedPool, setSelectedPool] = useState<PoolDetail | null>(null);
-  const [selectedPosition, setSelectedPosition] =
-    useState<PositionStats | null>(null);
   const [showRemoveLiquidityModal, setShowRemoveLiquidityModal] =
     useState(false);
   const [showAddLiquidityModal, setShowAddLiquidityModal] = useState(false);
@@ -52,6 +63,8 @@ export default function DashboardView() {
   const { positions, isPending, isRefetching, positionsError, refetch } =
     useLiquidityPositions();
   const { midgardStats, pools, isWalletConnected } = useAppState();
+
+  const networkIdentifiers = identifyNetworks(addressInSearch);
 
   const {
     positions: searchedPositions,
@@ -62,7 +75,12 @@ export default function DashboardView() {
     defaultRefetchInterval: 300000,
     mimirParameters: midgardStats,
     poolsData: pools,
-    addresses: [addressInSearch],
+    addressesByChain: networkIdentifiers.reduce<
+      Record<ThorchainIdentifiers, string>
+    >((addresseses, network) => {
+      addresseses[network] = addressInSearch;
+      return addresseses;
+    }, generateEmptyAddressObject()),
     filterByChains: allChainKeys,
     autoFetch: false,
     ensureBothAddressConnectedOnDlp: false,
@@ -154,7 +172,9 @@ export default function DashboardView() {
       </div>
       <div className="flex flex-col">
         <div
-          className={`flex ${!isWalletConnected() ? "flex-col" : "flew-row"} md:flex-row items-start justify-between md:items-center`}
+          className={`flex ${
+            !isWalletConnected() ? "flex-col" : "flew-row"
+          } md:flex-row items-start justify-between md:items-center`}
         >
           <div className="flex align-center">
             <h2 className={titleStyle}>Your positions</h2>
@@ -211,7 +231,9 @@ export default function DashboardView() {
                 type="secondary"
                 disabled={!addressInSearch}
                 onClick={() => {
-                  fetchPositions();
+                  if (addressInSearch) {
+                    fetchPositions();
+                  }
                 }}
                 className="ml-2"
               >
@@ -274,7 +296,7 @@ export default function DashboardView() {
                         ]
                       : [LpSubstepsAddLiquidity.BROADCAST_DEPOSIT_RUNE];
                   setAddLiquidityProcessState({
-                    initialStep: LpSteps.HANDLE_STATE,
+                    initialStep: LpAddSteps.HANDLE_STATE,
                     stepData: {
                       pool,
                       assetAmount: amountOfAssetToDeposit,
@@ -287,6 +309,7 @@ export default function DashboardView() {
                         .toNumber(),
                       positionType: type,
                       requiredSteps: requiredSteps,
+                      position,
                     },
                   });
                   setShowAddLiquidityModal(true);
@@ -300,12 +323,8 @@ export default function DashboardView() {
               if (!pool) {
                 throw Error("Pool not found");
               }
-              setSelectedPool(pool);
-              setSelectedPosition(
-                (currentPositions as Positions)[assetId][type] || null,
-              );
               setAddLiquidityProcessState({
-                initialStep: LpSteps.SELECT_OPTIONS,
+                initialStep: LpAddSteps.SELECT_OPTIONS,
                 stepData: {
                   pool,
                   runePriceUSD: runePriceUSD,
@@ -314,13 +333,23 @@ export default function DashboardView() {
               });
               setShowAddLiquidityModal(true);
             }}
-            onRemove={(poolId: string, type: PositionType) => {
-              setSelectedPool(
-                pools?.find((pool) => pool.asset === poolId) || null,
-              );
-              setSelectedPosition(
-                (currentPositions as Positions)[poolId][type],
-              );
+            onRemove={(assetId: string, type: PositionType) => {
+              const pool = pools?.find((pool) => pool.asset === assetId);
+              if (!pool) {
+                throw Error("Pool not found");
+              }
+              const position = (currentPositions as Positions)[assetId][type];
+              if (!position) {
+                throw Error("Position not found");
+              }
+              setRemoveLiquidityProcessState({
+                initialStep: LpRemoveSteps.SELECT_OPTIONS,
+                stepData: {
+                  pool,
+                  position,
+                  runePriceUSD,
+                },
+              });
               setShowRemoveLiquidityModal(true);
             }}
           />
@@ -330,7 +359,6 @@ export default function DashboardView() {
         <AddLiquidityManager
           initialStep={addLiquidityProcessState.initialStep}
           onClose={() => {
-            setSelectedPool(null);
             setShowAddLiquidityModal(false);
           }}
           stepData={
@@ -340,22 +368,15 @@ export default function DashboardView() {
           }
         />
       )}
-      {showRemoveLiquidityModal &&
-        selectedPool &&
-        selectedPosition &&
-        selectedPosition.memberDetails && (
-          <RemoveLiquidityModal
-            pool={selectedPool}
-            position={selectedPosition.memberDetails}
-            positionType={selectedPosition.type}
-            runePriceUSD={runePriceUSD}
-            onClose={() => {
-              setSelectedPool(null);
-              setSelectedPosition(null);
-              setShowRemoveLiquidityModal(false);
-            }}
-          />
-        )}
+      {showRemoveLiquidityModal && removeLiquidityProcessState.stepData && (
+        <RemoveLiquidityManager
+          initialStep={removeLiquidityProcessState.initialStep}
+          stepData={removeLiquidityProcessState.stepData}
+          onClose={() => {
+            setShowRemoveLiquidityModal(false);
+          }}
+        />
+      )}
     </main>
   );
 }

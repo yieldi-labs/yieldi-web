@@ -1,6 +1,7 @@
 import { addDollarSignAndSuffix, getLogoPath } from "@/app/utils";
 import { PoolDetail } from "@/midgard";
 import {
+  PositionStats,
   PositionStatus,
   PositionType,
 } from "@/utils/lp-monitor/parsePositions";
@@ -14,9 +15,10 @@ import {
   useLiquidityPosition,
 } from "@/hooks/useLiquidityPosition";
 import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
-import LpSubstepDetail from "./LpSubstepDetail";
+import LpSubstepDetail, { LpSubstepsStatus } from "../LpSubstepDetail";
 import { Warn } from "@shared/components/ui";
 import { showToast, ToastType } from "@/app/errorToast";
+import { WarnType } from "@shared/components/ui/Warn";
 
 export interface StatusStepData {
   pool: PoolDetail;
@@ -26,13 +28,7 @@ export interface StatusStepData {
   runeUsdAmount: number;
   positionType: PositionType;
   requiredSteps: LpSubstepsAddLiquidity[];
-}
-
-export enum LpSubstepsStatus {
-  PENDING = "PENDING",
-  SUCCESS = "SUCCESS",
-  INACTIVE = "INACTIVE",
-  FAILED = "FAILED",
+  position: PositionStats | null;
 }
 
 export interface ConfirmStepData {
@@ -42,7 +38,7 @@ export interface ConfirmStepData {
   positionType: PositionType;
 }
 
-export default function StatusModal({
+export default function StatusModalAddLiquidity({
   stepData,
   onClose,
   nextStep,
@@ -62,6 +58,10 @@ export default function StatusModal({
   const [requiredWalletsSymbol, setRequiredWalletsSymbol] = useState<
     string[] | undefined
   >([]);
+
+  const [invalidWalletNotice, setInvalidWalletNotice] = useState<string | null>(
+    null,
+  );
 
   const isInProgress = useRef(false);
 
@@ -111,13 +111,15 @@ export default function StatusModal({
     const parsedRuneAmount = stepData.runeAmount.amount().toNumber();
 
     const executeLiquidityAddition = async () => {
-      let pairedAddress: string | undefined;
+      let pairedRuneAddress: string | undefined;
 
       if (isDualSided) {
-        if (walletsState[ChainKey.THORCHAIN]) {
-          pairedAddress = walletsState[ChainKey.THORCHAIN].address;
-        } else {
-          throw new Error("No paired wallet found.");
+        pairedRuneAddress = stepData.position?.memberDetails?.runeAddress;
+        if (walletsState[ChainKey.THORCHAIN] && !stepData.position) {
+          pairedRuneAddress = walletsState[ChainKey.THORCHAIN].address;
+        }
+        if (!pairedRuneAddress) {
+          throw Error("Unable to find paired address for RUNE");
         }
       }
 
@@ -136,12 +138,29 @@ export default function StatusModal({
 
       let hashAssetDeposit = null;
       if (parsedAssetAmount > 0) {
+        const assetWallet = getAssetWallet(stepData.pool.asset);
+        if (
+          stepData.position?.memberDetails?.assetAddress.toLowerCase() !==
+          assetWallet.address.toLowerCase()
+        ) {
+          setInvalidWalletNotice(
+            `You are trying to complete this position from an incorrect wallet. Please connect the correct wallet: ${stepData.position?.memberDetails?.assetAddress}`,
+          );
+          setStepStatus((prev) => {
+            return prev.map((step) => ({
+              ...step,
+              status: LpSubstepsStatus.INACTIVE,
+            }));
+          });
+          return;
+        }
+
         hashAssetDeposit = await addLiquidity({
           asset: stepData.pool.asset,
           assetDecimals: Number(stepData.pool.nativeDecimal),
           amount: parsedAssetAmount,
           runeAmount: parsedRuneAmount,
-          pairedAddress,
+          pairedAddress: pairedRuneAddress,
           emitError: (error) => {
             showToast({ text: error, type: ToastType.ERROR });
             setStepStatus((prev) => {
@@ -186,12 +205,30 @@ export default function StatusModal({
         parsedRuneAmount > 0 &&
         (hashAssetDeposit || parsedAssetAmount <= 0)
       ) {
-        pairedAddress = getAssetWallet(stepData.pool.asset).address;
+        const runeWallet = getAssetWallet("THOR.RUNE");
+        if (
+          stepData.position?.memberDetails?.runeAddress.toLowerCase() !==
+          runeWallet.address.toLowerCase()
+        ) {
+          setInvalidWalletNotice(
+            `You are trying to complete this position from an incorrect wallet. Please connect the correct wallet: ${stepData.position?.memberDetails?.runeAddress}`,
+          );
+          setStepStatus((prev) => {
+            return prev.map((step) => ({
+              ...step,
+              status: LpSubstepsStatus.INACTIVE,
+            }));
+          });
+          return;
+        }
+        const pairedAssetAddress =
+          stepData.position?.memberDetails?.assetAddress ||
+          getAssetWallet(stepData.pool.asset).address;
         await addLiquidity({
           asset: "THOR.RUNE",
           assetDecimals: Number(stepData.pool.nativeDecimal),
           amount: 0,
-          pairedAddress,
+          pairedAddress: pairedAssetAddress,
           runeAmount: parsedRuneAmount,
           emitError: (error) => {
             showToast({ text: error, type: ToastType.ERROR });
@@ -200,7 +237,7 @@ export default function StatusModal({
                 if (step.status === LpSubstepsStatus.PENDING) {
                   return {
                     ...step,
-                    status: LpSubstepsStatus.INACTIVE,
+                    status: LpSubstepsStatus.FAILED,
                   };
                 }
                 return step;
@@ -248,10 +285,7 @@ export default function StatusModal({
     getAssetWallet,
     isDualSided,
     onClose,
-    stepData.assetAmount,
-    stepData.pool.asset,
-    stepData.pool.nativeDecimal,
-    stepData.runeAmount,
+    stepData,
     walletsState,
   ]);
 
@@ -335,18 +369,28 @@ export default function StatusModal({
         </div>
 
         {requiredWalletsSymbol?.length ? (
-          <div className="pb-4">
+          <div>
             <Warn
-              text={`Connect your ${requiredWalletsSymbol.join(" ")} wallet to continue.`}
+              text={`Connect your ${requiredWalletsSymbol.join(
+                " ",
+              )} wallet to continue.`}
             />
           </div>
         ) : null}
 
-        <div className="text-sm text-gray-500 text-center">
-          {`You will be prompted to confirm transactions on your wallet.
-            Ensure your wallet is connected in the correct network and has sufficient funds for this
-            transaction.`}
-        </div>
+        {invalidWalletNotice ? (
+          <div>
+            <Warn type={WarnType.ERROR} text={invalidWalletNotice} />
+          </div>
+        ) : null}
+
+        {!invalidWalletNotice && !requiredWalletsSymbol?.length && (
+          <div className="text-sm text-gray-500 text-center pt-4">
+            {`You will be prompted to confirm transactions on your wallet.
+              Ensure your wallet is connected in the correct network and has sufficient funds for this
+              transaction.`}
+          </div>
+        )}
       </div>
     </>
   );
