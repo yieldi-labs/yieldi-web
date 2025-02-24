@@ -98,9 +98,10 @@ export const positionsTransformer = async (
         if (!asset) {
           throw Error(`Invalid asset ${memberPool.pool}`)
         }
-        if (addressesByChain[asset.chain as ThorchainIdentifiers] === "" || addressesByChain[ThorchainIdentifiers.THOR] === "") { // If no different wallets connected display all
-          return true
-        }
+        // TODO: Enable multi position support before uncomment this
+        // if (addressesByChain[asset.chain as ThorchainIdentifiers] === "" || addressesByChain[ThorchainIdentifiers.THOR] === "") { // If no different wallets connected display all
+        //   return true
+        // }
         return (
           addressesByChain[asset.chain as ThorchainIdentifiers].toLowerCase() === memberPool.assetAddress.toLowerCase() &&
           addressesByChain[ThorchainIdentifiers.THOR].toLowerCase() === memberPool.runeAddress.toLowerCase()
