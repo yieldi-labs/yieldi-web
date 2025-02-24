@@ -58,6 +58,7 @@ export function usePositionStats({
   autoFetch = true,
   ensureBothAddressConnectedOnDlp = false,
 }: UsePositionStatsProps) {
+
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     Positions | undefined
   >();
@@ -66,15 +67,17 @@ export function usePositionStats({
   >(defaultRefetchInterval);
   const [fetchPositions, setFetchPositions] = useState(autoFetch);
 
+  const hasNonEmptyValue = Object.values(addressesByChain).some(value => value !== "");
+
   const {
     isFetching: isPending,
     isRefetching,
     error,
     refetch,
   } = useQuery({
-    queryKey: ["position-stats"],
+    queryKey: ["position-stats", addressesByChain],
     retry: false,
-    enabled: fetchPositions && Object.keys(addressesByChain).length > 0 && Boolean(mimirParameters),
+    enabled: fetchPositions && hasNonEmptyValue && Boolean(mimirParameters),
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
 

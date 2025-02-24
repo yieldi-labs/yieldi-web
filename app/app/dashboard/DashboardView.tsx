@@ -228,7 +228,9 @@ export default function DashboardView() {
                 type="secondary"
                 disabled={!addressInSearch}
                 onClick={() => {
-                  fetchPositions();
+                  if (addressInSearch) {
+                    fetchPositions();
+                  }
                 }}
                 className="ml-2"
               >
