@@ -1,4 +1,7 @@
-import { LpSubstepsAddLiquidity, LpSubstepsRemoveLiquidity } from "@/hooks/useLiquidityPosition";
+import {
+  LpSubstepsAddLiquidity,
+  LpSubstepsRemoveLiquidity,
+} from "@/hooks/useLiquidityPosition";
 import React from "react";
 import Image from "next/image";
 

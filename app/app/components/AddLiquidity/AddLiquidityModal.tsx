@@ -50,7 +50,7 @@ export default function AddLiquidityModal({
   const [assetAmount, setAssetAmount] = useState("");
   const [runeAmount, setRuneAmount] = useState("");
   const [isDualSided, setIsDualSided] = useState(
-    stepData.initialType === PositionType.SYM
+    stepData.initialType === PositionType.SYM,
   );
   const [inputChanging, setInputChanging] = useState<InputChanging>("asset");
   const inputChangeConstraint = 0.01; // 1%
@@ -75,7 +75,7 @@ export default function AddLiquidityModal({
       const newRuneAmount = newUsdValue / stepData.runePriceUSD;
       // Prevents changing input value when focusing on the other input without changing the value
       const runeAmountChanged = Math.abs(
-        (newRuneAmount - parseFloat(runeAmount)) / newRuneAmount
+        (newRuneAmount - parseFloat(runeAmount)) / newRuneAmount,
       );
       if (
         Number.isNaN(runeAmountChanged) ||
@@ -93,7 +93,7 @@ export default function AddLiquidityModal({
         newUsdValue / parseFloat(stepData.pool.assetPriceUSD);
 
       const assetAmountChanged = Math.abs(
-        (newAssetAmount - parseFloat(assetAmount)) / newAssetAmount
+        (newAssetAmount - parseFloat(assetAmount)) / newAssetAmount,
       );
       if (
         Number.isNaN(assetAmountChanged) ||
@@ -192,7 +192,7 @@ export default function AddLiquidityModal({
 
   const isCloseToPercentage = (
     currentPercentage: number,
-    targetPercentage: number
+    targetPercentage: number,
   ) => {
     const tolerance = 0.01;
     if (targetPercentage === 100) {
@@ -208,7 +208,7 @@ export default function AddLiquidityModal({
   const isDisableDueTooSmallAmount = disableDueTooSmallAmount(
     Number(mimirParameters?.MINIMUML1OUTBOUNDFEEUSD || 0),
     usdValue,
-    runeUsdValue
+    runeUsdValue,
   );
 
   const buttonText = getButtonText(
@@ -218,8 +218,8 @@ export default function AddLiquidityModal({
     runeBalance,
     assetBalance,
     runeAmount,
-    assetAmount
-  )
+    assetAmount,
+  );
 
   return (
     <>
@@ -305,17 +305,17 @@ export default function AddLiquidityModal({
               pool: stepData.pool,
               assetAmount: assetAmountConstructor(
                 assetAmount,
-                poolNativeDecimal
+                poolNativeDecimal,
               ),
               assetUsdAmount: usdValue,
               runeAmount: assetAmountConstructor(runeAmount, RUNE_DECIMAL),
               runeUsdAmount: runeUsdValue,
               positionType: type,
               requiredSteps: getSubsteps(isDualSided, asset),
-              position: null
+              position: null,
             })
           }
-          disabled={buttonText !== 'Add'}
+          disabled={buttonText !== "Add"}
           className="w-full"
         >
           {buttonText}

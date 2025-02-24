@@ -18,7 +18,11 @@ import { LpSubstepsAddLiquidity } from "@/hooks/useLiquidityPosition";
 import { useAppState } from "@/utils/contexts/context";
 import { Button, Input, Tooltip } from "@shared/components/ui";
 import { showToast, ToastType } from "../errorToast";
-import { generateEmptyAddressObject, getAddressUrl, identifyNetworks } from "@/utils/wallet/utils";
+import {
+  generateEmptyAddressObject,
+  getAddressUrl,
+  identifyNetworks,
+} from "@/utils/wallet/utils";
 import { ChainKey, ThorchainIdentifiers } from "@/utils/wallet/constants";
 import { usePositionStats } from "@/hooks/usePositionStats";
 import RemoveLiquidityManager, {
@@ -32,7 +36,7 @@ import { AddLiquidityStepData } from "../components/AddLiquidity/AddLiquidityMod
 import { RemoveLiquidityStepData } from "../components/RemoveLiquidity/RemoveLiquidityModal";
 
 const allChainKeys = Object.values(ChainKey).filter(
-  (value) => typeof value === "string"
+  (value) => typeof value === "string",
 ) as ChainKey[];
 
 export default function DashboardView() {
@@ -71,13 +75,12 @@ export default function DashboardView() {
     defaultRefetchInterval: 300000,
     mimirParameters: midgardStats,
     poolsData: pools,
-    addressesByChain: networkIdentifiers.reduce<Record<ThorchainIdentifiers, string>>(
-      (addresseses, network) => {
-        addresseses[network] = addressInSearch;
-        return addresseses;
-      },
-      generateEmptyAddressObject()
-    ),
+    addressesByChain: networkIdentifiers.reduce<
+      Record<ThorchainIdentifiers, string>
+    >((addresseses, network) => {
+      addresseses[network] = addressInSearch;
+      return addresseses;
+    }, generateEmptyAddressObject()),
     filterByChains: allChainKeys,
     autoFetch: false,
     ensureBothAddressConnectedOnDlp: false,
@@ -115,7 +118,7 @@ export default function DashboardView() {
             .map(([, position]) => position as PositionStats);
           return pools.concat(chainPools);
         },
-        []
+        [],
       )) ||
     [];
 
@@ -263,17 +266,17 @@ export default function DashboardView() {
                     `${getAddressUrl()}${
                       position.memberDetails?.assetAddress
                     }?tab=lps`,
-                    "_blank"
+                    "_blank",
                   );
                   break;
                 case PositionStatus.LP_POSITION_INCOMPLETE:
                   const assetPriceUSD = parseFloat(pool.assetPriceUSD);
 
                   const assetAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.assetPending, 8)
+                    baseAmount(position.memberDetails?.assetPending, 8),
                   );
                   const runeAmount = baseToAsset(
-                    baseAmount(position.memberDetails?.runePending, 8)
+                    baseAmount(position.memberDetails?.runePending, 8),
                   );
 
                   const valueOfPendingAssetInUsd =

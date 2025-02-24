@@ -1,8 +1,13 @@
 import React, { useState } from "react";
-import StatusModalRemoveLiquidity, { ConfirmStepData, StatusModalRemoveLiquidityStepData } from "./StatusModalRemoveLiquidity";
+import StatusModalRemoveLiquidity, {
+  ConfirmStepData,
+  StatusModalRemoveLiquidityStepData,
+} from "./StatusModalRemoveLiquidity";
 import Modal from "@/app/modal";
 import TransactionConfirmationModal from "../TransactionConfirmationModal";
-import RemoveLiquidityModal, { RemoveLiquidityStepData } from "./RemoveLiquidityModal";
+import RemoveLiquidityModal, {
+  RemoveLiquidityStepData,
+} from "./RemoveLiquidityModal";
 
 export enum LpRemoveSteps {
   SELECT_OPTIONS = 1,
@@ -19,7 +24,10 @@ const modalTitles = {
 interface AddLiquidityManagerProps {
   onClose: () => void;
   initialStep?: LpRemoveSteps;
-  stepData?: StatusModalRemoveLiquidityStepData | ConfirmStepData | RemoveLiquidityStepData;
+  stepData?:
+    | StatusModalRemoveLiquidityStepData
+    | ConfirmStepData
+    | RemoveLiquidityStepData;
 }
 
 const RemoveLiquidityManager = ({
@@ -30,7 +38,9 @@ const RemoveLiquidityManager = ({
   const [step, setStep] = useState(initialStep || LpRemoveSteps.SELECT_OPTIONS);
   const [data, setData] = useState(stepData);
 
-  const nextStep = (data?: StatusModalRemoveLiquidityStepData | ConfirmStepData) => {
+  const nextStep = (
+    data?: StatusModalRemoveLiquidityStepData | ConfirmStepData,
+  ) => {
     setStep((prev) => prev + 1);
     setData(data);
   };

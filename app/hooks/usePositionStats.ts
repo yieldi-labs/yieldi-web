@@ -58,7 +58,6 @@ export function usePositionStats({
   autoFetch = true,
   ensureBothAddressConnectedOnDlp = false,
 }: UsePositionStatsProps) {
-
   const [currentPositionsStats, setCurrentPositionsStats] = useState<
     Positions | undefined
   >();
@@ -67,7 +66,9 @@ export function usePositionStats({
   >(defaultRefetchInterval);
   const [fetchPositions, setFetchPositions] = useState(autoFetch);
 
-  const hasNonEmptyValue = Object.values(addressesByChain).some(value => value !== "");
+  const hasNonEmptyValue = Object.values(addressesByChain).some(
+    (value) => value !== "",
+  );
 
   const {
     isFetching: isPending,
@@ -80,7 +81,6 @@ export function usePositionStats({
     enabled: fetchPositions && hasNonEmptyValue && Boolean(mimirParameters),
     refetchInterval: currentRefetchInterval,
     queryFn: async () => {
-
       if (!poolsData) {
         throw Error("No pools available");
       }

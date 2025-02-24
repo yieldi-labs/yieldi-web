@@ -59,7 +59,9 @@ export default function StatusModalAddLiquidity({
     string[] | undefined
   >([]);
 
-  const [invalidWalletNotice, setInvalidWalletNotice] = useState<string | null>(null);
+  const [invalidWalletNotice, setInvalidWalletNotice] = useState<string | null>(
+    null,
+  );
 
   const isInProgress = useRef(false);
 
@@ -67,7 +69,7 @@ export default function StatusModalAddLiquidity({
     stepData.requiredSteps.map((step) => ({
       step: step,
       status: LpSubstepsStatus.INACTIVE,
-    }))
+    })),
   );
 
   const { walletsState } = useAppState();
@@ -83,7 +85,7 @@ export default function StatusModalAddLiquidity({
       markPositionAsPending(
         stepData.pool.asset,
         stepData.positionType,
-        PositionStatus.LP_POSITION_DEPOSIT_PENDING
+        PositionStatus.LP_POSITION_DEPOSIT_PENDING,
       );
       nextStep({
         assetHash: assetTxHash,
@@ -111,10 +113,8 @@ export default function StatusModalAddLiquidity({
     const executeLiquidityAddition = async () => {
       let pairedRuneAddress: string | undefined;
 
-      console.log('stepData.position', stepData.position)
-
       if (isDualSided) {
-        pairedRuneAddress =  stepData.position?.memberDetails?.runeAddress
+        pairedRuneAddress = stepData.position?.memberDetails?.runeAddress;
         if (walletsState[ChainKey.THORCHAIN] && !stepData.position) {
           pairedRuneAddress = walletsState[ChainKey.THORCHAIN].address;
         }
@@ -138,15 +138,19 @@ export default function StatusModalAddLiquidity({
 
       let hashAssetDeposit = null;
       if (parsedAssetAmount > 0) {
-
         const assetWallet = getAssetWallet(stepData.pool.asset);
-        if (stepData.position?.memberDetails?.assetAddress.toLowerCase() !== assetWallet.address.toLowerCase()) {
-          setInvalidWalletNotice(`You are trying to complete this position from an incorrect wallet. Please connect the correct wallet: ${stepData.position?.memberDetails?.assetAddress}`);
+        if (
+          stepData.position?.memberDetails?.assetAddress.toLowerCase() !==
+          assetWallet.address.toLowerCase()
+        ) {
+          setInvalidWalletNotice(
+            `You are trying to complete this position from an incorrect wallet. Please connect the correct wallet: ${stepData.position?.memberDetails?.assetAddress}`,
+          );
           setStepStatus((prev) => {
             return prev.map((step) => ({
               ...step,
               status: LpSubstepsStatus.INACTIVE,
-            }))
+            }));
           });
           return;
         }
@@ -202,22 +206,29 @@ export default function StatusModalAddLiquidity({
         (hashAssetDeposit || parsedAssetAmount <= 0)
       ) {
         const runeWallet = getAssetWallet("THOR.RUNE");
-        if (stepData.position?.memberDetails?.runeAddress.toLowerCase() !== runeWallet.address.toLowerCase()) {
-          setInvalidWalletNotice(`You are trying to complete this position from an incorrect wallet. Please connect the correct wallet: ${stepData.position?.memberDetails?.runeAddress}`);
+        if (
+          stepData.position?.memberDetails?.runeAddress.toLowerCase() !==
+          runeWallet.address.toLowerCase()
+        ) {
+          setInvalidWalletNotice(
+            `You are trying to complete this position from an incorrect wallet. Please connect the correct wallet: ${stepData.position?.memberDetails?.runeAddress}`,
+          );
           setStepStatus((prev) => {
             return prev.map((step) => ({
               ...step,
               status: LpSubstepsStatus.INACTIVE,
-            }))
+            }));
           });
           return;
         }
-        const pairedAssetAddress = stepData.position?.memberDetails?.assetAddress || getAssetWallet(stepData.pool.asset).address;
+        const pairedAssetAddress =
+          stepData.position?.memberDetails?.assetAddress ||
+          getAssetWallet(stepData.pool.asset).address;
         await addLiquidity({
           asset: "THOR.RUNE",
           assetDecimals: Number(stepData.pool.nativeDecimal),
           amount: 0,
-          pairedAddress:pairedAssetAddress,
+          pairedAddress: pairedAssetAddress,
           runeAmount: parsedRuneAmount,
           emitError: (error) => {
             showToast({ text: error, type: ToastType.ERROR });
@@ -257,7 +268,7 @@ export default function StatusModalAddLiquidity({
 
     if (parsedAssetAmount > 0 && !assetWallet) {
       missingWallets.push(
-        assetFromString(stepData.pool.asset)?.ticker as string
+        assetFromString(stepData.pool.asset)?.ticker as string,
       );
     }
 
@@ -288,7 +299,7 @@ export default function StatusModalAddLiquidity({
               {addDollarSignAndSuffix(
                 isDualSided
                   ? stepData.runeUsdAmount + stepData.assetUsdAmount
-                  : stepData.assetUsdAmount
+                  : stepData.assetUsdAmount,
               )}
             </span>
           </div>
@@ -361,7 +372,7 @@ export default function StatusModalAddLiquidity({
           <div>
             <Warn
               text={`Connect your ${requiredWalletsSymbol.join(
-                " "
+                " ",
               )} wallet to continue.`}
             />
           </div>
@@ -369,20 +380,17 @@ export default function StatusModalAddLiquidity({
 
         {invalidWalletNotice ? (
           <div>
-            <Warn
-              type={WarnType.ERROR}
-              text={invalidWalletNotice}
-            />
+            <Warn type={WarnType.ERROR} text={invalidWalletNotice} />
           </div>
         ) : null}
 
-        { !invalidWalletNotice && !requiredWalletsSymbol?.length && 
+        {!invalidWalletNotice && !requiredWalletsSymbol?.length && (
           <div className="text-sm text-gray-500 text-center pt-4">
             {`You will be prompted to confirm transactions on your wallet.
               Ensure your wallet is connected in the correct network and has sufficient funds for this
               transaction.`}
           </div>
-        }
+        )}
       </div>
     </>
   );

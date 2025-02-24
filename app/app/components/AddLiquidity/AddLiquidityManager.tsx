@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import AddLiquidityModal, { AddLiquidityStepData } from "./AddLiquidityModal";
-import StatusModal, { ConfirmStepData, StatusStepData } from "./StatusModalAddLiquidity";
+import StatusModal, {
+  ConfirmStepData,
+  StatusStepData,
+} from "./StatusModalAddLiquidity";
 import Modal from "@/app/modal";
 import TransactionConfirmationModal from "../TransactionConfirmationModal";
 

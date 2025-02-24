@@ -39,7 +39,7 @@ export const LiquidityPositionsProvider = ({
 
   const addressesByChain = generateEmptyAddressObject();
   for (const key in walletsState) {
-    const chainInfo = CHAINS.find((chain) => chain.name === key)
+    const chainInfo = CHAINS.find((chain) => chain.name === key);
     if (!chainInfo) {
       throw Error(`Chain not found for chain: ${key}`);
     }

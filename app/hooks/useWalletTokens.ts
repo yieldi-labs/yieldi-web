@@ -136,7 +136,10 @@ export const useWalletTokens = (walletsState: ConnectedWalletsState) => {
 
     // ONLY FOR STAGENET
     let formattedRuneStagenetBalance = 0;
-    if (process.env.NEXT_PUBLIC_IS_STAGENET && walletsState[ChainKey.THORCHAIN]?.address) {
+    if (
+      process.env.NEXT_PUBLIC_IS_STAGENET &&
+      walletsState[ChainKey.THORCHAIN]?.address
+    ) {
       const runeStagenetBalance = await getBalanceFromThorchainNetwork({
         path: { address: walletsState[ChainKey.THORCHAIN].address },
       });

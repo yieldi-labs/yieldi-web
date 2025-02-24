@@ -16,7 +16,9 @@ import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { showToast, ToastType } from "@/app/errorToast";
 import { getChainKeyFromChain } from "@/utils/chain";
 import { WithdrawalType } from "@/utils/fees";
-import LpSubstepDetail, { LpSubstepsStatus } from "@/app/components/LpSubstepDetail";
+import LpSubstepDetail, {
+  LpSubstepsStatus,
+} from "@/app/components/LpSubstepDetail";
 
 export interface StatusModalRemoveLiquidityStepData {
   pool: PoolDetail;
@@ -46,7 +48,17 @@ export default function StatusModal({
   onClose: () => void;
   nextStep: (stepData: ConfirmStepData) => void;
 }) {
-  const { positionType, pool, percentage, withdrawalType, assetAmount, assetUsdAmount, runeAmount, runeUsdAmount, requiredSteps } = stepData;
+  const {
+    positionType,
+    pool,
+    percentage,
+    withdrawalType,
+    assetAmount,
+    assetUsdAmount,
+    runeAmount,
+    runeUsdAmount,
+    requiredSteps,
+  } = stepData;
   const { removeLiquidity } = useLiquidityPosition({
     pool,
   });
@@ -62,7 +74,7 @@ export default function StatusModal({
     requiredSteps.map((step) => ({
       step: step,
       status: LpSubstepsStatus.INACTIVE,
-    }))
+    })),
   );
 
   const { walletsState } = useAppState();
@@ -85,7 +97,7 @@ export default function StatusModal({
       markPositionAsPending(
         pool.asset,
         positionType,
-        PositionStatus.LP_POSITION_WITHDRAWAL_PENDING
+        PositionStatus.LP_POSITION_WITHDRAWAL_PENDING,
       );
       nextStep({
         assetHash: assetTxHash,
@@ -94,14 +106,22 @@ export default function StatusModal({
         positionType: positionType,
       });
     }
-  }, [assetTxHash, markPositionAsPending, nextStep, pool, positionType, runeTxHash, stepData, stepStatus]);
+  }, [
+    assetTxHash,
+    markPositionAsPending,
+    nextStep,
+    pool,
+    positionType,
+    runeTxHash,
+    stepData,
+    stepStatus,
+  ]);
 
   useEffect(() => {
     if (isInProgress.current) return;
     isInProgress.current = true;
 
     const executeLiquidityRemove = async () => {
-
       setStepStatus((prev) => {
         const firstStep = prev[0].step;
         return prev.map((step) => {
@@ -117,52 +137,54 @@ export default function StatusModal({
 
       const assetId =
         positionType === PositionType.ASYM ? pool.asset : "THOR.RUNE";
-      
-        await removeLiquidity({
+
+      await removeLiquidity({
         assetIdToStartAction: assetId,
         percentage,
         withdrawAsset:
           withdrawalType === WithdrawalType.ALL_ASSET
             ? pool.asset
             : withdrawalType === WithdrawalType.ALL_RUNE
-            ? "THOR.RUNE"
-            : undefined,
-          emitError: (error) => {
-            showToast({ text: error, type: ToastType.ERROR });
-            setStepStatus((prev) => {
-              return prev.map((step) => {
-                if (step.status === LpSubstepsStatus.PENDING) {
-                  return {
-                    ...step,
-                    status: LpSubstepsStatus.FAILED,
-                  };
-                }
-                return step;
-              });
+              ? "THOR.RUNE"
+              : undefined,
+        emitError: (error) => {
+          showToast({ text: error, type: ToastType.ERROR });
+          setStepStatus((prev) => {
+            return prev.map((step) => {
+              if (step.status === LpSubstepsStatus.PENDING) {
+                return {
+                  ...step,
+                  status: LpSubstepsStatus.FAILED,
+                };
+              }
+              return step;
             });
-          },
-          emitNewHash: (hash, stepToUpdate) => {
-            if (stepToUpdate === LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET) {
-              setAssetTxHash(hash);
-            } else {
-              setRuneTxHash(hash);
-            }
-            setStepStatus((prev) => {
-              return prev.map((step) => {
-                if (step.step === stepToUpdate) {
-                  return {
-                    ...step,
-                    status: LpSubstepsStatus.SUCCESS,
-                  };
-                }
-                return step;
-              });
+          });
+        },
+        emitNewHash: (hash, stepToUpdate) => {
+          if (
+            stepToUpdate === LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET
+          ) {
+            setAssetTxHash(hash);
+          } else {
+            setRuneTxHash(hash);
+          }
+          setStepStatus((prev) => {
+            return prev.map((step) => {
+              if (step.step === stepToUpdate) {
+                return {
+                  ...step,
+                  status: LpSubstepsStatus.SUCCESS,
+                };
+              }
+              return step;
             });
-          },
+          });
+        },
       });
     };
 
-    executeLiquidityRemove()
+    executeLiquidityRemove();
   }, [
     isDualSided,
     markPositionAsPending,
@@ -185,9 +207,7 @@ export default function StatusModal({
             <span className="text-gray-600 font-medium">Deposit</span>
             <span className="text-gray-900 font-semibold text-lg">
               {addDollarSignAndSuffix(
-                isDualSided
-                  ? runeUsdAmount + assetUsdAmount
-                  : assetUsdAmount
+                isDualSided ? runeUsdAmount + assetUsdAmount : assetUsdAmount,
               )}
             </span>
           </div>

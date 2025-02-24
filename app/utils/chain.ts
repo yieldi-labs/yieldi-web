@@ -123,7 +123,10 @@ export const getMinAmountByChain = (
   if (!inbound) {
     return 0; // For RUNE
   }
-  const dustBaseAmount = baseAmount(Number(inbound.dust_threshold) + 1, decimals);
+  const dustBaseAmount = baseAmount(
+    Number(inbound.dust_threshold) + 1,
+    decimals,
+  );
   const dustAssetAmount = baseToAsset(dustBaseAmount).amount().toNumber();
   return dustAssetAmount;
 };

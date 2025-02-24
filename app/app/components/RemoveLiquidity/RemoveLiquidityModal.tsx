@@ -84,16 +84,16 @@ export default function RemoveLiquidityModal({
   const [runeAmount, setRuneAmount] = useState("");
   const [percentage, setPercentage] = useState(0);
   const [lastModified, setLastModified] = useState<"asset" | "rune" | null>(
-    null
+    null,
   );
   const [withdrawalType, setWithdrawalType] = useState<WithdrawalType>(
     position.type === PositionType.ASYM
       ? WithdrawalType.ALL_ASSET
-      : WithdrawalType.SPLIT
+      : WithdrawalType.SPLIT,
   );
 
   const userShare = new BigNumber(
-    position.memberDetails?.liquidityUnits || 0
+    position.memberDetails?.liquidityUnits || 0,
   ).div(pool.units);
   const positionAssetAmount = new BigNumber(pool.assetDepth)
     .div(DECIMALS)
@@ -118,22 +118,22 @@ export default function RemoveLiquidityModal({
 
   const posAssetAmount = useMemo(
     () => new BigNumber(positionAssetAmount),
-    [positionAssetAmount]
+    [positionAssetAmount],
   );
   const posRuneAmount = useMemo(
     () => new BigNumber(positionRuneAmount),
-    [positionRuneAmount]
+    [positionRuneAmount],
   );
   const posAssetUsdValue = posAssetAmount.times(
-    new BigNumber(pool.assetPriceUSD)
+    new BigNumber(pool.assetPriceUSD),
   );
   const posRuneUsdValue = posRuneAmount.times(new BigNumber(runePriceUSD));
 
   const totalAssetAmount = posAssetAmount.plus(
-    posRuneAmount.times(assetRuneRatio)
+    posRuneAmount.times(assetRuneRatio),
   );
   const totalRuneAmount = posRuneAmount.plus(
-    posAssetAmount.div(assetRuneRatio)
+    posAssetAmount.div(assetRuneRatio),
   );
 
   const handlePercentageClick = (percent: number) => {
@@ -291,7 +291,7 @@ export default function RemoveLiquidityModal({
   const isDisableDueTooSmallAmount = disableDueTooSmallAmount(
     Number(mimirParameters?.MINIMUML1OUTBOUNDFEEUSD || 0),
     assetUsdValue,
-    runeUsdValue
+    runeUsdValue,
   );
 
   const outboundFee = getOutboundFeeInDollarsByPoolAndWithdrawalStrategy(
@@ -300,7 +300,7 @@ export default function RemoveLiquidityModal({
     withdrawalType,
     nativePool,
     thornodeNetworkParameters?.native_outbound_fee_rune,
-    inboundAddresses
+    inboundAddresses,
   );
 
   return (
@@ -354,7 +354,8 @@ export default function RemoveLiquidityModal({
         <Tooltip
           content={
             <p className="w-[300px]">
-              This fee covers the cost of sending transactions across networks, paid by nodes on your behalf.
+              This fee covers the cost of sending transactions across networks,
+              paid by nodes on your behalf.
               <a
                 href="https://yieldi.gitbook.io/yieldi/basics/integrations#how-are-outbound-transaction-fees-calculated"
                 target="_blank"
@@ -400,7 +401,7 @@ export default function RemoveLiquidityModal({
             pool: stepData.pool,
             assetAmount: assetAmountConstructor(
               assetAmount,
-              Number(nativePool?.nativeDecimal) || 8
+              Number(nativePool?.nativeDecimal) || 8,
             ),
             assetUsdAmount: assetUsdValue,
             runeAmount: assetAmountConstructor(runeAmount, RUNE_DECIMAL),

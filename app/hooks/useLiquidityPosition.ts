@@ -185,10 +185,9 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         // Handle Cosmos chain transactions
         if (wallet.ChainInfo === ChainKey.GAIACHAIN) {
-
           const cosmosAmount = assetToBase(
             assetAmount(amount, parseInt(pool.nativeDecimal)),
-          )
+          );
 
           const transferParams = {
             from: wallet!.address,
@@ -302,14 +301,26 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
 
         return txHash;
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Failed to remove liquidity";
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to remove liquidity";
         emitError(errorMessage);
         console.error("Failed to add liquidity:", err);
       } finally {
         setLoading(false);
       }
     },
-    [getAssetWallet, pool, inboundAddresses, thorChainClient, addUTXOLiquidity, isNativeAsset, tokenAddress, getAllowance, depositWithExpiry, approveSpending],
+    [
+      getAssetWallet,
+      pool,
+      inboundAddresses,
+      thorChainClient,
+      addUTXOLiquidity,
+      isNativeAsset,
+      tokenAddress,
+      getAllowance,
+      depositWithExpiry,
+      approveSpending,
+    ],
   );
 
   const removeLiquidity = useCallback(
@@ -317,8 +328,8 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       assetIdToStartAction, // Rune or assets depends on position type
       percentage,
       withdrawAsset,
-      emitNewHash, 
-      emitError
+      emitNewHash,
+      emitError,
     }: RemoveLiquidityParams) => {
       try {
         const wallet = getAssetWallet(assetIdToStartAction);
@@ -363,8 +374,11 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             amount: amount,
             memo: memo,
           });
-          emitNewHash(thorchainHash, LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
-          return thorchainHash
+          emitNewHash(
+            thorchainHash,
+            LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET,
+          );
+          return thorchainHash;
         }
 
         const inbound = inboundAddresses?.find(
@@ -390,7 +404,7 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
               ),
               selectedChainToStartAction.nativeDecimals,
             ),
-          )
+          );
 
           const transferParams = {
             from: wallet!.address,
@@ -400,8 +414,11 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
           };
 
           const bftHash = await transferCosmos(wallet, transferParams);
-          emitNewHash(bftHash, LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
-          return bftHash
+          emitNewHash(
+            bftHash,
+            LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET,
+          );
+          return bftHash;
         }
 
         // Handle UTXO chain withdrawals
@@ -417,8 +434,11 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
             ), // TODO: Handle decimals
             memo: memo,
           });
-          emitNewHash(utxoHash, LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET);
-          return utxoHash
+          emitNewHash(
+            utxoHash,
+            LpSubstepsRemoveLiquidity.BROADCAST_DEPOSIT_ASSET,
+          );
+          return utxoHash;
         }
 
         const routerAddress = inbound.router
@@ -455,14 +475,21 @@ export function useLiquidityPosition({ pool }: UseLiquidityPositionProps) {
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to remove liquidity";
-        emitError(errorMessage)
+        emitError(errorMessage);
         setError(errorMessage);
         throw new Error(errorMessage);
       } finally {
         setLoading(false);
       }
     },
-    [getAssetWallet, pool.asset, inboundAddresses, depositWithExpiry, thorChainClient, removeUTXOLiquidity],
+    [
+      getAssetWallet,
+      pool.asset,
+      inboundAddresses,
+      depositWithExpiry,
+      thorChainClient,
+      removeUTXOLiquidity,
+    ],
   );
 
   return {

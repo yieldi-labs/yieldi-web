@@ -3,14 +3,14 @@ import { ThorchainIdentifiers } from "./constants";
 
 export const isWalletValidForAllChains = (
   wallet: WalletType,
-  selectedChains: ChainInfo[]
+  selectedChains: ChainInfo[],
 ): boolean => {
   if (selectedChains.length) {
     const selectedChainKeys = new Set(
-      selectedChains.map((chain) => chain.name)
+      selectedChains.map((chain) => chain.name),
     );
     return Array.from(selectedChainKeys).every((chainKey) =>
-      wallet.chains.includes(chainKey)
+      wallet.chains.includes(chainKey),
     );
   } else {
     return true;
@@ -19,7 +19,7 @@ export const isWalletValidForAllChains = (
 
 export const isChainSupportedByWallet = (
   chain: ChainInfo,
-  selectedWallet?: WalletType
+  selectedWallet?: WalletType,
 ): boolean => {
   if (!selectedWallet) {
     return true;
@@ -65,8 +65,13 @@ export function generateEmptyAddressObject(): Record<
   ThorchainIdentifiers,
   string
 > {
-  return Object.keys(ThorchainIdentifiers).reduce<Record<ThorchainIdentifiers, string>>((emptyAddresses, network) => {
-    emptyAddresses[network as ThorchainIdentifiers] = "";
-    return emptyAddresses;
-  }, {} as Record<ThorchainIdentifiers, string>);
+  return Object.keys(ThorchainIdentifiers).reduce<
+    Record<ThorchainIdentifiers, string>
+  >(
+    (emptyAddresses, network) => {
+      emptyAddresses[network as ThorchainIdentifiers] = "";
+      return emptyAddresses;
+    },
+    {} as Record<ThorchainIdentifiers, string>,
+  );
 }

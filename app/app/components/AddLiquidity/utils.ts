@@ -9,7 +9,7 @@ export const getButtonText = (
   runeBalance: number,
   assetBalance: number,
   runeAmount: string,
-  assetAmount: string
+  assetAmount: string,
 ) => {
   if (!selectedWallet?.address) {
     return "Connect Wallet";

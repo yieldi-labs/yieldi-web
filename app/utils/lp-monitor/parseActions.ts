@@ -55,13 +55,13 @@ export const actionsTransformer = async (
       });
     }
 
-    const tx = status?.data?.tx
+    const tx = status?.data?.tx;
 
     return {
       date: new Date(Number(action.date) / 1000).toDateString(),
       type:
         action.type === "addLiquidity"
-          ? ActionType.ADD_LIQUIDITY  
+          ? ActionType.ADD_LIQUIDITY
           : ActionType.REMOVE_LIQUIDITY,
       status:
         action.status === "pending"
@@ -73,8 +73,8 @@ export const actionsTransformer = async (
         status?.data?.stages.outbound_delay?.remaining_delay_seconds || 0,
       pool: action.pools[0],
       memo: tx?.memo || "-",
-      assetAddress: tx?.chain !== 'THOR' ? tx?.from_address || null : null,
-      runeAddress: tx?.chain === 'THOR' ? tx?.from_address || null : null,
+      assetAddress: tx?.chain !== "THOR" ? tx?.from_address || null : null,
+      runeAddress: tx?.chain === "THOR" ? tx?.from_address || null : null,
     };
   });
 

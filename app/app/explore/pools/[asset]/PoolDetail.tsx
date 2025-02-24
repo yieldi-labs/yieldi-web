@@ -26,8 +26,12 @@ import { useLiquidityPositions } from "@/utils/contexts/PositionsContext";
 import { assetFromString } from "@xchainjs/xchain-util";
 import { Button, Warn } from "@shared/components/ui";
 import { showToast, ToastType } from "@/app/errorToast";
-import RemoveLiquidityManager, { LpRemoveSteps } from "@/app/components/RemoveLiquidity/RemoveLiquidityManager";
-import AddLiquidityManager, { LpAddSteps } from "@/app/components/AddLiquidity/AddLiquidityManager";
+import RemoveLiquidityManager, {
+  LpRemoveSteps,
+} from "@/app/components/RemoveLiquidity/RemoveLiquidityManager";
+import AddLiquidityManager, {
+  LpAddSteps,
+} from "@/app/components/AddLiquidity/AddLiquidityManager";
 
 interface PoolDetailProps {
   pool: IPoolDetail;
@@ -298,7 +302,7 @@ export default function PoolDetail({ pool }: PoolDetailProps) {
             stepData={{
               pool: pool,
               position: selectedPosition,
-              runePriceUSD: runePriceUSD
+              runePriceUSD: runePriceUSD,
             }}
           />
         )}

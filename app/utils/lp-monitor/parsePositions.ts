@@ -71,11 +71,11 @@ export const positionsTransformer = async (
   const defaultLockupPeriodInSecond = options.LIQUIDITYLOCKUPBLOCKS * 6; // six second per block
   const result: Positions = {};
 
-  const addresses: string[] = []
+  const addresses: string[] = [];
 
   Object.entries(addressesByChain).forEach(([, value]) => {
     if (value !== "" && !addresses.includes(value)) {
-      addresses.push(value) 
+      addresses.push(value);
     }
   });
 
@@ -94,17 +94,20 @@ export const positionsTransformer = async (
   if (options.ensureBothAddressConnectedOnDlp) {
     filteredMemberPools = memberPools?.filter((memberPool) => {
       if (memberPool.assetAddress !== "" && memberPool.runeAddress !== "") {
-        const asset = assetFromString(memberPool.pool)
+        const asset = assetFromString(memberPool.pool);
         if (!asset) {
-          throw Error(`Invalid asset ${memberPool.pool}`)
+          throw Error(`Invalid asset ${memberPool.pool}`);
         }
         // TODO: Enable multi position support before uncomment this
         // if (addressesByChain[asset.chain as ThorchainIdentifiers] === "" || addressesByChain[ThorchainIdentifiers.THOR] === "") { // If no different wallets connected display all
         //   return true
         // }
         return (
-          addressesByChain[asset.chain as ThorchainIdentifiers].toLowerCase() === memberPool.assetAddress.toLowerCase() &&
-          addressesByChain[ThorchainIdentifiers.THOR].toLowerCase() === memberPool.runeAddress.toLowerCase()
+          addressesByChain[
+            asset.chain as ThorchainIdentifiers
+          ].toLowerCase() === memberPool.assetAddress.toLowerCase() &&
+          addressesByChain[ThorchainIdentifiers.THOR].toLowerCase() ===
+            memberPool.runeAddress.toLowerCase()
         );
       }
       return true;
